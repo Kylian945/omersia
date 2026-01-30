@@ -95,7 +95,7 @@ services:
     restart: unless-stopped
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    command: sh /var/www/html/docker-entrypoint-dev.sh
+    command: sh -c "sed -i 's/\r$//' /var/www/html/docker-entrypoint-dev.sh && sh /var/www/html/docker-entrypoint-dev.sh"
 
   # Next.js Storefront
   storefront:
