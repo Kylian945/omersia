@@ -2,6 +2,7 @@
 # ENVIRONNEMENT LOCAL
 # Tout en Docker : MySQL, Meilisearch, Backend, Storefront, Mailpit
 # Usage: docker compose up -d
+# Defaults are in .env.docker, override with a .env file at project root
 # ========================================
 
 services:
@@ -9,11 +10,15 @@ services:
   mysql:
     image: mysql:8.0
     container_name: omersia-mysql
+    env_file:
+      - .env.docker
+      - path: .env
+        required: false
     environment:
-      MYSQL_DATABASE: ${DB_DATABASE:-omersia}
-      MYSQL_USER: ${DB_USERNAME:-omersia}
-      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
     ports:
@@ -31,10 +36,14 @@ services:
   meilisearch:
     image: getmeili/meilisearch:v1.5
     container_name: omersia-meilisearch
+    env_file:
+      - .env.docker
+      - path: .env
+        required: false
     environment:
-      - MEILI_ENV=development
-      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-masterKey}
-      - MEILI_NO_ANALYTICS=true
+      MEILI_ENV: development
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY}
+      MEILI_NO_ANALYTICS: "true"
     volumes:
       - meilisearch_data:/meili_data
     networks:
@@ -70,19 +79,23 @@ services:
       - ./backend:/var/www/html
       - /var/www/html/vendor
       - ./storefront:/var/www/storefront
+    env_file:
+      - .env.docker
+      - path: .env
+        required: false
     environment:
-      - APP_ENV=${APP_ENV:-local}
-      - APP_DEBUG=${APP_DEBUG:-true}
-      - DB_CONNECTION=mysql
-      - DB_HOST=mysql
-      - DB_PORT=3306
-      - DB_DATABASE=${DB_DATABASE:-omersia}
-      - DB_USERNAME=${DB_USERNAME:-omersia}
-      - DB_PASSWORD=${DB_PASSWORD:-secret}
-      - MEILISEARCH_HOST=http://meilisearch:7700
-      - MEILISEARCH_KEY=${MEILI_MASTER_KEY:-masterKey}
-      - MAIL_HOST=mailpit
-      - FRONT_API_KEY=${FRONT_API_KEY:-dev_api_key_change_in_production}
+      APP_ENV: ${APP_ENV}
+      APP_DEBUG: ${APP_DEBUG}
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_PORT: "3306"
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      MEILISEARCH_HOST: http://meilisearch:7700
+      MEILISEARCH_KEY: ${MEILI_MASTER_KEY}
+      MAIL_HOST: mailpit
+      FRONT_API_KEY: ${FRONT_API_KEY}
     depends_on:
       mysql:
         condition: service_healthy
@@ -107,14 +120,18 @@ services:
       - ./storefront:/app
       - /app/node_modules
       - /app/.next
+    env_file:
+      - .env.docker
+      - path: .env
+        required: false
     environment:
-      - NODE_ENV=development
-      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
-      - API_INTERNAL_URL=http://backend:8001/api/v1
-      - NEXT_INTERNAL_URL=http://storefront:3000
-      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
-      - NEXT_PUBLIC_FRONTEND_URL=http://localhost:8000
-      - FRONT_API_KEY=${FRONT_API_KEY:-dev_api_key_change_in_production}
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+      API_INTERNAL_URL: http://backend:8001/api/v1
+      NEXT_INTERNAL_URL: http://storefront:3000
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
+      NEXT_PUBLIC_FRONTEND_URL: http://localhost:8000
+      FRONT_API_KEY: ${FRONT_API_KEY}
     networks:
       - omersia_network
     restart: unless-stopped

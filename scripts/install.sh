@@ -116,6 +116,19 @@ print_step_fancy "3" "10" "Building and starting Docker services..." "$ICON_DOCK
 
 cd "$PROJECT_ROOT"
 
+# Ensure root .env exists with defaults before first docker compose up
+# (Docker Compose reads this file for variable substitution)
+if [ ! -f ".env" ]; then
+    cat > ".env" <<EOF
+DB_DATABASE=$DB_NAME
+DB_USERNAME=$DB_USERNAME
+DB_PASSWORD=$DB_PASSWORD
+DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD
+FRONT_API_KEY=temporary_key_will_be_replaced
+EOF
+    print_success "Created root .env with defaults"
+fi
+
 # Show spinner while building
 show_spinner "Building Docker images..." &
 SPINNER_PID=$!
