@@ -33,7 +33,19 @@ ICON_DOCKER   = 🐳
 # === Docker Compose Detection (V2 preferred, fallback to V1) ===
 DOCKER_COMPOSE := $(shell docker compose version > /dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
 
-.PHONY: help install setup-env setup-db apikey admin dev test lint clean build
+# === Docker exec shortcuts (uses service names, not container names) ===
+EXEC_BACKEND  = $(DOCKER_COMPOSE) exec -T backend
+EXEC_STOREFRONT = $(DOCKER_COMPOSE) exec -T storefront
+EXEC_BACKEND_IT = $(DOCKER_COMPOSE) exec backend
+EXEC_MYSQL_IT = $(DOCKER_COMPOSE) exec mysql
+
+.PHONY: help install setup-env setup-db apikey admin dev test lint clean build check-docker
+
+# Docker container check - used as dependency for commands that need running containers
+check-docker:
+	@$(DOCKER_COMPOSE) ps --status running --format '{{.Service}}' 2>/dev/null | grep -q backend || \
+		(printf "$(RED)$(ICON_DOCKER) Docker containers are not running.$(RESET)\n" && \
+		 printf "$(YELLOW)   Run $(CYAN)make dev$(YELLOW) or $(CYAN)make install$(YELLOW) first.$(RESET)\n" && exit 1)
 
 # Default target
 help:
@@ -103,27 +115,27 @@ install:
 	@./scripts/install.sh
 
 # Setup environment files
-setup-env:
+setup-env: check-docker
 	@echo "Setting up environment files..."
 	@cp -n backend/.env.example backend/.env 2>/dev/null || true
 	@cp -n storefront/.env.example storefront/.env.local 2>/dev/null || true
-	@cd backend && php artisan key:generate --ansi
+	@$(EXEC_BACKEND) php artisan key:generate --ansi
 	@echo "✓ Environment files ready"
 
 # Setup database (migrations + roles/permissions)
-setup-db:
+setup-db: check-docker
 	@echo "Setting up database..."
-	@cd backend && php artisan migrate --force
-	@cd backend && php artisan db:seed --class=RolesAndPermissionsSeeder --force
+	@$(EXEC_BACKEND) php artisan migrate --force
+	@$(EXEC_BACKEND) php artisan db:seed --class=RolesAndPermissionsSeeder --force
 	@echo "✓ Database setup complete"
 
 # Generate API key
-apikey:
-	@cd backend && php artisan apikey:generate --sync
+apikey: check-docker
+	@$(EXEC_BACKEND) php artisan apikey:generate --sync
 
 # Create admin user
-admin:
-	@cd backend && php artisan admin:create
+admin: check-docker
+	@$(EXEC_BACKEND_IT) php artisan admin:create
 
 # Start development
 dev:
@@ -141,74 +153,74 @@ dev:
 	@printf "$(GREEN)│$(RESET)\n"
 	@printf "$(GREEN)╰────────────────────────────────────────────────────────╯$(RESET)\n"
 	@echo ""
-	@printf "$(DIM)💡 View logs: $(CYAN)docker-compose logs -f$(RESET)\n"
+	@printf "$(DIM)💡 View logs: $(CYAN)make docker-logs$(RESET)\n"
 	@echo ""
 
 # Run tests
-test:
+test: check-docker
 	@echo ""
 	@printf "$(BRIGHT_CYAN)$(ICON_TEST) Running tests...$(RESET)\n"
 	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
 	@echo ""
 	@printf "$(BLUE)➜ Backend tests (PHPUnit)...$(RESET)\n"
-	@cd backend && php artisan test
+	@$(EXEC_BACKEND) php artisan test
 	@echo ""
 	@printf "$(BLUE)➜ Frontend tests (Vitest)...$(RESET)\n"
-	@cd storefront && npm run test --if-present || true
+	@$(EXEC_STOREFRONT) npm run test --if-present || true
 	@echo ""
 	@printf "$(BRIGHT_GREEN)✅ All tests completed!$(RESET)\n"
 	@echo ""
 
 # Run linters
-lint:
+lint: check-docker
 	@echo ""
 	@printf "$(BRIGHT_CYAN)$(ICON_LINT) Running linters...$(RESET)\n"
 	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
 	@echo ""
 	@printf "$(BLUE)➜ PHP linting (Pint)...$(RESET)\n"
-	@cd backend && ./vendor/bin/pint --test
+	@$(EXEC_BACKEND) ./vendor/bin/pint --test
 	@echo ""
 	@printf "$(BLUE)➜ JavaScript/TypeScript linting (ESLint)...$(RESET)\n"
-	@cd storefront && npm run lint
+	@$(EXEC_STOREFRONT) npm run lint
 	@echo ""
 	@printf "$(BRIGHT_GREEN)✅ Linting completed!$(RESET)\n"
 	@echo ""
 
 # Fix linting issues
-lint-fix:
+lint-fix: check-docker
 	@echo ""
 	@printf "$(BRIGHT_CYAN)$(ICON_LINT) Fixing linting issues...$(RESET)\n"
 	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
 	@echo ""
 	@printf "$(BLUE)➜ Fixing PHP...$(RESET)\n"
-	@cd backend && ./vendor/bin/pint
+	@$(EXEC_BACKEND) ./vendor/bin/pint
 	@echo ""
 	@printf "$(BLUE)➜ Fixing JavaScript/TypeScript...$(RESET)\n"
-	@cd storefront && npm run lint:fix
+	@$(EXEC_STOREFRONT) npm run lint:fix
 	@echo ""
 	@printf "$(BRIGHT_GREEN)✅ All fixes applied!$(RESET)\n"
 	@echo ""
 
 # Clean
-clean:
+clean: check-docker
 	@echo ""
 	@printf "$(BRIGHT_CYAN)$(ICON_CLEAN) Cleaning caches and generated files...$(RESET)\n"
 	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
 	@echo ""
 	@printf "$(BLUE)➜ Clearing Laravel caches...$(RESET)\n"
-	@cd backend && php artisan cache:clear
-	@cd backend && php artisan config:clear
-	@cd backend && php artisan route:clear
-	@cd backend && php artisan view:clear
+	@$(EXEC_BACKEND) php artisan cache:clear
+	@$(EXEC_BACKEND) php artisan config:clear
+	@$(EXEC_BACKEND) php artisan route:clear
+	@$(EXEC_BACKEND) php artisan view:clear
 	@echo ""
 	@printf "$(BLUE)➜ Clearing Next.js build files...$(RESET)\n"
-	@cd storefront && rm -rf .next node_modules/.cache
+	@$(EXEC_STOREFRONT) rm -rf .next node_modules/.cache
 	@echo ""
 	@printf "$(BRIGHT_GREEN)✅ Cleanup completed!$(RESET)\n"
 	@echo ""
 
 # Refresh frontend styles (restart storefront to regenerate Tailwind classes)
-refresh-styles:
+refresh-styles: check-docker
 	@echo ""
 	@printf "$(BRIGHT_CYAN)$(ICON_LINT) Refreshing frontend styles...$(RESET)\n"
 	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
@@ -220,46 +232,46 @@ refresh-styles:
 	@echo ""
 
 # Build for production
-build:
+build: check-docker
 	@echo ""
 	@printf "$(BRIGHT_CYAN)$(ICON_BUILD) Building for production...$(RESET)\n"
 	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
 	@echo ""
 	@printf "$(BLUE)➜ Building frontend...$(RESET)\n"
-	@cd storefront && npm run build
+	@$(EXEC_STOREFRONT) npm run build
 	@echo ""
 	@printf "$(BLUE)➜ Optimizing backend...$(RESET)\n"
-	@cd backend && php artisan config:cache
-	@cd backend && php artisan route:cache
-	@cd backend && php artisan view:cache
+	@$(EXEC_BACKEND) php artisan config:cache
+	@$(EXEC_BACKEND) php artisan route:cache
+	@$(EXEC_BACKEND) php artisan view:cache
 	@echo ""
 	@printf "$(BRIGHT_GREEN)✅ Build completed successfully!$(RESET)\n"
 	@echo ""
 
 # Database
-migrate:
-	docker exec omersia-backend php artisan migrate
+migrate: check-docker
+	@$(EXEC_BACKEND) php artisan migrate
 
-migrate-fresh:
-	docker exec omersia-backend php artisan migrate:fresh --seed
+migrate-fresh: check-docker
+	@$(EXEC_BACKEND) php artisan migrate:fresh --seed
 
-db:
-	docker exec -it omersia-mysql mysql -u omersia -psecret omersia
+db: check-docker
+	@$(EXEC_MYSQL_IT) mysql -u omersia -psecret omersia
 
-tinker:
-	docker exec -it omersia-backend php artisan tinker
+tinker: check-docker
+	@$(EXEC_BACKEND_IT) php artisan tinker
 
 # Docker
 docker-up:
-	$(DOCKER_COMPOSE) up -d
+	@$(DOCKER_COMPOSE) up -d
 
 docker-down:
-	$(DOCKER_COMPOSE) down
+	@$(DOCKER_COMPOSE) down
 
 docker-logs:
-	$(DOCKER_COMPOSE) logs -f
+	@$(DOCKER_COMPOSE) logs -f
 
 docker-rebuild:
-	$(DOCKER_COMPOSE) down
-	$(DOCKER_COMPOSE) build --no-cache
-	$(DOCKER_COMPOSE) up -d
+	@$(DOCKER_COMPOSE) down
+	@$(DOCKER_COMPOSE) build --no-cache
+	@$(DOCKER_COMPOSE) up -d
