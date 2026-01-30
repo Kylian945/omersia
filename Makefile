@@ -99,6 +99,7 @@ install:
 	@echo ""
 	@printf "$(BRIGHT_GREEN)$(ICON_ROCKET) Starting Omersia installation...$(RESET)\n"
 	@echo ""
+	@chmod +x scripts/*.sh backend/docker-entrypoint*.sh 2>/dev/null || true
 	@./scripts/install.sh
 
 # Setup environment files

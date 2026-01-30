@@ -12,6 +12,10 @@ set -e
 
 # Configuration
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Ensure all scripts are executable (fixes Windows/NTFS permission issues)
+chmod +x "$PROJECT_ROOT/scripts/"*.sh 2>/dev/null || true
+chmod +x "$PROJECT_ROOT/backend/docker-entrypoint"*.sh 2>/dev/null || true
 BACKEND_DIR="$PROJECT_ROOT/backend"
 STOREFRONT_DIR="$PROJECT_ROOT/storefront"
 INTERACTIVE="${INTERACTIVE:-true}"
