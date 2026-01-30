@@ -127,7 +127,8 @@ services:
     ports:
       - "8000:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx.conf:/etc/nginx/nginx.conf.orig:ro
+    command: sh -c "sed 's/\r$//' /etc/nginx/nginx.conf.orig > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
     depends_on:
       backend:
         condition: service_started
