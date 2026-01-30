@@ -1,0 +1,455 @@
+# Omersia Installation Guide
+
+Complete installation infrastructure for the Omersia e-commerce platform (Laravel 10 + Next.js 16).
+
+## Quick Start
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd omersia
+
+# Run the installation
+make install
+
+# Start development
+make dev
+```
+
+That's it! The installation script will guide you through the setup process.
+
+## What Gets Installed
+
+The `make install` command runs a comprehensive installation script that:
+
+1. **Checks Prerequisites** - Verifies Docker, PHP, Composer, Node.js, and npm
+2. **Sets Up Environment** - Copies `.env.example` files and generates APP_KEY
+3. **Installs Dependencies** - Runs `composer install` and `npm ci` in parallel
+4. **Starts Docker Services** - Launches MySQL, MeiliSearch, and Mailpit
+5. **Waits for MySQL** - Ensures database is ready (with timeout protection)
+6. **Runs Migrations** - Sets up database schema
+7. **Seeds Roles & Permissions** - Creates required roles (always runs)
+8. **Optional Demo Data** - Asks if you want demo products (interactive mode only)
+9. **Creates Admin User** - Interactive prompt or auto-generated in CI
+10. **Generates API Key** - Creates and syncs API key to storefront
+11. **Displays Summary** - Shows credentials and next steps
+
+## Installation Modes
+
+### Interactive Mode (Default)
+
+```bash
+make install
+```
+
+- Prompts for admin email/password
+- Asks if you want demo data
+- Provides colored output with progress indicators
+
+### Non-Interactive Mode (CI/CD)
+
+```bash
+INTERACTIVE=false \
+ADMIN_EMAIL=admin@example.com \
+ADMIN_PASSWORD=SecurePass123! \
+DEMO_DATA=false \
+./scripts/install.sh
+```
+
+Environment variables:
+- `INTERACTIVE=false` - Disable all prompts
+- `ADMIN_EMAIL` - Admin user email (default: admin@omersia.com)
+- `ADMIN_PASSWORD` - Admin password (auto-generated if not set)
+- `DEMO_DATA=true|false` - Install demo products (default: false)
+
+## Prerequisites
+
+### Required Software
+
+- **Docker** 20.10+ and Docker Compose
+- **PHP** 8.2+ with extensions:
+  - pdo_mysql
+  - mbstring
+  - zip
+  - exif
+  - pcntl
+  - bcmath
+  - gd
+- **Composer** 2.x
+- **Node.js** 18+ (20+ recommended)
+- **npm** 9+
+
+### System Requirements
+
+- 4GB+ RAM
+- 10GB+ free disk space
+- macOS, Linux, or Windows with WSL2
+
+## Docker Services
+
+The installation sets up these services:
+
+| Service | Container Name | Ports | Purpose |
+|---------|---------------|-------|---------|
+| MySQL | omersia-mysql | 3306 | Database |
+| MeiliSearch | omersia_meilisearch_local | 7700 | Search engine |
+| Mailpit | omersia_mailpit_local | 1025 (SMTP), 8025 (Web UI) | Email testing |
+| Backend | omersia_backend_local | 5173 (Vite) | Laravel API |
+| Storefront | omersia_storefront_local | 3000 | Next.js frontend |
+| Nginx | omersia_nginx_local | 8000 | Reverse proxy |
+
+### Network Configuration
+
+- All services communicate via `omersia_network` (bridge)
+- Backend connects to MySQL via `mysql:3306` (Docker DNS)
+- Storefront connects to Backend via `backend:8001`
+- External access via Nginx on port 8000
+
+### Volumes
+
+- `mysql_data` - Persistent MySQL data
+- `meilisearch_data` - Persistent search index
+- `backend_vendor` - Cached Composer dependencies
+- `storefront_node_modules` - Cached npm packages
+
+## Makefile Targets
+
+### Main Commands
+
+```bash
+make help        # Show all available commands
+make install     # Complete installation (recommended)
+make dev         # Start development environment
+make test        # Run all tests (backend + frontend)
+make lint        # Run linters (Pint + ESLint)
+make clean       # Clean caches and generated files
+make build       # Build for production
+```
+
+### Advanced Commands
+
+```bash
+make setup-env   # Setup .env files only
+make setup-db    # Run migrations + seed roles
+make apikey      # Generate new API key
+make admin       # Create admin user interactively
+make migrate     # Run migrations only
+make migrate-fresh  # Fresh migration with seeds
+```
+
+### Docker Commands
+
+```bash
+make docker-up       # Start Docker services
+make docker-down     # Stop Docker services
+make docker-logs     # View logs (follow mode)
+make docker-rebuild  # Rebuild containers from scratch
+```
+
+## Manual Installation (Step by Step)
+
+If you prefer to run each step manually:
+
+```bash
+# 1. Setup environment files
+make setup-env
+
+# 2. Install dependencies
+cd backend && composer install
+cd storefront && npm ci
+
+# 3. Start Docker services
+docker-compose up -d mysql meilisearch mailpit
+
+# 4. Wait for MySQL
+until docker exec omersia-mysql mysqladmin ping -h localhost --silent; do
+    echo "Waiting for MySQL..."
+    sleep 2
+done
+
+# 5. Setup database
+make setup-db
+
+# 6. Create admin user
+make admin
+
+# 7. Generate API key
+make apikey
+
+# 8. Start all services
+make dev
+```
+
+## Environment Configuration
+
+### Backend (.env)
+
+Key variables automatically configured by the installer:
+
+```env
+APP_NAME=Omersia
+APP_ENV=local
+APP_KEY=<auto-generated>
+DB_HOST=mysql                    # Docker service name
+DB_PORT=3306
+DB_DATABASE=omersia
+DB_USERNAME=omersia
+DB_PASSWORD=secret
+MEILISEARCH_HOST=http://meilisearch:7700
+MAIL_HOST=mailpit
+```
+
+### Storefront (.env.local)
+
+```env
+API_INTERNAL_URL=http://backend:8001/api/v1
+NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+FRONT_API_KEY=<auto-generated>
+```
+
+## Post-Installation
+
+### Access the Application
+
+Once installation is complete:
+
+- **Storefront:** http://localhost:8000
+- **Admin Panel:** http://localhost:8000/admin
+- **Mailpit:** http://localhost:8025 (email testing)
+- **MeiliSearch:** http://localhost:7700
+
+### Default Credentials
+
+The installation script will display:
+- Admin email (you entered or default)
+- Admin password (you entered or auto-generated)
+- API key (saved in storefront/.env.local)
+
+### Next Steps
+
+1. **Start development:**
+   ```bash
+   make dev
+   ```
+
+2. **View logs:**
+   ```bash
+   docker-compose logs -f
+   # Or specific service:
+   docker-compose logs -f backend
+   ```
+
+3. **Run tests:**
+   ```bash
+   make test
+   ```
+
+4. **Index products in MeiliSearch:**
+   ```bash
+   cd backend
+   php artisan products:configure-index
+   php artisan products:index
+   ```
+
+## Troubleshooting
+
+### MySQL Connection Failed
+
+```bash
+# Check if MySQL is running
+docker ps | grep mysql
+
+# Check MySQL logs
+docker logs omersia-mysql
+
+# Restart MySQL
+docker-compose restart mysql
+```
+
+### Port Already in Use
+
+If port 3306, 8000, or 3000 is already in use:
+
+1. Stop the conflicting service
+2. Or modify ports in `docker-compose.yml`:
+   ```yaml
+   ports:
+     - "3307:3306"  # Use different host port
+   ```
+
+### Permission Errors (Linux)
+
+```bash
+# Fix storage permissions
+cd backend
+sudo chown -R $USER:$USER storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+```
+
+### Docker Desktop Not Running
+
+```bash
+# macOS
+open -a Docker
+
+# Or start Docker Desktop manually
+```
+
+### Composer/NPM Install Fails
+
+```bash
+# Clear caches
+cd backend
+composer clear-cache
+composer install --no-cache
+
+cd storefront
+npm cache clean --force
+npm ci
+```
+
+### Reset Everything
+
+```bash
+# Stop and remove all containers
+docker-compose down -v
+
+# Remove generated files
+rm -rf backend/vendor backend/.env
+rm -rf storefront/node_modules storefront/.env.local
+
+# Reinstall
+make install
+```
+
+## Development Workflow
+
+### Daily Development
+
+```bash
+# Start services
+make dev
+
+# In separate terminals:
+cd backend && php artisan serve     # Optional: Laravel dev server
+cd storefront && npm run dev        # Optional: Next.js dev server
+
+# View logs
+docker-compose logs -f backend
+```
+
+### Code Quality
+
+```bash
+# Run linters
+make lint
+
+# Fix linting issues automatically
+make lint-fix
+
+# Run tests
+make test
+
+# Run specific tests
+cd backend && php artisan test --filter=ProductTest
+cd storefront && npm run test -- ProductCard.test.tsx
+```
+
+### Database Management
+
+```bash
+# Create new migration
+cd backend
+php artisan make:migration create_something_table
+
+# Run migrations
+php artisan migrate
+
+# Rollback last migration
+php artisan migrate:rollback
+
+# Fresh install with seeds
+make migrate-fresh
+```
+
+## CI/CD Integration
+
+### GitHub Actions Example
+
+```yaml
+name: Install and Test
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Omersia
+        run: |
+          INTERACTIVE=false \
+          ADMIN_EMAIL=admin@test.com \
+          ADMIN_PASSWORD=TestPass123! \
+          DEMO_DATA=false \
+          ./scripts/install.sh
+
+      - name: Run tests
+        run: make test
+```
+
+### GitLab CI Example
+
+```yaml
+install:
+  script:
+    - export INTERACTIVE=false
+    - export ADMIN_EMAIL=admin@test.com
+    - export DEMO_DATA=false
+    - ./scripts/install.sh
+    - make test
+```
+
+## Architecture Notes
+
+### Why MySQL in Docker?
+
+The main `docker-compose.yml` now includes MySQL (previously only in `docker-compose.dev.yml`) to provide a complete, reproducible environment out of the box. This:
+
+- Ensures consistent database versions across all environments
+- Eliminates "works on my machine" issues
+- Simplifies onboarding for new developers
+- Supports CI/CD pipelines
+
+### Service Dependencies
+
+The installation script respects service dependencies:
+
+1. MySQL must be healthy before backend starts
+2. MeiliSearch must be healthy before backend starts
+3. Migrations run after MySQL is ready
+4. Admin creation happens after roles are seeded
+5. API key generation syncs to storefront
+
+### Hot Reload
+
+Both backend and storefront support hot reload:
+
+- **Backend:** Vite dev server on port 5173
+- **Storefront:** Next.js dev server with Fast Refresh
+- Changes reflect immediately without container restart
+
+## Support
+
+If you encounter issues:
+
+1. Check the [Troubleshooting](#troubleshooting) section
+2. Review logs: `docker-compose logs -f`
+3. Verify prerequisites are met
+4. Try a clean reinstall (see [Reset Everything](#reset-everything))
+
+## Related Documentation
+
+- [Docker Compose Documentation](./docker-compose.yml)
+- [Backend README](./backend/README.md)
+- [Storefront README](./storefront/README.md)
+- [Nginx Configuration](./nginx.conf)

@@ -1,0 +1,4399 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Omersia Storefront API",
+        "description": "Documentation de l'API publique Storefront pour l'e-commerce Omersia",
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Environnement local / base"
+        }
+    ],
+    "paths": {
+        "/api/v1/account/profile": {
+            "get": {
+                "tags": [
+                    "Compte"
+                ],
+                "summary": "Récupérer le profil du client connecté",
+                "operationId": "5ab8910569429b59d7ed5856b4bb966b",
+                "responses": {
+                    "200": {
+                        "description": "Profil du client",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProfileResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": [],
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Compte"
+                ],
+                "summary": "Mettre à jour le profil du client connecté",
+                "operationId": "88ef27c938a018ddd6c9a82a9be3e9f0",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateProfileRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profil mis à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProfileResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": [],
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/addresses": {
+            "get": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Liste des adresses du client connecté",
+                "operationId": "5bcea816a095aae0a0c9a4d6401e91cd",
+                "responses": {
+                    "200": {
+                        "description": "Liste des adresses",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Créer une nouvelle adresse pour le client connecté",
+                "operationId": "3079e8d2ebd19eb8f14fe251227d28b2",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddressCreateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Adresse créée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressDetailResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/addresses/{id}": {
+            "get": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Détail d'une adresse du client connecté",
+                "operationId": "8bb084da3ca2f35db82269f67c412500",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de l'adresse",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Adresse trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressDetailResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "404": {
+                        "description": "Adresse non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Mettre à jour une adresse du client connecté",
+                "operationId": "0666e3d3375c0c1e8c88d9a11b756b64",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de l'adresse",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddressUpdateRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Adresse mise à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressDetailResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "404": {
+                        "description": "Adresse non trouvée"
+                    },
+                    "422": {
+                        "description": "Erreur de validation"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Supprimer une adresse du client connecté",
+                "operationId": "fdf6ee013c334b5b3d9870197d1d6a11",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de l'adresse",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Adresse supprimée"
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "404": {
+                        "description": "Adresse non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/addresses/{id}/default-shipping": {
+            "post": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Définir l'adresse comme adresse de livraison par défaut",
+                "operationId": "3ee3000110e96098f34e442ac210ecfd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de l'adresse",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Adresse mise à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressDetailResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "404": {
+                        "description": "Adresse non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/addresses/{id}/default-billing": {
+            "post": {
+                "tags": [
+                    "Adresses"
+                ],
+                "summary": "Définir l'adresse comme adresse de facturation par défaut",
+                "operationId": "3179519fd9c70b64d055362ad86af93e",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de l'adresse",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Adresse mise à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AddressDetailResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié"
+                    },
+                    "404": {
+                        "description": "Adresse non trouvée"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/register": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Créer un nouveau compte client",
+                "operationId": "2e6991330a150f52c8414e2e7615c17d",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Compte créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/login": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Connexion client",
+                "operationId": "d43150a4afe88acb7ac285bb0f0aa66b",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LoginRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Connexion réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LoginResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Identifiants incorrects",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/logout": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Déconnexion client",
+                "operationId": "c12eca842879d986d7c42622801f8ba5",
+                "responses": {
+                    "200": {
+                        "description": "Déconnexion réussie",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": [],
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/me": {
+            "get": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Informations du client connecté",
+                "operationId": "ac542bf5ba8f7ba0d3be83905a8c6280",
+                "responses": {
+                    "200": {
+                        "description": "Informations du client",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MeResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": [],
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/password/forgot": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Demander un lien de réinitialisation de mot de passe",
+                "operationId": "7cc72e8353dd9028e76ff4f58788f43e",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ForgotPasswordRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Email envoyé (si l'adresse existe)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/auth/password/reset": {
+            "post": {
+                "tags": [
+                    "Authentification"
+                ],
+                "summary": "Réinitialiser le mot de passe avec le token",
+                "operationId": "c231e4085a07aa322ca5a789b504ece3",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResetPasswordRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Mot de passe réinitialisé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MessageResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Utilisateur non trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Token invalide ou expiré",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cart/sync": {
+            "post": {
+                "tags": [
+                    "Panier"
+                ],
+                "summary": "Synchroniser le panier (créer ou mettre à jour)",
+                "operationId": "e6f2c4a53923b74252c5a7d379061a94",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CartSyncRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Panier synchronisé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 42
+                                        },
+                                        "token": {
+                                            "type": "string",
+                                            "example": "cart_abc123"
+                                        },
+                                        "subtotal": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 59.98
+                                        },
+                                        "total_qty": {
+                                            "type": "integer",
+                                            "example": 3
+                                        },
+                                        "currency": {
+                                            "type": "string",
+                                            "example": "EUR"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cart/apply-discount": {
+            "post": {
+                "tags": [
+                    "Panier"
+                ],
+                "summary": "Appliquer un code promo au panier",
+                "operationId": "6e3d8069ae6c75a65aaba7ed99de2a25",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/DiscountApplicationRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Code promo appliqué",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DiscountApplicationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Code promo invalide ou non applicable",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ok": {
+                                            "type": "boolean",
+                                            "example": false
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Code promo invalide ou expiré."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/categories": {
+            "get": {
+                "tags": [
+                    "Catégories"
+                ],
+                "summary": "Lister toutes les catégories actives",
+                "description": "Retourne toutes les catégories actives (enfants de la catégorie 'accueil') avec leurs traductions et le nombre de produits",
+                "operationId": "getCategories",
+                "parameters": [
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "description": "Langue des traductions",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "fr",
+                            "enum": [
+                                "fr",
+                                "en"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "parent_only",
+                        "in": "query",
+                        "description": "Retourner uniquement les catégories parentes",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des catégories avec comptage des produits",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/categories/{slug}": {
+            "get": {
+                "tags": [
+                    "Catégories"
+                ],
+                "summary": "Détail d'une catégorie avec ses produits et sous-catégories",
+                "description": "Retourne une catégorie par slug avec ses sous-catégories (jusqu'à 3 niveaux), sa catégorie parente et les produits paginés (20/page)",
+                "operationId": "getCategoryBySlug",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Slug de la catégorie dans la langue spécifiée",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "chemises-homme"
+                        }
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "description": "Langue des traductions",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "fr",
+                            "enum": [
+                                "fr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Catégorie trouvée avec produits et sous-catégories",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CategoryWithProducts"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Catégorie non trouvée pour ce slug et cette langue",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/ecommerce-pages/{slug}": {
+            "get": {
+                "tags": [
+                    "Pages E-commerce"
+                ],
+                "summary": "Récupérer une page e-commerce par slug",
+                "description": "Récupérer une page e-commerce par slug",
+                "operationId": "e203934eedcda877a0f3b9e24b14f902",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Slug de la page",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "about-us"
+                        }
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "description": "Langue de la page",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "fr",
+                            "enum": [
+                                "fr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "example": "custom"
+                                        },
+                                        "slug": {
+                                            "type": "string",
+                                            "example": "about-us"
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "À propos de nous"
+                                        },
+                                        "content": {
+                                            "description": "Contenu JSON de la page (sections du page builder)",
+                                            "properties": {
+                                                "sections": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Page non trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Page not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/menus/{slug}": {
+            "get": {
+                "tags": [
+                    "Menus"
+                ],
+                "summary": "Récupérer un menu par son slug",
+                "description": "Retourne un menu actif et ses items.\n     *          Les items de type `category` exposent la catégorie liée ainsi que ses sous-catégories jusqu'à 2 niveaux d'enfants (3 niveaux au total : parent > enfant > petit-enfant), selon la locale demandée.",
+                "operationId": "getMenuBySlug",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Slug du menu (ex: main, footer, header)",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "main"
+                        }
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "description": "Code langue pour les traductions des catégories (ex: fr, en). Si non fourni, fr est utilisé.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "fr"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Menu trouvé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "slug": {
+                                            "description": "Slug du menu",
+                                            "type": "string",
+                                            "example": "main"
+                                        },
+                                        "name": {
+                                            "description": "Nom lisible du menu",
+                                            "type": "string",
+                                            "example": "Menu principal"
+                                        },
+                                        "location": {
+                                            "description": "Emplacement / type du menu (header, footer, etc.)",
+                                            "type": "string",
+                                            "example": "header",
+                                            "nullable": true
+                                        },
+                                        "items": {
+                                            "description": "Liste des éléments de menu",
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "label": {
+                                                        "description": "Label affiché dans la navigation",
+                                                        "type": "string",
+                                                        "example": "Chemises"
+                                                    },
+                                                    "type": {
+                                                        "description": "Type de l'item: category = lié à une catégorie, link = URL libre, text = texte seul",
+                                                        "type": "string",
+                                                        "enum": [
+                                                            "category",
+                                                            "link",
+                                                            "text"
+                                                        ],
+                                                        "example": "category"
+                                                    },
+                                                    "url": {
+                                                        "description": "URL cible. Pour un type category, est générée automatiquement si absente (/categories/{slug}).",
+                                                        "type": "string",
+                                                        "example": "/categories/chemises",
+                                                        "nullable": true
+                                                    },
+                                                    "category": {
+                                                        "description": "Données de la catégorie liée si type = category",
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 12
+                                                            },
+                                                            "slug": {
+                                                                "type": "string",
+                                                                "example": "chemises"
+                                                            },
+                                                            "name": {
+                                                                "type": "string",
+                                                                "example": "Chemises"
+                                                            },
+                                                            "children": {
+                                                                "description": "Sous-catégories directes (niveau 2)",
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer",
+                                                                            "example": 34
+                                                                        },
+                                                                        "slug": {
+                                                                            "type": "string",
+                                                                            "example": "chemises-homme"
+                                                                        },
+                                                                        "name": {
+                                                                            "type": "string",
+                                                                            "example": "Chemises homme"
+                                                                        },
+                                                                        "children": {
+                                                                            "description": "Sous-catégories du niveau 2 (niveau 3, petites-filles)",
+                                                                            "type": "array",
+                                                                            "items": {
+                                                                                "properties": {
+                                                                                    "id": {
+                                                                                        "type": "integer",
+                                                                                        "example": 56
+                                                                                    },
+                                                                                    "slug": {
+                                                                                        "type": "string",
+                                                                                        "example": "chemises-homme-manches-longues"
+                                                                                    },
+                                                                                    "name": {
+                                                                                        "type": "string",
+                                                                                        "example": "Chemises manches longues"
+                                                                                    }
+                                                                                },
+                                                                                "type": "object"
+                                                                            }
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object",
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Menu non trouvé"
+                    }
+                }
+            }
+        },
+        "/api/v1/orders": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Liste des commandes du client connecté",
+                "operationId": "002a07124a31a203cabd44c093be76e9",
+                "responses": {
+                    "200": {
+                        "description": "Liste des commandes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Order"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": [],
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Créer une nouvelle commande",
+                "operationId": "037d69e4936b331c6a4d2475ef243e86",
+                "requestBody": {
+                    "description": "Données de la commande",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "currency",
+                                    "shipping_method_id",
+                                    "customer_email",
+                                    "shipping_address",
+                                    "items"
+                                ],
+                                "properties": {
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "EUR"
+                                    },
+                                    "shipping_method_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "customer_email": {
+                                        "type": "string",
+                                        "example": "customer@example.com"
+                                    },
+                                    "shipping_address": {
+                                        "$ref": "#/components/schemas/OrderAddress"
+                                    },
+                                    "billing_address": {
+                                        "oneOf": [
+                                            {
+                                                "$ref": "#/components/schemas/OrderAddress"
+                                            }
+                                        ],
+                                        "nullable": true
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "product_id": {
+                                                    "type": "integer"
+                                                },
+                                                "variant_id": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                },
+                                                "name": {
+                                                    "type": "string"
+                                                },
+                                                "quantity": {
+                                                    "type": "integer"
+                                                },
+                                                "unit_price": {
+                                                    "type": "number"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Commande créée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Order"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": [],
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/orders/{number}": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Détail d'une commande par numéro",
+                "operationId": "89aab61e37b3db3bd470be3edb1cd3e7",
+                "parameters": [
+                    {
+                        "name": "number",
+                        "in": "path",
+                        "description": "Numéro de commande",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "ORD-2024-00123"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détail de la commande",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Order"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Commande non trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": [],
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/orders/{number}/invoice": {
+            "get": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Télécharger la facture d'une commande",
+                "operationId": "1d8003cedcb867a9c959faacea7857c5",
+                "parameters": [
+                    {
+                        "name": "number",
+                        "in": "path",
+                        "description": "Numéro de commande",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "ORD-2024-00123"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Fichier PDF de la facture",
+                        "content": {
+                            "application/pdf": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Commande ou facture non trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": [],
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/pages": {
+            "get": {
+                "tags": [
+                    "Pages"
+                ],
+                "summary": "Liste des pages actives",
+                "operationId": "84688f6fbcd2df4990a2edda818fc2e1",
+                "parameters": [
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "fr"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des pages",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer"
+                                            },
+                                            "slug": {
+                                                "type": "string"
+                                            },
+                                            "title": {
+                                                "type": "string"
+                                            },
+                                            "type": {
+                                                "type": "string"
+                                            },
+                                            "is_home": {
+                                                "type": "boolean"
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/pages/{slug}": {
+            "get": {
+                "tags": [
+                    "Pages"
+                ],
+                "summary": "Détail d'une page CMS",
+                "operationId": "1bad740475767acc3dc97c7b0594212f",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "fr"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        },
+                                        "slug": {
+                                            "type": "string"
+                                        },
+                                        "title": {
+                                            "type": "string"
+                                        },
+                                        "meta_title": {
+                                            "type": "string"
+                                        },
+                                        "meta_description": {
+                                            "type": "string"
+                                        },
+                                        "layout": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Page non trouvée"
+                    }
+                }
+            }
+        },
+        "/api/v1/payments/intent": {
+            "post": {
+                "tags": [
+                    "Paiement"
+                ],
+                "summary": "Créer une intention de paiement (Stripe)",
+                "operationId": "869f4046b94420f1ae42696cba896e29",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PaymentIntentRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Payment intent créé",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaymentIntentResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Commande non trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": [],
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/products": {
+            "get": {
+                "tags": [
+                    "Produits"
+                ],
+                "summary": "Liste paginée des produits actifs",
+                "operationId": "d431d5301cfb83ad7d4e81eb8175e2ba",
+                "parameters": [
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "description": "Langue des traductions",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "fr",
+                            "enum": [
+                                "fr",
+                                "en"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Numéro de page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1,
+                            "minimum": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste paginée des produits avec pagination Laravel",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductListResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/products/{slug}": {
+            "get": {
+                "tags": [
+                    "Produits"
+                ],
+                "summary": "Détail d'un produit par slug avec images, catégories, variantes et options",
+                "operationId": "5e9c180be9cad94df07d68b93d7b65e2",
+                "parameters": [
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Slug du produit dans la langue spécifiée",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "t-shirt-homme"
+                        }
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "description": "Langue des traductions",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "fr",
+                            "enum": [
+                                "fr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Produit trouvé avec toutes ses relations",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ProductDetailResponse"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Produit non trouvé pour ce slug et cette langue",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/search": {
+            "get": {
+                "tags": [
+                    "Recherche"
+                ],
+                "summary": "Recherche de produits",
+                "operationId": "a7fe72ee641d94dbc9e6e6816d9866c8",
+                "parameters": [
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Terme de recherche",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "t-shirt"
+                        }
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "fr"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Nombre de résultats par page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Résultats de recherche",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "query": {
+                                            "type": "string"
+                                        },
+                                        "total": {
+                                            "type": "integer"
+                                        },
+                                        "products": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/ProductListResponse"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/shipping-methods": {
+            "get": {
+                "tags": [
+                    "Livraison"
+                ],
+                "summary": "Liste des méthodes de livraison disponibles",
+                "operationId": "338cc9e7744fabb7da85f030a6be90d4",
+                "parameters": [
+                    {
+                        "name": "cart_total",
+                        "in": "query",
+                        "description": "Montant total du panier pour calcul de livraison gratuite",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 59.98
+                        }
+                    },
+                    {
+                        "name": "weight",
+                        "in": "query",
+                        "description": "Poids total du panier",
+                        "required": false,
+                        "schema": {
+                            "type": "number",
+                            "format": "float",
+                            "example": 2.5
+                        }
+                    },
+                    {
+                        "name": "country_code",
+                        "in": "query",
+                        "description": "Code pays de livraison",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "FR"
+                        }
+                    },
+                    {
+                        "name": "postal_code",
+                        "in": "query",
+                        "description": "Code postal de livraison",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "75001"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des méthodes de livraison",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ok": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "code": {
+                                                        "type": "string",
+                                                        "example": "standard"
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Livraison standard"
+                                                    },
+                                                    "description": {
+                                                        "type": "string",
+                                                        "example": "Livraison en 3-5 jours ouvrés",
+                                                        "nullable": true
+                                                    },
+                                                    "price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 5
+                                                    },
+                                                    "original_price": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 5
+                                                    },
+                                                    "delivery_time": {
+                                                        "type": "string",
+                                                        "example": "3-5 jours",
+                                                        "nullable": true
+                                                    },
+                                                    "is_free": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "has_advanced_pricing": {
+                                                        "type": "boolean",
+                                                        "example": false
+                                                    },
+                                                    "free_shipping_threshold": {
+                                                        "type": "number",
+                                                        "format": "float",
+                                                        "example": 100,
+                                                        "nullable": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/shop/info": {
+            "get": {
+                "tags": [
+                    "Shop"
+                ],
+                "summary": "Get shop information",
+                "description": "Returns the shop name, logo and other public information",
+                "operationId": "getShopInfo",
+                "responses": {
+                    "200": {
+                        "description": "Shop information",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "example": "Ma Boutique"
+                                        },
+                                        "display_name": {
+                                            "type": "string",
+                                            "example": "Ma Super Boutique"
+                                        },
+                                        "logo_url": {
+                                            "type": "string",
+                                            "example": "http://localhost:8000/storage/logos/logo.png",
+                                            "nullable": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/taxes/calculate": {
+            "post": {
+                "tags": [
+                    "Taxes"
+                ],
+                "summary": "Calculer les taxes pour une commande",
+                "operationId": "1622eac077dc810f818e4a1c07507acf",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TaxCalculationRequest"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Taxes calculées",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TaxCalculationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/theme/settings": {
+            "get": {
+                "tags": [
+                    "Thème"
+                ],
+                "summary": "Récupérer les paramètres du thème actif",
+                "operationId": "d778d1c7292a46079182525ff1641721",
+                "responses": {
+                    "200": {
+                        "description": "Paramètres du thème",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ThemeSettingsResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Shop non configuré",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Shop not configured"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Theme settings error"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "ProfileResponse": {
+                "description": "Customer profile information",
+                "properties": {
+                    "id": {
+                        "description": "Account profile-related OpenAPI schemas.",
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "firstname": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john.doe@example.com"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+33 6 12 34 56 78",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateProfileRequest": {
+                "description": "Update customer profile request",
+                "properties": {
+                    "firstname": {
+                        "type": "string",
+                        "example": "John",
+                        "nullable": true
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Doe",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john.doe@example.com",
+                        "nullable": true
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+33 6 12 34 56 78",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "RegisterRequest": {
+                "description": "Customer registration request",
+                "required": [
+                    "firstname",
+                    "lastname",
+                    "email",
+                    "password",
+                    "password_confirmation"
+                ],
+                "properties": {
+                    "firstname": {
+                        "description": "Customer first name",
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "lastname": {
+                        "description": "Customer last name",
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "email": {
+                        "description": "Customer email address",
+                        "type": "string",
+                        "format": "email",
+                        "example": "john.doe@example.com"
+                    },
+                    "password": {
+                        "description": "Password (min 8 characters)",
+                        "type": "string",
+                        "format": "password",
+                        "example": "SecureP@ssw0rd"
+                    },
+                    "password_confirmation": {
+                        "description": "Password confirmation",
+                        "type": "string",
+                        "format": "password",
+                        "example": "SecureP@ssw0rd"
+                    },
+                    "newsletter": {
+                        "description": "Subscribe to newsletter (optional)",
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "LoginRequest": {
+                "description": "Customer login request",
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "description": "Customer email",
+                        "type": "string",
+                        "format": "email",
+                        "example": "john.doe@example.com"
+                    },
+                    "password": {
+                        "description": "Customer password",
+                        "type": "string",
+                        "format": "password",
+                        "example": "SecureP@ssw0rd"
+                    }
+                },
+                "type": "object"
+            },
+            "LoginResponse": {
+                "description": "Successful login response",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Connexion réussie."
+                    },
+                    "user": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 42
+                            },
+                            "firstname": {
+                                "type": "string",
+                                "example": "John"
+                            },
+                            "lastname": {
+                                "type": "string",
+                                "example": "Doe"
+                            },
+                            "email": {
+                                "type": "string",
+                                "example": "john.doe@example.com"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "token": {
+                        "description": "Sanctum API token",
+                        "type": "string",
+                        "example": "1|abcdefghijklmnopqrstuvwxyz123456789"
+                    }
+                },
+                "type": "object"
+            },
+            "MeResponse": {
+                "description": "Current authenticated user information",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "firstname": {
+                        "type": "string",
+                        "example": "John",
+                        "nullable": true
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Doe",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "example": "john.doe@example.com"
+                    }
+                },
+                "type": "object"
+            },
+            "ForgotPasswordRequest": {
+                "description": "Password reset request",
+                "required": [
+                    "email"
+                ],
+                "properties": {
+                    "email": {
+                        "description": "Email address to send reset link",
+                        "type": "string",
+                        "format": "email",
+                        "example": "john.doe@example.com"
+                    }
+                },
+                "type": "object"
+            },
+            "ResetPasswordRequest": {
+                "description": "Password reset with token",
+                "required": [
+                    "email",
+                    "token",
+                    "password",
+                    "password_confirmation"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john.doe@example.com"
+                    },
+                    "token": {
+                        "description": "Reset token from email",
+                        "type": "string",
+                        "example": "abc123xyz789"
+                    },
+                    "password": {
+                        "description": "New password",
+                        "type": "string",
+                        "format": "password",
+                        "example": "NewP@ssw0rd"
+                    },
+                    "password_confirmation": {
+                        "description": "New password confirmation",
+                        "type": "string",
+                        "format": "password",
+                        "example": "NewP@ssw0rd"
+                    }
+                },
+                "type": "object"
+            },
+            "MessageResponse": {
+                "description": "Simple message response",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Opération réussie."
+                    }
+                },
+                "type": "object"
+            },
+            "CartItem": {
+                "description": "Item in shopping cart",
+                "required": [
+                    "id",
+                    "price",
+                    "qty"
+                ],
+                "properties": {
+                    "id": {
+                        "description": "Product ID",
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "variant_id": {
+                        "description": "Variant ID if applicable",
+                        "type": "integer",
+                        "example": 456,
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "T-shirt Homme",
+                        "nullable": true
+                    },
+                    "price": {
+                        "description": "Unit price",
+                        "type": "number",
+                        "format": "float",
+                        "example": 29.99
+                    },
+                    "qty": {
+                        "description": "Quantity",
+                        "type": "integer",
+                        "minimum": 1,
+                        "example": 2
+                    }
+                },
+                "type": "object"
+            },
+            "CartSyncRequest": {
+                "description": "Cart synchronization request",
+                "properties": {
+                    "token": {
+                        "description": "Cart token for guest users",
+                        "type": "string",
+                        "example": "cart_abc123xyz",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "customer@example.com",
+                        "nullable": true
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CartItem"
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "DiscountApplicationRequest": {
+                "description": "Apply discount code request",
+                "required": [
+                    "code",
+                    "items"
+                ],
+                "properties": {
+                    "code": {
+                        "description": "Discount code",
+                        "type": "string",
+                        "example": "SUMMER2024"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "customer@example.com",
+                        "nullable": true
+                    },
+                    "subtotal": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 59.98
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CartItem"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "DiscountApplicationResponse": {
+                "description": "Discount application result",
+                "properties": {
+                    "ok": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Code promo invalide",
+                        "nullable": true
+                    },
+                    "order_discount_amount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 10,
+                        "nullable": true
+                    },
+                    "product_discount_amount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "total_discount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 15,
+                        "nullable": true
+                    },
+                    "line_adjustments": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "product_id": {
+                                    "type": "integer"
+                                },
+                                "discount_amount": {
+                                    "type": "number",
+                                    "format": "float"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "CategoryWithProducts": {
+                "description": "Category with its products",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Category"
+                    },
+                    {
+                        "properties": {
+                            "products": {
+                                "description": "Category-related OpenAPI schemas.",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "CategoryListResponse": {
+                "description": "List of categories",
+                "properties": {
+                    "categories": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Category"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "CreateCheckoutOrderRequest": {
+                "description": "Create or update checkout order",
+                "required": [
+                    "shippingMethodId",
+                    "shippingAddressId",
+                    "billingAddressId",
+                    "items",
+                    "subtotal",
+                    "shippingCostBase",
+                    "promoDiscount",
+                    "automaticDiscountTotal",
+                    "shippingDiscountTotal",
+                    "total"
+                ],
+                "properties": {
+                    "order_id": {
+                        "description": "Existing order ID to update (optional)",
+                        "type": "integer",
+                        "example": 123,
+                        "nullable": true
+                    },
+                    "shippingMethodId": {
+                        "description": "Selected shipping method ID",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "shippingAddressId": {
+                        "description": "Shipping address ID",
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "billingAddressId": {
+                        "description": "Billing address ID",
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "items": {
+                        "description": "Order items",
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "product_id": {
+                                    "type": "integer",
+                                    "example": 42
+                                },
+                                "variant_id": {
+                                    "type": "integer",
+                                    "example": 12,
+                                    "nullable": true
+                                },
+                                "name": {
+                                    "type": "string",
+                                    "example": "T-shirt Homme"
+                                },
+                                "quantity": {
+                                    "type": "integer",
+                                    "example": 2
+                                },
+                                "unit_price": {
+                                    "type": "number",
+                                    "format": "float",
+                                    "example": 29.99
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "subtotal": {
+                        "description": "Cart subtotal",
+                        "type": "number",
+                        "format": "float",
+                        "example": 59.98
+                    },
+                    "shippingCostBase": {
+                        "description": "Base shipping cost",
+                        "type": "number",
+                        "format": "float",
+                        "example": 5
+                    },
+                    "promoDiscount": {
+                        "description": "Promo code discount amount",
+                        "type": "number",
+                        "format": "float",
+                        "example": 10
+                    },
+                    "automaticDiscountTotal": {
+                        "description": "Automatic discount total",
+                        "type": "number",
+                        "format": "float",
+                        "example": 0
+                    },
+                    "shippingDiscountTotal": {
+                        "description": "Shipping discount total",
+                        "type": "number",
+                        "format": "float",
+                        "example": 0
+                    },
+                    "total": {
+                        "description": "Order total",
+                        "type": "number",
+                        "format": "float",
+                        "example": 54.98
+                    },
+                    "promoCodes": {
+                        "description": "Applied promo codes",
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "example": "SUMMER2024"
+                        },
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "OrderCreatedResponse": {
+                "description": "Order creation response",
+                "properties": {
+                    "id": {
+                        "description": "Order ID",
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "number": {
+                        "description": "Order number",
+                        "type": "string",
+                        "example": "ORD-2024-00123"
+                    }
+                },
+                "type": "object"
+            },
+            "Pagination": {
+                "description": "Laravel pagination metadata",
+                "properties": {
+                    "current_page": {
+                        "description": "Current page number",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "last_page": {
+                        "description": "Last page number",
+                        "type": "integer",
+                        "example": 10
+                    },
+                    "per_page": {
+                        "description": "Items per page",
+                        "type": "integer",
+                        "example": 20
+                    },
+                    "total": {
+                        "description": "Total number of items",
+                        "type": "integer",
+                        "example": 200
+                    },
+                    "from": {
+                        "description": "Index of first item on current page",
+                        "type": "integer",
+                        "example": 1,
+                        "nullable": true
+                    },
+                    "to": {
+                        "description": "Index of last item on current page",
+                        "type": "integer",
+                        "example": 20,
+                        "nullable": true
+                    },
+                    "links": {
+                        "description": "Pagination links",
+                        "properties": {
+                            "first": {
+                                "type": "string",
+                                "example": "http://api.example.com/products?page=1",
+                                "nullable": true
+                            },
+                            "last": {
+                                "type": "string",
+                                "example": "http://api.example.com/products?page=10",
+                                "nullable": true
+                            },
+                            "prev": {
+                                "type": "string",
+                                "example": "http://api.example.com/products?page=1",
+                                "nullable": true
+                            },
+                            "next": {
+                                "type": "string",
+                                "example": "http://api.example.com/products?page=3",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "Timestamps": {
+                "description": "Standard Laravel timestamps",
+                "properties": {
+                    "created_at": {
+                        "description": "Creation timestamp",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-15T10:30:00.000000Z"
+                    },
+                    "updated_at": {
+                        "description": "Last update timestamp",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-01-20T14:45:00.000000Z"
+                    }
+                },
+                "type": "object"
+            },
+            "Translation": {
+                "description": "Translatable content",
+                "properties": {
+                    "locale": {
+                        "description": "Language code",
+                        "type": "string",
+                        "example": "fr"
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Titre du produit",
+                        "nullable": true
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "titre-du-produit",
+                        "nullable": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Description du produit",
+                        "nullable": true
+                    },
+                    "meta_title": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "meta_description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "meta_keywords": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "Image": {
+                "description": "Image resource",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "path": {
+                        "type": "string",
+                        "example": "/storage/products/image.jpg"
+                    },
+                    "url": {
+                        "type": "string",
+                        "example": "https://cdn.example.com/products/image.jpg"
+                    },
+                    "alt": {
+                        "type": "string",
+                        "example": "Product image",
+                        "nullable": true
+                    },
+                    "position": {
+                        "description": "Display order",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "is_main": {
+                        "description": "Is primary image",
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "Money": {
+                "description": "Money value with currency",
+                "properties": {
+                    "amount": {
+                        "description": "Monetary amount",
+                        "type": "number",
+                        "format": "float",
+                        "example": 29.99
+                    },
+                    "currency": {
+                        "description": "ISO 4217 currency code",
+                        "type": "string",
+                        "example": "EUR"
+                    },
+                    "formatted": {
+                        "description": "Human-readable formatted price",
+                        "type": "string",
+                        "example": "29,99 €"
+                    }
+                },
+                "type": "object"
+            },
+            "SuccessResponse": {
+                "description": "Generic success response",
+                "properties": {
+                    "ok": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Operation completed successfully",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "Customer": {
+                "description": "Customer account",
+                "properties": {
+                    "id": {
+                        "description": "Customer and Address schemas.",
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "shop_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    },
+                    "firstname": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+33 6 12 34 56 78",
+                        "nullable": true
+                    },
+                    "newsletter": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Address": {
+                "description": "Customer address",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "customer_id": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "Maison",
+                        "nullable": true
+                    },
+                    "firstname": {
+                        "type": "string",
+                        "example": "John",
+                        "nullable": true
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Doe",
+                        "nullable": true
+                    },
+                    "line1": {
+                        "type": "string",
+                        "example": "123 rue de la Paix"
+                    },
+                    "line2": {
+                        "type": "string",
+                        "example": "Apt 4B",
+                        "nullable": true
+                    },
+                    "postcode": {
+                        "type": "string",
+                        "example": "75001"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Paris"
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "FR"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+33 6 12 34 56 78",
+                        "nullable": true
+                    },
+                    "is_default_shipping": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "is_default_billing": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "AddressListResponse": {
+                "description": "List of customer addresses",
+                "properties": {
+                    "addresses": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Address"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "AddressDetailResponse": {
+                "description": "Single address detail response",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "customer_id": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "label": {
+                        "type": "string",
+                        "example": "Maison",
+                        "nullable": true
+                    },
+                    "firstname": {
+                        "type": "string",
+                        "example": "John",
+                        "nullable": true
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Doe",
+                        "nullable": true
+                    },
+                    "company": {
+                        "type": "string",
+                        "example": "ACME Inc.",
+                        "nullable": true
+                    },
+                    "line1": {
+                        "type": "string",
+                        "example": "123 rue de la Paix"
+                    },
+                    "line2": {
+                        "type": "string",
+                        "example": "Apt 4B",
+                        "nullable": true
+                    },
+                    "postcode": {
+                        "type": "string",
+                        "example": "75001"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Paris"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "Île-de-France",
+                        "nullable": true
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "FR"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+33 6 12 34 56 78",
+                        "nullable": true
+                    },
+                    "is_default_shipping": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "is_default_billing": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "AddressCreateRequest": {
+                "description": "Request body for creating a new address",
+                "required": [
+                    "label",
+                    "line1",
+                    "postcode",
+                    "city"
+                ],
+                "properties": {
+                    "label": {
+                        "description": "Label for the address",
+                        "type": "string",
+                        "example": "Maison"
+                    },
+                    "firstname": {
+                        "type": "string",
+                        "example": "John",
+                        "nullable": true
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Doe",
+                        "nullable": true
+                    },
+                    "company": {
+                        "type": "string",
+                        "example": "ACME Inc.",
+                        "nullable": true
+                    },
+                    "line1": {
+                        "type": "string",
+                        "example": "123 rue de la Paix"
+                    },
+                    "line2": {
+                        "type": "string",
+                        "example": "Apt 4B",
+                        "nullable": true
+                    },
+                    "postcode": {
+                        "type": "string",
+                        "example": "75001"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Paris"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "Île-de-France",
+                        "nullable": true
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "FR",
+                        "nullable": true
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+33 6 12 34 56 78",
+                        "nullable": true
+                    },
+                    "is_default_shipping": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "is_default_billing": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
+            "AddressUpdateRequest": {
+                "description": "Request body for updating an address",
+                "properties": {
+                    "label": {
+                        "description": "Label for the address",
+                        "type": "string",
+                        "example": "Maison"
+                    },
+                    "firstname": {
+                        "type": "string",
+                        "example": "John",
+                        "nullable": true
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Doe",
+                        "nullable": true
+                    },
+                    "company": {
+                        "type": "string",
+                        "example": "ACME Inc.",
+                        "nullable": true
+                    },
+                    "line1": {
+                        "type": "string",
+                        "example": "123 rue de la Paix"
+                    },
+                    "line2": {
+                        "type": "string",
+                        "example": "Apt 4B",
+                        "nullable": true
+                    },
+                    "postcode": {
+                        "type": "string",
+                        "example": "75001"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Paris"
+                    },
+                    "state": {
+                        "type": "string",
+                        "example": "Île-de-France",
+                        "nullable": true
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "FR",
+                        "nullable": true
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+33 6 12 34 56 78",
+                        "nullable": true
+                    },
+                    "is_default_shipping": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "is_default_billing": {
+                        "type": "boolean",
+                        "example": false
+                    }
+                },
+                "type": "object"
+            },
+            "CustomerRegisterRequest": {
+                "required": [
+                    "firstname",
+                    "lastname",
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "firstname": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "secret123"
+                    },
+                    "password_confirmation": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "secret123"
+                    },
+                    "newsletter": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "CustomerLoginRequest": {
+                "required": [
+                    "email",
+                    "password"
+                ],
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "example": "john@example.com"
+                    },
+                    "password": {
+                        "type": "string",
+                        "format": "password",
+                        "example": "secret123"
+                    }
+                },
+                "type": "object"
+            },
+            "AuthResponse": {
+                "description": "Authentication response with token",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "example": "Success"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/Customer"
+                    },
+                    "token": {
+                        "type": "string",
+                        "example": "1|abcdefghijklmnopqrstuvwxyz123456"
+                    }
+                },
+                "type": "object"
+            },
+            "Error": {
+                "description": "Standard error response",
+                "required": [
+                    "message"
+                ],
+                "properties": {
+                    "message": {
+                        "description": "Human-readable error message",
+                        "type": "string",
+                        "example": "Resource not found"
+                    },
+                    "code": {
+                        "description": "Machine-readable error code",
+                        "type": "string",
+                        "example": "RESOURCE_NOT_FOUND",
+                        "nullable": true
+                    },
+                    "error": {
+                        "description": "Detailed error description",
+                        "type": "string",
+                        "example": "The requested resource was not found",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ValidationError": {
+                "description": "Validation error response (HTTP 422)",
+                "required": [
+                    "message",
+                    "errors"
+                ],
+                "properties": {
+                    "message": {
+                        "description": "Generic validation error message",
+                        "type": "string",
+                        "example": "The given data was invalid."
+                    },
+                    "errors": {
+                        "description": "Field-specific validation errors",
+                        "type": "object",
+                        "example": {
+                            "email": [
+                                "L'adresse email est déjà utilisée."
+                            ],
+                            "password": [
+                                "Le mot de passe doit contenir au moins 8 caractères."
+                            ]
+                        },
+                        "additionalProperties": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "UnauthorizedError": {
+                "description": "Authentication error response (HTTP 401)",
+                "properties": {
+                    "message": {
+                        "description": "Authentication failure message",
+                        "type": "string",
+                        "example": "Unauthenticated"
+                    }
+                },
+                "type": "object"
+            },
+            "ForbiddenError": {
+                "description": "Authorization error response (HTTP 403)",
+                "properties": {
+                    "message": {
+                        "description": "Authorization failure message",
+                        "type": "string",
+                        "example": "This action is unauthorized."
+                    }
+                },
+                "type": "object"
+            },
+            "NotFoundError": {
+                "description": "Resource not found error (HTTP 404)",
+                "properties": {
+                    "message": {
+                        "description": "Not found message",
+                        "type": "string",
+                        "example": "Resource not found"
+                    }
+                },
+                "type": "object"
+            },
+            "ApiKeyError": {
+                "description": "API key validation error",
+                "properties": {
+                    "message": {
+                        "description": "API key error message",
+                        "type": "string",
+                        "example": "Invalid API key"
+                    },
+                    "error": {
+                        "description": "Detailed error (e.g., expired, missing)",
+                        "type": "string",
+                        "example": "API key expired",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "ServerError": {
+                "description": "Internal server error (HTTP 500)",
+                "properties": {
+                    "message": {
+                        "description": "Generic server error message",
+                        "type": "string",
+                        "example": "Server Error"
+                    },
+                    "error": {
+                        "description": "Detailed error (only in debug mode)",
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "OrderAddress": {
+                "description": "Address used in an order",
+                "properties": {
+                    "label": {
+                        "description": "Order-related OpenAPI schemas.",
+                        "type": "string",
+                        "example": "Maison",
+                        "nullable": true
+                    },
+                    "firstname": {
+                        "type": "string",
+                        "example": "John"
+                    },
+                    "lastname": {
+                        "type": "string",
+                        "example": "Doe"
+                    },
+                    "line1": {
+                        "type": "string",
+                        "example": "123 rue de la Paix"
+                    },
+                    "line2": {
+                        "type": "string",
+                        "example": "Apt 4B",
+                        "nullable": true
+                    },
+                    "postcode": {
+                        "type": "string",
+                        "example": "75001"
+                    },
+                    "city": {
+                        "type": "string",
+                        "example": "Paris"
+                    },
+                    "country": {
+                        "type": "string",
+                        "example": "FR"
+                    },
+                    "phone": {
+                        "type": "string",
+                        "example": "+33 6 12 34 56 78",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
+            "OrderItem": {
+                "description": "Item in an order",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "product_id": {
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "variant_id": {
+                        "type": "integer",
+                        "example": 456,
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "T-shirt Homme"
+                    },
+                    "sku": {
+                        "type": "string",
+                        "example": "TSHIRT-BLACK-L"
+                    },
+                    "quantity": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "unit_price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 29.99
+                    },
+                    "total_price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 59.98
+                    },
+                    "discount_amount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 0
+                    }
+                },
+                "type": "object"
+            },
+            "Order": {
+                "description": "Order",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "number": {
+                        "type": "string",
+                        "example": "ORD-2024-00123"
+                    },
+                    "customer_id": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "draft",
+                            "pending",
+                            "processing",
+                            "shipped",
+                            "completed",
+                            "cancelled"
+                        ],
+                        "example": "pending"
+                    },
+                    "subtotal": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 59.98
+                    },
+                    "tax_amount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 11.99
+                    },
+                    "shipping_amount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 5
+                    },
+                    "discount_amount": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 0
+                    },
+                    "total": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 76.97
+                    },
+                    "shipping_address": {
+                        "$ref": "#/components/schemas/OrderAddress"
+                    },
+                    "billing_address": {
+                        "$ref": "#/components/schemas/OrderAddress"
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OrderItem"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "OrderListResponse": {
+                "description": "Paginated list of orders",
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Pagination"
+                    },
+                    {
+                        "properties": {
+                            "data": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Order"
+                                }
+                            }
+                        },
+                        "type": "object"
+                    }
+                ]
+            },
+            "PaymentMethod": {
+                "description": "Available payment method",
+                "properties": {
+                    "id": {
+                        "description": "Payment-related OpenAPI schemas.",
+                        "type": "string",
+                        "example": "stripe"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Carte bancaire"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "Paiement sécurisé par carte",
+                        "nullable": true
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "PaymentMethodsResponse": {
+                "description": "List of available payment methods",
+                "properties": {
+                    "ok": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PaymentMethod"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "PaymentIntentRequest": {
+                "description": "Payment intent creation request",
+                "required": [
+                    "order_id"
+                ],
+                "properties": {
+                    "order_id": {
+                        "description": "Order ID to create payment for",
+                        "type": "integer",
+                        "example": 123
+                    }
+                },
+                "type": "object"
+            },
+            "PaymentIntentResponse": {
+                "description": "Stripe payment intent",
+                "properties": {
+                    "ok": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "data": {
+                        "properties": {
+                            "client_secret": {
+                                "type": "string",
+                                "example": "pi_abc123_secret_xyz789"
+                            },
+                            "payment_intent_id": {
+                                "type": "string",
+                                "example": "pi_abc123"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "ProductTranslation": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 12
+                    },
+                    "locale": {
+                        "type": "string",
+                        "example": "fr"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "t-shirt-homme"
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "T-shirt Homme"
+                    },
+                    "description": {
+                        "type": "string",
+                        "example": "T-shirt 100% coton bio."
+                    }
+                },
+                "type": "object"
+            },
+            "CategoryTranslation": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "locale": {
+                        "type": "string",
+                        "example": "fr"
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Vêtements"
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "vetements"
+                    }
+                },
+                "type": "object"
+            },
+            "Category": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "translations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CategoryTranslation"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ProductImage": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 34
+                    },
+                    "url": {
+                        "type": "string",
+                        "example": "https://cdn.example.com/products/image1.jpg"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "example": 1
+                    }
+                },
+                "type": "object"
+            },
+            "Product": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "shop_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "sku": {
+                        "type": "string",
+                        "example": "TSHIRT-BLACK-L"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "simple"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 29.99
+                    },
+                    "stock": {
+                        "type": "integer",
+                        "example": 42
+                    },
+                    "translations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProductTranslation"
+                        }
+                    },
+                    "categories": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Category"
+                        }
+                    },
+                    "images": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProductImage"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ProductListResponse": {
+                "properties": {
+                    "current_page": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "last_page": {
+                        "type": "integer",
+                        "example": 5
+                    },
+                    "per_page": {
+                        "type": "integer",
+                        "example": 20
+                    },
+                    "total": {
+                        "type": "integer",
+                        "example": 85
+                    },
+                    "data": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Product"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ProductDetailResponse": {
+                "type": "object",
+                "allOf": [
+                    {
+                        "$ref": "#/components/schemas/Product"
+                    }
+                ]
+            },
+            "ShippingMethod": {
+                "description": "Available shipping method",
+                "properties": {
+                    "id": {
+                        "description": "Shipping-related OpenAPI schemas.",
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Colissimo"
+                    },
+                    "carrier": {
+                        "type": "string",
+                        "example": "La Poste"
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 5.99
+                    },
+                    "estimated_days_min": {
+                        "type": "integer",
+                        "example": 2,
+                        "nullable": true
+                    },
+                    "estimated_days_max": {
+                        "type": "integer",
+                        "example": 3,
+                        "nullable": true
+                    },
+                    "enabled": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "ShippingMethodsResponse": {
+                "description": "List of available shipping methods",
+                "properties": {
+                    "methods": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ShippingMethod"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "TaxCalculationRequest": {
+                "description": "Tax calculation request",
+                "required": [
+                    "subtotal",
+                    "address"
+                ],
+                "properties": {
+                    "subtotal": {
+                        "description": "Cart subtotal",
+                        "type": "number",
+                        "format": "float",
+                        "example": 59.98
+                    },
+                    "shipping_cost": {
+                        "description": "Shipping cost",
+                        "type": "number",
+                        "format": "float",
+                        "example": 5,
+                        "nullable": true
+                    },
+                    "address": {
+                        "required": [
+                            "country"
+                        ],
+                        "properties": {
+                            "country": {
+                                "description": "Country code",
+                                "type": "string",
+                                "example": "FR"
+                            },
+                            "state": {
+                                "description": "State/province",
+                                "type": "string",
+                                "example": "Île-de-France",
+                                "nullable": true
+                            },
+                            "postal_code": {
+                                "description": "Postal code",
+                                "type": "string",
+                                "example": "75001",
+                                "nullable": true
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "TaxCalculationResponse": {
+                "description": "Tax calculation result",
+                "properties": {
+                    "tax_total": {
+                        "description": "Total tax amount",
+                        "type": "number",
+                        "format": "float",
+                        "example": 11.99
+                    },
+                    "tax_rate": {
+                        "description": "Applied tax rate percentage",
+                        "type": "number",
+                        "format": "float",
+                        "example": 20
+                    },
+                    "tax_zone": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "France"
+                            },
+                            "code": {
+                                "type": "string",
+                                "example": "FR"
+                            }
+                        },
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "breakdown": {
+                        "description": "Tax breakdown by component",
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "name": {
+                                    "type": "string",
+                                    "example": "TVA"
+                                },
+                                "rate": {
+                                    "type": "number",
+                                    "format": "float",
+                                    "example": 20
+                                },
+                                "amount": {
+                                    "type": "number",
+                                    "format": "float",
+                                    "example": 11.99
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ThemeSettingsResponse": {
+                "description": "Active theme settings and customization",
+                "properties": {
+                    "settings": {
+                        "description": "Theme settings object",
+                        "type": "object",
+                        "example": {
+                            "primary_color": "#3B82F6",
+                            "font_family": "Inter"
+                        }
+                    },
+                    "settings_schema": {
+                        "description": "Theme settings schema definition",
+                        "type": "object",
+                        "nullable": true
+                    },
+                    "css_variables": {
+                        "description": "CSS variables for theme customization",
+                        "type": "object",
+                        "example": {
+                            "--color-primary": "#3B82F6",
+                            "--font-body": "Inter"
+                        }
+                    },
+                    "component_path": {
+                        "description": "Theme component directory",
+                        "type": "string",
+                        "example": "vision"
+                    },
+                    "theme_slug": {
+                        "description": "Active theme slug",
+                        "type": "string",
+                        "example": "vision"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "api.key": {
+                "type": "apiKey",
+                "description": "Frontend API Key (required for all requests)",
+                "name": "X-API-KEY",
+                "in": "header"
+            },
+            "sanctum": {
+                "type": "http",
+                "description": "Laravel Sanctum token authentication",
+                "scheme": "bearer",
+                "bearerFormat": "Token"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Pages",
+            "description": "Endpoints liés aux pages CMS"
+        },
+        {
+            "name": "Produits",
+            "description": "Endpoints liés aux produits du catalogue"
+        },
+        {
+            "name": "Catégories",
+            "description": "Endpoints liés aux catégories de produits"
+        },
+        {
+            "name": "Menus",
+            "description": "Endpoints liés aux menus de navigation"
+        },
+        {
+            "name": "Panier",
+            "description": "Endpoints pour la gestion du panier"
+        },
+        {
+            "name": "Commandes",
+            "description": "Endpoints pour la gestion des commandes"
+        },
+        {
+            "name": "Authentification",
+            "description": "Endpoints d'authentification et gestion de compte"
+        },
+        {
+            "name": "Adresses",
+            "description": "Endpoints pour la gestion des adresses client"
+        },
+        {
+            "name": "Paiement",
+            "description": "Endpoints liés aux méthodes de paiement"
+        },
+        {
+            "name": "Livraison",
+            "description": "Endpoints liés aux méthodes de livraison"
+        },
+        {
+            "name": "Recherche",
+            "description": "Endpoints de recherche de produits"
+        },
+        {
+            "name": "Compte",
+            "description": "Endpoints de gestion du compte client"
+        },
+        {
+            "name": "Taxes",
+            "description": "Endpoints de calcul des taxes"
+        },
+        {
+            "name": "Thème",
+            "description": "Endpoints liés à la personnalisation du thème"
+        },
+        {
+            "name": "Pages E-commerce",
+            "description": "Pages E-commerce"
+        },
+        {
+            "name": "Shop",
+            "description": "Shop"
+        }
+    ],
+    "security": [
+        {
+            "api.key": []
+        }
+    ]
+}

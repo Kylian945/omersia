@@ -1,0 +1,16 @@
+{
+  "name": "omersia/core",
+  "autoload": {
+    "psr-4": {
+      "Omersia\\Core\\": "src/",
+      "Omersia\\Core\\Database\\Factories\\": "database/factories/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Omersia\\Core\\CoreServiceProvider"
+      ]
+    }
+  }
+}

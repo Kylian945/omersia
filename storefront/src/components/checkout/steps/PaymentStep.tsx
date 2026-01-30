@@ -1,0 +1,210 @@
+"use client";
+
+import { StripePaymentForm } from "../components/StripePaymentForm";
+import { useEffect, useState } from "react";
+import { useCheckoutContext } from "../CheckoutContext";
+import { useCart } from "@/components/cart/CartContext";
+import { Loader2 } from "lucide-react";
+import type { PaymentMethod } from "@/lib/types/checkout-types";
+import { ModuleHooks } from "@/components/modules/ModuleHooks";
+
+type PaymentMethodCode = "card" | "paypal" | "applepay" | null;
+
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  stripe: "Carte bancaire (Visa, Mastercard)",
+  paypal: "PayPal",
+  applepay: "Apple Pay / Google Pay",
+};
+
+const PAYMENT_METHOD_CODE_MAP: Record<string, PaymentMethodCode> = {
+  stripe: "card",
+  paypal: "paypal",
+  applepay: "applepay",
+};
+
+export function PaymentStep() {
+  const {
+    paymentMethod,
+    setPaymentMethod,
+    orderId,
+    orderNumber,
+    shippingCostBase,
+    taxTotal,
+    appliedPromos,
+    automaticDiscountTotal,
+  } = useCheckoutContext();
+  const { subtotal } = useCart();
+  const [availableMethods, setAvailableMethods] = useState<PaymentMethod[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Calculer les réductions
+  const promoDiscount = appliedPromos
+    .filter((p) => p.type === "order" || p.type === "product")
+    .reduce((sum, p) => sum + (p.discountAmount || 0), 0);
+
+  const shippingDiscountTotal = appliedPromos
+    .filter((p) => p.freeShipping || (p.shippingDiscountAmount ?? 0) > 0)
+    .reduce((sum, p) => sum + (p.shippingDiscountAmount ?? 0), 0);
+
+  const finalShippingCost = Math.max(0, shippingCostBase - shippingDiscountTotal);
+  // Note: subtotal est déjà TTC (taxes comprises), donc on n'ajoute PAS taxTotal
+  const total = subtotal - promoDiscount - automaticDiscountTotal + finalShippingCost;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPaymentMethods() {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const res = await fetch("/api/payment-methods", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Accept: "application/json",
+          },
+        });
+
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok || !data || data.ok === false) {
+          throw new Error(
+            data?.error || data?.message || "Impossible de charger les moyens de paiement."
+          );
+        }
+
+        if (!cancelled) {
+          const methods: PaymentMethod[] = data.data || [];
+          setAvailableMethods(methods);
+
+          // Sélectionner automatiquement le premier moyen de paiement disponible
+          if (!paymentMethod && methods.length > 0) {
+            const firstMethodCode = PAYMENT_METHOD_CODE_MAP[methods[0].code];
+            if (firstMethodCode) {
+              setPaymentMethod(firstMethodCode);
+            }
+          }
+        }
+      } catch (err: unknown) {
+        console.error(err);
+        if (!cancelled) {
+          const errorMessage = err instanceof Error ? err.message : "Erreur lors du chargement des moyens de paiement.";
+          setError(errorMessage);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadPaymentMethods();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [paymentMethod, setPaymentMethod]);
+
+  return (
+    <div className="space-y-3">
+      <h2 className="text-sm font-semibold text-neutral-900">
+        4. Paiement sécurisé
+      </h2>
+      <p className="text-xs text-neutral-500">
+        Sélectionnez votre mode de paiement. Les formulaires se connectent à
+        vos providers (Stripe, PayPal, Mollie…).
+      </p>
+
+      {loading && (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="w-6 h-6 text-neutral-400 animate-spin" />
+        </div>
+      )}
+
+      {error && (
+        <p className="text-xs text-red-600">
+          {error}
+        </p>
+      )}
+
+      {!loading && !error && availableMethods.length === 0 && (
+        <p className="text-xs text-neutral-500">
+          Aucun moyen de paiement disponible pour le moment.
+        </p>
+      )}
+
+      {!loading && !error && availableMethods.length > 0 && (
+        <div className="space-y-2 text-xs">
+          {availableMethods.map((method) => {
+            const methodCode = PAYMENT_METHOD_CODE_MAP[method.code];
+            if (!methodCode) return null;
+
+            return (
+              <button
+                key={method.id}
+                type="button"
+                onClick={() => setPaymentMethod(methodCode)}
+                className={`w-full px-3 py-2 rounded-xl border text-left transition ${paymentMethod === methodCode
+                    ? "border-black bg-gray-50"
+                    : "border-neutral-200 bg-white hover:bg-neutral-50"
+                  }`}
+              >
+                {PAYMENT_METHOD_LABELS[method.code] || method.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Hook: checkout.payment.methods - Permet d'ajouter des méthodes de paiement personnalisées */}
+      <ModuleHooks
+        hookName="checkout.payment.methods"
+        context={{
+          paymentMethod,
+          orderId,
+          orderNumber,
+          total,
+        }}
+      />
+
+      {/* Zone des formulaires de paiement */}
+      <div className="mt-3">
+        {paymentMethod === "card" && (
+          <>
+            {!orderId && (
+              <p className="text-xs text-neutral-500 flex gap-2 items-center">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Initialisation du paiement en cours…
+              </p>
+            )}
+
+            {orderId && (
+              <StripePaymentForm
+                orderId={orderId}
+                orderNumber={orderNumber}
+                total={total}
+              />
+            )}
+          </>
+        )}
+
+        {paymentMethod === "paypal" && (
+          <p className="text-xs text-neutral-500">
+            Intégration PayPal à implémenter ici (module). La commande est déjà
+            créée, vous pourrez appeler votre endpoint PayPal avec l&apos;ID de
+            commande.
+          </p>
+        )}
+
+        {paymentMethod === "applepay" && (
+          <p className="text-xs text-neutral-500">
+            Intégration Apple Pay / Google Pay (via Stripe ou autre provider)
+            à implémenter ici.
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}

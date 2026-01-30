@@ -1,0 +1,18 @@
+{
+  "name": "omersia/api",
+  "autoload": {
+    "psr-4": {
+      "Omersia\\Api\\": "src/"
+    },
+    "files": [
+      "src/OpenApi/OpenApiSpecs.php"
+    ]
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Omersia\\Api\\ApiServiceProvider"
+      ]
+    }
+  }
+}

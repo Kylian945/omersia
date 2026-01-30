@@ -1,0 +1,22 @@
+{
+    "name": "omersia/sales",
+    "description": "Sales and discounts management package for Omersia",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Omersia\\Sales\\": "src/",
+            "Omersia\\Sales\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Omersia\\Sales\\SalesServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^10.0"
+    }
+}

@@ -1,0 +1,134 @@
+# ========================================
+# ENVIRONNEMENT PRODUCTION
+# Tout dans Docker (MySQL + Backend + Storefront + Meilisearch + Redis)
+# Usage: docker compose -f docker-compose.prod.yml up -d
+# ========================================
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: omersia_mysql_prod
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-change_this_root_password}
+      MYSQL_DATABASE: ${DB_DATABASE:-omersia_prod}
+      MYSQL_USER: ${DB_USERNAME:-omersia_prod}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-change_this_password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - omersia_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${DB_USERNAME:-omersia_prod}", "-p${DB_PASSWORD:-change_this_password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (Cache, Session, Queue)
+  redis:
+    image: redis:7-alpine
+    container_name: omersia_redis_prod
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    networks:
+      - omersia_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Meilisearch
+  meilisearch:
+    image: getmeili/meilisearch:v1.5
+    container_name: omersia_meilisearch_prod
+    environment:
+      - MEILI_ENV=production
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-change_this_meilisearch_key}
+      - MEILI_NO_ANALYTICS=true
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - omersia_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--spider", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Laravel Backend (PHP-FPM)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: omersia_backend_prod
+    volumes:
+      - backend_storage:/var/www/html/storage
+      - backend_bootstrap_cache:/var/www/html/bootstrap/cache
+    env_file:
+      - ./backend/.env.prod
+    networks:
+      - omersia_network
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Next.js Storefront
+  storefront:
+    build:
+      context: ./storefront
+      dockerfile: Dockerfile
+    container_name: omersia_storefront_prod
+    env_file:
+      - ./storefront/.env.prod
+    networks:
+      - omersia_network
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: omersia_nginx_prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - backend_storage:/var/www/html/storage:ro
+      # Décommenter pour SSL/TLS
+      # - ./ssl/cert.pem:/etc/nginx/ssl/cert.pem:ro
+      # - ./ssl/key.pem:/etc/nginx/ssl/key.pem:ro
+    depends_on:
+      backend:
+        condition: service_started
+      storefront:
+        condition: service_started
+      meilisearch:
+        condition: service_healthy
+    networks:
+      - omersia_network
+    restart: unless-stopped
+
+networks:
+  omersia_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
+  meilisearch_data:
+  backend_storage:
+  backend_bootstrap_cache:

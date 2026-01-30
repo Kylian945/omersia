@@ -1,0 +1,22 @@
+@import './quill.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+input[type="checkbox"],
+input[type="checkbox"]:hover,
+input[type="checkbox"]:focus,
+input[type="radio"],
+input[type="radio"]:hover,
+input[type="radio"]:focus {
+    @apply appearance-none h-3.5 w-3.5 border border-neutral-400 rounded-sm 
+           checked:bg-black checked:border-black cursor-pointer;
+}
+
+input[type="radio"],
+input[type="radio"]:hover,
+input[type="radio"]:focus {
+    @apply rounded-full;
+}
+

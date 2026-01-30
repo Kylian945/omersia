@@ -1,0 +1,148 @@
+# ========================================
+# ENVIRONNEMENT LOCAL
+# Tout en Docker : MySQL, Meilisearch, Backend, Storefront, Mailpit
+# Usage: docker compose up -d
+# ========================================
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: omersia-mysql
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-omersia}
+      MYSQL_USER: ${DB_USERNAME:-omersia}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-secret}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - omersia_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Meilisearch
+  meilisearch:
+    image: getmeili/meilisearch:v1.5
+    container_name: omersia-meilisearch
+    environment:
+      - MEILI_ENV=development
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-masterKey}
+      - MEILI_NO_ANALYTICS=true
+    volumes:
+      - meilisearch_data:/meili_data
+    networks:
+      - omersia_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # Mailpit (Email testing)
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: omersia-mailpit
+    ports:
+      - "8025:8025" # Interface web
+      - "1025:1025" # SMTP server
+    networks:
+      - omersia_network
+    restart: unless-stopped
+
+  # Laravel Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: omersia-backend
+    ports:
+      - "5173:5173" # Vite dev server
+    volumes:
+      - ./backend:/var/www/html
+      - /var/www/html/vendor
+      - ./storefront:/var/www/storefront
+    environment:
+      - APP_ENV=${APP_ENV:-local}
+      - APP_DEBUG=${APP_DEBUG:-true}
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-omersia}
+      - DB_USERNAME=${DB_USERNAME:-omersia}
+      - DB_PASSWORD=${DB_PASSWORD:-secret}
+      - MEILISEARCH_HOST=http://meilisearch:7700
+      - MEILISEARCH_KEY=${MEILI_MASTER_KEY:-masterKey}
+      - MAIL_HOST=mailpit
+      - FRONT_API_KEY=${FRONT_API_KEY:-dev_api_key_change_in_production}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+      mailpit:
+        condition: service_started
+    networks:
+      - omersia_network
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: sh /var/www/html/docker-entrypoint-dev.sh
+
+  # Next.js Storefront
+  storefront:
+    build:
+      context: ./storefront
+      dockerfile: Dockerfile.dev
+    container_name: omersia-storefront
+    volumes:
+      - ./storefront:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - NEXT_PUBLIC_API_URL=http://localhost:8000/api/v1
+      - API_INTERNAL_URL=http://backend:8001/api/v1
+      - NEXT_INTERNAL_URL=http://storefront:3000
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+      - NEXT_PUBLIC_FRONTEND_URL=http://localhost:8000
+      - FRONT_API_KEY=${FRONT_API_KEY:-dev_api_key_change_in_production}
+    networks:
+      - omersia_network
+    restart: unless-stopped
+    command: sh -lc "npm install && npm run dev"
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: omersia-nginx
+    ports:
+      - "8000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      backend:
+        condition: service_started
+      storefront:
+        condition: service_started
+      meilisearch:
+        condition: service_healthy
+    networks:
+      - omersia_network
+    restart: unless-stopped
+
+networks:
+  omersia_network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  meilisearch_data:
