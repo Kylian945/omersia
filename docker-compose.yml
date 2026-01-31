@@ -132,6 +132,9 @@ services:
       NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
       NEXT_PUBLIC_FRONTEND_URL: http://localhost:8000
       FRONT_API_KEY: ${FRONT_API_KEY}
+    depends_on:
+      backend:
+        condition: service_started
     networks:
       - omersia_network
     restart: unless-stopped
