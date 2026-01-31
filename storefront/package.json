@@ -25,7 +25,7 @@
     "test:report": "node scripts/test-report.js"
   },
   "dependencies": {
-    "@stripe/react-stripe-js": "^5.4.0",
+    "@stripe/react-stripe-js": "^5.6.0",
     "@stripe/stripe-js": "^8.5.2",
     "embla-carousel-autoplay": "^8.6.0",
     "embla-carousel-react": "^8.6.0",
