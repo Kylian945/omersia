@@ -1,5 +1,6 @@
 {
     "name": "omersia/customer",
+    "version": "1.0.0",
     "description": "Customer management package for Omersia",
     "type": "library",
     "autoload": {

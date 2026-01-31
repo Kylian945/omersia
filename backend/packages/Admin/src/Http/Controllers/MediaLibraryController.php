@@ -66,7 +66,7 @@ class MediaLibraryController extends Controller
             finfo_close($finfo);
 
             // Vérifier que le MIME type détecté est autorisé
-            if (!in_array($detectedMimeType, $allowedMimeTypes, true)) {
+            if (! in_array($detectedMimeType, $allowedMimeTypes, true)) {
                 if ($request->expectsJson()) {
                     return response()->json([
                         'success' => false,

@@ -1,5 +1,6 @@
 {
   "name": "omersia/shared",
+  "version": "1.0.0",
   "description": "Shared ValueObjects and common utilities for Omersia",
   "type": "library",
   "autoload": {
