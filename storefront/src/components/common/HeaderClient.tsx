@@ -41,10 +41,13 @@ export function HeaderClient({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   const { items, openCart } = useCart();
   const { user, isAuthenticated } = useAuth();
-  const cartCount = items.reduce((sum, item) => sum + item.qty, 0);
+  const cartCount = mounted ? items.reduce((sum, item) => sum + item.qty, 0) : 0;
+
+  useEffect(() => { setMounted(true); }, []);
 
   const navItems: MenuItem[] =
     menu?.items?.filter(
