@@ -1,6 +1,5 @@
 {
   "name": "omersia/core",
-  "version": "1.0.0",
   "autoload": {
     "psr-4": {
       "Omersia\\Core\\": "src/",

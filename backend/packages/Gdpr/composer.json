@@ -1,6 +1,5 @@
 {
     "name": "omersia/gdpr",
-    "version": "1.0.0",
     "description": "GDPR compliance package for Omersia - Cookie consent, DSAR, and data deletion",
     "type": "library",
     "require": {

@@ -1,6 +1,5 @@
 {
   "name": "omersia/payment",
-  "version": "1.0.0",
   "description": "Payment management package for Omersia",
   "type": "library",
   "autoload": {

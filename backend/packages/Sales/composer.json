@@ -1,6 +1,5 @@
 {
     "name": "omersia/sales",
-    "version": "1.0.0",
     "description": "Sales and discounts management package for Omersia",
     "type": "library",
     "autoload": {

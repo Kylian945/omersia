@@ -7,8 +7,8 @@ require('@testing-library/jest-dom')
 // afterEach(() => server.resetHandlers())
 // afterAll(() => server.close())
 
-// Mock HTMLFormElement.prototype.requestSubmit (not implemented in jsdom)
-if (typeof HTMLFormElement !== 'undefined' && typeof HTMLFormElement.prototype.requestSubmit === 'undefined') {
+// Polyfill HTMLFormElement.prototype.requestSubmit (jsdom defines it but throws "not implemented")
+if (typeof HTMLFormElement !== 'undefined') {
   HTMLFormElement.prototype.requestSubmit = function (submitter) {
     if (submitter) {
       if (submitter.getAttribute('type') !== 'submit') {

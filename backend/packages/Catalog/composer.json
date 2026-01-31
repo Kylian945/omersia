@@ -1,6 +1,5 @@
 {
   "name": "omersia/catalog",
-  "version": "1.0.0",
   "autoload": {
     "psr-4": {
       "Omersia\\Catalog\\": "src/",
