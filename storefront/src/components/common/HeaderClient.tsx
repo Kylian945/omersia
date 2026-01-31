@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Container } from "./Container";
@@ -135,10 +136,13 @@ export function HeaderClient({
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
                   {shopInfo.logo_url ? (
-                    <img
+                    <Image
                       src={shopInfo.logo_url}
                       alt={shopInfo.display_name}
+                      width={120}
+                      height={32}
                       className="h-8 w-auto object-contain"
+                      priority
                     />
                   ) : (
                     <div className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center font-bold">
@@ -293,7 +297,7 @@ export function HeaderClient({
           );
           if (!activeItem) return null;
 
-          const level2 = activeItem.category!.children!;
+          const level2 = activeItem.category?.children ?? [];
 
           return (
             <div className="left-0 right-0 top-full border-b border-black/5 shadow-sm animate-fade-in">

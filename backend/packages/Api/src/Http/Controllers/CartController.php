@@ -258,7 +258,7 @@ class CartController extends Controller
             $customer = Customer::where('id', $validated['email'])->first();
         }
 
-        $shopId = 1;
+        $shopId = session('shop_id', 1);
         $code = strtoupper(trim($validated['code']));
 
         // 1) Trouver une réduction code promo active
@@ -378,7 +378,7 @@ class CartController extends Controller
             $customer = Customer::where('id', $validated['email'])->first();
         }
 
-        $shopId = 1;
+        $shopId = session('shop_id', 1);
 
         // 2) Convertir les items en DTOs et calculer sous-total
         $itemDTOs = [];

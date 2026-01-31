@@ -65,7 +65,7 @@ class SearchController extends Controller
     {
         $query = $request->get('q', '');
         $locale = $request->get('locale', 'fr');
-        $limit = (int) $request->get('limit', 20);
+        $limit = min((int) $request->get('limit', 24), 100);
 
         // Filtres
         $categoryIdsParam = $request->get('categories', '');

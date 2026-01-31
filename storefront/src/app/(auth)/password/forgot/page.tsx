@@ -3,6 +3,7 @@ import { Container } from "@/components/common/Container";
 import { HeaderAuth } from "@/components/common/HeaderAuth";
 import { Button } from "@/components/common/Button";
 import { getShopInfo } from "@/lib/api-shop";
+import { safeDecodeURIComponent } from "@/lib/utils/error-utils";
 
 type ForgotPasswordPageSearchParams = {
   success?: string;
@@ -17,8 +18,8 @@ export default async function ForgotPasswordPage({
   searchParams
 }: ForgotPasswordPageProps) {
   const params = await searchParams;
-  const success = params?.success ? decodeURIComponent(params.success) : null;
-  const error = params?.error ? decodeURIComponent(params.error) : null;
+  const success = params?.success ? safeDecodeURIComponent(params.success) : null;
+  const error = params?.error ? safeDecodeURIComponent(params.error) : null;
   const shopInfo = await getShopInfo();
 
   return (

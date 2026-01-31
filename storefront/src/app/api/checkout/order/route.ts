@@ -30,6 +30,7 @@ type FrontCheckoutPayload = {
 };
 
 export async function POST(req: Request) {
+  try {
   const cookieStore = await cookies();
   const token = cookieStore.get("auth_token")?.value;
 
@@ -168,4 +169,11 @@ export async function POST(req: Request) {
     },
     { status: 201 }
   );
+  } catch (error) {
+    console.error('Checkout order error:', error);
+    return NextResponse.json(
+      { message: 'An error occurred while processing your order' },
+      { status: 500 }
+    );
+  }
 }

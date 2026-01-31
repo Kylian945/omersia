@@ -4,6 +4,7 @@ import { Container } from "@/components/common/Container";
 import { HeaderAuth } from "@/components/common/HeaderAuth";
 import { Button } from "@/components/common/Button";
 import { getShopInfo } from "@/lib/api-shop";
+import { safeDecodeURIComponent } from "@/lib/utils/error-utils";
 
 type RegisterPageSearchParams = {
   error?: string;
@@ -15,7 +16,7 @@ type RegisterPageProps = {
 
 export default async function RegisterPage({ searchParams }: RegisterPageProps) {
   const params = await searchParams;
-  const error = params?.error ? decodeURIComponent(params.error) : null;
+  const error = params?.error ? safeDecodeURIComponent(params.error) : null;
   const shopInfo = await getShopInfo();
 
   return (

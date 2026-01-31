@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { safeDecodeURIComponent } from "@/lib/utils/error-utils";
 
 const BACKEND_URL = process.env.API_INTERNAL_URL?.replace('/api/v1', '') || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const API_KEY = process.env.FRONT_API_KEY;
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "X-API-KEY": API_KEY || "",
-        Authorization: `Bearer ${decodeURIComponent(authToken.value)}`,
+        Authorization: `Bearer ${safeDecodeURIComponent(authToken.value)}`,
         ...(sessionCookie && {
           Cookie: `${sessionCookie.name}=${sessionCookie.value}`,
         }),
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
         "Content-Type": "application/json",
         "Accept": "application/json",
         "X-API-KEY": API_KEY || "",
-        Authorization: `Bearer ${decodeURIComponent(authToken.value)}`,
+        Authorization: `Bearer ${safeDecodeURIComponent(authToken.value)}`,
         ...(sessionCookie && {
           Cookie: `${sessionCookie.name}=${sessionCookie.value}`,
         }),

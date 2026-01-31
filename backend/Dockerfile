@@ -28,10 +28,15 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader --no-interaction
 
 # Set permissions
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 /var/www/html && \
+    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
 
 # Create storage link
 RUN php artisan storage:link || true
+
+# Switch to non-root user
+USER www-data
 
 # Expose port 9000 for PHP-FPM
 EXPOSE 9000

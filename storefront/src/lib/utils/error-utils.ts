@@ -34,3 +34,14 @@ export function toError(error: unknown): Error {
   }
   return new Error(getErrorMessage(error));
 }
+
+/**
+ * Safely decode a URI component without throwing on malformed input
+ */
+export function safeDecodeURIComponent(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}

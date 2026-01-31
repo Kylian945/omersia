@@ -4,12 +4,13 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/common/Button";
+import { safeDecodeURIComponent } from "@/lib/utils/error-utils";
 
 export function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const error = searchParams.get("error") ? decodeURIComponent(searchParams.get("error")!) : null;
-  const success = searchParams.get("success") ? decodeURIComponent(searchParams.get("success")!) : null;
+  const error = searchParams.get("error") ? safeDecodeURIComponent(searchParams.get("error")!) : null;
+  const success = searchParams.get("success") ? safeDecodeURIComponent(searchParams.get("success")!) : null;
 
   // Dispatch auth:changed event when returning from successful login
   useEffect(() => {

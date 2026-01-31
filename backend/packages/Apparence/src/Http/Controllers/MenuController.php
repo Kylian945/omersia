@@ -69,7 +69,9 @@ class MenuController extends Controller
         $menus = Menu::orderBy('location')->orderBy('name')->get();
 
         $menuItems = $menu->items()
-            ->with('category')
+            ->with(['category.translations' => function ($q) {
+                $q->where('locale', 'fr');
+            }])
             ->orderBy('position')
             ->orderBy('id')
             ->paginate(25);

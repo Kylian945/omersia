@@ -25,6 +25,11 @@ class ValidateApiKey
             return response()->json(['message' => 'Invalid API key'], 401);
         }
 
+        // Multi-shop isolation: si l'API key est liée à un shop, vérifier la correspondance
+        if ($apiKey->shop_id && $apiKey->shop_id !== (int) session('shop_id', 1)) {
+            return response()->json(['message' => 'API key not valid for this shop'], 401);
+        }
+
         // Vérifier l'expiration
         if ($apiKey->expires_at && $apiKey->expires_at->isPast()) {
             return response()->json(['error' => 'API key expired'], 401);

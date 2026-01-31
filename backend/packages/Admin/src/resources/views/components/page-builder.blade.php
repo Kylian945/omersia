@@ -9,7 +9,7 @@
 @endphp
 
 <div
-    x-data='pageBuilder({!! $initial !!})'
+    x-data='pageBuilder(@json($initial))'
     x-init="sync()"
     class="space-y-4"
 >

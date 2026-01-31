@@ -98,6 +98,16 @@ class OrderPriceValidationService
                     );
                 }
                 $realPrice = $variant->price;
+
+                // Vérifier le stock disponible
+                if ($variant->manage_stock && $variant->stock_qty < $quantity) {
+                    throw new PriceTamperingException(
+                        field: 'items.stock',
+                        submitted: $quantity,
+                        expected: $variant->stock_qty,
+                        message: "Insufficient stock for variant {$variantId}. Available: {$variant->stock_qty}, Requested: {$quantity}"
+                    );
+                }
             } elseif ($productId) {
                 $product = Product::find($productId);
                 if (! $product) {
@@ -109,6 +119,16 @@ class OrderPriceValidationService
                     );
                 }
                 $realPrice = $product->price;
+
+                // Vérifier le stock disponible
+                if ($product->manage_stock && $product->stock_qty < $quantity) {
+                    throw new PriceTamperingException(
+                        field: 'items.stock',
+                        submitted: $quantity,
+                        expected: $product->stock_qty,
+                        message: "Insufficient stock for product {$productId}. Available: {$product->stock_qty}, Requested: {$quantity}"
+                    );
+                }
             } else {
                 throw new PriceTamperingException(
                     field: 'items',

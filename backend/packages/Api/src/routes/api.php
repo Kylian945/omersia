@@ -51,9 +51,11 @@ Route::middleware('api.key')->group(function () {
         Route::get('/me', [AuthController::class, 'me'])
             ->middleware('auth:sanctum');
 
-        // Password reset
-        Route::post('/password/forgot', [AuthController::class, 'forgotPassword']);
-        Route::post('/password/reset', [AuthController::class, 'resetPassword']);
+        // Password reset (stricter rate limiting)
+        Route::post('/password/forgot', [AuthController::class, 'forgotPassword'])
+            ->middleware('throttle:password-reset');
+        Route::post('/password/reset', [AuthController::class, 'resetPassword'])
+            ->middleware('throttle:password-reset');
     });
 
     /*

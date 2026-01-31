@@ -5,6 +5,7 @@ import { HeaderAuth } from "@/components/common/HeaderAuth";
 import { Button } from "@/components/common/Button";
 import { getShopInfo } from "@/lib/api-shop";
 import { redirect } from "next/navigation";
+import { safeDecodeURIComponent } from "@/lib/utils/error-utils";
 
 type ResetPasswordPageSearchParams = {
   token?: string;
@@ -22,7 +23,7 @@ export default async function ResetPasswordPage({
   const params = await searchParams;
   const token = params?.token;
   const email = params?.email;
-  const error = params?.error ? decodeURIComponent(params.error) : null;
+  const error = params?.error ? safeDecodeURIComponent(params.error) : null;
   const shopInfo = await getShopInfo();
 
   // Si pas de token ou d'email, rediriger vers la page de demande

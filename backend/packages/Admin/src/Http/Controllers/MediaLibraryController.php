@@ -41,7 +41,7 @@ class MediaLibraryController extends Controller
 
         $request->validate([
             'images' => 'required|array',
-            'images.*' => 'required|image|max:10240',
+            'images.*' => 'required|file|mimes:jpg,jpeg,png,gif,webp,svg,pdf|max:10240',
             'folder_id' => 'nullable|exists:media_folders,id',
         ]);
 

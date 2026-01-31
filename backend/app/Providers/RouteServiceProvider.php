@@ -41,6 +41,11 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(30)->by($request->ip());
         });
 
+        // Rate limit strict pour reset password
+        RateLimiter::for('password-reset', function (Request $request) {
+            return Limit::perHour(5)->by($request->ip());
+        });
+
         // Rate limit pour les webhooks
         RateLimiter::for('webhooks', function (Request $request) {
             return Limit::perMinute(100)->by($request->ip());
