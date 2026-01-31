@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cbf209ec46b0bafe7ca21ca10c7ab66a",
+    "content-hash": "f91c459b81bab3fb8645edb0ebebd15c",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -10386,19 +10386,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "omersia/admin": 20,
-        "omersia/api": 20,
-        "omersia/apparence": 20,
-        "omersia/catalog": 20,
-        "omersia/cms": 20,
-        "omersia/core": 20,
-        "omersia/customer": 20,
-        "omersia/gdpr": 20,
-        "omersia/payment": 20,
-        "omersia/sales": 20,
-        "omersia/shared": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
