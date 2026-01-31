@@ -1,5 +1,6 @@
 import { getThemeSettings } from '@/lib/api-theme';
 import { validateCSSVariables } from '@/lib/css-variable-sanitizer';
+import { logger } from '@/lib/logger';
 
 /**
  * Server-side component that injects dynamic theme CSS variables
@@ -45,7 +46,7 @@ export async function ThemeProvider() {
       </>
     );
   } catch (error) {
-    console.error('Failed to load theme settings:', error);
+    logger.error('Failed to load theme settings:', error);
     // Return null or default styles on error
     return null;
   }

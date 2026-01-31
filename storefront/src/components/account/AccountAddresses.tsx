@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PenIcon, Trash2 } from "lucide-react";
 import type { Address } from "@/lib/api";
 import { Button } from "@/components/common/Button";
+import { logger } from "@/lib/logger";
 
 type Props = {
   initialAddresses: Address[];
@@ -159,7 +160,7 @@ export function AccountAddresses({ initialAddresses }: Props) {
 
       setIsModalOpen(false);
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       setErrorMsg("Erreur réseau lors de l’envoi du formulaire.");
     } finally {
       setLoading(false);
@@ -208,7 +209,7 @@ export function AccountAddresses({ initialAddresses }: Props) {
       setAddresses((prev) => prev.filter((a) => a.id !== addressToDelete.id));
       closeDeleteModal();
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       setDeleteError("Erreur réseau lors de la suppression.");
     } finally {
       setLoading(false);
@@ -240,7 +241,7 @@ export function AccountAddresses({ initialAddresses }: Props) {
         }))
       );
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       alert("Erreur réseau.");
     } finally {
       setLoading(false);
@@ -274,7 +275,7 @@ export function AccountAddresses({ initialAddresses }: Props) {
         }))
       );
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       alert("Erreur réseau.");
     } finally {
       setLoading(false);

@@ -1,4 +1,5 @@
 import { getThemeSettings } from './api-theme';
+import { logger } from './logger';
 
 /**
  * Get theme widgets dynamically based on the active theme
@@ -15,7 +16,7 @@ export async function getThemeWidgets() {
   } catch (error) {
     // If the active theme doesn't have widgets, fallback to vision
     if (themeSlug !== 'vision') {
-      console.warn(
+      logger.warn(
         `Widgets not found in theme '${themeSlug}', falling back to vision theme`
       );
       const widgets = await import('@/components/themes/vision/widgets');
@@ -23,7 +24,7 @@ export async function getThemeWidgets() {
     }
 
     // If even vision doesn't have widgets, throw the error
-    console.error('Widgets not found in vision theme. This should not happen.');
+    logger.error('Widgets not found in vision theme. This should not happen.');
     throw error;
   }
 }

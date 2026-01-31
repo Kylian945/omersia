@@ -8,6 +8,7 @@ import { useCheckoutState } from "./hooks/useCheckoutState";
 import { useCheckoutAddresses } from "./hooks/useCheckoutAddresses";
 import { useCart } from "@/components/cart/CartContext";
 import { getErrorMessage } from "@/lib/utils/error-utils";
+import { logger } from "@/lib/logger";
 
 type CheckoutProviderProps = {
   initialUser: AuthUser | null;
@@ -333,7 +334,7 @@ export function CheckoutProvider({
 
       if (!res.ok) {
         // Erreur silencieuse pour les réductions automatiques
-        console.error("Échec du chargement des réductions automatiques");
+        logger.error("Échec du chargement des réductions automatiques");
         return;
       }
 
@@ -381,7 +382,7 @@ export function CheckoutProvider({
       state.setAutomaticDiscountTotal(totalAutoDiscount);
     } catch (err: unknown) {
       // Erreur silencieuse - les réductions automatiques ne doivent pas bloquer le checkout
-      console.error("Erreur lors du chargement des réductions automatiques:", err);
+      logger.error("Erreur lors du chargement des réductions automatiques:", err);
     }
   };
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { apiJson } from "@/lib/api-http";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
 
 export async function GET(_req: NextRequest) {
   const authToken = (await cookies()).get("auth_token")?.value;
@@ -31,7 +32,7 @@ export async function GET(_req: NextRequest) {
 
     return NextResponse.json(data, { status: 200 });
   } catch (err) {
-    console.error("Error calling backend /payment-methods:", err);
+    logger.error("Error calling backend /payment-methods:", err);
 
     return NextResponse.json(
       {

@@ -9,6 +9,7 @@ import {
   useElements,
 } from "@stripe/react-stripe-js";
 import { Button } from "@/components/common/Button";
+import { logger } from "@/lib/logger";
 
 const stripePromise = loadStripe(
   process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
@@ -75,7 +76,7 @@ export function StripePaymentForm({ orderId, orderNumber, total }: StripePayment
           setClientSecret(cs);
         }
       } catch (e: unknown) {
-        console.error("StripePaymentForm error", e);
+        logger.error("StripePaymentForm error", e);
         if (!cancelled) {
           const message = e instanceof Error ? e.message : "Erreur lors de l'initialisation du paiement.";
           setError(message);

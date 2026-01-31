@@ -20,8 +20,18 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Create non-root user and group
+RUN addgroup -g 1001 www && \
+    adduser -D -u 1001 -G www www
+
 # Set working directory
 WORKDIR /var/www/html
+
+# Change ownership to non-root user
+RUN chown -R www:www /var/www/html
+
+# Switch to non-root user
+USER www
 
 # Note: .env is provided via volume mount at runtime
 

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { safeDecodeURIComponent } from "@/lib/utils/error-utils";
+import { logger } from "@/lib/logger";
 
 const BACKEND_URL = process.env.API_INTERNAL_URL?.replace('/api/v1', '') || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const API_KEY = process.env.FRONT_API_KEY;
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     const data = await res.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Error fetching data requests:", error);
+    logger.error("Error fetching data requests:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
@@ -86,7 +87,7 @@ export async function POST(request: NextRequest) {
     const data = await res.json();
     return NextResponse.json(data, { status: 201 });
   } catch (error) {
-    console.error("Error creating data request:", error);
+    logger.error("Error creating data request:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

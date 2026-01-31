@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
 import { AuthUser } from "@/lib/types/user-types";
+import { logger } from "@/lib/logger";
 
 interface AuthContextType {
   user: AuthUser | null;
@@ -50,7 +51,7 @@ export function AuthProvider({ children, initialUser = null }: AuthProviderProps
         setUser(null);
       }
     } catch (error) {
-      console.error("Error fetching user:", error);
+      logger.error("Error fetching user:", error);
       setUser(null);
     } finally {
       setIsLoading(false);

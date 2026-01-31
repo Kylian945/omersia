@@ -47,15 +47,61 @@ class MediaLibraryController extends Controller
 
         $uploadedItems = [];
 
+        // MIME types autorisés
+        $allowedMimeTypes = [
+            'image/jpeg',
+            'image/jpg',
+            'image/png',
+            'image/gif',
+            'image/webp',
+            'image/svg+xml',
+            'application/pdf',
+        ];
+
         foreach ($request->file('images') as $file) {
+            // Validation du contenu réel du fichier
+            $realPath = $file->getRealPath();
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $detectedMimeType = finfo_file($finfo, $realPath);
+            finfo_close($finfo);
+
+            // Vérifier que le MIME type détecté est autorisé
+            if (!in_array($detectedMimeType, $allowedMimeTypes, true)) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Le fichier {$file->getClientOriginalName()} a un type de contenu invalide ({$detectedMimeType}).",
+                    ], 422);
+                }
+
+                return redirect()->back()->withErrors([
+                    'images' => "Le fichier {$file->getClientOriginalName()} a un type de contenu invalide.",
+                ]);
+            }
+
+            // Vérifier que le MIME type détecté correspond au MIME type déclaré
+            $declaredMimeType = $file->getMimeType();
+            if ($detectedMimeType !== $declaredMimeType) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Le fichier {$file->getClientOriginalName()} a un type de contenu non conforme (déclaré: {$declaredMimeType}, détecté: {$detectedMimeType}).",
+                    ], 422);
+                }
+
+                return redirect()->back()->withErrors([
+                    'images' => "Le fichier {$file->getClientOriginalName()} a un type de contenu non conforme.",
+                ]);
+            }
+
             $path = $file->store('media', 'public');
 
-            $imageSize = @getimagesize($file->getRealPath());
+            $imageSize = @getimagesize($realPath);
 
             $item = MediaItem::create([
                 'name' => FileHelper::sanitizeFilename($file->getClientOriginalName()),
                 'path' => $path,
-                'mime_type' => $file->getMimeType(),
+                'mime_type' => $detectedMimeType, // Utiliser le MIME type détecté
                 'size' => $file->getSize(),
                 'width' => $imageSize ? $imageSize[0] : null,
                 'height' => $imageSize ? $imageSize[1] : null,

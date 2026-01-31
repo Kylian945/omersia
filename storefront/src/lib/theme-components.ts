@@ -1,4 +1,5 @@
 import { ComponentType } from "react";
+import { logger } from "./logger";
 
 /**
  * Dynamic component resolver for theme-specific components
@@ -43,7 +44,7 @@ export async function getThemeComponent(
   } catch (error) {
     // If theme component doesn't exist, fallback to vision theme
     if (theme !== "vision") {
-      console.warn(
+      logger.warn(
         `Component ${componentPath} not found in theme '${theme}', falling back to vision theme`
       );
 
@@ -56,7 +57,7 @@ export async function getThemeComponent(
 
     // If vision itself doesn't have it, throw the error
     // This is better than silently failing
-    console.error(
+    logger.error(
       `Component ${componentPath} not found in vision theme. This should not happen as vision contains all widgets.`
     );
     throw error;

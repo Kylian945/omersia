@@ -39,7 +39,7 @@ EXEC_STOREFRONT = $(DOCKER_COMPOSE) exec -T storefront
 EXEC_BACKEND_IT = $(DOCKER_COMPOSE) exec backend
 EXEC_MYSQL_IT = $(DOCKER_COMPOSE) exec mysql
 
-.PHONY: help install setup-env setup-db apikey admin dev test lint clean build check-docker
+.PHONY: help install setup-env setup-db apikey admin dev test lint clean build check-docker audit
 
 # Docker container check - used as dependency for commands that need running containers
 check-docker:
@@ -77,6 +77,7 @@ help:
 	@printf "$(CYAN)│$(RESET)  $(ICON_TEST)  $(CYAN)%-18s$(RESET) %s\n" "make test" "Run all tests"
 	@printf "$(CYAN)│$(RESET)  $(ICON_LINT)  $(CYAN)%-18s$(RESET) %s\n" "make lint" "Run linters (check code style)"
 	@printf "$(CYAN)│$(RESET)  $(ICON_LINT)  $(CYAN)%-18s$(RESET) %s\n" "make lint-fix" "Fix linting issues automatically"
+	@printf "$(CYAN)│$(RESET)  $(ICON_LOCK)  $(CYAN)%-18s$(RESET) %s\n" "make audit" "Security audit (composer + npm)"
 	@printf "$(CYAN)│$(RESET)  $(ICON_CLEAN)  $(CYAN)%-18s$(RESET) %s\n" "make clean" "Clean generated files & caches"
 	@printf "$(CYAN)│$(RESET)  $(ICON_BUILD)  $(CYAN)%-18s$(RESET) %s\n" "make build" "Build for production"
 	@printf "$(CYAN)│$(RESET)  $(ICON_LINT)  $(CYAN)%-18s$(RESET) %s\n" "make refresh-styles" "Regenerate frontend styles"
@@ -111,6 +112,11 @@ install:
 	@echo ""
 	@printf "$(BRIGHT_GREEN)$(ICON_ROCKET) Starting Omersia installation...$(RESET)\n"
 	@echo ""
+	@if [ ! -f .env.docker ]; then \
+		printf "$(YELLOW)⚠️  Creating .env.docker from .env.docker.example...$(RESET)\n"; \
+		cp .env.docker.example .env.docker; \
+		printf "$(CYAN)💡 Edit .env.docker to customize your environment$(RESET)\n\n"; \
+	fi
 	@chmod +x scripts/*.sh backend/docker-entrypoint*.sh 2>/dev/null || true
 	@./scripts/install.sh
 

@@ -5,6 +5,7 @@ import { ContainerProvider } from "./ContainerContext";
 import { validateCSSPercentage } from "@/lib/css-sanitizer";
 import { getGapClass, getAlignmentClass, getPaddingClasses, getMarginClasses } from "@/lib/widget-helpers";
 import { validateGap, validateAlignment, validateSpacingConfig } from "@/lib/css-variable-sanitizer";
+import { logger } from "@/lib/logger";
 
 // Type for theme widgets module - dynamic object containing widgets
 export type ThemeWidgets = Record<string, React.ComponentType<Record<string, unknown>>>;
@@ -93,7 +94,7 @@ function RenderWidget({
 
   // If no mapping exists for this widget type, return null
   if (!componentName) {
-    console.warn(`Widget type "${widget.type}" is not mapped to a component`);
+    logger.warn(`Widget type "${widget.type}" is not mapped to a component`);
     return null;
   }
 
@@ -102,7 +103,7 @@ function RenderWidget({
 
   // If theme doesn't have this widget, return null
   if (!WidgetComponent) {
-    console.warn(`Component "${componentName}" not found in current theme for widget type "${widget.type}"`);
+    logger.warn(`Component "${componentName}" not found in current theme for widget type "${widget.type}"`);
     return null;
   }
 

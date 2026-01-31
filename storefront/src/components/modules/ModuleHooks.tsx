@@ -2,6 +2,7 @@
 
 import { useEffect, useState, ComponentType } from "react";
 import { getModuleHookComponents, ModuleHookContext } from "@/lib/module-system";
+import { logger } from "@/lib/logger";
 
 type ModuleHooksProps = {
   hookName: string;
@@ -35,7 +36,7 @@ export function ModuleHooks({ hookName, context = {}, fallback = null }: ModuleH
         const hookComponents = await getModuleHookComponents(hookName, context);
         setComponents(hookComponents);
       } catch (error) {
-        console.error(`[ModuleHooks] Error loading components for ${hookName}:`, error);
+        logger.error(`[ModuleHooks] Error loading components for ${hookName}:`, error);
         setComponents([]);
       } finally {
         setLoading(false);

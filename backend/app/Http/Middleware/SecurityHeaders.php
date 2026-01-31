@@ -12,6 +12,10 @@ class SecurityHeaders
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Générer un nonce CSP unique pour cette requête
+        $nonce = base64_encode(random_bytes(16));
+        $request->attributes->set('csp_nonce', $nonce);
+
         $response = $next($request);
 
         // Empêcher le clickjacking
@@ -39,8 +43,8 @@ class SecurityHeaders
 
         $cspDirectives = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' https://js.stripe.com https://maps.googleapis.com",
-            "style-src 'self' 'unsafe-inline'", // Requis pour PageBuilder dynamic styles
+            "script-src 'self' 'nonce-{$nonce}' https://js.stripe.com https://maps.googleapis.com",
+            "style-src 'self' 'nonce-{$nonce}'",
             "img-src 'self' data: https:",
             "font-src 'self' data: https://fonts.gstatic.com",
             "connect-src 'self' https://api.stripe.com https://*.meilisearch.com",

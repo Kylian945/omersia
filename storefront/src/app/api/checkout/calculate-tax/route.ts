@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { apiJson } from "@/lib/api";
+import { logger } from "@/lib/logger";
 
 type TaxBreakdown = {
   items?: Array<{
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
     );
 
     if (!res.ok || !data) {
-      console.error("Erreur calcul taxes:", res.status, res.statusText);
+      logger.error("Erreur calcul taxes:", { status: res.status, statusText: res.statusText });
       // En cas d'erreur, retourner 0 pour ne pas bloquer le checkout
       return NextResponse.json({
         tax_total: 0,
@@ -74,7 +75,7 @@ export async function POST(req: Request) {
       tax_rate: data.tax_rate,
     });
   } catch (err) {
-    console.error("Erreur lors du calcul des taxes:", err);
+    logger.error("Erreur lors du calcul des taxes:", err);
     // En cas d'erreur, retourner 0 pour ne pas bloquer le checkout
     return NextResponse.json({
       tax_total: 0,

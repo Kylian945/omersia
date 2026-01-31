@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { apiJson } from "@/lib/api";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
 
 type BackendPaymentIntentResponse = {
   ok: boolean;
@@ -31,7 +32,7 @@ export async function POST(req: NextRequest) {
   // Debug utile si ça foire
   if (!res.ok || !data) {
     const text = await res.text().catch(() => null);
-    console.error("Backend /payments/intent error", res.status, text, data);
+    logger.error("Backend /payments/intent error", { status: res.status, text, data });
 
     return NextResponse.json(
       {

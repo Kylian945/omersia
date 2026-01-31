@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { logger } from "@/lib/logger";
 
 interface LogoutButtonProps {
   children: React.ReactNode;
@@ -27,7 +28,7 @@ export function LogoutButton({ children, className }: LogoutButtonProps) {
         router.push("/");
       }
     } catch (error) {
-      console.error("Logout error:", error);
+      logger.error("Logout error:", error);
       // Even on error, try to clear client state
       window.dispatchEvent(new Event("auth:changed"));
       router.push("/");

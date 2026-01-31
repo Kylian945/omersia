@@ -1,6 +1,7 @@
 
 import { apiJson } from "./api-http";
 import type { Address, AddressInput } from "./types/api-types";
+import { logger } from "./logger";
 
 export async function getAddresses(
   authToken?: string
@@ -12,7 +13,7 @@ export async function getAddresses(
 
   if (!res.ok) {
     if (res.status !== 401) {
-      console.warn("getAddresses failed:", res.status);
+      logger.warn("getAddresses failed:", res.status);
     }
     return null;
   }
@@ -31,7 +32,7 @@ export async function getAddressById(
 
   if (!res.ok) {
     if (res.status !== 404) {
-      console.warn("getAddressById failed:", res.status);
+      logger.warn("getAddressById failed:", res.status);
     }
     return null;
   }
@@ -52,7 +53,7 @@ export async function createAddress(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    console.warn("createAddress failed:", res.status, text);
+    logger.warn("createAddress failed:", res.status, text);
     return null;
   }
 
@@ -72,7 +73,7 @@ export async function updateAddress(
   });
 
   if (!res.ok) {
-    console.warn("updateAddress failed:", res.status);
+    logger.warn("updateAddress failed:", res.status);
     return null;
   }
 
@@ -91,7 +92,7 @@ export async function deleteAddress(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    console.warn("deleteAddress failed:", res.status, text);
+    logger.warn("deleteAddress failed:", res.status, text);
     return false;
   }
 
@@ -112,7 +113,7 @@ export async function setDefaultShippingAddress(
   );
 
   if (!res.ok) {
-    console.warn("setDefaultShippingAddress failed:", res.status);
+    logger.warn("setDefaultShippingAddress failed:", res.status);
     return null;
   }
 
@@ -133,7 +134,7 @@ export async function setDefaultBillingAddress(
   );
 
   if (!res.ok) {
-    console.warn("setDefaultBillingAddress failed:", res.status);
+    logger.warn("setDefaultBillingAddress failed:", res.status);
     return null;
   }
 

@@ -7,6 +7,7 @@ import { useCart } from "@/components/cart/CartContext";
 import { Loader2 } from "lucide-react";
 import type { PaymentMethod } from "@/lib/types/checkout-types";
 import { ModuleHooks } from "@/components/modules/ModuleHooks";
+import { logger } from "@/lib/logger";
 
 type PaymentMethodCode = "card" | "paypal" | "applepay" | null;
 
@@ -88,7 +89,7 @@ export function PaymentStep() {
           }
         }
       } catch (err: unknown) {
-        console.error(err);
+        logger.error(err);
         if (!cancelled) {
           const errorMessage = err instanceof Error ? err.message : "Erreur lors du chargement des moyens de paiement.";
           setError(errorMessage);

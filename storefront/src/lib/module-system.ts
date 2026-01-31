@@ -1,4 +1,5 @@
 import { ComponentType } from "react";
+import { logger } from "./logger";
 
 /**
  * Universal Module Hook System for Omersia
@@ -109,7 +110,7 @@ export async function initializeModuleSystem(): Promise<void> {
 
       MODULE_SYSTEM_READY = true;
     } catch (error) {
-      console.error('[Module System] Failed to initialize:', error);
+      logger.error('[Module System] Failed to initialize:', error);
       MODULE_SYSTEM_READY = true; // Mark as ready even on error to avoid blocking
     }
   })();
@@ -126,14 +127,14 @@ async function loadModuleConfigs(): Promise<ModuleConfig[]> {
     // Fetch module hooks configuration from backend-synced file
     const response = await fetch('/module-hooks.json');
     if (!response.ok) {
-      console.warn('[Module System] module-hooks.json not found, no modules registered');
+      logger.warn('[Module System] module-hooks.json not found, no modules registered');
       return [];
     }
 
     const configs = await response.json();
     return Array.isArray(configs) ? configs : [];
   } catch (error) {
-    console.warn('[Module System] Error loading module configs:', error);
+    logger.warn('[Module System] Error loading module configs:', error);
     return [];
   }
 }
@@ -184,7 +185,7 @@ export async function getModuleHookComponents(
             priority: hook.priority || 100,
           });
         } else {
-          console.warn(`[Module System] Component ${componentName} not found in module ${slug}`);
+          logger.warn(`[Module System] Component ${componentName} not found in module ${slug}`);
         }
       } catch {
         // Component loading errors are silently ignored
@@ -216,7 +217,7 @@ function evaluateCondition(condition: string, context: ModuleHookContext): boole
 
     return func(...Object.values(context));
   } catch (error) {
-    console.error('[Module System] Condition evaluation error:', condition, error);
+    logger.error('[Module System] Condition evaluation error:', condition, error);
     return false;
   }
 }

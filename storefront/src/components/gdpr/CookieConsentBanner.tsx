@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "../common/Button";
+import { logger } from "@/lib/logger";
 
 interface CookieConsent {
   necessary: boolean;
@@ -35,7 +36,7 @@ export function CookieConsentBanner() {
         setShowBanner(true);
       }
     } catch (error) {
-      console.error("Error checking cookie consent:", error);
+      logger.error("Error checking cookie consent:", error);
       setShowBanner(true);
     }
   };
@@ -59,7 +60,7 @@ export function CookieConsentBanner() {
 
       setShowBanner(false);
     } catch (error) {
-      console.error("Error saving cookie consent:", error);
+      logger.error("Error saving cookie consent:", error);
     }
   };
 

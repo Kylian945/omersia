@@ -11,6 +11,7 @@ import {
 } from "@/lib/api";
 import type { CartItem } from "@/components/cart/CartContext";
 import type { AuthUser } from "@/lib/types/user-types";
+import { logger } from "@/lib/logger";
 
 type FrontCheckoutPayload = {
   cartId?: number;
@@ -170,7 +171,7 @@ export async function POST(req: Request) {
     { status: 201 }
   );
   } catch (error) {
-    console.error('Checkout order error:', error);
+    logger.error('Checkout order error:', error);
     return NextResponse.json(
       { message: 'An error occurred while processing your order' },
       { status: 500 }

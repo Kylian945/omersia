@@ -5,6 +5,7 @@ import type {
   OrderSummary,
   OrderApi,
 } from "./types/api-types";
+import { logger } from "./logger";
 
 export async function getOrders(
   authToken?: string
@@ -16,7 +17,7 @@ export async function getOrders(
 
   if (!res.ok) {
     if (res.status !== 401) {
-      console.warn("getOrders failed:", res.status);
+      logger.warn("getOrders failed:", res.status);
     }
     return null;
   }
@@ -37,7 +38,7 @@ export async function createOrder(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    console.warn("createOrder failed:", res.status, text);
+    logger.warn("createOrder failed:", res.status, text);
     return null;
   }
 
@@ -58,7 +59,7 @@ export async function updateOrder(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    console.warn("updateOrder failed:", res.status, text);
+    logger.warn("updateOrder failed:", res.status, text);
     return null;
   }
 
@@ -77,7 +78,7 @@ export async function getOrderByNumber(
 
   if (!res.ok) {
     if (res.status !== 404) {
-      console.warn("getOrderByNumber failed:", res.status);
+      logger.warn("getOrderByNumber failed:", res.status);
     }
     return null;
   }

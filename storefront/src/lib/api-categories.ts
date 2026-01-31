@@ -1,5 +1,6 @@
 import { apiJson } from "./api-http";
 import { Category, CategoriesResponse } from "./types/category-types";
+import { logger } from "./logger";
 
 /**
  * Récupère toutes les catégories actives
@@ -24,7 +25,7 @@ export async function getCategories(
   );
 
   if (!res.ok) {
-    console.warn("Categories fetch failed:", res.status, res.url);
+    logger.warn("Categories fetch failed:", res.status, res.url);
     return [];
   }
 
@@ -41,7 +42,7 @@ export async function getCategoryBySlug(slug: string, locale = "fr"): Promise<Ca
   );
 
   if (!res.ok) {
-    console.warn("Category fetch failed:", res.status, res.url);
+    logger.warn("Category fetch failed:", res.status, res.url);
     return null;
   }
 

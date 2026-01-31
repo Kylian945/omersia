@@ -1,4 +1,5 @@
 import { ProductsResponse } from "./types/product-types";
+import { logger } from "./logger";
 
 /**
  * Client-side function to fetch products via Next.js API route
@@ -17,14 +18,14 @@ export async function getProductsClient(
     );
 
     if (!response.ok) {
-      console.error("Failed to fetch products:", response.statusText);
+      logger.error("Failed to fetch products:", response.statusText);
       return null;
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("Error fetching products:", error);
+    logger.error("Error fetching products:", error);
     return null;
   }
 }

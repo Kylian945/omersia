@@ -6,6 +6,7 @@ import {
   type AddressInput,
 } from "@/lib/api";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
 
 
 export async function GET() {
@@ -60,7 +61,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json(created, { status: 201 });
   } catch (e) {
-    console.error("POST /api/account/addresses error:", e);
+    logger.error("POST /api/account/addresses error:", e);
     return NextResponse.json(
       { message: "Erreur interne côté Next." },
       { status: 500 }

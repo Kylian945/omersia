@@ -12,6 +12,7 @@ import {
 } from "@/lib/types/checkout-types";
 import { AuthUser } from "@/lib/types/user-types";
 import { useCart } from "@/components/cart/CartContext";
+import { logger } from "@/lib/logger";
 
 export function useCheckoutState(
   initialUser: AuthUser | null,
@@ -177,7 +178,7 @@ export function useCheckoutState(
           }
         }
       } catch (err: unknown) {
-        console.error(err);
+        logger.error(err);
         if (!cancelled) {
           setShippingError(
             (err instanceof Error ? err.message : String(err)) || "Erreur lors du chargement des livraisons."
@@ -277,7 +278,7 @@ export function useCheckoutState(
           }
         }
       } catch (err: unknown) {
-        console.error("Erreur lors du calcul des taxes:", err);
+        logger.error("Erreur lors du calcul des taxes:", err);
         if (!cancelled) {
           setTaxTotal(0);
           setTaxRate(0);

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { apiJson } from "@/lib/api-http";
 import { cookies } from "next/headers";
+import { logger } from "@/lib/logger";
 
 export async function POST(
   _req: NextRequest,
@@ -40,7 +41,7 @@ export async function POST(
 
     return NextResponse.json(data, { status: 200 });
   } catch (err) {
-    console.error("Error calling backend /orders/{number}/confirm:", err);
+    logger.error("Error calling backend /orders/{number}/confirm:", err);
 
     return NextResponse.json(
       {

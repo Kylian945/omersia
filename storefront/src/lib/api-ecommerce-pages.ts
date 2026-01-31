@@ -1,4 +1,5 @@
 import { apiJson } from "./api-http";
+import { logger } from "./logger";
 
 export type EcommercePageWidget = {
   id: string;
@@ -54,7 +55,7 @@ export async function getEcommercePageBySlug(
     );
     return data;
   } catch (error) {
-    console.error("Error fetching ecommerce page:", error);
+    logger.error("Error fetching ecommerce page:", error);
     return null;
   }
 }
@@ -74,7 +75,7 @@ export async function getEcommercePageByType(
     const { data } = await apiJson<EcommercePage>(url);
     return data;
   } catch (error) {
-    console.error("Error fetching ecommerce page:", error);
+    logger.error("Error fetching ecommerce page:", error);
     return null;
   }
 }

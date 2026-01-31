@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PenIcon } from "lucide-react";
 import { Button } from "@/components/common/Button";
+import { logger } from "@/lib/logger";
 
 type UserProfile = {
   firstname: string | null;
@@ -92,7 +93,7 @@ export function AccountProfile({ initialUser }: Props) {
       setUser(updated);
       setIsModalOpen(false);
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       setErrorMsg("Erreur réseau lors de la mise à jour du profil.");
     } finally {
       setLoading(false);

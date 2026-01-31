@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 import { Button } from '@/components/common/Button';
+import { logger } from '@/lib/logger';
 
 export default function GlobalError({
   error,
@@ -12,7 +13,7 @@ export default function GlobalError({
 }) {
   useEffect(() => {
     // Log the error to an error reporting service
-    console.error('Global error caught:', error);
+    logger.error('Global error caught:', error);
   }, [error]);
 
   return (

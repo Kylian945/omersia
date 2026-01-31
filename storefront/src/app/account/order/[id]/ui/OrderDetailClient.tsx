@@ -6,6 +6,7 @@ import Image from "next/image";
 import { BadgeCheck, Truck, MapPin, CheckCircle2 } from "lucide-react";
 import type { OrderApi } from "@/lib/api";
 import { Button } from "@/components/common/Button";
+import { logger } from "@/lib/logger";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
 
@@ -76,7 +77,7 @@ export function OrderDetailClient({ order, user }: PropsOrder) {
       const response = await fetch(`/api/orders/${order.number}/invoice`);
 
       if (!response.ok) {
-        console.error("Failed to download invoice:", response.status);
+        logger.error("Failed to download invoice:", response.status);
         alert("Erreur lors du téléchargement de la facture");
         return;
       }
@@ -91,7 +92,7 @@ export function OrderDetailClient({ order, user }: PropsOrder) {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error) {
-      console.error("Error downloading invoice:", error);
+      logger.error("Error downloading invoice:", error);
       alert("Erreur lors du téléchargement de la facture");
     } finally {
       setIsDownloading(false);

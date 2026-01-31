@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { safeDecodeURIComponent } from "@/lib/utils/error-utils";
+import { logger } from "@/lib/logger";
 
 const BACKEND_URL = process.env.API_INTERNAL_URL?.replace('/api/v1', '') || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 const API_KEY = process.env.FRONT_API_KEY;
@@ -54,7 +55,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error downloading data export:", error);
+    logger.error("Error downloading data export:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

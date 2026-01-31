@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 const BACKEND_URL = process.env.API_INTERNAL_URL;
 const API_KEY = process.env.FRONT_API_KEY;
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
     const data = await response.json();
     return NextResponse.json(data);
   } catch (error) {
-    console.error("Search error:", error);
+    logger.error("Search error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

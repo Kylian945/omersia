@@ -39,18 +39,9 @@ docker compose up -d
 
 ## 🔧 Mode Développement avec Hot Reload
 
-Pour activer le **hot reload** Vite (recompilation automatique du CSS/JS) :
+Le **hot reload** Vite est activé par défaut dans `docker-compose.yml`.
 
-```bash
-# Copier le fichier override
-cp docker-compose.override.example.yml docker-compose.override.yml
-
-# Redémarrer les conteneurs
-docker compose down
-docker compose up -d
-```
-
-Le port 5173 (Vite HMR) sera exposé et les assets se recompileront automatiquement à chaque modification.
+Le port 5173 (Vite HMR) est exposé et les assets se recompilent automatiquement à chaque modification.
 
 ## 🛠️ Commandes Utiles
 
@@ -250,17 +241,9 @@ docker compose up -d
 docker compose down
 ```
 
-### Avec Hot Reload activé
+### Hot Reload
 
-```bash
-# Une seule fois : activer le override
-cp docker-compose.override.example.yml docker-compose.override.yml
-
-# Ensuite, usage normal
-docker compose up -d
-
-# Les assets backend se recompilent automatiquement !
-```
+Les assets backend se recompilent automatiquement grâce à Vite (port 5173).
 
 ## 🚨 Dépannage
 
@@ -323,12 +306,10 @@ docker compose restart meilisearch
 
 ## 📚 Fichiers de Configuration
 
-- **docker-compose.yml** : Configuration principale (dev local)
-- **docker-compose.dev.yml** : Configuration dev complète
-- **docker-compose.prod.yml** : Configuration production
-- **docker-compose.override.yml** : Overrides locaux (gitignored)
-- **.env.docker** : Variables d'environnement Docker (gitignored)
-- **.env.docker.example** : Template des variables
+- **docker-compose.yml** : Configuration principale (développement local)
+- **docker-compose.override.yml** : Overrides locaux optionnels (gitignored)
+- **.env.docker** : Variables d'environnement Docker (gitignored, créé depuis .example)
+- **.env.docker.example** : Template des variables d'environnement
 
 ## 🏗️ Architecture Docker
 

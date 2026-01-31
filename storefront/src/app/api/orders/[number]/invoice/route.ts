@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { API_KEY } from "@/lib/api-http";
+import { logger } from "@/lib/logger";
 
 type Params = {
   number: string;
@@ -34,7 +35,7 @@ export async function GET(
     });
 
     if (!response.ok) {
-      console.error("Backend invoice download failed:", response.status);
+      logger.error("Backend invoice download failed:", response.status);
       return NextResponse.json(
         { error: "Failed to download invoice" },
         { status: response.status }
@@ -50,7 +51,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Error downloading invoice:", error);
+    logger.error("Error downloading invoice:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

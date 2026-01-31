@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/common/Button";
 import { safeDecodeURIComponent } from "@/lib/utils/error-utils";
+import { logger } from "@/lib/logger";
 
 export function LoginForm() {
   const router = useRouter();
@@ -38,7 +39,7 @@ export function LoginForm() {
         router.push("/");
       }
     } catch (error) {
-      console.error("Login error:", error);
+      logger.error("Login error:", error);
     }
   };
 

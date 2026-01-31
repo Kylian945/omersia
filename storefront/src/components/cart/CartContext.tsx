@@ -10,6 +10,7 @@ import {
 import { CartItem } from "@/lib/types/product-types";
 import { AddToCartModal } from "./AddToCartModal";
 import { useRouter } from "next/navigation";
+import { logger } from "@/lib/logger";
 
 // Re-export CartItem pour compatibilité
 export type { CartItem };
@@ -58,7 +59,7 @@ export function CartProvider({
         }
       }
     } catch (e) {
-      console.error("Failed to parse cart from localStorage", e);
+      logger.error("Failed to parse cart from localStorage", e);
     }
 
     return [];
@@ -91,7 +92,7 @@ export function CartProvider({
     try {
       window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     } catch (e) {
-      console.error("Failed to save cart to localStorage", e);
+      logger.error("Failed to save cart to localStorage", e);
     }
   }, [items, isHydrated]);
 
@@ -123,7 +124,7 @@ export function CartProvider({
 
         if (!res.ok) {
           const text = await res.text().catch(() => "");
-          console.error("Cart sync failed", res.status, text);
+          logger.error("Cart sync failed", res.status, text);
           return;
         }
 
@@ -146,7 +147,7 @@ export function CartProvider({
             window.localStorage.removeItem(CART_STORAGE_KEY);
             window.localStorage.removeItem(CART_TOKEN_STORAGE_KEY);
           } catch (e) {
-            console.error("Failed to clear cart localStorage", e);
+            logger.error("Failed to clear cart localStorage", e);
           }
 
           return;
@@ -161,11 +162,11 @@ export function CartProvider({
           try {
             window.localStorage.setItem(CART_TOKEN_STORAGE_KEY, data.token);
           } catch (e) {
-            console.error("Failed to save cart token", e);
+            logger.error("Failed to save cart token", e);
           }
         }
       } catch (e) {
-        console.error("Cart sync error", e);
+        logger.error("Cart sync error", e);
       }
     };
 

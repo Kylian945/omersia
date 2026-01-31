@@ -6,6 +6,7 @@ import { Search, Loader2 } from "lucide-react";
 import { ListingProduct } from "../product/ListingProducts";
 import { getMainImage } from "@/lib/image-utils";
 import { SearchProduct, SearchResponse } from "@/lib/types/search-types";
+import { logger } from "@/lib/logger";
 
 // Alias local pour compatibilité
 type Product = SearchProduct;
@@ -58,7 +59,7 @@ export function SearchDropdown({
           setResults(data);
         }
       } catch (error) {
-        console.error("Erreur de recherche:", error);
+        logger.error("Erreur de recherche:", error);
       } finally {
         setLoading(false);
       }

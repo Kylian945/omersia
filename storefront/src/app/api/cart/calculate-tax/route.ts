@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { apiJson } from '@/lib/api-http';
+import { logger } from '@/lib/logger';
 
 // Map country names to ISO codes
 const countryNameToCode: Record<string, string> = {
@@ -67,7 +68,7 @@ export async function POST(request: NextRequest) {
     });
 
     if (!res.ok || !data) {
-      console.error('Backend tax calculation error');
+      logger.error('Backend tax calculation error');
 
       // Return 0 tax if calculation fails
       return NextResponse.json({
@@ -81,7 +82,7 @@ export async function POST(request: NextRequest) {
       tax_rate: data.tax_rate || 0,
     });
   } catch (error) {
-    console.error('Error calculating tax:', error);
+    logger.error('Error calculating tax:', error);
 
     // Return 0 tax on error
     return NextResponse.json({

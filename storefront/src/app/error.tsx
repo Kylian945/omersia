@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/common/Button';
+import { logger } from '@/lib/logger';
 
 export default function Error({
   error,
@@ -13,7 +14,7 @@ export default function Error({
 }) {
   useEffect(() => {
     // Log the error to an error reporting service
-    console.error('Error caught by error boundary:', error);
+    logger.error('Error caught by error boundary:', error);
   }, [error]);
 
   return (

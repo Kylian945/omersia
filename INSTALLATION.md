@@ -432,9 +432,9 @@ The installation script respects service dependencies:
 
 ### Hot Reload
 
-Both backend and storefront support hot reload:
+Both backend and storefront support hot reload by default:
 
-- **Backend:** Vite dev server on port 5173
+- **Backend:** Vite dev server on port 5173 (configured in docker-compose.yml)
 - **Storefront:** Next.js dev server with Fast Refresh
 - Changes reflect immediately without container restart
 

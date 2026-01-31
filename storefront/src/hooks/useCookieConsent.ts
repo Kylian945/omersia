@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { logger } from "@/lib/logger";
 
 interface CookieConsent {
   has_consent: boolean;
@@ -25,7 +26,7 @@ export function useCookieConsent() {
       const data = await res.json();
       setConsent(data);
     } catch (error) {
-      console.error("Error loading cookie consent:", error);
+      logger.error("Error loading cookie consent:", error);
       // Par défaut, pas de consentement = refus (RGPD)
       setConsent({
         has_consent: false,
@@ -60,7 +61,7 @@ export function useCookieConsent() {
         const data = await res.json();
         return data.allowed === true;
       } catch (error) {
-        console.error(`Error checking ${type} cookie consent:`, error);
+        logger.error(`Error checking ${type} cookie consent:`, error);
         return type === "necessary"; // Toujours autoriser les cookies nécessaires
       }
     },
