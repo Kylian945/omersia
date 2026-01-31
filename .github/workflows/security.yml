@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
   security-events: write
 
 jobs:
@@ -107,8 +108,8 @@ jobs:
           output: 'trivy-backend.sarif'
 
       - name: Upload Trivy backend results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy-backend.sarif') != ''
         with:
           sarif_file: 'trivy-backend.sarif'
           category: 'docker-backend'
@@ -122,8 +123,8 @@ jobs:
           output: 'trivy-storefront.sarif'
 
       - name: Upload Trivy storefront results to GitHub Security
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
+        uses: github/codeql-action/upload-sarif@v4
+        if: always() && hashFiles('trivy-storefront.sarif') != ''
         with:
           sarif_file: 'trivy-storefront.sarif'
           category: 'docker-storefront'

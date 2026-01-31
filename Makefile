@@ -39,7 +39,7 @@ EXEC_STOREFRONT = $(DOCKER_COMPOSE) exec -T storefront
 EXEC_BACKEND_IT = $(DOCKER_COMPOSE) exec backend
 EXEC_MYSQL_IT = $(DOCKER_COMPOSE) exec mysql
 
-.PHONY: help install setup-env setup-db apikey admin dev test lint clean build check-docker audit
+.PHONY: help install setup-env setup-db apikey admin dev test lint clean build check-docker audit update update-composer update-npm
 
 # Docker container check - used as dependency for commands that need running containers
 check-docker:
@@ -77,6 +77,9 @@ help:
 	@printf "$(CYAN)│$(RESET)  $(ICON_TEST)  $(CYAN)%-18s$(RESET) %s\n" "make test" "Run all tests"
 	@printf "$(CYAN)│$(RESET)  $(ICON_LINT)  $(CYAN)%-18s$(RESET) %s\n" "make lint" "Run linters (check code style)"
 	@printf "$(CYAN)│$(RESET)  $(ICON_LINT)  $(CYAN)%-18s$(RESET) %s\n" "make lint-fix" "Fix linting issues automatically"
+	@printf "$(CYAN)│$(RESET)  $(ICON_PACKAGE)  $(CYAN)%-18s$(RESET) %s\n" "make update" "Update all dependencies"
+	@printf "$(CYAN)│$(RESET)  $(ICON_PACKAGE)  $(CYAN)%-18s$(RESET) %s\n" "make update-composer" "Update Composer packages only"
+	@printf "$(CYAN)│$(RESET)  $(ICON_PACKAGE)  $(CYAN)%-18s$(RESET) %s\n" "make update-npm" "Update npm packages only"
 	@printf "$(CYAN)│$(RESET)  $(ICON_LOCK)  $(CYAN)%-18s$(RESET) %s\n" "make audit" "Security audit (composer + npm)"
 	@printf "$(CYAN)│$(RESET)  $(ICON_CLEAN)  $(CYAN)%-18s$(RESET) %s\n" "make clean" "Clean generated files & caches"
 	@printf "$(CYAN)│$(RESET)  $(ICON_BUILD)  $(CYAN)%-18s$(RESET) %s\n" "make build" "Build for production"
@@ -266,6 +269,29 @@ db: check-docker
 
 tinker: check-docker
 	@$(EXEC_BACKEND_IT) php artisan tinker
+
+# Update dependencies
+update: check-docker
+	@echo ""
+	@printf "$(BRIGHT_CYAN)$(ICON_PACKAGE) Updating dependencies...$(RESET)\n"
+	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
+	@echo ""
+	@printf "$(BLUE)➜ Updating Composer packages...$(RESET)\n"
+	@$(EXEC_BACKEND) composer update
+	@echo ""
+	@printf "$(BLUE)➜ Updating npm packages...$(RESET)\n"
+	@$(EXEC_STOREFRONT) npm update
+	@echo ""
+	@printf "$(BRIGHT_GREEN)✅ All dependencies updated!$(RESET)\n"
+	@echo ""
+
+update-composer: check-docker
+	@printf "$(BLUE)➜ Updating Composer packages...$(RESET)\n"
+	@$(EXEC_BACKEND) composer update
+
+update-npm: check-docker
+	@printf "$(BLUE)➜ Updating npm packages...$(RESET)\n"
+	@$(EXEC_STOREFRONT) npm update
 
 # Docker
 docker-up:
