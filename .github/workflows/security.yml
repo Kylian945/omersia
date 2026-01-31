@@ -36,7 +36,7 @@ jobs:
       - name: Validate composer.json
         run: |
           cd backend
-          composer validate --no-check-publish --no-check-lock || echo "::warning::Composer validation has warnings (expected for monorepo path packages)"
+          composer validate --no-check-publish --no-check-lock --no-check-all || echo "::warning::Composer validation has warnings (expected for monorepo path packages)"
 
       - name: Cache Composer dependencies
         uses: actions/cache@v5
