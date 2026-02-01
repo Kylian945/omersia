@@ -802,34 +802,49 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Panier synchronisé",
+                        "description": "Panier synchronisé ou supprimé. Si items vide/null, retourne {deleted: true}. Sinon retourne le panier mis à jour.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "properties": {
-                                        "id": {
-                                            "type": "integer",
-                                            "example": 42
+                                    "oneOf": [
+                                        {
+                                            "description": "Panier mis à jour",
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 42
+                                                },
+                                                "token": {
+                                                    "type": "string",
+                                                    "example": "cart_abc123"
+                                                },
+                                                "subtotal": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "example": 59.98
+                                                },
+                                                "total_qty": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                },
+                                                "currency": {
+                                                    "type": "string",
+                                                    "example": "EUR"
+                                                }
+                                            },
+                                            "type": "object"
                                         },
-                                        "token": {
-                                            "type": "string",
-                                            "example": "cart_abc123"
-                                        },
-                                        "subtotal": {
-                                            "type": "number",
-                                            "format": "float",
-                                            "example": 59.98
-                                        },
-                                        "total_qty": {
-                                            "type": "integer",
-                                            "example": 3
-                                        },
-                                        "currency": {
-                                            "type": "string",
-                                            "example": "EUR"
+                                        {
+                                            "description": "Panier supprimé (items vides)",
+                                            "properties": {
+                                                "deleted": {
+                                                    "type": "boolean",
+                                                    "example": true
+                                                }
+                                            },
+                                            "type": "object"
                                         }
-                                    },
-                                    "type": "object"
+                                    ]
                                 }
                             }
                         }
@@ -926,6 +941,165 @@
                                         }
                                     },
                                     "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/cart/apply-automatic-discounts": {
+            "post": {
+                "tags": [
+                    "Panier"
+                ],
+                "summary": "Appliquer automatiquement les réductions actives au panier",
+                "operationId": "2575a11a101a0f5588fda8ef67d7695c",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "items"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "description": "Customer ID",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "id",
+                                                "qty",
+                                                "price"
+                                            ],
+                                            "properties": {
+                                                "id": {
+                                                    "description": "Product ID",
+                                                    "type": "integer"
+                                                },
+                                                "qty": {
+                                                    "type": "integer",
+                                                    "minimum": 1
+                                                },
+                                                "price": {
+                                                    "type": "number",
+                                                    "format": "float",
+                                                    "minimum": 0
+                                                },
+                                                "variant_id": {
+                                                    "type": "integer",
+                                                    "nullable": true
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Réductions automatiques évaluées",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ok": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "promotions": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "code": {
+                                                        "type": "string",
+                                                        "example": "AUTO-12"
+                                                    },
+                                                    "label": {
+                                                        "type": "string",
+                                                        "example": "Soldes été"
+                                                    },
+                                                    "type": {
+                                                        "type": "string",
+                                                        "example": "order"
+                                                    },
+                                                    "value_type": {
+                                                        "type": "string",
+                                                        "example": "percentage"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        },
+                                        "line_adjustments_by_code": {
+                                            "description": "Ajustements ligne par code promo",
+                                            "type": "object"
+                                        },
+                                        "order_discount_total": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 10
+                                        },
+                                        "product_discount_total": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 5
+                                        },
+                                        "shipping_discount_total": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 0
+                                        },
+                                        "free_shipping": {
+                                            "type": "boolean",
+                                            "example": false
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
                                 }
                             }
                         }
@@ -1072,6 +1246,133 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/ecommerce-pages/{type}/{slug}": {
+            "get": {
+                "tags": [
+                    "Pages E-commerce"
+                ],
+                "summary": "Récupérer une page e-commerce par type et slug optionnel",
+                "operationId": "e19498fb6e9d2c000a4d864e8b3bd15c",
+                "parameters": [
+                    {
+                        "name": "type",
+                        "in": "path",
+                        "description": "Type de page e-commerce",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "collection"
+                        }
+                    },
+                    {
+                        "name": "slug",
+                        "in": "path",
+                        "description": "Slug optionnel de la page",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "summer-sale"
+                        }
+                    },
+                    {
+                        "name": "locale",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "fr",
+                            "enum": [
+                                "fr",
+                                "en"
+                            ]
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Page trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "type": {
+                                            "type": "string",
+                                            "example": "collection"
+                                        },
+                                        "slug": {
+                                            "type": "string",
+                                            "example": "summer-sale",
+                                            "nullable": true
+                                        },
+                                        "title": {
+                                            "type": "string",
+                                            "example": "Soldes d'été"
+                                        },
+                                        "content": {
+                                            "properties": {
+                                                "sections": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Page non trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "error": {
+                                            "type": "string",
+                                            "example": "Page not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
                                 }
                             }
                         }
@@ -1372,13 +1673,48 @@
                 "operationId": "002a07124a31a203cabd44c093be76e9",
                 "responses": {
                     "200": {
-                        "description": "Liste des commandes",
+                        "description": "Liste des commandes confirmées du client",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/Order"
+                                        "properties": {
+                                            "id": {
+                                                "type": "integer",
+                                                "example": 1
+                                            },
+                                            "number": {
+                                                "type": "string",
+                                                "example": "ORD-2024-00123"
+                                            },
+                                            "status": {
+                                                "type": "string",
+                                                "enum": [
+                                                    "pending",
+                                                    "processing",
+                                                    "shipped",
+                                                    "completed",
+                                                    "cancelled"
+                                                ],
+                                                "example": "pending"
+                                            },
+                                            "total": {
+                                                "type": "number",
+                                                "format": "float",
+                                                "example": 76.97
+                                            },
+                                            "placed_at": {
+                                                "type": "string",
+                                                "format": "date-time",
+                                                "nullable": true
+                                            },
+                                            "items_count": {
+                                                "type": "integer",
+                                                "example": 3
+                                            }
+                                        },
+                                        "type": "object"
                                     }
                                 }
                             }
@@ -1561,6 +1897,243 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Order"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Commande non trouvée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NotFoundError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": [],
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/orders/{order}": {
+            "put": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Mettre à jour une commande brouillon (checkout)",
+                "operationId": "3bd32398e7d55da8ed2498faabdbaebc",
+                "parameters": [
+                    {
+                        "name": "order",
+                        "in": "path",
+                        "description": "ID de la commande",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "currency",
+                                    "shipping_method_id",
+                                    "customer_email",
+                                    "shipping_address",
+                                    "billing_address",
+                                    "items",
+                                    "discount_total",
+                                    "shipping_total",
+                                    "tax_total",
+                                    "total"
+                                ],
+                                "properties": {
+                                    "currency": {
+                                        "type": "string",
+                                        "example": "EUR"
+                                    },
+                                    "shipping_method_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "customer_email": {
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "customer@example.com"
+                                    },
+                                    "customer_firstname": {
+                                        "type": "string",
+                                        "example": "John",
+                                        "nullable": true
+                                    },
+                                    "customer_lastname": {
+                                        "type": "string",
+                                        "example": "Doe",
+                                        "nullable": true
+                                    },
+                                    "shipping_address": {
+                                        "$ref": "#/components/schemas/OrderAddress"
+                                    },
+                                    "billing_address": {
+                                        "$ref": "#/components/schemas/OrderAddress"
+                                    },
+                                    "items": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "discount_total": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 0
+                                    },
+                                    "shipping_total": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 5
+                                    },
+                                    "tax_total": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 11.99
+                                    },
+                                    "total": {
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 76.97
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Commande mise à jour",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Order"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnauthorizedError"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Non autorisé (commande d'un autre client)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ForbiddenError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": [],
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/orders/{id}/confirm": {
+            "post": {
+                "tags": [
+                    "Commandes"
+                ],
+                "summary": "Confirmer une commande brouillon après paiement réussi",
+                "description": "Confirmer une commande brouillon (appelé après paiement réussi)",
+                "operationId": "8183dad79557f3560fe928297b5278dd",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID de la commande",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Commande confirmée ou déjà confirmée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Commande confirmée avec succès"
+                                        },
+                                        "order": {
+                                            "$ref": "#/components/schemas/Order"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -1787,6 +2360,78 @@
                         "description": "Page non trouvée"
                     }
                 }
+            }
+        },
+        "/api/v1/payment-methods": {
+            "get": {
+                "tags": [
+                    "Paiement"
+                ],
+                "summary": "Liste des méthodes de paiement disponibles",
+                "operationId": "57a6c378a07a23039ed4b9e591958cc6",
+                "responses": {
+                    "200": {
+                        "description": "Liste des méthodes de paiement actives",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "ok": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "id": {
+                                                        "type": "integer",
+                                                        "example": 1
+                                                    },
+                                                    "name": {
+                                                        "type": "string",
+                                                        "example": "Stripe"
+                                                    },
+                                                    "code": {
+                                                        "type": "string",
+                                                        "example": "stripe"
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
             }
         },
         "/api/v1/payments/intent": {
@@ -2217,7 +2862,7 @@
                 ]
             }
         },
-        "/shop/info": {
+        "/api/v1/shop/info": {
             "get": {
                 "tags": [
                     "Shop"
@@ -2254,13 +2899,13 @@
                 }
             }
         },
-        "/api/v1/taxes/calculate": {
+        "/api/v1/calculate-tax": {
             "post": {
                 "tags": [
                     "Taxes"
                 ],
                 "summary": "Calculer les taxes pour une commande",
-                "operationId": "1622eac077dc810f818e4a1c07507acf",
+                "operationId": "5f80a413441a6102377ec3cbe574196f",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -2278,6 +2923,124 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/TaxCalculationResponse"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "API key invalide ou manquante",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApiKeyError"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ValidationError"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Erreur serveur",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ServerError"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "api.key": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/calculate-included-tax": {
+            "post": {
+                "tags": [
+                    "Taxes"
+                ],
+                "summary": "Extraire la taxe d'un prix TTC",
+                "description": "Calculate included tax (extract tax from TTC price)",
+                "operationId": "9d1fd17811ad806b698612015ae35836",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "price_including_tax",
+                                    "address"
+                                ],
+                                "properties": {
+                                    "price_including_tax": {
+                                        "description": "Prix TTC",
+                                        "type": "number",
+                                        "format": "float",
+                                        "example": 119.98
+                                    },
+                                    "address": {
+                                        "required": [
+                                            "country"
+                                        ],
+                                        "properties": {
+                                            "country": {
+                                                "type": "string",
+                                                "example": "FR"
+                                            },
+                                            "state": {
+                                                "type": "string",
+                                                "example": "Île-de-France",
+                                                "nullable": true
+                                            },
+                                            "postal_code": {
+                                                "type": "string",
+                                                "example": "75001",
+                                                "nullable": true
+                                            }
+                                        },
+                                        "type": "object"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Taxe extraite du prix TTC",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "tax_total": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 19.99
+                                        },
+                                        "tax_rate": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 20
+                                        },
+                                        "price_excluding_tax": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 99.99
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
@@ -2658,8 +3421,7 @@
                     },
                     "name": {
                         "type": "string",
-                        "example": "T-shirt Homme",
-                        "nullable": true
+                        "example": "T-shirt Homme"
                     },
                     "price": {
                         "description": "Unit price",
@@ -2667,11 +3429,30 @@
                         "format": "float",
                         "example": 29.99
                     },
+                    "oldPrice": {
+                        "description": "Previous price (before discount)",
+                        "type": "number",
+                        "format": "float",
+                        "example": 39.99,
+                        "nullable": true
+                    },
                     "qty": {
                         "description": "Quantity",
                         "type": "integer",
                         "minimum": 1,
                         "example": 2
+                    },
+                    "imageUrl": {
+                        "description": "Product image URL",
+                        "type": "string",
+                        "example": "https://cdn.example.com/img.jpg",
+                        "nullable": true
+                    },
+                    "variantLabel": {
+                        "description": "Variant display label",
+                        "type": "string",
+                        "example": "Taille: M",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -2691,7 +3472,14 @@
                         "example": "customer@example.com",
                         "nullable": true
                     },
+                    "currency": {
+                        "description": "Currency code (3 chars)",
+                        "type": "string",
+                        "example": "EUR",
+                        "nullable": true
+                    },
                     "items": {
+                        "description": "Cart items. If empty or null, the cart will be deleted.",
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/CartItem"
@@ -2740,44 +3528,95 @@
                         "type": "boolean",
                         "example": true
                     },
-                    "message": {
+                    "code": {
+                        "description": "Code promo appliqué",
                         "type": "string",
-                        "example": "Code promo invalide",
-                        "nullable": true
+                        "example": "SUMMER2024"
+                    },
+                    "label": {
+                        "description": "Nom de la réduction",
+                        "type": "string",
+                        "example": "Soldes été 2024"
+                    },
+                    "type": {
+                        "description": "Type de réduction",
+                        "type": "string",
+                        "enum": [
+                            "order",
+                            "product",
+                            "shipping",
+                            "buy_x_get_y"
+                        ],
+                        "example": "order"
+                    },
+                    "value_type": {
+                        "description": "Type de valeur",
+                        "type": "string",
+                        "enum": [
+                            "percentage",
+                            "fixed"
+                        ],
+                        "example": "percentage"
+                    },
+                    "value": {
+                        "description": "Valeur de la réduction",
+                        "type": "number",
+                        "format": "float",
+                        "example": 10
+                    },
+                    "discount_amount": {
+                        "description": "Montant total de la réduction",
+                        "type": "number",
+                        "format": "float",
+                        "example": 15
                     },
                     "order_discount_amount": {
+                        "description": "Montant réduction sur la commande",
                         "type": "number",
                         "format": "float",
-                        "example": 10,
-                        "nullable": true
+                        "example": 10
                     },
                     "product_discount_amount": {
+                        "description": "Montant réduction sur les produits",
                         "type": "number",
                         "format": "float",
-                        "example": 5,
-                        "nullable": true
+                        "example": 5
                     },
-                    "total_discount": {
+                    "shipping_discount_amount": {
+                        "description": "Montant réduction sur la livraison",
                         "type": "number",
                         "format": "float",
-                        "example": 15,
-                        "nullable": true
+                        "example": 0
+                    },
+                    "free_shipping": {
+                        "description": "Livraison gratuite accordée",
+                        "type": "boolean",
+                        "example": false
                     },
                     "line_adjustments": {
                         "type": "array",
                         "items": {
                             "properties": {
-                                "product_id": {
+                                "id": {
+                                    "description": "Product ID",
                                     "type": "integer"
+                                },
+                                "variant_id": {
+                                    "description": "Variant ID",
+                                    "type": "integer",
+                                    "nullable": true
                                 },
                                 "discount_amount": {
                                     "type": "number",
                                     "format": "float"
+                                },
+                                "is_gift": {
+                                    "type": "boolean",
+                                    "example": false
                                 }
                             },
                             "type": "object"
-                        },
-                        "nullable": true
+                        }
                     }
                 },
                 "type": "object"
@@ -4002,6 +4841,18 @@
                         "type": "boolean",
                         "example": true
                     },
+                    "slug": {
+                        "description": "Slug de la catégorie (ajouté dynamiquement depuis la traduction)",
+                        "type": "string",
+                        "example": "vetements",
+                        "nullable": true
+                    },
+                    "name": {
+                        "description": "Nom de la catégorie (ajouté dynamiquement depuis la traduction)",
+                        "type": "string",
+                        "example": "Vêtements",
+                        "nullable": true
+                    },
                     "translations": {
                         "type": "array",
                         "items": {
@@ -4076,6 +4927,30 @@
                         "items": {
                             "$ref": "#/components/schemas/ProductImage"
                         }
+                    },
+                    "compare_at_price": {
+                        "description": "Prix avant réduction",
+                        "type": "number",
+                        "format": "float",
+                        "example": 39.99,
+                        "nullable": true
+                    },
+                    "on_sale": {
+                        "description": "Indique si le produit est en promotion",
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "has_variants": {
+                        "description": "Indique si le produit possède des variantes",
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "from_price": {
+                        "description": "Prix minimum des variantes (si has_variants=true)",
+                        "type": "number",
+                        "format": "float",
+                        "example": 19.99,
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -4107,11 +4982,126 @@
                 },
                 "type": "object"
             },
+            "OptionValue": {
+                "properties": {
+                    "option": {
+                        "description": "Nom de l'option",
+                        "type": "string",
+                        "example": "Taille"
+                    },
+                    "value": {
+                        "description": "Valeur de l'option",
+                        "type": "string",
+                        "example": "M"
+                    }
+                },
+                "type": "object"
+            },
+            "ProductVariant": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 456
+                    },
+                    "sku": {
+                        "type": "string",
+                        "example": "TSHIRT-BLACK-M",
+                        "nullable": true
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 29.99
+                    },
+                    "compare_at_price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 39.99,
+                        "nullable": true
+                    },
+                    "on_sale": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "stock": {
+                        "type": "integer",
+                        "example": 15
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "option_values": {
+                        "description": "Valeurs d'options associées à cette variante",
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OptionValue"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ProductOption": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Taille"
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "example": "S"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
             "ProductDetailResponse": {
+                "description": "Détail complet d'un produit avec variantes, options et produits associés",
                 "type": "object",
                 "allOf": [
                     {
                         "$ref": "#/components/schemas/Product"
+                    },
+                    {
+                        "properties": {
+                            "variants": {
+                                "description": "Variantes du produit",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/ProductVariant"
+                                }
+                            },
+                            "options": {
+                                "description": "Options configurables (Taille, Couleur, etc.)",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/ProductOption"
+                                }
+                            },
+                            "relatedProducts": {
+                                "description": "Produits associés",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            }
+                        },
+                        "type": "object"
                     }
                 ]
             },

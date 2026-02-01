@@ -12,6 +12,85 @@ use OpenApi\Annotations as OA;
 
 class EcommercePageApiController extends Controller
 {
+    /**
+     * @OA\Get(
+     *     path="/api/v1/ecommerce-pages/{type}/{slug}",
+     *     summary="Récupérer une page e-commerce par type et slug optionnel",
+     *     tags={"Pages E-commerce"},
+     *     security={{"api.key": {}}},
+     *
+     *     @OA\Parameter(
+     *         name="type",
+     *         in="path",
+     *         required=true,
+     *         description="Type de page e-commerce",
+     *
+     *         @OA\Schema(type="string", example="collection")
+     *     ),
+     *
+     *     @OA\Parameter(
+     *         name="slug",
+     *         in="path",
+     *         required=false,
+     *         description="Slug optionnel de la page",
+     *
+     *         @OA\Schema(type="string", example="summer-sale")
+     *     ),
+     *
+     *     @OA\Parameter(
+     *         name="locale",
+     *         in="query",
+     *         required=false,
+     *
+     *         @OA\Schema(type="string", default="fr", enum={"fr", "en"})
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Page trouvée",
+     *
+     *         @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(property="id", type="integer", example=1),
+     *             @OA\Property(property="type", type="string", example="collection"),
+     *             @OA\Property(property="slug", type="string", nullable=true, example="summer-sale"),
+     *             @OA\Property(property="title", type="string", example="Soldes d'été"),
+     *             @OA\Property(
+     *                 property="content",
+     *                 type="object",
+     *
+     *                 @OA\Property(property="sections", type="array", @OA\Items(type="object"))
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="API key invalide ou manquante",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/ApiKeyError")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Page non trouvée",
+     *
+     *         @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(property="error", type="string", example="Page not found")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erreur serveur",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/ServerError")
+     *     )
+     * )
+     */
     public function show(Request $request, string $type, ?string $slug = null)
     {
         $locale = $request->get('locale', 'fr');

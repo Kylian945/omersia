@@ -28,12 +28,21 @@ class OrderController extends Controller
      *
      *     @OA\Response(
      *         response=200,
-     *         description="Liste des commandes",
+     *         description="Liste des commandes confirmées du client",
      *
      *         @OA\JsonContent(
      *             type="array",
      *
-     *             @OA\Items(ref="#/components/schemas/Order")
+     *             @OA\Items(
+     *                 type="object",
+     *
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="number", type="string", example="ORD-2024-00123"),
+     *                 @OA\Property(property="status", type="string", enum={"pending", "processing", "shipped", "completed", "cancelled"}, example="pending"),
+     *                 @OA\Property(property="total", type="number", format="float", example=76.97),
+     *                 @OA\Property(property="placed_at", type="string", format="date-time", nullable=true),
+     *                 @OA\Property(property="items_count", type="integer", example=3)
+     *             )
      *         )
      *     ),
      *
@@ -279,6 +288,79 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
+    /**
+     * @OA\Put(
+     *     path="/api/v1/orders/{order}",
+     *     summary="Mettre à jour une commande brouillon (checkout)",
+     *     tags={"Commandes"},
+     *     security={{"api.key": {}, "sanctum": {}}},
+     *
+     *     @OA\Parameter(
+     *         name="order",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la commande",
+     *
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"currency", "shipping_method_id", "customer_email", "shipping_address", "billing_address", "items", "discount_total", "shipping_total", "tax_total", "total"},
+     *
+     *             @OA\Property(property="currency", type="string", example="EUR"),
+     *             @OA\Property(property="shipping_method_id", type="integer", example=1),
+     *             @OA\Property(property="customer_email", type="string", format="email", example="customer@example.com"),
+     *             @OA\Property(property="customer_firstname", type="string", nullable=true, example="John"),
+     *             @OA\Property(property="customer_lastname", type="string", nullable=true, example="Doe"),
+     *             @OA\Property(property="shipping_address", type="object", ref="#/components/schemas/OrderAddress"),
+     *             @OA\Property(property="billing_address", type="object", ref="#/components/schemas/OrderAddress"),
+     *             @OA\Property(property="items", type="array", @OA\Items(type="object")),
+     *             @OA\Property(property="discount_total", type="number", format="float", example=0.00),
+     *             @OA\Property(property="shipping_total", type="number", format="float", example=5.00),
+     *             @OA\Property(property="tax_total", type="number", format="float", example=11.99),
+     *             @OA\Property(property="total", type="number", format="float", example=76.97)
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Commande mise à jour",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/Order")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non authentifié",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/UnauthorizedError")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=403,
+     *         description="Non autorisé (commande d'un autre client)",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/ForbiddenError")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erreur serveur",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/ServerError")
+     *     )
+     * )
+     */
     public function update(Request $request, Order $order)
     {
         $user = $request->user();
@@ -318,6 +400,55 @@ class OrderController extends Controller
 
     /**
      * Confirmer une commande brouillon (appelé après paiement réussi)
+     *
+     * @OA\Post(
+     *     path="/api/v1/orders/{id}/confirm",
+     *     summary="Confirmer une commande brouillon après paiement réussi",
+     *     tags={"Commandes"},
+     *     security={{"api.key": {}, "sanctum": {}}},
+     *
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         description="ID de la commande",
+     *
+     *         @OA\Schema(type="integer", example=1)
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Commande confirmée ou déjà confirmée",
+     *
+     *         @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(property="message", type="string", example="Commande confirmée avec succès"),
+     *             @OA\Property(property="order", ref="#/components/schemas/Order")
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non authentifié",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/UnauthorizedError")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=404,
+     *         description="Commande non trouvée",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/NotFoundError")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erreur serveur",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/ServerError")
+     *     )
+     * )
      */
     public function confirmOrder(Request $request, string $id)
     {

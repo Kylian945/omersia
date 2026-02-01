@@ -21,6 +21,51 @@ class PaymentController extends Controller
         $this->providers = $providers;
     }
 
+    /**
+     * @OA\Get(
+     *     path="/api/v1/payment-methods",
+     *     summary="Liste des méthodes de paiement disponibles",
+     *     tags={"Paiement"},
+     *     security={{"api.key": {}}},
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des méthodes de paiement actives",
+     *
+     *         @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(property="ok", type="boolean", example=true),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="array",
+     *
+     *                 @OA\Items(
+     *                     type="object",
+     *
+     *                     @OA\Property(property="id", type="integer", example=1),
+     *                     @OA\Property(property="name", type="string", example="Stripe"),
+     *                     @OA\Property(property="code", type="string", example="stripe")
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="API key invalide ou manquante",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/ApiKeyError")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erreur serveur",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/ServerError")
+     *     )
+     * )
+     */
     public function getAvailableMethods()
     {
         $methods = PaymentProvider::where('enabled', true)

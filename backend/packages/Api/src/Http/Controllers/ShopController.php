@@ -11,7 +11,7 @@ class ShopController
 {
     /**
      * @OA\Get(
-     *     path="/shop/info",
+     *     path="/api/v1/shop/info",
      *     summary="Get shop information",
      *     description="Returns the shop name, logo and other public information",
      *     operationId="getShopInfo",

@@ -20,7 +20,7 @@ class TaxCalculatorController extends Controller
 
     /**
      * @OA\Post(
-     *     path="/api/v1/taxes/calculate",
+     *     path="/api/v1/calculate-tax",
      *     summary="Calculer les taxes pour une commande",
      *     tags={"Taxes"},
      *     security={{"api.key": {}}},
@@ -95,6 +95,66 @@ class TaxCalculatorController extends Controller
 
     /**
      * Calculate included tax (extract tax from TTC price)
+     *
+     * @OA\Post(
+     *     path="/api/v1/calculate-included-tax",
+     *     summary="Extraire la taxe d'un prix TTC",
+     *     tags={"Taxes"},
+     *     security={{"api.key": {}}},
+     *
+     *     @OA\RequestBody(
+     *         required=true,
+     *
+     *         @OA\JsonContent(
+     *             required={"price_including_tax", "address"},
+     *
+     *             @OA\Property(property="price_including_tax", type="number", format="float", example=119.98, description="Prix TTC"),
+     *             @OA\Property(
+     *                 property="address",
+     *                 type="object",
+     *                 required={"country"},
+     *
+     *                 @OA\Property(property="country", type="string", example="FR"),
+     *                 @OA\Property(property="state", type="string", nullable=true, example="Île-de-France"),
+     *                 @OA\Property(property="postal_code", type="string", nullable=true, example="75001")
+     *             )
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=200,
+     *         description="Taxe extraite du prix TTC",
+     *
+     *         @OA\JsonContent(
+     *             type="object",
+     *
+     *             @OA\Property(property="tax_total", type="number", format="float", example=19.99),
+     *             @OA\Property(property="tax_rate", type="number", format="float", example=20.00),
+     *             @OA\Property(property="price_excluding_tax", type="number", format="float", example=99.99)
+     *         )
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=401,
+     *         description="API key invalide ou manquante",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/ApiKeyError")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/ValidationError")
+     *     ),
+     *
+     *     @OA\Response(
+     *         response=500,
+     *         description="Erreur serveur",
+     *
+     *         @OA\JsonContent(ref="#/components/schemas/ServerError")
+     *     )
+     * )
      */
     public function calculateIncludedTax(Request $request)
     {
