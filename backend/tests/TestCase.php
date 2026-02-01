@@ -3,8 +3,6 @@
 namespace Tests;
 
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
-use Illuminate\Foundation\Vite;
-use Illuminate\Support\HtmlString;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -19,23 +17,29 @@ abstract class TestCase extends BaseTestCase
 
     protected function withoutVite(): void
     {
-        $this->app->singleton(Vite::class, function () {
-            return new class extends Vite {
-                public function __invoke($entrypoints, $buildDirectory = null): HtmlString
-                {
-                    return new HtmlString('');
-                }
+        $manifest = json_encode([
+            'resources/js/app.js' => ['file' => 'assets/app.js', 'src' => 'resources/js/app.js'],
+            'resources/css/app.css' => ['file' => 'assets/app.css', 'src' => 'resources/css/app.css', 'isEntry' => true],
+        ]);
 
-                public function content($asset, $buildDirectory = null): string
-                {
-                    return '';
-                }
+        $buildDir = public_path('build');
 
-                public function asset($asset, $buildDirectory = null): string
-                {
-                    return "build/assets/{$asset}";
-                }
-            };
-        });
+        if (! is_dir($buildDir)) {
+            mkdir($buildDir, 0755, true);
+        }
+
+        file_put_contents($buildDir.'/manifest.json', $manifest);
+    }
+
+    protected function tearDown(): void
+    {
+        $manifestPath = public_path('build/manifest.json');
+
+        if (file_exists($manifestPath)) {
+            unlink($manifestPath);
+            @rmdir(public_path('build'));
+        }
+
+        parent::tearDown();
     }
 }
