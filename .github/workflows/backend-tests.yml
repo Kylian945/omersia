@@ -103,7 +103,7 @@ jobs:
       - name: Run PHPUnit tests
         run: |
           cd backend
-          php artisan test --coverage-clover coverage.xml
+          vendor/bin/phpunit --coverage-clover coverage.xml
         env:
           APP_ENV: testing
           DB_CONNECTION: mysql
