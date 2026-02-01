@@ -13,7 +13,7 @@ class SecurityHeadersTest extends TestCase
     {
         $response = $this->get('/');
 
-        $response->assertHeader('X-Frame-Options', 'SAMEORIGIN');
+        $response->assertHeader('X-Frame-Options', 'DENY');
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
         $response->assertHeader('X-XSS-Protection', '1; mode=block');
         $response->assertHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
@@ -38,7 +38,7 @@ class SecurityHeadersTest extends TestCase
         $this->assertStringContainsString("default-src 'self'", $csp);
         $this->assertStringContainsString("object-src 'none'", $csp);
         $this->assertStringContainsString("frame-ancestors 'none'", $csp);
-        $this->assertStringContainsString("script-src 'self' 'unsafe-inline'", $csp);
+        $this->assertMatchesRegularExpression("/script-src 'self' 'nonce-[A-Za-z0-9+\/=]+'/", $csp);
         $this->assertStringContainsString('https://js.stripe.com', $csp);
     }
 
