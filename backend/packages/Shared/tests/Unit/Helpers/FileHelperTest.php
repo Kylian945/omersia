@@ -9,6 +9,7 @@ use Tests\TestCase;
 
 class FileHelperTest extends TestCase
 {
+    /** @test */
     public function it_sanitizes_simple_filename(): void
     {
         $result = FileHelper::sanitizeFilename('test.jpg');
@@ -17,6 +18,7 @@ class FileHelperTest extends TestCase
         $this->assertStringEndsWith('.jpg', $result);
     }
 
+    /** @test */
     public function it_converts_filename_to_slug(): void
     {
         $result = FileHelper::sanitizeFilename('My Test File.jpg');
@@ -25,6 +27,7 @@ class FileHelperTest extends TestCase
         $this->assertStringEndsWith('.jpg', $result);
     }
 
+    /** @test */
     public function it_removes_special_characters(): void
     {
         $result = FileHelper::sanitizeFilename('test@#$%file!.jpg');
@@ -33,6 +36,7 @@ class FileHelperTest extends TestCase
         $this->assertStringEndsWith('.jpg', $result);
     }
 
+    /** @test */
     public function it_adds_random_identifier(): void
     {
         $result1 = FileHelper::sanitizeFilename('test.jpg');
@@ -42,6 +46,7 @@ class FileHelperTest extends TestCase
         $this->assertMatchesRegularExpression('/test-[a-zA-Z0-9]{8}\.jpg/', $result1);
     }
 
+    /** @test */
     public function it_normalizes_extension_to_lowercase(): void
     {
         $result = FileHelper::sanitizeFilename('test.JPG');
@@ -49,6 +54,7 @@ class FileHelperTest extends TestCase
         $this->assertStringEndsWith('.jpg', $result);
     }
 
+    /** @test */
     public function it_preserves_allowed_image_extensions(): void
     {
         $extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'];
@@ -59,6 +65,7 @@ class FileHelperTest extends TestCase
         }
     }
 
+    /** @test */
     public function it_preserves_pdf_extension(): void
     {
         $result = FileHelper::sanitizeFilename('document.pdf');
@@ -66,6 +73,7 @@ class FileHelperTest extends TestCase
         $this->assertStringEndsWith('.pdf', $result);
     }
 
+    /** @test */
     public function it_replaces_disallowed_extensions_with_bin(): void
     {
         $result = FileHelper::sanitizeFilename('malicious.exe');
@@ -73,6 +81,7 @@ class FileHelperTest extends TestCase
         $this->assertStringEndsWith('.bin', $result);
     }
 
+    /** @test */
     public function it_handles_file_without_extension(): void
     {
         $result = FileHelper::sanitizeFilename('filename');
@@ -80,6 +89,7 @@ class FileHelperTest extends TestCase
         $this->assertStringEndsWith('.bin', $result);
     }
 
+    /** @test */
     public function it_limits_filename_length(): void
     {
         $longName = str_repeat('a', 200).'.jpg';
@@ -91,6 +101,7 @@ class FileHelperTest extends TestCase
         $this->assertLessThanOrEqual(109, strlen($nameWithoutExtension));
     }
 
+    /** @test */
     public function it_handles_multiple_dots_in_filename(): void
     {
         $result = FileHelper::sanitizeFilename('my.file.name.jpg');
@@ -99,6 +110,7 @@ class FileHelperTest extends TestCase
         $this->assertStringEndsWith('.jpg', $result);
     }
 
+    /** @test */
     public function it_handles_unicode_characters(): void
     {
         $result = FileHelper::sanitizeFilename('café-photo.jpg');
@@ -107,6 +119,7 @@ class FileHelperTest extends TestCase
         $this->assertStringEndsWith('.jpg', $result);
     }
 
+    /** @test */
     public function it_handles_spaces_and_underscores(): void
     {
         $result = FileHelper::sanitizeFilename('my_test file.jpg');
@@ -115,6 +128,7 @@ class FileHelperTest extends TestCase
         $this->assertStringEndsWith('.jpg', $result);
     }
 
+    /** @test */
     public function it_handles_consecutive_special_characters(): void
     {
         $result = FileHelper::sanitizeFilename('test---file___name.jpg');

@@ -35,6 +35,7 @@ class SequenceConcurrencyTest extends TestCase
      * sequence numbers at the same time. Without proper locking,
      * this would produce duplicates.
      */
+    /** @test */
     public function it_generates_unique_numbers_under_concurrent_load(): void
     {
         $sequenceName = 'test_concurrency';
@@ -74,6 +75,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test order number generation with concurrent order creation.
      */
+    /** @test */
     public function it_generates_unique_order_numbers_concurrently(): void
     {
         $iterations = 50;
@@ -96,6 +98,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test invoice number generation with year-based sequences.
      */
+    /** @test */
     public function it_generates_unique_invoice_numbers_per_year(): void
     {
         $year = date('Y');
@@ -133,6 +136,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test that different years maintain separate sequences.
      */
+    /** @test */
     public function it_isolates_invoice_sequences_per_year(): void
     {
         $year2025 = '2025';
@@ -151,6 +155,7 @@ class SequenceConcurrencyTest extends TestCase
      * Test performance: generating 100 numbers should be reasonably fast.
      * Target: < 2 seconds for 100 generations
      */
+    /** @test */
     public function it_performs_efficiently_under_load(): void
     {
         $iterations = 100;
@@ -176,6 +181,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test that sequence service correctly initializes new sequences.
      */
+    /** @test */
     public function it_creates_new_sequence_with_correct_initial_value(): void
     {
         $sequenceName = 'new_sequence_test';
@@ -195,6 +201,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test sequence reset functionality.
      */
+    /** @test */
     public function it_resets_sequence_to_new_value(): void
     {
         $sequenceName = 'reset_test';
@@ -215,6 +222,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test that current() returns correct value without incrementing.
      */
+    /** @test */
     public function it_returns_current_value_without_incrementing(): void
     {
         $sequenceName = 'current_test';
@@ -230,6 +238,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test database transaction rollback doesn't increment sequence.
      */
+    /** @test */
     public function it_handles_transaction_rollback_correctly(): void
     {
         $sequenceName = 'rollback_test';
@@ -257,6 +266,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test multiple sequences are independent.
      */
+    /** @test */
     public function it_maintains_independent_sequences(): void
     {
         $orderNumber1 = $this->sequenceService->next('orders', 'ORD-');
@@ -273,6 +283,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test custom padding length.
      */
+    /** @test */
     public function it_supports_custom_padding_length(): void
     {
         $sequenceName = 'custom_padding';
@@ -293,6 +304,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test sequence with no prefix.
      */
+    /** @test */
     public function it_generates_numbers_without_prefix(): void
     {
         $sequenceName = 'no_prefix';
@@ -304,6 +316,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test concurrent access to same sequence doesn't cause deadlocks.
      */
+    /** @test */
     public function it_prevents_deadlocks_under_concurrent_access(): void
     {
         $sequenceName = 'deadlock_test';
@@ -328,6 +341,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test sequence with very high initial value.
      */
+    /** @test */
     public function it_handles_high_initial_values(): void
     {
         $sequenceName = 'high_value';
@@ -340,6 +354,7 @@ class SequenceConcurrencyTest extends TestCase
     /**
      * Test that sequence persists across multiple calls.
      */
+    /** @test */
     public function it_persists_sequence_state(): void
     {
         $sequenceName = 'persist_test';

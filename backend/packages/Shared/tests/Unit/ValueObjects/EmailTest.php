@@ -10,6 +10,7 @@ use Tests\TestCase;
 
 class EmailTest extends TestCase
 {
+    /** @test */
     public function it_creates_valid_email(): void
     {
         $email = new Email('test@example.com');
@@ -17,6 +18,7 @@ class EmailTest extends TestCase
         $this->assertEquals('test@example.com', $email->value());
     }
 
+    /** @test */
     public function it_normalizes_email_to_lowercase(): void
     {
         $email = new Email('Test@EXAMPLE.COM');
@@ -24,6 +26,7 @@ class EmailTest extends TestCase
         $this->assertEquals('test@example.com', $email->value());
     }
 
+    /** @test */
     public function it_trims_whitespace(): void
     {
         $email = new Email('  test@example.com  ');
@@ -31,6 +34,7 @@ class EmailTest extends TestCase
         $this->assertEquals('test@example.com', $email->value());
     }
 
+    /** @test */
     public function it_throws_exception_for_invalid_email(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -39,6 +43,7 @@ class EmailTest extends TestCase
         new Email('invalid-email');
     }
 
+    /** @test */
     public function it_throws_exception_for_empty_string(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -46,6 +51,7 @@ class EmailTest extends TestCase
         new Email('');
     }
 
+    /** @test */
     public function it_throws_exception_for_email_without_at_symbol(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -53,6 +59,7 @@ class EmailTest extends TestCase
         new Email('testexample.com');
     }
 
+    /** @test */
     public function it_extracts_domain(): void
     {
         $email = new Email('user@example.com');
@@ -60,6 +67,7 @@ class EmailTest extends TestCase
         $this->assertEquals('example.com', $email->domain());
     }
 
+    /** @test */
     public function it_extracts_local_part(): void
     {
         $email = new Email('user@example.com');
@@ -67,6 +75,7 @@ class EmailTest extends TestCase
         $this->assertEquals('user', $email->localPart());
     }
 
+    /** @test */
     public function it_handles_complex_email_addresses(): void
     {
         $email = new Email('user+tag@sub.example.com');
