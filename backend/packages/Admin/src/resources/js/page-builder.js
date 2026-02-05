@@ -1604,7 +1604,7 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
             let previewUrl;
             if (pageSlug === 'accueil' || pageSlug === 'home') {
                 // Page d'accueil via slug
-                previewUrl = `${frontendUrl}/${pageSlug}?preview=1&t=${Date.now()}`;
+                previewUrl = `${frontendUrl}?preview=1&t=${Date.now()}`;
             } else {
                 // Pages CMS classiques
                 previewUrl = `${frontendUrl}/content/${pageSlug}?preview=1&t=${Date.now()}`;

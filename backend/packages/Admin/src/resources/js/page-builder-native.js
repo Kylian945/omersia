@@ -1126,11 +1126,11 @@ export function pageBuilderNative(config) {
                 previewUrl = `${frontendUrl}/?preview=1&t=${Date.now()}`;
             } else if (pageSlug === 'accueil' || pageSlug === 'home') {
                 // Page d'accueil via slug
-                previewUrl = `${frontendUrl}/${pageSlug}?preview=1&t=${Date.now()}`;
+                previewUrl = `${frontendUrl}?preview=1&t=${Date.now()}`;
             } else if (pageType === 'category') {
-                previewUrl = `${frontendUrl}/cat/${pageSlug}?preview=1&t=${Date.now()}`;
+                previewUrl = `${frontendUrl}/categories/${pageSlug}?preview=1&t=${Date.now()}`;
             } else if (pageType === 'product') {
-                previewUrl = `${frontendUrl}/prod/${pageSlug}?preview=1&t=${Date.now()}`;
+                previewUrl = `${frontendUrl}/products/${pageSlug}?preview=1&t=${Date.now()}`;
             } else {
                 previewUrl = `${frontendUrl}/content/${pageSlug}?preview=1&t=${Date.now()}`;
             }

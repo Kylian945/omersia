@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
              @click.self="show = false"
              class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
              style="display: none;">
-            <div @click.stop class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl h-[90vh] flex flex-col">
+            <div @click.stop class="bg-white rounded-2xl shadow-2xl w-full max-w-7xl flex flex-col" style="height: 90vh;">
                 <div class="flex items-center justify-between border-b border-neutral-200 px-6 py-4">
                     <div>
                         <h3 class="text-lg font-semibold text-neutral-900">Aperçu de la page</h3>

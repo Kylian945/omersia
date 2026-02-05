@@ -50,7 +50,7 @@ export default async function ProductsPage({
   return (
     <>
       <Header />
-      <main className="flex-1 py-10">
+      <main className="flex-1 py-8 md:py-10">
         <Container>
           {/* Fil d’Ariane */}
           <div className="text-xs text-neutral-500 mb-2">

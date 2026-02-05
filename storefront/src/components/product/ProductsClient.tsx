@@ -89,27 +89,31 @@ export function ProductsClient({ products, themePath = "vision" }: Props) {
   return (
     <>
       {/* Top bar */}
+      <div className="text-neutral-800 text-xs block md:hidden mb-3 text-right">
+        {total} produit{total > 1 ? "s" : ""} trouvé{total > 1 ? "s" : ""}
+      </div>
       <div className="mb-3 flex items-center justify-between gap-3 text-xxxs">
         {/* Bouton filtres mobile */}
         <button
           type="button"
           onClick={() => setFiltersOpen(true)}
-          className="lg:hidden inline-flex items-center gap-1 rounded-full border border-neutral-300 bg-white px-3 py-1.5 text-xxxs text-neutral-800 hover:border-black hover:text-black hover:bg-neutral-50 transition"
+          className="lg:hidden inline-flex items-center gap-1 rounded-lg border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-800 hover:border-black hover:text-black hover:bg-neutral-50 transition"
         >
           <span className="text-xs">☰</span>
           <span>Afficher les filtres</span>
         </button>
 
+        <div className="text-neutral-800 text-xs hidden md:block">
+          {total} produit{total > 1 ? "s" : ""} trouvé{total > 1 ? "s" : ""}
+        </div>
         <div className="flex items-center gap-2 ml-auto">
-          <div className="text-neutral-500">
-            {total} produit{total > 1 ? "s" : ""} trouvé{total > 1 ? "s" : ""}
-          </div>
+
           <div className="flex items-center gap-1.5">
             <span className="text-neutral-500">Trier par</span>
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value as any)}
-              className="rounded-full border border-neutral-200 bg-white px-2 py-1 text-xxxs focus:outline-none focus:ring-1 focus:ring-black/70"
+              className="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
             >
               <option value="featured">Pertinence</option>
               <option value="price-asc">Prix croissant</option>

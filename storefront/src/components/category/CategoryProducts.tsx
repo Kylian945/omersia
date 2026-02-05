@@ -96,6 +96,9 @@ export function CategoryProducts({ products, themePath = "vision" }: Props) {
     <>
       <div className="mt-4">
         {/* Top bar */}
+        <div className="text-neutral-800 text-xs block md:hidden mb-3 text-right">
+              {total} produit{total > 1 ? "s" : ""} trouvé{total > 1 ? "s" : ""}
+            </div>
         <div className="mb-3 flex items-center justify-between gap-3 text-xxxs">
           <div className="flex items-center gap-3">
             <button
@@ -106,7 +109,7 @@ export function CategoryProducts({ products, themePath = "vision" }: Props) {
               <span className="text-xs">☰</span>
               <span>Afficher les filtres</span>
             </button>
-            <div className="text-neutral-800 text-xs">
+            <div className="text-neutral-800 text-xs hidden md:block">
               {total} produit{total > 1 ? "s" : ""} trouvé{total > 1 ? "s" : ""}
             </div>
           </div>

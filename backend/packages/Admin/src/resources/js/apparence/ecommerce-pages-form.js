@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (selectedType === 'home') {
             // Page d'accueil : slug = "accueil" automatiquement
-            if (slugInput) slugInput.value = 'accueil';
+            if (slugInput) slugInput.value = '/';
             if (slugInfoContainer) slugInfoContainer.style.display = 'block';
         } else if (selectedType === 'category') {
             // Page catégorie : afficher le select de catégories
