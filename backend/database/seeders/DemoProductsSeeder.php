@@ -20,6 +20,8 @@ class DemoProductsSeeder extends Seeder
 
     private string $seedImagesPath = 'database/seeders/images/products';
 
+    private string $seedCategoryImagesPath = 'database/seeders/images/categories';
+
     /**
      * Run the database seeds.
      */
@@ -92,6 +94,8 @@ class DemoProductsSeeder extends Seeder
 
         foreach ($categoriesData as $categoryData) {
             // Niveau 1
+            $level1Slug = Str::slug($categoryData['name']);
+
             $level1 = Category::create([
                 'shop_id' => $this->shopId,
                 'parent_id' => null,
@@ -99,11 +103,17 @@ class DemoProductsSeeder extends Seeder
                 'position' => $position++,
             ]);
 
+            // Ajouter l'image après création pour avoir l'ID (full slug = simple slug pour niveau 1)
+            $level1ImagePath = $this->copyCategoryImageToStorage($level1Slug, $level1->id);
+            if ($level1ImagePath) {
+                $level1->update(['image_path' => $level1ImagePath]);
+            }
+
             CategoryTranslation::create([
                 'category_id' => $level1->id,
                 'locale' => 'fr',
                 'name' => $categoryData['name'],
-                'slug' => Str::slug($categoryData['name']),
+                'slug' => $level1Slug,
                 'description' => $categoryData['description'],
                 'meta_title' => $categoryData['name'].' - Omersia',
                 'meta_description' => $categoryData['description'],
@@ -115,6 +125,8 @@ class DemoProductsSeeder extends Seeder
             if (isset($categoryData['children']) && count($categoryData['children']) > 0) {
                 $level2Position = 0;
                 foreach ($categoryData['children'] as $level2Data) {
+                    $level2FullSlug = Str::slug($categoryData['name'].'-'.$level2Data['name']);
+
                     $level2 = Category::create([
                         'shop_id' => $this->shopId,
                         'parent_id' => $level1->id,
@@ -122,11 +134,17 @@ class DemoProductsSeeder extends Seeder
                         'position' => $level2Position++,
                     ]);
 
+                    // Ajouter l'image après création pour avoir l'ID
+                    $level2ImagePath = $this->copyCategoryImageToStorage($level2FullSlug, $level2->id);
+                    if ($level2ImagePath) {
+                        $level2->update(['image_path' => $level2ImagePath]);
+                    }
+
                     CategoryTranslation::create([
                         'category_id' => $level2->id,
                         'locale' => 'fr',
                         'name' => $level2Data['name'],
-                        'slug' => Str::slug($categoryData['name'].'-'.$level2Data['name']),
+                        'slug' => $level2FullSlug,
                         'description' => $level2Data['description'],
                         'meta_title' => $level2Data['name'].' - '.$categoryData['name'].' - Omersia',
                         'meta_description' => $level2Data['description'],
@@ -138,6 +156,8 @@ class DemoProductsSeeder extends Seeder
                     if (isset($level2Data['children']) && count($level2Data['children']) > 0) {
                         $level3Position = 0;
                         foreach ($level2Data['children'] as $level3Data) {
+                            $level3FullSlug = Str::slug($categoryData['name'].'-'.$level2Data['name'].'-'.$level3Data['name']);
+
                             $level3 = Category::create([
                                 'shop_id' => $this->shopId,
                                 'parent_id' => $level2->id,
@@ -145,11 +165,17 @@ class DemoProductsSeeder extends Seeder
                                 'position' => $level3Position++,
                             ]);
 
+                            // Ajouter l'image après création pour avoir l'ID
+                            $level3ImagePath = $this->copyCategoryImageToStorage($level3FullSlug, $level3->id);
+                            if ($level3ImagePath) {
+                                $level3->update(['image_path' => $level3ImagePath]);
+                            }
+
                             CategoryTranslation::create([
                                 'category_id' => $level3->id,
                                 'locale' => 'fr',
                                 'name' => $level3Data['name'],
-                                'slug' => Str::slug($categoryData['name'].'-'.$level2Data['name'].'-'.$level3Data['name']),
+                                'slug' => $level3FullSlug,
                                 'description' => $level3Data['description'],
                                 'meta_title' => $level3Data['name'].' - '.$level2Data['name'].' - Omersia',
                                 'meta_description' => $level3Data['description'],
@@ -693,5 +719,42 @@ class DemoProductsSeeder extends Seeder
         Storage::disk('public')->put($destinationPath, $fileContent);
 
         return $destinationPath;
+    }
+
+    /**
+     * Copier une image de catégorie du dossier de seed vers le storage
+     * Essaie plusieurs patterns de nommage: cat_{slug-avec-tirets}.jpg, cat_{slug_avec_underscores}.jpg
+     */
+    private function copyCategoryImageToStorage(string $fullSlug, int $categoryId): ?string
+    {
+        // Patterns à essayer (tirets et underscores)
+        $patterns = [
+            "cat_{$fullSlug}.jpg",
+            'cat_'.str_replace('-', '_', $fullSlug).'.jpg',
+        ];
+
+        foreach ($patterns as $imageName) {
+            $sourcePath = base_path($this->seedCategoryImagesPath.'/'.$imageName);
+
+            if (file_exists($sourcePath)) {
+                // Générer un nom unique
+                $extension = pathinfo($imageName, PATHINFO_EXTENSION);
+                $filename = Str::random(40).'.'.$extension;
+
+                // Créer le chemin de destination avec l'ID de la catégorie séparé par chiffre
+                // Exemple: ID 1 -> categories/1/, ID 11 -> categories/1/1/, ID 123 -> categories/1/2/3/
+                $idPath = implode('/', str_split((string) $categoryId));
+                $directory = 'categories/'.$idPath;
+                $destinationPath = $directory.'/'.$filename;
+
+                // Copier le fichier vers le storage public
+                $fileContent = file_get_contents($sourcePath);
+                Storage::disk('public')->put($destinationPath, $fileContent);
+
+                return $destinationPath;
+            }
+        }
+
+        return null;
     }
 }

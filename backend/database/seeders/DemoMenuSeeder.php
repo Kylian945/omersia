@@ -84,10 +84,12 @@ class DemoMenuSeeder extends Seeder
 
             // If type is 'category', find category and generate URL
             if ($itemData['type'] === 'category') {
-                $category = Category::whereHas('translations', function ($query) use ($itemData) {
-                    $query->where('name', $itemData['categoryName'])
-                        ->where('locale', 'fr');
-                })->first();
+                // Chercher les catégories de niveau 1 (parent_id = null) pour le menu principal
+                $category = Category::whereNull('parent_id')
+                    ->whereHas('translations', function ($query) use ($itemData) {
+                        $query->where('name', $itemData['categoryName'])
+                            ->where('locale', 'fr');
+                    })->first();
 
                 if ($category) {
                     $translation = CategoryTranslation::where('category_id', $category->id)
