@@ -221,12 +221,31 @@ print_step_fancy "4" "10" "Building and starting Docker services..." "$ICON_DOCK
 
 cd "$PROJECT_ROOT"
 
+# Ensure .env.docker exists for Docker Compose defaults
+if [ ! -f ".env.docker" ] && [ -f ".env.docker.example" ]; then
+    cp ".env.docker.example" ".env.docker"
+    print_success "Created .env.docker from .env.docker.example"
+fi
+
+# Resolve MEILI_MASTER_KEY for root .env (prefer .env.docker)
+MEILI_MASTER_KEY_VALUE=""
+if [ -f ".env.docker" ]; then
+    MEILI_MASTER_KEY_VALUE=$(grep -E "^MEILI_MASTER_KEY=" ".env.docker" | tail -n 1 | cut -d= -f2-)
+fi
+if [ -z "$MEILI_MASTER_KEY_VALUE" ] && [ -f ".env.docker.example" ]; then
+    MEILI_MASTER_KEY_VALUE=$(grep -E "^MEILI_MASTER_KEY=" ".env.docker.example" | tail -n 1 | cut -d= -f2-)
+fi
+if [ -z "$MEILI_MASTER_KEY_VALUE" ]; then
+    MEILI_MASTER_KEY_VALUE="masterKey"
+fi
+
 # Create root .env with all configuration before starting containers
 cat > ".env" <<EOF
 DB_DATABASE=$DB_NAME
 DB_USERNAME=$DB_USERNAME
 DB_PASSWORD=$DB_PASSWORD
 DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD
+MEILI_MASTER_KEY=$MEILI_MASTER_KEY_VALUE
 FRONT_API_KEY=temporary_key_will_be_replaced
 EOF
 print_success "Created root .env with configuration"
@@ -364,24 +383,24 @@ stop_spinner $SPINNER_PID "success" "Default theme installed"
 if [ "$DEMO_DATA" = "true" ]; then
     show_spinner "Importing demo products..." &
     SPINNER_PID=$!
-    docker exec omersia-backend php artisan db:seed --class=DemoProductsSeeder --force
+    docker exec omersia-backend php artisan db:seed --class=DemoProductsSeeder --force > /dev/null 2>&1
     stop_spinner $SPINNER_PID "success" "Demo products imported"
 
     show_spinner "Creating demo menu..." &
     SPINNER_PID=$!
-    docker exec omersia-backend php artisan db:seed --class=DemoMenuSeeder --force
+    docker exec omersia-backend php artisan db:seed --class=DemoMenuSeeder --force > /dev/null 2>&1
     stop_spinner $SPINNER_PID "success" "Demo menu created"
 
     show_spinner "Initializing homepage with demo content..." &
     SPINNER_PID=$!
-    docker exec omersia-backend php artisan omersia:init-pages --demo --force
+    docker exec omersia-backend php artisan omersia:init-pages --demo --force > /dev/null 2>&1
     stop_spinner $SPINNER_PID "success" "Homepage initialized with demo content"
 else
     print_info "Skipping demo data"
 
     show_spinner "Initializing homepage..." &
     SPINNER_PID=$!
-    docker exec omersia-backend php artisan omersia:init-pages --force
+    docker exec omersia-backend php artisan omersia:init-pages --force > /dev/null 2>&1
     stop_spinner $SPINNER_PID "success" "Homepage initialized"
 fi
 
@@ -398,7 +417,7 @@ print_step_fancy "10" "10" "Finalizing setup..." "$ICON_LOCK"
 
 show_spinner "Creating admin user..." &
 SPINNER_PID=$!
-docker exec omersia-backend php artisan admin:create --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD" --no-interaction || {
+docker exec omersia-backend php artisan admin:create --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD" --no-interaction > /dev/null 2>&1 || {
     stop_spinner $SPINNER_PID "warning" "Admin creation via CLI failed"
     print_warning "You may need to create it manually"
     SPINNER_PID=""
