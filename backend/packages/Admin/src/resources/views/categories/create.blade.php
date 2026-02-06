@@ -4,7 +4,7 @@
 @section('page-title', 'Créer une catégorie')
 
 @section('content')
-<form action="{{ route('categories.store') }}" method="POST" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+<form action="{{ route('categories.store') }}" method="POST" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
     @csrf
 
     {{-- Colonne principale --}}
@@ -66,6 +66,25 @@
 
     {{-- Colonne droite --}}
     <div class="space-y-4">
+        {{-- Image --}}
+        <div class="rounded-2xl bg-white border border-black/5 shadow-sm p-4 space-y-3">
+            <div>
+                <div class="text-xs font-semibold text-gray-800">Image</div>
+                <div class="text-xxxs text-gray-500">
+                    Image de la catégorie (jpeg, png, jpg, gif, webp - max 2 Mo)
+                </div>
+            </div>
+
+            <div class="space-y-2">
+                <label class="block text-xs font-medium text-gray-700">Choisir une image</label>
+                <input type="file" name="image" accept="image/jpeg,image/png,image/jpg,image/gif,image/webp"
+                       class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-xs file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200">
+                @error('image')
+                    <p class="text-xxxs text-red-500">{{ $message }}</p>
+                @enderror
+            </div>
+        </div>
+
         {{-- Organisation --}}
         <div class="rounded-2xl bg-white border border-black/5 shadow-sm p-4 space-y-3">
             <div class="text-xs font-semibold text-gray-800">Organisation</div>

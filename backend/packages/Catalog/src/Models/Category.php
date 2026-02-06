@@ -24,7 +24,27 @@ class Category extends Model
         'parent_id',
         'is_active',
         'position',
+        'image_path',
     ];
+
+    protected $appends = ['image_url'];
+
+    /**
+     * Get the full URL for the category image.
+     */
+    public function getImageUrlAttribute(): ?string
+    {
+        if (! $this->image_path) {
+            return null;
+        }
+
+        // Si le chemin contient déjà un protocole, retourner directement
+        if (str_starts_with($this->image_path, 'http://') || str_starts_with($this->image_path, 'https://')) {
+            return $this->image_path;
+        }
+
+        return asset('storage/'.$this->image_path);
+    }
 
     public function parent(): BelongsTo
     {

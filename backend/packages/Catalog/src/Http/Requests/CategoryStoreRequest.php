@@ -32,6 +32,7 @@ final class CategoryStoreRequest extends FormRequest
             'parent_id' => ['nullable', 'integer', 'exists:categories,id'],
             'is_active' => ['nullable', 'boolean'],
             'position' => ['nullable', 'integer', 'min:0'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],
         ];
     }
 
@@ -67,6 +68,10 @@ final class CategoryStoreRequest extends FormRequest
 
             'position.integer' => 'La position doit être un nombre entier.',
             'position.min' => 'La position ne peut pas être négative.',
+
+            'image.image' => 'Le fichier doit être une image.',
+            'image.mimes' => 'L\'image doit être au format jpeg, png, jpg, gif ou webp.',
+            'image.max' => 'L\'image ne peut pas dépasser 2 Mo.',
         ];
     }
 }

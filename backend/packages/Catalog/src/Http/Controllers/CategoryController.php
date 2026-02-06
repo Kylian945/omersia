@@ -9,9 +9,14 @@ use Omersia\Catalog\Http\Requests\CategoryStoreRequest;
 use Omersia\Catalog\Http\Requests\CategoryUpdateRequest;
 use Omersia\Catalog\Models\Category;
 use Omersia\Catalog\Models\CategoryTranslation;
+use Omersia\Catalog\Services\CategoryImageService;
 
 class CategoryController extends Controller
 {
+    public function __construct(
+        private CategoryImageService $imageService
+    ) {}
+
     public function index()
     {
         $this->authorize('categories.view');
@@ -52,6 +57,11 @@ class CategoryController extends Controller
             'meta_title' => $validated['meta_title'] ?? null,
             'meta_description' => $validated['meta_description'] ?? null,
         ]);
+
+        // Gestion de l'image
+        if ($request->hasFile('image')) {
+            $this->imageService->uploadImage($category, $request->file('image'));
+        }
 
         return redirect()->route('categories.index')
             ->with('success', 'Catégorie créée avec succès.');
@@ -99,6 +109,13 @@ class CategoryController extends Controller
             'meta_description' => $validated['meta_description'] ?? null,
         ])->save();
 
+        // Gestion de l'image
+        if ($request->boolean('delete_image')) {
+            $this->imageService->deleteImage($category);
+        } elseif ($request->hasFile('image')) {
+            $this->imageService->uploadImage($category, $request->file('image'));
+        }
+
         return redirect()->route('categories.index')
             ->with('success', 'Catégorie mise à jour avec succès.');
     }
@@ -106,6 +123,9 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $this->authorize('categories.delete');
+
+        // Supprimer l'image avant de supprimer la catégorie
+        $this->imageService->deleteImage($category);
 
         $category->delete();
 

@@ -102,7 +102,7 @@ class CategoryController extends Controller
                 'name' => $translation?->name ?? 'Sans nom',
                 'slug' => $translation?->slug ?? '',
                 'description' => $translation?->description,
-                'image' => $category->image,
+                'image' => $category->image_url,
                 'count' => $productCount,
                 'parent_id' => $category->parent_id,
                 'position' => $category->position,
