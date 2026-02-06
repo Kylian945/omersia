@@ -90,9 +90,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Créer la réponse appropriée selon le type de requête
+    // Rediriger vers l'accueil (l'utilisateur est automatiquement connecté via le token)
     const response = isAjax
       ? NextResponse.json({ success: true, message: "Compte créé avec succès" })
-      : NextResponse.redirect(new URL("/login", FRONTEND_URL));
+      : NextResponse.redirect(new URL("/", FRONTEND_URL));
 
     // Définir le cookie auth_token si l'API renvoie un token
     if (data.token) {
