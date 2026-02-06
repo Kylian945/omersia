@@ -1,3 +1,12 @@
+/**
+ * API Barrel Exports
+ *
+ * NOTE: For better tree-shaking and bundle optimization, prefer direct imports:
+ * - import { getProducts } from "@/lib/api-products"
+ * - import { getCategories } from "@/lib/api-categories"
+ *
+ * This barrel file is kept for backward compatibility.
+ */
 export * from "./types/api-types";
 export * from "./api-http";
 export * from "./api-pages";

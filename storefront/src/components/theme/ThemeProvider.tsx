@@ -35,12 +35,15 @@ export async function ThemeProvider() {
 
     return (
       <>
+        {/* Preconnect to Google Fonts for faster font loading */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <style dangerouslySetInnerHTML={{ __html: globalStyles }} />
-        {/* Inject Google Fonts dynamically */}
+        {/* Inject Google Fonts dynamically with display=swap for better performance */}
         {theme.settings.typography && (
           <link
             rel="stylesheet"
-            href={`https://fonts.googleapis.com/css2?family=${theme.settings.typography.heading_font}:wght@400;500;600;700;800&family=${theme.settings.typography.body_font}:wght@400;500;600;700&display=swap`}
+            href={`https://fonts.googleapis.com/css2?family=${encodeURIComponent(theme.settings.typography.heading_font)}:wght@400;500;600;700;800&family=${encodeURIComponent(theme.settings.typography.body_font)}:wght@400;500;600;700&display=swap`}
           />
         )}
       </>

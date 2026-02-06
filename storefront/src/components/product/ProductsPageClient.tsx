@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { getProductsClient } from "@/lib/api-products-client";
 import { ProductsClient } from "./ProductsClient";
 import { Pagination } from "@/components/common/Pagination";
@@ -16,6 +16,11 @@ export function ProductsPageClient({ initialData, themePath }: ProductsPageClien
   const [data, setData] = useState<ProductsResponse>(initialData);
   const [isLoading, setIsLoading] = useState(false);
 
+  // Cache for visited pages - prevents refetching when navigating back
+  const pageCache = useRef<Map<number, ProductsResponse>>(
+    new Map([[initialData.current_page || 1, initialData]])
+  );
+
   const currentPage = data.current_page || 1;
   const lastPage = data.last_page || 1;
   const total = data.total || 0;
@@ -23,19 +28,30 @@ export function ProductsPageClient({ initialData, themePath }: ProductsPageClien
   const from = data.from || null;
   const to = data.to || null;
 
-  const handlePageChange = async (page: number) => {
+  const handlePageChange = useCallback(async (page: number) => {
+    // Check cache first
+    const cachedData = pageCache.current.get(page);
+    if (cachedData) {
+      setData(cachedData);
+      // Use instant scroll to avoid blocking main thread
+      window.scrollTo({ top: 0, behavior: "instant" });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const newData = await getProductsClient("fr", page);
       if (newData) {
+        // Store in cache
+        pageCache.current.set(page, newData);
         setData(newData);
       }
     } finally {
       setIsLoading(false);
-      // Scroll to top
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      // Use instant scroll to avoid blocking main thread
+      window.scrollTo({ top: 0, behavior: "instant" });
     }
-  };
+  }, []);
 
   const products = (data.data || []) as ListingProduct[];
 

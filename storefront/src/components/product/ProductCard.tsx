@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import type { ListingProduct } from "./ListingProducts";
 import { getMainImage } from "@/lib/image-utils";
@@ -22,7 +23,7 @@ type Props = {
   hrefBase?: string; // ex: "/products"
 };
 
-export function ProductCard({ product, hrefBase = "/products" }: Props) {
+export const ProductCard = memo(function ProductCard({ product, hrefBase = "/products" }: Props) {
   const {
     productCardStyle,
     productHoverEffect,
@@ -238,4 +239,4 @@ export function ProductCard({ product, hrefBase = "/products" }: Props) {
       </div>
     </Link>
   );
-}
+});

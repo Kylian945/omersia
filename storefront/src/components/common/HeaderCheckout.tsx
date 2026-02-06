@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Container } from "./Container";
 import { ShopInfo } from "@/lib/types/menu-types";
 
@@ -15,12 +15,17 @@ export function HeaderCheckout({ shopInfo }: { shopInfo: ShopInfo; }) {
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2">
               {shopInfo.logo_url ? (
-                <Image
+                <OptimizedImage
                   src={shopInfo.logo_url}
                   alt={shopInfo.display_name}
                   width={120}
                   height={32}
                   className="h-8 w-auto object-contain"
+                  fallback={
+                    <div className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center font-bold">
+                      {shopInfo.display_name?.[0]?.toUpperCase() || "S"}
+                    </div>
+                  }
                 />
               ) : (
                 <div className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center font-bold">

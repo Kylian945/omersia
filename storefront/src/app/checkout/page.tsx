@@ -9,13 +9,14 @@ import { cookies } from "next/headers";
 
 
 export default async function CheckoutPage() {
-    // 1) User côté serveur via /auth/me
-    const user = await fetchUserSSR();
+    const [user, shopInfo, cookieStore] = await Promise.all([
+        fetchUserSSR(),
+        getShopInfo(),
+        cookies(),
+    ]);
 
-    // 2) Adresses côté serveur via Storefront API
-    const token = (await cookies()).get("auth_token")?.value;
+    const token = cookieStore.get("auth_token")?.value;
     const addresses: Address[] = user ? (await getAddresses(token)) ?? [] : [];
-    const shopInfo = await getShopInfo();
 
     return (
         <>

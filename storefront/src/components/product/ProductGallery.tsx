@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 type NormalizedImage = {
   id: number;
@@ -26,15 +26,21 @@ export function ProductGallery({ images, mainImage, alt }: Props) {
   return (
     <section className="space-y-3">
       {/* Image principale */}
-      <div className="aspect-square w-full rounded-2xl border border-neutral-200 bg-white flex items-center justify-center overflow-hidden">
+      <div className="aspect-square w-full rounded-2xl border border-neutral-200 bg-white flex items-center justify-center overflow-hidden relative">
         {hasImages && selected?.url ? (
-          <Image
+          <OptimizedImage
             src={selected.url}
             alt={alt}
-            width={800}
-            height={800}
-            className="h-full w-full object-cover"
-            unoptimized
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            className="object-cover"
+            priority
+            fallback={
+              <div className="flex flex-col items-center justify-center text-xs text-neutral-400 h-full w-full">
+                <div className="w-10 h-10 rounded-full border border-dashed border-neutral-300 mb-2" />
+                Image non disponible
+              </div>
+            }
           />
         ) : (
           <div className="flex flex-col items-center justify-center text-xs text-neutral-400">
@@ -62,13 +68,12 @@ export function ProductGallery({ images, mainImage, alt }: Props) {
                   }
                 `}
               >
-                <Image
+                <OptimizedImage
                   src={img.url}
                   alt={alt}
                   fill
                   sizes="72px"
                   className="object-cover"
-                  unoptimized
                 />
               </button>
             );

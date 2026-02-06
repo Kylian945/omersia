@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import type { ListingProduct } from "@/components/product/ListingProducts";
 import { getMainImage } from "@/lib/image-utils";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
@@ -154,12 +154,17 @@ export function ProductCard({ product, hrefBase = "/products" }: Props) {
         style={{ paddingBottom: productImageRatio }}
       >
         {image ? (
-          <Image
+          <OptimizedImage
             src={image}
             alt={t?.name || ""}
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
+            fallback={
+              <div className="absolute inset-0 flex items-center justify-center text-xxxs text-neutral-400">
+                Aucune image
+              </div>
+            }
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-xxxs text-neutral-400">

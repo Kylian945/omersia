@@ -128,4 +128,39 @@ export function useCheckoutContext() {
   return context;
 }
 
+/**
+ * Selector hooks for optimized re-renders
+ * Use these instead of useCheckoutContext when you only need specific parts
+ */
+export function useCheckoutNavigation() {
+  const { currentStep, setCurrentStep, nextStep, prevStep } = useCheckoutContext();
+  return { currentStep, setCurrentStep, nextStep, prevStep };
+}
+
+export function useCheckoutIdentity() {
+  const { identity, setIdentity, updateIdentity, effectiveUser } = useCheckoutContext();
+  return { identity, setIdentity, updateIdentity, effectiveUser };
+}
+
+export function useCheckoutShipping() {
+  const {
+    shippingMethods, setShippingMethods, shippingMethodId, setShippingMethodId,
+    shippingLoading, shippingError, selectedShippingMethod, shippingCostBase
+  } = useCheckoutContext();
+  return {
+    shippingMethods, setShippingMethods, shippingMethodId, setShippingMethodId,
+    shippingLoading, shippingError, selectedShippingMethod, shippingCostBase
+  };
+}
+
+export function useCheckoutPayment() {
+  const { paymentMethod, setPaymentMethod } = useCheckoutContext();
+  return { paymentMethod, setPaymentMethod };
+}
+
+export function useCheckoutOrder() {
+  const { orderId, orderNumber, submitting, setSubmitting } = useCheckoutContext();
+  return { orderId, orderNumber, submitting, setSubmitting };
+}
+
 export { CheckoutContext };

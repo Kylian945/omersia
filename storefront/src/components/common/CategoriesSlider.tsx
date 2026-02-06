@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { useCallback, useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -132,12 +132,13 @@ export function CategoriesSlider({
                 {/* Image */}
                 <div className="relative aspect-square overflow-hidden">
                   {category.image ? (
-                    <Image
+                    <OptimizedImage
                       src={category.image}
                       alt={category.name}
                       fill
                       sizes="(max-width: 768px) 50vw, 33vw"
                       className="object-cover transition-transform duration-300 group-hover:scale-110"
+                      fallback={<div className="h-full w-full bg-gray-100" />}
                     />
                   ) : (
                     <div className="h-full w-full bg-gray-100" />

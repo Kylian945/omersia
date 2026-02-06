@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { apiJson } from "./api-http";
 import { Category, CategoriesResponse } from "./types/category-types";
 import { logger } from "./logger";
@@ -32,7 +33,11 @@ export async function getCategories(
   return data?.categories || [];
 }
 
-export async function getCategoryBySlug(slug: string, locale = "fr"): Promise<Category | null> {
+/**
+ * Get a category by slug
+ * Wrapped with React cache() for per-request deduplication
+ */
+export const getCategoryBySlug = cache(async (slug: string, locale = "fr"): Promise<Category | null> => {
   const safeSlug = encodeURIComponent(slug);
   const { res, data } = await apiJson<Category>(
     `/categories/${safeSlug}?locale=${encodeURIComponent(locale)}`,
@@ -47,4 +52,4 @@ export async function getCategoryBySlug(slug: string, locale = "fr"): Promise<Ca
   }
 
   return data;
-}
+});

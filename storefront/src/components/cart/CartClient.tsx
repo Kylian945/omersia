@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { useCart } from "@/components/cart/CartContext";
 import { Container } from "@/components/common/Container";
 import { Trash2, ArrowLeft, ArrowRight } from "lucide-react";
@@ -81,12 +81,13 @@ export default function CartPage() {
                     {/* Image */}
                     <div className="relative w-16 h-16 bg-neutral-50 rounded-lg overflow-hidden flex items-center justify-center">
                       {item.imageUrl ? (
-                        <Image
+                        <OptimizedImage
                           src={item.imageUrl}
                           alt={item.name}
                           fill
                           sizes="64px"
                           className="object-cover"
+                          fallback={<span className="text-xxxs text-neutral-400">Image</span>}
                         />
                       ) : (
                         <span className="text-xxxs text-neutral-400">Image</span>

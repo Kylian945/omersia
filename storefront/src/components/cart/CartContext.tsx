@@ -5,12 +5,17 @@ import {
   useContext,
   useState,
   useEffect,
+  useRef,
+  useCallback,
   ReactNode,
 } from "react";
 import { CartItem } from "@/lib/types/product-types";
 import { AddToCartModal } from "./AddToCartModal";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
+
+// Debounce delay for localStorage and backend sync (ms)
+const SYNC_DEBOUNCE_MS = 300;
 
 // Re-export CartItem pour compatibilité
 export type { CartItem };
@@ -86,22 +91,44 @@ export function CartProvider({
     setIsHydrated(true);
   }, []);
 
-  // 2) Sauvegarde dans localStorage à chaque changement d'items
+  // 2) Sauvegarde dans localStorage à chaque changement d'items (debounced)
+  const localStorageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (!isHydrated) return;
-    try {
-      window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
-    } catch (e) {
-      logger.error("Failed to save cart to localStorage", e);
+
+    // Clear previous timeout
+    if (localStorageTimeoutRef.current) {
+      clearTimeout(localStorageTimeoutRef.current);
     }
+
+    // Debounce localStorage writes to avoid blocking main thread
+    localStorageTimeoutRef.current = setTimeout(() => {
+      try {
+        window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
+      } catch (e) {
+        logger.error("Failed to save cart to localStorage", e);
+      }
+    }, SYNC_DEBOUNCE_MS);
+
+    return () => {
+      if (localStorageTimeoutRef.current) {
+        clearTimeout(localStorageTimeoutRef.current);
+      }
+    };
   }, [items, isHydrated]);
 
-  // 3) Sync avec le backend Laravel
+  // 3) Sync avec le backend Laravel (debounced)
+  const backendSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
     if (!isHydrated) return;
 
     // Si aucun item et pas de token, pas la peine de sync
     if (!items.length && !cartToken) return;
+
+    // Clear previous timeout
+    if (backendSyncTimeoutRef.current) {
+      clearTimeout(backendSyncTimeoutRef.current);
+    }
 
     let abort = false;
 
@@ -124,7 +151,7 @@ export function CartProvider({
 
         if (!res.ok) {
           const text = await res.text().catch(() => "");
-          logger.error("Cart sync failed", res.status, text);
+          logger.error(`Cart sync failed: ${res.status} - ${text}`);
           return;
         }
 
@@ -170,21 +197,27 @@ export function CartProvider({
       }
     };
 
-    sync();
+    // Debounce backend sync to batch rapid changes
+    backendSyncTimeoutRef.current = setTimeout(sync, SYNC_DEBOUNCE_MS);
 
     return () => {
       abort = true;
+      if (backendSyncTimeoutRef.current) {
+        clearTimeout(backendSyncTimeoutRef.current);
+      }
     };
   }, [items, cartToken, isHydrated]);
 
+  // Helper to create a unique key for cart items
+  const getItemKey = useCallback((item: CartItem) =>
+    `${item.id}-${item.variantId ?? 'none'}-${item.variantLabel ?? 'none'}`,
+  []);
+
   const addItem = (item: CartItem, showModal: boolean = true) => {
     setItems((prev) => {
-      const existingIndex = prev.findIndex(
-        (p) =>
-          p.id === item.id &&
-          p.variantId === item.variantId &&
-          p.variantLabel === item.variantLabel
-      );
+      // Build a Map for O(1) lookup instead of O(n) findIndex
+      const itemKey = getItemKey(item);
+      const existingIndex = prev.findIndex((p) => getItemKey(p) === itemKey);
 
       if (existingIndex !== -1) {
         const next = [...prev];

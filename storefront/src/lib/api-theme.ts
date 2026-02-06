@@ -1,3 +1,4 @@
+import { cache } from 'react';
 import { apiJson, hasApiKey } from './api-http';
 
 export interface ProductSettings {
@@ -69,8 +70,9 @@ export interface ThemeResponse {
 
 /**
  * Fetch active theme settings from the backend
+ * Wrapped with React cache() for per-request deduplication
  */
-export async function getThemeSettings(): Promise<ThemeResponse> {
+export const getThemeSettings = cache(async (): Promise<ThemeResponse> => {
   // Ne pas faire d'appel API si la clé n'est pas configurée
   if (!hasApiKey()) {
     // Retourner un thème par défaut minimal
@@ -180,4 +182,4 @@ export async function getThemeSettings(): Promise<ThemeResponse> {
   }
 
   return data;
-}
+});

@@ -58,15 +58,12 @@ export default async function Home() {
     );
   }
 
-  // Fallback to default homepage
-  const products = await getFeaturedProducts();
+  const [products, categories, widgets] = await Promise.all([
+    getFeaturedProducts(),
+    getCategories("fr", true), // parentOnly = true pour avoir uniquement les catégories principales
+    getThemeWidgets(),
+  ]);
   const featured = products.slice(0, 12);
-
-  // Récupérer les catégories depuis l'API
-  const categories = await getCategories("fr", true); // parentOnly = true pour avoir uniquement les catégories principales
-
-  // Load theme widgets
-  const widgets = await getThemeWidgets();
   const { HeroBanner, FeaturesBar, PromoBanner, Testimonials, Newsletter } = widgets;
 
   const testimonials = [

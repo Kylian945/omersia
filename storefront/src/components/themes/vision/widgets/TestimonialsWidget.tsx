@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { SmartContainer } from "@/components/common/SmartContainer";
 import { getPaddingClasses, getMarginClasses } from "@/lib/widget-helpers";
 import { validateSpacingConfig } from "@/lib/css-variable-sanitizer";
@@ -83,12 +83,23 @@ export function Testimonials({
               <div className="mt-4 flex items-center gap-3">
                 {testimonial.avatar ? (
                   <div className="relative h-10 w-10 rounded-full overflow-hidden">
-                    <Image
+                    <OptimizedImage
                       src={testimonial.avatar}
                       alt={testimonial.name}
                       fill
                       sizes="40px"
                       className="object-cover"
+                      fallback={
+                        <div
+                          className="flex h-full w-full items-center justify-center text-sm font-semibold"
+                          style={{
+                            backgroundColor: "var(--theme-primary, #111827)",
+                            color: "var(--theme-button-primary-text, #ffffff)",
+                          }}
+                        >
+                          {testimonial.name.charAt(0)}
+                        </div>
+                      }
                     />
                   </div>
                 ) : (

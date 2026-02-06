@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { apiJson } from "./api-http";
 import { ProductsResponse, ProductDetailResponse } from "./types/product-types";
 
@@ -47,7 +48,11 @@ export async function getProducts(
   return data;
 }
 
-export async function getProductBySlug(slug: string, locale = "fr"): Promise<ProductDetailResponse | null> {
+/**
+ * Get a product by slug
+ * Wrapped with React cache() for per-request deduplication
+ */
+export const getProductBySlug = cache(async (slug: string, locale = "fr"): Promise<ProductDetailResponse | null> => {
   const safeSlug = encodeURIComponent(slug);
   const { res, data } = await apiJson<ProductDetailResponse>(
     `/products/${safeSlug}?locale=${locale}`,
@@ -58,4 +63,4 @@ export async function getProductBySlug(slug: string, locale = "fr"): Promise<Pro
 
   if (!res.ok) return null;
   return data;
-}
+});

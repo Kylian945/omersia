@@ -1,10 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { X } from "lucide-react";
 import { useCart } from "./CartContext";
-import Link from "next/link";
 import { Button } from "../common/Button";
 import { ModuleHooks } from "../modules/ModuleHooks";
 
@@ -86,12 +85,13 @@ export function CartDrawer() {
               <div className="flex flex-1 items-center gap-2 py-0.5 border border-neutral-100 px-2 rounded-lg">
                 <div className="relative w-14 h-14 rounded-lg bg-neutral-50 overflow-hidden flex items-center justify-center">
                   {item.imageUrl ? (
-                    <Image
+                    <OptimizedImage
                       src={item.imageUrl}
                       alt={item.name}
                       fill
                       sizes="56px"
                       className="object-cover"
+                      fallback={<span className="text-xxxs text-neutral-400">Image</span>}
                     />
                   ) : (
                     <span className="text-xxxs text-neutral-400">Image</span>

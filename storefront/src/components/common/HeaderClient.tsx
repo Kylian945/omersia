@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Container } from "./Container";
@@ -139,13 +139,18 @@ export function HeaderClient({
                 {/* Logo */}
                 <Link href="/" className="flex items-center gap-2">
                   {shopInfo.logo_url ? (
-                    <Image
+                    <OptimizedImage
                       src={shopInfo.logo_url}
                       alt={shopInfo.display_name}
                       width={120}
                       height={32}
                       className="h-8 w-auto object-contain"
                       priority
+                      fallback={
+                        <div className="h-9 w-9 rounded-xl text-xl bg-black text-white flex items-center justify-center font-bold">
+                          {shopInfo.display_name?.[0]?.toUpperCase() || "O"}
+                        </div>
+                      }
                     />
                   ) : (
                     <div className="h-9 w-9 rounded-xl text-xl bg-black text-white flex items-center justify-center font-bold">

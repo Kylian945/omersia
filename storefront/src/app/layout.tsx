@@ -58,9 +58,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }) {
   const apiKeyPresent = hasApiKey();
-  const themeSettings = await getThemeSettings();
+
+  const [themeSettings, initialUser] = await Promise.all([
+    getThemeSettings(),
+    getInitialUser(),
+  ]);
+
   const cartType = themeSettings.settings.cart?.cart_type || 'drawer';
-  const initialUser = await getInitialUser();
 
   return (
     <html lang="fr">

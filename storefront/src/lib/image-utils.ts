@@ -14,10 +14,73 @@ type ProductWithImages = {
   images?: ImageLike[] | null;
 };
 
+// Use image proxy in Docker development (set via NEXT_PUBLIC_USE_IMAGE_PROXY)
+// This must be a NEXT_PUBLIC_ var so it's consistent between server and client
+const USE_IMAGE_PROXY = process.env.NEXT_PUBLIC_USE_IMAGE_PROXY === "true";
+
+// Backend URL for non-Docker environments
 const BACKEND_URL =
   process.env.NEXT_PUBLIC_BACKEND_URL ||
   process.env.BACKEND_URL ||
-  "";
+  "http://localhost:8000";
+
+/**
+ * Extracts the path from a backend image URL
+ */
+function extractImagePath(url: string): string | null {
+  if (!url) return null;
+
+  const patterns = [
+    /^https?:\/\/localhost(?::\d+)?(.+)$/,
+    /^https?:\/\/127\.0\.0\.1(?::\d+)?(.+)$/,
+    /^https?:\/\/backend(?::\d+)?(.+)$/,
+    /^https?:\/\/nginx(?::\d+)?(.+)$/,
+    /^https?:\/\/host\.docker\.internal(?::\d+)?(.+)$/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) {
+      return match[1];
+    }
+  }
+
+  if (url.startsWith("/")) {
+    return url;
+  }
+
+  return null;
+}
+
+/**
+ * Normalizes an image URL for Next.js Image optimization
+ * In Docker, uses the image proxy to handle internal network routing
+ */
+export function normalizeBackendUrl(url: string): string {
+  if (!url) return url;
+
+  // Already a proxy URL - don't transform again
+  if (url.startsWith("/api/image-proxy")) {
+    return url;
+  }
+
+  if (USE_IMAGE_PROXY) {
+    const path = extractImagePath(url);
+    // Only transform storage paths, not API paths
+    if (path && path.startsWith("/storage")) {
+      return `/api/image-proxy?path=${encodeURIComponent(path)}`;
+    }
+  }
+
+  // For non-Docker environments, normalize to localhost:8000
+  return url
+    .replace(/^http:\/\/backend:8001/, "http://localhost:8000")
+    .replace(/^http:\/\/backend:8000/, "http://localhost:8000")
+    .replace(/^http:\/\/backend\//, "http://localhost:8000/")
+    .replace(/^http:\/\/nginx(?::\d+)?\//, "http://localhost:8000/")
+    .replace(/^http:\/\/127\.0\.0\.1:8000/, "http://localhost:8000")
+    .replace(/^http:\/\/127\.0\.0\.1\//, "http://localhost:8000/");
+}
 
 /**
  * Construit l'URL complète d'une image produit
@@ -26,19 +89,27 @@ const BACKEND_URL =
 export function buildImageUrl(img?: ImageLike | null): string | null {
   if (!img) return null;
 
-  // Si l'image a déjà une URL complète, l'utiliser
-  if (img.url) return img.url;
+  // Si l'image a déjà une URL complète, la normaliser
+  if (img.url) {
+    return normalizeBackendUrl(img.url);
+  }
 
-  // Si le path est déjà une URL complète (http/https), le retourner directement
-  if (img.path && (img.path.startsWith('http://') || img.path.startsWith('https://'))) {
-    return img.path;
+  // Si le path est déjà une URL complète (http/https), le normaliser
+  if (img.path && (img.path.startsWith("http://") || img.path.startsWith("https://"))) {
+    return normalizeBackendUrl(img.path);
   }
 
   // Sinon, construire l'URL à partir du path
-  if (img.path && BACKEND_URL) {
+  if (img.path) {
+    const cleanPath = img.path.replace(/^\/+/, "");
+    const storagePath = `/storage/${cleanPath}`;
+
+    if (USE_IMAGE_PROXY) {
+      return `/api/image-proxy?path=${encodeURIComponent(storagePath)}`;
+    }
+
     const base = BACKEND_URL.replace(/\/+$/, "");
-    const path = img.path.replace(/^\/+/, "");
-    return `${base}/storage/${path}`;
+    return `${base}${storagePath}`;
   }
 
   return null;
@@ -81,7 +152,9 @@ export function getProductImages(product: ListingProduct): string[] {
  */
 export function getMainImageUrl(product: ProductWithImages): string | null {
   // Si le produit a déjà une main_image_url, l'utiliser
-  if (product.main_image_url) return product.main_image_url;
+  if (product.main_image_url) {
+    return normalizeBackendUrl(product.main_image_url);
+  }
 
   const imgs = product.images || [];
   if (!imgs.length) return null;

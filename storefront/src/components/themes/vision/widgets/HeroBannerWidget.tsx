@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { Button } from "@/components/common/Button";
 import { SmartContainer } from "@/components/common/SmartContainer";
 import { getPaddingClasses, getMarginClasses } from "@/lib/widget-helpers";
@@ -110,13 +110,14 @@ export function HeroBanner({
           <div className="relative">
             {image ? (
               <div className="relative aspect-square overflow-hidden rounded-2xl shadow-2xl">
-                <Image
+                <OptimizedImage
                   src={image}
                   alt={title || 'Hero banner'}
                   fill
                   priority
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover"
+                  fallback={<div className="h-full w-full bg-gray-100" />}
                 />
               </div>
             ) : (

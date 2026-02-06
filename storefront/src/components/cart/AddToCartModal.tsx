@@ -1,7 +1,7 @@
 "use client";
 
 import { X, Check, ShoppingBag } from "lucide-react";
-import Image from "next/image";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 import Link from "next/link";
 import { useEffect } from "react";
 import { CartItem } from "@/lib/types/product-types";
@@ -88,11 +88,13 @@ export function AddToCartModal({
               {/* Image */}
               {item.imageUrl && (
                 <div className="relative w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden">
-                  <Image
+                  <OptimizedImage
                     src={item.imageUrl}
                     alt={item.name}
                     fill
+                    sizes="80px"
                     className="object-cover"
+                    fallback={<span className="text-xs text-gray-400">Image</span>}
                   />
                 </div>
               )}

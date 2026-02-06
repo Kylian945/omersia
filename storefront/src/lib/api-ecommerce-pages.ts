@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { apiJson } from "./api-http";
 import { logger } from "./logger";
 
@@ -44,11 +45,12 @@ export type EcommercePage = {
 
 /**
  * Get an ecommerce page by slug
+ * Wrapped with React cache() for per-request deduplication
  */
-export async function getEcommercePageBySlug(
+export const getEcommercePageBySlug = cache(async (
   slug: string,
   locale: string = "fr"
-): Promise<EcommercePage | null> {
+): Promise<EcommercePage | null> => {
   try {
     const { data } = await apiJson<EcommercePage>(
       `/ecommerce-pages/${slug}?locale=${locale}`
@@ -58,16 +60,17 @@ export async function getEcommercePageBySlug(
     logger.error("Error fetching ecommerce page:", error);
     return null;
   }
-}
+});
 
 /**
  * Get an ecommerce page by type and optional slug
+ * Wrapped with React cache() for per-request deduplication
  */
-export async function getEcommercePageByType(
+export const getEcommercePageByType = cache(async (
   type: string,
   slug?: string,
   locale: string = "fr"
-): Promise<EcommercePage | null> {
+): Promise<EcommercePage | null> => {
   try {
     const url = slug
       ? `/ecommerce-pages/${type}/${slug}?locale=${locale}`
@@ -78,4 +81,4 @@ export async function getEcommercePageByType(
     logger.error("Error fetching ecommerce page:", error);
     return null;
   }
-}
+});

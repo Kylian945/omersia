@@ -131,6 +131,7 @@ services:
       NEXT_INTERNAL_URL: http://storefront:3000
       NEXT_PUBLIC_BACKEND_URL: http://localhost:8000
       NEXT_PUBLIC_FRONTEND_URL: http://localhost:8000
+      NEXT_PUBLIC_USE_IMAGE_PROXY: "true"
       FRONT_API_KEY: ${FRONT_API_KEY}
     depends_on:
       backend:
@@ -138,6 +139,9 @@ services:
     networks:
       - omersia_network
     restart: unless-stopped
+    # Allow container to reach localhost:8000 via host machine (for Next.js Image optimization)
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     command: sh -lc "npm install && npm run dev"
 
   # Nginx Reverse Proxy

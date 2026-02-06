@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import { OptimizedImage } from "./OptimizedImage";
 import { Category } from "@/lib/types/category-types";
 
 type CategoriesGridProps = {
@@ -54,6 +54,7 @@ export function CategoriesGrid({
             <Link
               key={category.slug}
               href={`/categories/${category.slug}`}
+              prefetch={true}
               className="group relative overflow-hidden rounded-xl transition-transform hover:scale-105 border border-gray-100"
               style={{
                 backgroundColor: "var(--theme-card-bg, #ffffff)",
@@ -63,12 +64,13 @@ export function CategoriesGrid({
               {/* Image */}
               <div className="relative aspect-square overflow-hidden">
                 {category.image ? (
-                  <Image
+                  <OptimizedImage
                     src={category.image}
                     alt={category.name}
                     fill
                     sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     className="object-cover transition-transform duration-300 group-hover:scale-110"
+                    fallback={<div className="h-full w-full bg-gray-100" />}
                   />
                 ) : (
                   <div
