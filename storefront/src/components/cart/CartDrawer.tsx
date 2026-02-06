@@ -47,7 +47,7 @@ export function CartDrawer() {
 
       {/* Drawer animé */}
       <div
-        className={`w-full max-w-sm h-full bg-white shadow-2xl border-l border-neutral-200 flex flex-col transform transition-transform duration-300 cart-drawer-animate ${isOpen ? "translate-x-0" : "translate-x-full"
+        className={`w-full max-w-md h-full bg-white shadow-2xl border-l border-neutral-200 flex flex-col transform transition-transform duration-300 cart-drawer-animate ${isOpen ? "translate-x-0" : "translate-x-full"
           }`}
       >
         <div className="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">

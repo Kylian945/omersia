@@ -22,14 +22,14 @@ export function HeaderCheckout({ shopInfo }: { shopInfo: ShopInfo; }) {
                   height={32}
                   className="h-8 w-auto object-contain"
                   fallback={
-                    <div className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center font-bold">
-                      {shopInfo.display_name?.[0]?.toUpperCase() || "S"}
+                    <div className="h-9 w-9 text-xl rounded-xl bg-black text-white flex items-center justify-center font-bold">
+                      {shopInfo.display_name?.[0]?.toUpperCase() || "O"}
                     </div>
                   }
                 />
               ) : (
-                <div className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center font-bold">
-                  {shopInfo.display_name?.[0]?.toUpperCase() || "S"}
+                <div className="h-9 w-9 text-xl rounded-xl bg-black text-white flex items-center justify-center font-bold">
+                  {shopInfo.display_name?.[0]?.toUpperCase() || "O"}
                 </div>
               )}
               <span className="text-lg font-semibold tracking-tight">

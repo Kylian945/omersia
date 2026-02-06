@@ -9,7 +9,7 @@ import { Button } from "@/components/common/Button";
 import { ModuleHooks } from "@/components/modules/ModuleHooks";
 
 export default function CartPage() {
-  const { items, subtotal, totalQty, updateQty, removeItem, clear } = useCart();
+  const { items, subtotal, totalQty, updateQty, removeItem, clear, isHydrated } = useCart();
 
   const handleQtyChange = (index: number, value: string) => {
     const qty = Math.max(1, Number(value) || 1);
@@ -35,16 +35,17 @@ export default function CartPage() {
               Mon panier
             </h1>
             <p className="text-xs text-neutral-500">
-              {totalQty > 0
-                ? `${totalQty} article${totalQty > 1 ? "s" : ""} sélectionné${totalQty > 1 ? "s" : ""
-                }`
-                : "Votre panier est vide."}
+              {!isHydrated
+                ? "\u00A0" // Non-breaking space pendant l'hydration
+                : totalQty > 0
+                  ? `${totalQty} article${totalQty > 1 ? "s" : ""} sélectionné${totalQty > 1 ? "s" : ""}`
+                  : "Votre panier est vide."}
             </p>
           </div>
         </div>
 
         {/* Empty state */}
-        {items.length === 0 && (
+        {isHydrated && items.length === 0 && (
           <div className="mt-4 rounded-2xl bg-white border border-neutral-200 p-6 text-xs text-neutral-600 flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
               <p className="font-medium text-neutral-900 mb-1">
@@ -65,7 +66,7 @@ export default function CartPage() {
         )}
 
         {/* Cart layout */}
-        {items.length > 0 && (
+        {isHydrated && items.length > 0 && (
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.2fr)_minmax(260px,320px)] gap-6 items-start">
             {/* Left: items */}
             <section className="flex flex-col gap-3">

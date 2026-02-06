@@ -35,6 +35,7 @@ type CartContextType = {
   cartToken: string | null;
   cartId: number | null;
   cartType: string;
+  isHydrated: boolean;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -295,6 +296,7 @@ export function CartProvider({
         cartToken,
         cartId,
         cartType,
+        isHydrated,
       }}
     >
       {children}

@@ -10,7 +10,7 @@ export function HeaderAuth({ shopInfo }: { shopInfo: ShopInfo; }) {
         <>
             <header className="border-b border-neutral-100 bg-white/80 backdrop-blur">
                 <Container>
-                    <div className="h-14 flex items-center justify-between gap-4">
+                    <div className="h-16 flex items-center justify-between gap-4">
                         {/* Logo */}
                         <Link href="/" className="flex items-center gap-2">
                             {shopInfo.logo_url ? (
@@ -21,13 +21,13 @@ export function HeaderAuth({ shopInfo }: { shopInfo: ShopInfo; }) {
                                     height={32}
                                     className="h-8 w-auto object-contain"
                                     fallback={
-                                        <div className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center font-bold">
+                                        <div className="h-9 w-9 text-xl rounded-xl bg-black text-white flex items-center justify-center font-bold">
                                             {shopInfo.display_name?.[0]?.toUpperCase() || "S"}
                                         </div>
                                     }
                                 />
                             ) : (
-                                <div className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center font-bold">
+                                <div className="h-9 w-9 text-xl rounded-xl bg-black text-white flex items-center justify-center font-bold">
                                     {shopInfo.display_name?.[0]?.toUpperCase() || "S"}
                                 </div>
                             )}
