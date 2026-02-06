@@ -34,13 +34,42 @@ export async function POST(req: NextRequest) {
     const text = await res.text().catch(() => null);
     logger.error("Backend /payments/intent error", { status: res.status, text, data });
 
+    const rawText = text ?? "";
+    const lowered = rawText.toLowerCase();
+
+    const looksLikeStripeConfigError =
+      lowered.includes("no api key provided") ||
+      lowered.includes("invalid api key") ||
+      (lowered.includes("stripe") && lowered.includes("api key"));
+
+    const looksLikeFrontApiKeyMissing =
+      lowered.includes("api key not configured") ||
+      lowered.includes("front_api_key");
+
+    const messageFromBackend =
+      typeof data === "object" &&
+      data !== null &&
+      "message" in data &&
+      typeof data.message === "string"
+        ? data.message
+        : null;
+
+    let message =
+      messageFromBackend ||
+      "Paiement impossible à traiter. Veuillez réessayer ou contacter le support.";
+
+    if (looksLikeFrontApiKeyMissing) {
+      message =
+        "Clé API storefront manquante. Veuillez contacter le support.";
+    } else if (looksLikeStripeConfigError) {
+      message =
+        "Stripe n'est pas configuré. Veuillez contacter le support.";
+    }
+
     return NextResponse.json(
       {
         ok: false,
-        message:
-          (typeof data === 'object' && data !== null && 'message' in data && typeof data.message === 'string'
-            ? data.message
-            : "Payment intent failed (backend error)."),
+        message,
         backend: text,
       },
       { status: res.status }

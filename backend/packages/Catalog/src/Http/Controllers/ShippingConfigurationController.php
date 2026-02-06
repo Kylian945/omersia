@@ -27,7 +27,7 @@ class ShippingConfigurationController extends Controller
             $query->whereNull('shipping_zone_id')->orderBy('priority', 'desc');
         }]);
 
-        return view('admin::settings.shipping_methods.configure', compact('method'));
+        return view('admin::settings.shipping_methods.edit', compact('method'));
     }
 
     /**

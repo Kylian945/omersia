@@ -5,13 +5,23 @@ declare(strict_types=1);
 namespace Omersia\Api\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Omersia\Catalog\Models\Category;
-use Omersia\Catalog\Models\Product;
+use Illuminate\Http\JsonResponse;
+use Omersia\Api\Http\Requests\CategoryIndexRequest;
+use Omersia\Api\Http\Requests\CategoryShowRequest;
+use Omersia\Api\Http\Resources\CategoryDetailResource;
+use Omersia\Api\Http\Resources\CategoryListResource;
+use Omersia\Api\Http\Resources\ProductSummaryResource;
+use Omersia\Api\Services\Catalog\CategoryService;
+use Omersia\Api\Services\Catalog\ProductService;
 use OpenApi\Annotations as OA;
 
 class CategoryController extends Controller
 {
+    public function __construct(
+        private readonly CategoryService $categoryService,
+        private readonly ProductService $productService
+    ) {}
+
     /**
      * @OA\Get(
      *     path="/api/v1/categories",
@@ -54,18 +64,12 @@ class CategoryController extends Controller
      *     )
      * )
      */
-    public function index(Request $request)
+    public function index(CategoryIndexRequest $request): JsonResponse
     {
-        $locale = $request->get('locale', 'fr');
+        $locale = $request->input('locale', 'fr');
+        $parentOnly = $request->boolean('parent_only', false);
 
-        // 1. Trouver la catégorie "accueil"
-        $accueil = Category::query()
-            ->where('is_active', true)
-            ->whereHas('translations', function ($q) use ($locale) {
-                $q->where('locale', $locale)
-                    ->where('slug', 'accueil');
-            })
-            ->first();
+        $accueil = $this->categoryService->findAccueil($locale);
 
         if (! $accueil) {
             return response()->json([
@@ -74,43 +78,10 @@ class CategoryController extends Controller
             ]);
         }
 
-        // 2. Récupérer SES ENFANTS DIRECTS
-        $categories = Category::query()
-            ->where('is_active', true)
-            ->where('id', '!=', $accueil->id)
-            ->with([
-                'translations' => function ($q) use ($locale) {
-                    $q->where('locale', $locale);
-                },
-            ])
-            ->orderBy('position')
-            ->get();
-
-        // 3. Ajouter le nombre de produits
-        $categoriesWithCount = $categories->map(function ($category) {
-            $productCount = Product::query()
-                ->where('is_active', true)
-                ->whereHas('categories', function ($q) use ($category) {
-                    $q->where('categories.id', $category->id);
-                })
-                ->count();
-
-            $translation = $category->translations->first();
-
-            return [
-                'id' => $category->id,
-                'name' => $translation?->name ?? 'Sans nom',
-                'slug' => $translation?->slug ?? '',
-                'description' => $translation?->description,
-                'image' => $category->image_url,
-                'count' => $productCount,
-                'parent_id' => $category->parent_id,
-                'position' => $category->position,
-            ];
-        });
+        $categories = $this->categoryService->listCategories($accueil, $locale, $parentOnly);
 
         return response()->json([
-            'categories' => $categoriesWithCount,
+            'categories' => CategoryListResource::collection($categories)->toArray($request),
         ]);
     }
 
@@ -145,7 +116,7 @@ class CategoryController extends Controller
      *         response=200,
      *         description="Catégorie trouvée avec produits et sous-catégories",
      *
-     *         @OA\JsonContent(ref="#/components/schemas/CategoryWithProducts")
+     *         @OA\JsonContent(ref="#/components/schemas/CategoryDetailResponse")
      *     ),
      *
      *     @OA\Response(
@@ -163,107 +134,18 @@ class CategoryController extends Controller
      *     )
      * )
      */
-    public function show(string $slug, Request $request)
+    public function show(string $slug, CategoryShowRequest $request): JsonResponse
     {
-        $locale = $request->get('locale', 'fr');
+        $locale = $request->input('locale', 'fr');
 
-        // 1. Catégorie par slug (dans la locale)
-        $category = Category::query()
-            ->where('is_active', true)
-            ->whereHas('translations', function ($q) use ($slug, $locale) {
-                $q->where('locale', $locale)
-                    ->where('slug', $slug);
-            })
-            ->with([
-                'translations' => function ($q) use ($locale) {
-                    $q->where('locale', $locale);
-                },
-                'children' => function ($q) use ($locale) {
-                    $q->where('is_active', true)
-                        ->orderBy('position')
-                        ->with([
-                            'translations' => function ($t) use ($locale) {
-                                $t->where('locale', $locale);
-                            },
-                            'children' => function ($qq) use ($locale) {
-                                $qq->where('is_active', true)
-                                    ->orderBy('position')
-                                    ->with([
-                                        'translations' => function ($tt) use ($locale) {
-                                            $tt->where('locale', $locale);
-                                        },
-                                    ]);
-                            },
-                        ]);
-                },
-                'parent' => function ($q) use ($locale) {
-                    $q->where('is_active', true)
-                        ->orderBy('position')
-                        ->with([
-                            'translations' => function ($t) use ($locale) {
-                                $t->where('locale', $locale);
-                            },
-                        ]);
-                },
-            ])
-            ->firstOrFail();
+        $category = $this->categoryService->findBySlug($slug, $locale);
 
-        // 2. Produits directement liés à cette catégorie
-        $paginator = Product::query()
-            ->where('is_active', true)
-            ->whereHas('categories', function ($q) use ($category) {
-                // Utilise la relation categories() → pivot product_categories
-                $q->where('categories.id', $category->id);
-            })
-            ->with('images')
-            ->with([
-                'translations' => function ($q) use ($locale) {
-                    $q->where('locale', $locale);
-                },
-            ])
-            // On veut aussi les variantes actives pour calculer le prix min si besoin
-            ->with(['variants' => function ($q) {
-                $q->where('is_active', true);
-            }])
-            ->paginate(20);
-
-        $items = $paginator->items();
-
-        foreach ($items as $product) {
-            $hasVariants = ($product->type === 'variant')
-                || ($product->variants && $product->variants->count() > 0);
-
-            if ($hasVariants) {
-                $activeVariants = $product->variants
-                    ->filter(fn ($v) => $v->price !== null);
-
-                $fromPrice = $activeVariants->min('price') ?? 0;
-
-                $product->has_variants = true;
-                $product->from_price = (float) $fromPrice;
-
-                // Pour rester compatible avec ton front actuel :
-                $product->price = (float) $fromPrice;
-
-                // (Tu peux raffiner si tu veux gérer un compare_at_price global)
-                $product->compare_at_price = null;
-                $product->on_sale = false;
-            } else {
-                $product->has_variants = false;
-
-                $product->price = (float) ($product->price ?? 0);
-                $product->compare_at_price = $product->compare_at_price !== null
-                    ? (float) $product->compare_at_price
-                    : null;
-
-                $product->on_sale = $product->compare_at_price !== null
-                    && $product->compare_at_price > $product->price;
-            }
-        }
+        $paginator = $this->productService->paginateByCategory($category, $locale, 20);
+        $products = ProductSummaryResource::collection($paginator->items())->toArray($request);
 
         return response()->json([
-            'category' => $category,
-            'products' => $items,
+            'category' => new CategoryDetailResource($category),
+            'products' => $products,
         ]);
     }
 }

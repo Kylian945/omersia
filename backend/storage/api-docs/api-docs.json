@@ -1225,7 +1225,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CategoryWithProducts"
+                                    "$ref": "#/components/schemas/CategoryDetailResponse"
                                 }
                             }
                         }
@@ -2700,7 +2700,7 @@
                                         "products": {
                                             "type": "array",
                                             "items": {
-                                                "$ref": "#/components/schemas/ProductListResponse"
+                                                "$ref": "#/components/schemas/Product"
                                             }
                                         }
                                     },
@@ -3621,26 +3621,20 @@
                 },
                 "type": "object"
             },
-            "CategoryWithProducts": {
-                "description": "Category with its products",
-                "type": "object",
-                "allOf": [
-                    {
+            "CategoryDetailResponse": {
+                "description": "Category payload with related products",
+                "properties": {
+                    "category": {
                         "$ref": "#/components/schemas/Category"
                     },
-                    {
-                        "properties": {
-                            "products": {
-                                "description": "Category-related OpenAPI schemas.",
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/Product"
-                                }
-                            }
-                        },
-                        "type": "object"
+                    "products": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Product"
+                        }
                     }
-                ]
+                },
+                "type": "object"
             },
             "CategoryListResponse": {
                 "description": "List of categories",
@@ -4787,46 +4781,62 @@
             },
             "ProductTranslation": {
                 "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 12
-                    },
                     "locale": {
                         "type": "string",
                         "example": "fr"
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "T-shirt Homme"
                     },
                     "slug": {
                         "type": "string",
                         "example": "t-shirt-homme"
                     },
-                    "title": {
-                        "type": "string",
-                        "example": "T-shirt Homme"
-                    },
                     "description": {
                         "type": "string",
-                        "example": "T-shirt 100% coton bio."
+                        "nullable": true
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "meta_title": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "meta_description": {
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "type": "object"
             },
             "CategoryTranslation": {
                 "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 5
-                    },
                     "locale": {
                         "type": "string",
                         "example": "fr"
                     },
-                    "title": {
+                    "name": {
                         "type": "string",
                         "example": "Vêtements"
                     },
                     "slug": {
                         "type": "string",
                         "example": "vetements"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "meta_title": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "meta_description": {
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "type": "object"
@@ -4837,26 +4847,62 @@
                         "type": "integer",
                         "example": 1
                     },
-                    "is_active": {
-                        "type": "boolean",
-                        "example": true
+                    "name": {
+                        "type": "string",
+                        "example": "Vêtements",
+                        "nullable": true
                     },
                     "slug": {
-                        "description": "Slug de la catégorie (ajouté dynamiquement depuis la traduction)",
                         "type": "string",
                         "example": "vetements",
                         "nullable": true
                     },
-                    "name": {
-                        "description": "Nom de la catégorie (ajouté dynamiquement depuis la traduction)",
+                    "description": {
                         "type": "string",
-                        "example": "Vêtements",
+                        "nullable": true
+                    },
+                    "image": {
+                        "type": "string",
+                        "example": "https://cdn.example.com/category.jpg",
+                        "nullable": true
+                    },
+                    "image_url": {
+                        "type": "string",
+                        "example": "https://cdn.example.com/category.jpg",
+                        "nullable": true
+                    },
+                    "count": {
+                        "type": "integer",
+                        "example": 12,
+                        "nullable": true
+                    },
+                    "parent_id": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "position": {
+                        "type": "integer",
+                        "example": 1,
                         "nullable": true
                     },
                     "translations": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/CategoryTranslation"
+                        }
+                    },
+                    "parent": {
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/Category"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "children": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Category"
                         }
                     }
                 },
@@ -4872,9 +4918,158 @@
                         "type": "string",
                         "example": "https://cdn.example.com/products/image1.jpg"
                     },
+                    "path": {
+                        "type": "string",
+                        "example": "products/image1.jpg",
+                        "nullable": true
+                    },
+                    "alt": {
+                        "type": "string",
+                        "example": "Vue principale",
+                        "nullable": true
+                    },
                     "position": {
                         "type": "integer",
                         "example": 1
+                    },
+                    "is_main": {
+                        "type": "boolean",
+                        "example": true
+                    }
+                },
+                "type": "object"
+            },
+            "ProductVariantValue": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "value": {
+                        "type": "string",
+                        "example": "M"
+                    },
+                    "option": {
+                        "properties": {
+                            "id": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "name": {
+                                "type": "string",
+                                "example": "Taille"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "type": "object"
+            },
+            "OptionValue": {
+                "properties": {
+                    "option": {
+                        "type": "string",
+                        "example": "Taille"
+                    },
+                    "value": {
+                        "type": "string",
+                        "example": "M"
+                    }
+                },
+                "type": "object"
+            },
+            "ProductVariant": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 456
+                    },
+                    "sku": {
+                        "type": "string",
+                        "example": "TSHIRT-BLACK-M",
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Noir / M",
+                        "nullable": true
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "manage_stock": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "stock_qty": {
+                        "type": "integer",
+                        "example": 15,
+                        "nullable": true
+                    },
+                    "price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 29.99
+                    },
+                    "compare_at_price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 39.99,
+                        "nullable": true
+                    },
+                    "on_sale": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProductVariantValue"
+                        }
+                    },
+                    "option_values": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/OptionValue"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "ProductOption": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Taille"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "values": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "id": {
+                                    "type": "integer",
+                                    "example": 1
+                                },
+                                "value": {
+                                    "type": "string",
+                                    "example": "S"
+                                },
+                                "position": {
+                                    "type": "integer",
+                                    "example": 1
+                                }
+                            },
+                            "type": "object"
+                        }
                     }
                 },
                 "type": "object"
@@ -4885,13 +5080,10 @@
                         "type": "integer",
                         "example": 123
                     },
-                    "shop_id": {
-                        "type": "integer",
-                        "example": 1
-                    },
                     "sku": {
                         "type": "string",
-                        "example": "TSHIRT-BLACK-L"
+                        "example": "TSHIRT-BLACK-L",
+                        "nullable": true
                     },
                     "type": {
                         "type": "string",
@@ -4901,14 +5093,58 @@
                         "type": "boolean",
                         "example": true
                     },
+                    "manage_stock": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "stock_qty": {
+                        "type": "integer",
+                        "example": 42,
+                        "nullable": true
+                    },
                     "price": {
                         "type": "number",
                         "format": "float",
                         "example": 29.99
                     },
-                    "stock": {
-                        "type": "integer",
-                        "example": 42
+                    "compare_at_price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 39.99,
+                        "nullable": true
+                    },
+                    "on_sale": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "has_variants": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "from_price": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 19.99,
+                        "nullable": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "T-shirt Homme",
+                        "nullable": true
+                    },
+                    "slug": {
+                        "type": "string",
+                        "example": "t-shirt-homme",
+                        "nullable": true
+                    },
+                    "short_description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "main_image_url": {
+                        "type": "string",
+                        "example": "https://cdn.example.com/products/image1.jpg",
+                        "nullable": true
                     },
                     "translations": {
                         "type": "array",
@@ -4928,29 +5164,11 @@
                             "$ref": "#/components/schemas/ProductImage"
                         }
                     },
-                    "compare_at_price": {
-                        "description": "Prix avant réduction",
-                        "type": "number",
-                        "format": "float",
-                        "example": 39.99,
-                        "nullable": true
-                    },
-                    "on_sale": {
-                        "description": "Indique si le produit est en promotion",
-                        "type": "boolean",
-                        "example": false
-                    },
-                    "has_variants": {
-                        "description": "Indique si le produit possède des variantes",
-                        "type": "boolean",
-                        "example": false
-                    },
-                    "from_price": {
-                        "description": "Prix minimum des variantes (si has_variants=true)",
-                        "type": "number",
-                        "format": "float",
-                        "example": 19.99,
-                        "nullable": true
+                    "variants": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ProductVariant"
+                        }
                     }
                 },
                 "type": "object"
@@ -4961,13 +5179,58 @@
                         "type": "integer",
                         "example": 1
                     },
+                    "first_page_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "from": {
+                        "type": "integer",
+                        "nullable": true
+                    },
                     "last_page": {
                         "type": "integer",
                         "example": 5
                     },
+                    "last_page_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "links": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "url": {
+                                    "type": "string",
+                                    "nullable": true
+                                },
+                                "label": {
+                                    "type": "string"
+                                },
+                                "active": {
+                                    "type": "boolean"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "next_page_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "path": {
+                        "type": "string"
+                    },
                     "per_page": {
                         "type": "integer",
                         "example": 20
+                    },
+                    "prev_page_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "to": {
+                        "type": "integer",
+                        "nullable": true
                     },
                     "total": {
                         "type": "integer",
@@ -4982,94 +5245,6 @@
                 },
                 "type": "object"
             },
-            "OptionValue": {
-                "properties": {
-                    "option": {
-                        "description": "Nom de l'option",
-                        "type": "string",
-                        "example": "Taille"
-                    },
-                    "value": {
-                        "description": "Valeur de l'option",
-                        "type": "string",
-                        "example": "M"
-                    }
-                },
-                "type": "object"
-            },
-            "ProductVariant": {
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 456
-                    },
-                    "sku": {
-                        "type": "string",
-                        "example": "TSHIRT-BLACK-M",
-                        "nullable": true
-                    },
-                    "price": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 29.99
-                    },
-                    "compare_at_price": {
-                        "type": "number",
-                        "format": "float",
-                        "example": 39.99,
-                        "nullable": true
-                    },
-                    "on_sale": {
-                        "type": "boolean",
-                        "example": false
-                    },
-                    "stock": {
-                        "type": "integer",
-                        "example": 15
-                    },
-                    "is_active": {
-                        "type": "boolean",
-                        "example": true
-                    },
-                    "option_values": {
-                        "description": "Valeurs d'options associées à cette variante",
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/OptionValue"
-                        }
-                    }
-                },
-                "type": "object"
-            },
-            "ProductOption": {
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "example": 1
-                    },
-                    "name": {
-                        "type": "string",
-                        "example": "Taille"
-                    },
-                    "values": {
-                        "type": "array",
-                        "items": {
-                            "properties": {
-                                "id": {
-                                    "type": "integer",
-                                    "example": 1
-                                },
-                                "value": {
-                                    "type": "string",
-                                    "example": "S"
-                                }
-                            },
-                            "type": "object"
-                        }
-                    }
-                },
-                "type": "object"
-            },
             "ProductDetailResponse": {
                 "description": "Détail complet d'un produit avec variantes, options et produits associés",
                 "type": "object",
@@ -5079,22 +5254,37 @@
                     },
                     {
                         "properties": {
-                            "variants": {
-                                "description": "Variantes du produit",
-                                "type": "array",
-                                "items": {
-                                    "$ref": "#/components/schemas/ProductVariant"
-                                }
+                            "description": {
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "meta_title": {
+                                "type": "string",
+                                "nullable": true
+                            },
+                            "meta_description": {
+                                "type": "string",
+                                "nullable": true
                             },
                             "options": {
-                                "description": "Options configurables (Taille, Couleur, etc.)",
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/components/schemas/ProductOption"
                                 }
                             },
+                            "variants": {
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/ProductVariant"
+                                }
+                            },
                             "relatedProducts": {
-                                "description": "Produits associés",
+                                "type": "array",
+                                "items": {
+                                    "$ref": "#/components/schemas/Product"
+                                }
+                            },
+                            "related_products": {
                                 "type": "array",
                                 "items": {
                                     "$ref": "#/components/schemas/Product"

@@ -29,8 +29,12 @@ final class ShippingMethodUpdateRequest extends FormRequest
         return [
             'code' => ['required', 'string', 'max:255', Rule::unique('shipping_methods', 'code')->ignore($shippingMethod->id)],
             'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],
             'delivery_time' => ['nullable', 'string', 'max:255'],
+            'free_shipping_threshold' => ['nullable', 'numeric', 'min:0'],
+            'use_weight_based_pricing' => ['nullable', 'boolean'],
+            'use_zone_based_pricing' => ['nullable', 'boolean'],
             'is_active' => ['nullable', 'boolean'],
         ];
     }

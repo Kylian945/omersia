@@ -47,7 +47,7 @@ export default function CheckoutClient({
 }
 
 function CheckoutClientInner() {
-  const { items } = useCart();
+  const { items, isHydrated } = useCart();
   const {
     currentStep,
     prevStep,
@@ -112,9 +112,11 @@ function CheckoutClientInner() {
                 Finaliser ma commande
               </h1>
               <p className="text-xs text-neutral-500">
-                {totalQty > 0
-                  ? `${totalQty} article${totalQty > 1 ? "s" : ""} dans votre panier`
-                  : "Votre panier est vide."}
+                {!isHydrated
+                  ? "\u00A0"
+                  : totalQty > 0
+                    ? `${totalQty} article${totalQty > 1 ? "s" : ""} dans votre panier`
+                    : "Votre panier est vide."}
               </p>
               {effectiveUser && (
                 <p className="mt-1 text-xxs text-neutral-500">
@@ -127,7 +129,7 @@ function CheckoutClientInner() {
                 </p>
               )}
             </div>
-            {totalQty === 0 && (
+            {isHydrated && totalQty === 0 && (
               <Link
                 href="/products"
                 className="inline-flex items-center rounded-full bg-black px-4 py-1.5 text-xs text-white hover:bg-neutral-900"
@@ -137,13 +139,13 @@ function CheckoutClientInner() {
             )}
           </div>
 
-          {items.length === 0 && (
+          {isHydrated && items.length === 0 && (
             <div className="mt-4 rounded-2xl bg-white border border-neutral-200 p-6 text-xs text-neutral-600">
               Votre panier est vide. Ajoutez des produits pour accéder au checkout.
             </div>
           )}
 
-          {items.length > 0 && (
+          {isHydrated && items.length > 0 && (
             <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_300px] gap-6 items-start">
               <div className="space-y-4">
                 <CheckoutStepper steps={steps} currentStep={currentStep} />

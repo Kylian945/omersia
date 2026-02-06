@@ -10,21 +10,16 @@ use OpenApi\Annotations as OA;
  * Category-related OpenAPI schemas.
  *
  * @OA\Schema(
- *     schema="CategoryWithProducts",
+ *     schema="CategoryDetailResponse",
  *     type="object",
- *     description="Category with its products",
- *     allOf={
- *         @OA\Schema(ref="#/components/schemas/Category"),
- *         @OA\Schema(
+ *     description="Category payload with related products",
  *
- *             @OA\Property(
- *                 property="products",
- *                 type="array",
- *
- *                 @OA\Items(ref="#/components/schemas/Product")
- *             )
- *         )
- *     }
+ *     @OA\Property(property="category", ref="#/components/schemas/Category"),
+ *     @OA\Property(
+ *         property="products",
+ *         type="array",
+ *         @OA\Items(ref="#/components/schemas/Product")
+ *     )
  * )
  *
  * @OA\Schema(
@@ -35,7 +30,6 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(
  *         property="categories",
  *         type="array",
- *
  *         @OA\Items(ref="#/components/schemas/Category")
  *     )
  * )

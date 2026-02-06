@@ -49,6 +49,17 @@ function submitDelete() {
     }
 }
 
+// Expose functions for inline onclick handlers
+if (typeof window !== 'undefined') {
+    window.openZoneModal = openZoneModal;
+    window.closeZoneModal = closeZoneModal;
+    window.openRateModal = openRateModal;
+    window.closeRateModal = closeRateModal;
+    window.confirmDelete = confirmDelete;
+    window.closeConfirmModal = closeConfirmModal;
+    window.submitDelete = submitDelete;
+}
+
 // Gestion de l'affichage des sections de configuration
 function toggleConfigurationSections() {
     const useWeightPricing = document.getElementById('use_weight_based_pricing');

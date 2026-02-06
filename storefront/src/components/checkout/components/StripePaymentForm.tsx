@@ -11,9 +11,8 @@ import {
 import { Button } from "@/components/common/Button";
 import { logger } from "@/lib/logger";
 
-const stripePromise = loadStripe(
-  process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string
-);
+const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
 type StripePaymentFormProps = {
   orderId: number;
@@ -24,9 +23,23 @@ type StripePaymentFormProps = {
 export function StripePaymentForm({ orderId, orderNumber, total }: StripePaymentFormProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+
+  const openErrorModal = (message: string) => {
+    setError(message);
+    setIsErrorModalOpen(true);
+  };
+
+  const closeErrorModal = () => setIsErrorModalOpen(false);
 
   useEffect(() => {
     if (!orderId) return;
+    if (!stripePublishableKey) {
+      openErrorModal(
+        "Stripe n'est pas configuré. Veuillez contacter le support."
+      );
+      return;
+    }
 
     let cancelled = false;
 
@@ -55,11 +68,14 @@ export function StripePaymentForm({ orderId, orderNumber, total }: StripePayment
             backend?: string;
           }
           const errorData = json as ErrorResponse;
-          throw new Error(
+          const message =
             errorData?.message ||
             errorData?.backend ||
-            `Impossible d'initialiser le paiement (HTTP ${res.status}).`
-          );
+            `Impossible d'initialiser le paiement (HTTP ${res.status}).`;
+          if (!cancelled) {
+            openErrorModal(message);
+          }
+          return;
         }
 
         // 👉 On sait que ta réponse ressemble à ça :
@@ -67,9 +83,12 @@ export function StripePaymentForm({ orderId, orderNumber, total }: StripePayment
         const cs = json.data?.client_secret;
 
         if (!cs) {
-          throw new Error(
-            "client_secret manquant dans la réponse de l'API."
-          );
+          if (!cancelled) {
+            openErrorModal(
+              "client_secret manquant dans la réponse de l'API."
+            );
+          }
+          return;
         }
 
         if (!cancelled) {
@@ -79,7 +98,7 @@ export function StripePaymentForm({ orderId, orderNumber, total }: StripePayment
         logger.error("StripePaymentForm error", e);
         if (!cancelled) {
           const message = e instanceof Error ? e.message : "Erreur lors de l'initialisation du paiement.";
-          setError(message);
+          openErrorModal(message);
         }
       }
     })();
@@ -89,45 +108,54 @@ export function StripePaymentForm({ orderId, orderNumber, total }: StripePayment
     };
   }, [orderId, total]);
 
-  if (error) {
+  if (!clientSecret || !stripePromise) {
     return (
-      <div className="mt-2 rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xxs text-red-700">
-        {error}
-      </div>
+      <StripeErrorModal
+        open={isErrorModalOpen}
+        message={error}
+        onClose={closeErrorModal}
+      />
     );
   }
 
-  if (!clientSecret) {
-    return;
-  }
-
   return (
-    <Elements
-      stripe={stripePromise}
-      options={{
-        clientSecret,
-        appearance: {
-          theme: "stripe",
-        },
-      }}
-    >
-      <StripeCheckoutForm orderNumber={orderNumber} />
-    </Elements>
+    <>
+      <StripeErrorModal
+        open={isErrorModalOpen}
+        message={error}
+        onClose={closeErrorModal}
+      />
+      <Elements
+        stripe={stripePromise}
+        options={{
+          clientSecret,
+          appearance: {
+            theme: "stripe",
+          },
+        }}
+      >
+        <StripeCheckoutForm orderNumber={orderNumber} onError={openErrorModal} />
+      </Elements>
+    </>
   );
 }
 
-function StripeCheckoutForm({ orderNumber }: { orderNumber: string | null }) {
+function StripeCheckoutForm({
+  orderNumber,
+  onError,
+}: {
+  orderNumber: string | null;
+  onError: (message: string) => void;
+}) {
   const stripe = useStripe();
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stripe || !elements) return;
 
     setSubmitting(true);
-    setError(null);
 
     localStorage.removeItem("omersia_cart_items");
 
@@ -143,7 +171,7 @@ function StripeCheckoutForm({ orderNumber }: { orderNumber: string | null }) {
     });
 
     if (stripeError) {
-      setError(stripeError.message || "Erreur lors du paiement.");
+      onError(stripeError.message || "Erreur lors du paiement.");
       setSubmitting(false);
       return;
     }
@@ -154,11 +182,6 @@ function StripeCheckoutForm({ orderNumber }: { orderNumber: string | null }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-3 mt-2">
       <PaymentElement />
-      {error && (
-        <p className="text-xxs text-red-600 mt-1">
-          {error}
-        </p>
-      )}
       <Button
         type="submit"
         disabled={!stripe || !elements || submitting}
@@ -169,5 +192,75 @@ function StripeCheckoutForm({ orderNumber }: { orderNumber: string | null }) {
         {submitting ? "Traitement en cours…" : "Payer maintenant"}
       </Button>
     </form>
+  );
+}
+
+function StripeErrorModal({
+  open,
+  message,
+  onClose,
+}: {
+  open: boolean;
+  message: string | null;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!open) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
+    };
+  }, [open, onClose]);
+
+  if (!open || !message) return null;
+
+  return (
+    <>
+      <div
+        className="fixed inset-0 bg-black/50 z-50 transition-opacity"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+          className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative animate-in fade-in zoom-in duration-200"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="p-5 border-b border-neutral-200 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-neutral-900">
+              Paiement indisponible
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-neutral-500 hover:text-neutral-700 transition-colors"
+              aria-label="Fermer"
+            >
+              ×
+            </button>
+          </div>
+          <div className="p-5 space-y-3">
+            <p className="text-xs text-neutral-700">
+              {message}
+            </p>
+            <div className="flex justify-end">
+              <button
+                onClick={onClose}
+                className="rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900"
+              >
+                Compris
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
