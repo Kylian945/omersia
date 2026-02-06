@@ -133,7 +133,7 @@ export function CategoryProducts({ products, themePath = "vision" }: Props) {
         </div>
 
         {/* Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-[220px_minmax(0,1fr)] gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[250px_minmax(0,1fr)] gap-6 items-start">
           {/* Sidebar desktop */}
           <aside className="hidden lg:block">
             <div className="text-xs font-medium text-neutral-500 uppercase tracking-[.16em] mb-2">

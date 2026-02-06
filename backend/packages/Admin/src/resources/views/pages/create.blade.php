@@ -95,11 +95,6 @@
                     <input type="checkbox" name="is_active" value="1" checked class="h-3 w-3 rounded border-gray-300">
                     <span class="text-xs text-gray-700">Page visible</span>
                 </div>
-
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" name="is_home" value="1" class="h-3 w-3 rounded border-gray-300">
-                    <span class="text-xs text-gray-700">Utiliser comme page d’accueil</span>
-                </div>
             </div>
 
             <div class="rounded-2xl bg-white border border-black/5 shadow-sm p-4 flex flex-col gap-2">
