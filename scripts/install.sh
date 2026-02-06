@@ -40,6 +40,46 @@ error_exit() {
 }
 
 # ========================================
+# HTTP readiness helpers
+# ========================================
+http_ready() {
+    local url="$1"
+
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsS --max-time 2 "$url" >/dev/null 2>&1
+        return $?
+    fi
+
+    if command -v wget >/dev/null 2>&1; then
+        wget -q -T 2 -O /dev/null "$url" >/dev/null 2>&1
+        return $?
+    fi
+
+    # If no HTTP client is available, don't block the install
+    return 0
+}
+
+wait_for_url() {
+    local url="$1"
+    local timeout="${2:-180}"
+    local interval="${3:-2}"
+    local start
+    start=$(date +%s)
+
+    while true; do
+        if http_ready "$url"; then
+            return 0
+        fi
+
+        if [ $(( $(date +%s) - start )) -ge "$timeout" ]; then
+            return 1
+        fi
+
+        sleep "$interval"
+    done
+}
+
+# ========================================
 # MAIN INSTALLATION
 # ========================================
 
@@ -358,7 +398,7 @@ print_step_fancy "10" "10" "Finalizing setup..." "$ICON_LOCK"
 
 show_spinner "Creating admin user..." &
 SPINNER_PID=$!
-docker exec omersia-backend php artisan admin:create --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD" --no-interaction > /dev/null 2>&1 || {
+docker exec omersia-backend php artisan admin:create --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD" --no-interaction || {
     stop_spinner $SPINNER_PID "warning" "Admin creation via CLI failed"
     print_warning "You may need to create it manually"
     SPINNER_PID=""
@@ -438,6 +478,23 @@ if [ -n "$API_KEY" ]; then
 fi
 
 # Access URLs box
+echo ""
+show_spinner "Waiting for admin panel to be ready..." &
+SPINNER_PID=$!
+if wait_for_url "http://localhost:8000/admin" 240 2; then
+    stop_spinner $SPINNER_PID "success" "Admin panel is ready"
+else
+    stop_spinner $SPINNER_PID "warning" "Admin panel not ready yet (still starting)"
+fi
+
+show_spinner "Waiting for storefront to be ready..." &
+SPINNER_PID=$!
+if wait_for_url "http://localhost:8000" 240 2; then
+    stop_spinner $SPINNER_PID "success" "Storefront is ready"
+else
+    stop_spinner $SPINNER_PID "warning" "Storefront not ready yet (still starting)"
+fi
+
 echo ""
 printf "${BRIGHT_CYAN}╭─ 🌐 Access URLs ───────────────────────────────────────╮${RESET}\n"
 printf "${BRIGHT_CYAN}│${RESET}\n"
