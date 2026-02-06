@@ -14,27 +14,12 @@ backend/.env.*
 storefront/.env.local
 storefront/.env.*.local
 
-# Scripts
-#scripts
-
-# Brand
-shop-omersia
-
 # IDE and OS
 .DS_Store
-.claude
 .idea/
 .vscode/
 
-# Data
-meili_data/
-backend/phpstan-baseline.neon
-docker-compose.override.yml
+# Ai
+.claude
 CLAUDE.md
 
-# Documentation
-.github/VALIDATION_CHECKLIST.md
-storefront/src/__tests__/README.md
-.github/workflows/README.md
-QUICK_FIXES.md
-TEST_VALIDATION_REPORT.md
