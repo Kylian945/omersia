@@ -19,7 +19,7 @@ class OrderController extends Controller
     {
         $this->authorize('orders.view');
 
-        $q = trim((string) $request->get('q'));
+        $q = trim((string) $request->get('q', ''));
         $status = $request->get('status');
         $payment = $request->get('payment');
         $from = $request->get('from');
@@ -29,12 +29,14 @@ class OrderController extends Controller
         $orders = Order::query()
             ->confirmed() // 🔥 Exclure les brouillons du backoffice
             ->withCount('items')
-            ->when($q, function (Builder $builder) use ($q) {
-                $builder->where(function (Builder $b) use ($q) {
-                    $b->where('number', 'like', "%{$q}%")
-                        ->orWhere('customer_email', 'like', "%{$q}%")
-                        ->orWhere('customer_firstname', 'like', "%{$q}%")
-                        ->orWhere('customer_lastname', 'like', "%{$q}%");
+            ->when($q !== '', function (Builder $builder) use ($q) {
+                $like = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $q).'%';
+
+                $builder->where(function (Builder $b) use ($like) {
+                    $b->where('number', 'like', $like)
+                        ->orWhere('customer_email', 'like', $like)
+                        ->orWhere('customer_firstname', 'like', $like)
+                        ->orWhere('customer_lastname', 'like', $like);
                 });
             })
             ->when($status, fn ($b) => $b->where('status', $status))
@@ -50,7 +52,7 @@ class OrderController extends Controller
             default => $orders->orderBy('placed_at', 'desc'),
         };
 
-        $orders = $orders->paginate(20)->appends($request->query());
+        $orders = $orders->paginate(20)->withQueryString();
 
         return view('admin::orders.index', [
             'orders' => $orders,

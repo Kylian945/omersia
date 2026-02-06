@@ -4,7 +4,7 @@
 @section('page-title', 'Commandes')
 
 @section('content')
-    <div class="space-y-4">
+    <div x-data="{ q: @js($filters['q'] ?? '') }" class="space-y-4">
 
         {{-- Header / barre supérieure --}}
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -35,7 +35,7 @@
         {{-- Listing des commandes façon Shopify --}}
         <div class="rounded-xl bg-white border border-neutral-200 shadow-sm overflow-hidden">
             {{-- Barre bulk actions (comme Shopify quand une ligne est cochée – pour l’instant statique) --}}
-            <form method="GET" class="rounded-xl bg-white">
+            <form method="GET" class="rounded-xl bg-white" x-ref="searchForm">
                 <div
                     class="px-3 py-2 border-b border-neutral-100 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
                     {{-- Recherche --}}
@@ -45,7 +45,8 @@
                                 class="pointer-events-none absolute top-2 left-2 flex items-center text-neutral-400 text-xs">
                                 <x-lucide-search class="w-4 h-4" />
                             </span>
-                            <input type="text" name="q" value="{{ $filters['q'] ?? '' }}"
+                            <input type="text" name="q" value="{{ $filters['q'] ?? '' }}" x-model="q"
+                                @input.debounce.300ms="$refs.searchForm.requestSubmit()"
                                 class="w-full rounded-md border-0 pl-7 pr-2 py-1.5 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-neutral-900/5"
                                 placeholder="Rechercher une commande, un client, un e-mail…" />
                         </div>

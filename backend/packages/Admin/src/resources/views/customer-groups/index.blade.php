@@ -5,9 +5,18 @@
 
 @section('content')
     <div x-data="{}" class="space-y-4">
-        <div class="flex items-center justify-between">
-            <h1 class="text-lg font-semibold">Groupes clients</h1>
-            <a href="{{ route('customer-groups.create') }}" class="px-3 py-1.5 font-semibold rounded-md bg-black text-white text-xs">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <div class="text-sm font-semibold text-gray-800 flex items-baseline gap-1.5">
+                    <x-lucide-users class="w-3 h-3" />
+                    Groupes clients
+                </div>
+                <div class="text-xs text-gray-500">
+                    Organisez vos clients par segments pour vos campagnes et remises.
+                </div>
+            </div>
+            <a href="{{ route('customer-groups.create') }}"
+               class="bg-black rounded-lg px-4 py-1.5 text-xs text-white hover:bg-neutral-800 shadow-sm border border-black font-semibold">
                 Nouveau groupe
             </a>
         </div>

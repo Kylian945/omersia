@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Omersia\Catalog\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Omersia\Catalog\DTO\ProductCreateDTO;
 use Omersia\Catalog\DTO\ProductUpdateDTO;
 use Omersia\Catalog\Http\Requests\ProductStoreRequest;
@@ -22,11 +23,35 @@ class ProductController extends Controller
         private readonly ProductImageService $productImageService
     ) {}
 
-    public function index()
+    public function index(Request $request)
     {
         $this->authorize('products.view');
 
-        $products = Product::with(['translations', 'images'])->paginate(25);
+        $search = trim((string) $request->query('q', ''));
+
+        $products = Product::query()
+            ->with([
+                'translations' => function ($query) {
+                    $query->where('locale', 'fr');
+                },
+                'images',
+                'mainImage',
+                'variants',
+                'categories',
+            ])
+            ->when($search !== '', function ($query) use ($search) {
+                $like = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search).'%';
+
+                $query->where(function ($query) use ($like) {
+                    $query->where('sku', 'like', $like)
+                        ->orWhereHas('translations', function ($query) use ($like) {
+                            $query->where('locale', 'fr')
+                                ->where('name', 'like', $like);
+                        });
+                });
+            })
+            ->paginate(25)
+            ->withQueryString();
 
         return view('admin::products.index', compact('products'));
     }

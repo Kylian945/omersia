@@ -25,13 +25,19 @@
             Aucun produit pour le moment. Les nouveaux produits apparaîtront automatiquement ici.
         </div>
     @else
-        <div x-data="{ q: '' }" class="rounded-2xl bg-white border border-black/5 shadow-sm overflow-hidden">
+        <div x-data="{ q: @js(request('q')) }" class="rounded-2xl bg-white border border-black/5 shadow-sm overflow-hidden">
             <table class="w-full text-xs text-gray-700">
                 <div class="flex items-center gap-3 p-1.5">
                     <div class="relative flex-1">
-                        <input x-model="q" type="text" placeholder="Rechercher un produit…"
-                            class="w-full rounded-xl border-0 bg-white px-10 py-2 text-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none">
-                        <x-lucide-search class="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
+                        <form method="GET" action="{{ route('products.index') }}" class="relative flex-1"
+                            x-ref="searchForm">
+                            <input name="q" type="text" value="{{ request('q') }}" x-model="q"
+                                @input.debounce.300ms="$refs.searchForm.requestSubmit()"
+                                placeholder="Rechercher un produit…"
+                                class="w-full rounded-xl border-0 bg-white px-10 py-2 text-sm placeholder:text-neutral-400 focus:border-neutral-400 focus:outline-none">
+                            <x-lucide-search class="absolute left-3 top-2.5 h-4 w-4 text-neutral-400" />
+                            <button type="submit" class="sr-only">Rechercher</button>
+                        </form>
                     </div>
                 </div>
                 <thead class="bg-[#f9fafb] border-b border-t border-slate-200">
@@ -51,18 +57,13 @@
                             $variantCount = $product->variants->count();
                             $isVariant = $product->type === 'variant' || $variantCount > 0;
                         @endphp
-                        <tr x-show="
-                            q === '' ||
-                            '{{ Str::of($t->name)->lower() }}'.includes(q.toLowerCase()) ||
-                            '{{ $product->sku }}'.toLowerCase().includes(q.toLowerCase())
-                        "
-                            class="border-b border-gray-50 hover:bg-[#fafafa]">
+                        <tr class="border-b border-gray-50 hover:bg-[#fafafa]">
                             {{-- Nom --}}
                             <td class="py-2 px-3">
                                 <div class="flex items-center gap-2">
                                     @if ($product->mainImage->url)
-                                        <img class="w-10 h-10 rounded-md"
-                                            src="{{ $product->mainImage->url }}" alt="image produit" />
+                                        <img class="w-10 h-10 rounded-md" src="{{ $product->mainImage->url }}"
+                                            alt="image produit" />
                                     @endif
                                     <div>
                                         <div class="font-medium text-xs text-gray-900">
@@ -135,8 +136,8 @@
                                         Modifier
                                     </a>
                                     <button type="button"
-                                            class="rounded-full border border-red-100 px-2 py-0.5 text-xxxs text-red-500 hover:bg-red-50"
-                                            @click="$dispatch('open-modal', { name: 'delete-product-{{ $product->id }}' })">
+                                        class="rounded-full border border-red-100 px-2 py-0.5 text-xxxs text-red-500 hover:bg-red-50"
+                                        @click="$dispatch('open-modal', { name: 'delete-product-{{ $product->id }}' })">
                                         Supprimer
                                     </button>
                                 </div>
@@ -153,11 +154,9 @@
     @endif
 
     {{-- Modals de confirmation de suppression --}}
-    @foreach($products as $product)
-        <x-admin::modal name="delete-product-{{ $product->id }}"
-            :title="'Supprimer le produit « ' . $product->name . ' » ?'"
-            description="Cette action est définitive et ne peut pas être annulée."
-            size="max-w-md">
+    @foreach ($products as $product)
+        <x-admin::modal name="delete-product-{{ $product->id }}" :title="'Supprimer le produit « ' . $product->name . ' » ?'"
+            description="Cette action est définitive et ne peut pas être annulée." size="max-w-md">
             <p class="text-xs text-gray-600">
                 Voulez-vous vraiment supprimer le produit
                 <span class="font-semibold">{{ $product->name }}</span> ?
