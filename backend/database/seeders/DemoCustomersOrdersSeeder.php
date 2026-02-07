@@ -16,7 +16,9 @@ use Omersia\Customer\Models\Customer;
 class DemoCustomersOrdersSeeder extends Seeder
 {
     private const CUSTOMER_COUNT = 5;
+
     private const ORDERS_PREVIOUS_YEAR = 150;
+
     private const ORDERS_CURRENT_YEAR = 250;
 
     private Generator $faker;

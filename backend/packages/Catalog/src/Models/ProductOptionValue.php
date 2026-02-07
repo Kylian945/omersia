@@ -7,6 +7,13 @@ namespace Omersia\Catalog\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $product_option_id
+ * @property mixed $value
+ * @property mixed $position
+ * @property-read ProductOption|null $option
+ */
 class ProductOptionValue extends Model
 {
     protected $fillable = [

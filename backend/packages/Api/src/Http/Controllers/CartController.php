@@ -39,6 +39,7 @@ class CartController extends Controller
      *
      *         @OA\JsonContent(
      *             oneOf={
+     *
      *                 @OA\Schema(
      *                     type="object",
      *                     description="Panier mis à jour",
@@ -49,6 +50,7 @@ class CartController extends Controller
      *                     @OA\Property(property="total_qty", type="integer", example=3),
      *                     @OA\Property(property="currency", type="string", example="EUR")
      *                 ),
+     *
      *                 @OA\Schema(
      *                     type="object",
      *                     description="Panier supprimé (items vides)",

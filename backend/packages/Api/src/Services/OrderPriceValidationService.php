@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omersia\Api\Services;
 
+use Omersia\Api\DTO\CartItemDTO;
 use Omersia\Api\DTO\DiscountApplicationDTO;
 use Omersia\Api\DTO\OrderCreateDTO;
 use Omersia\Api\Exceptions\PriceTamperingException;
@@ -339,12 +340,12 @@ class OrderPriceValidationService
             $productId = $item['product_id'] ?? null;
             if ($productId) {
                 $productIds[] = $productId;
-                $items[] = (object) [
-                    'id' => $productId,
-                    'variantId' => $item['variant_id'] ?? null,
-                    'qty' => $item['quantity'],
-                    'price' => $item['unit_price'],
-                ];
+                $items[] = new CartItemDTO(
+                    id: (int) $productId,
+                    price: (float) ($item['unit_price'] ?? 0),
+                    qty: (int) ($item['quantity'] ?? 0),
+                    variantId: isset($item['variant_id']) ? (int) $item['variant_id'] : null
+                );
             }
         }
 

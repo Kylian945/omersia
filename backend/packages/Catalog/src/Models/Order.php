@@ -14,6 +14,31 @@ use Illuminate\Support\Facades\Mail;
 use Omersia\Customer\Models\Customer;
 use Omersia\Sales\Mail\OrderConfirmationMail;
 
+/**
+ * @property int $id
+ * @property string|null $number
+ * @property string|null $currency
+ * @property string|null $status
+ * @property string|null $payment_status
+ * @property string|null $fulfillment_status
+ * @property float|int|string|null $subtotal
+ * @property float|int|string|null $discount_total
+ * @property float|int|string|null $shipping_total
+ * @property float|int|string|null $tax_total
+ * @property float|int|string|null $total
+ * @property int|null $customer_id
+ * @property string|null $customer_email
+ * @property string|null $customer_firstname
+ * @property string|null $customer_lastname
+ * @property array<string, mixed>|null $shipping_address
+ * @property array<string, mixed>|null $billing_address
+ * @property int|null $shipping_method_id
+ * @property \Illuminate\Support\Carbon|null $placed_at
+ * @property array<string, mixed>|null $meta
+ * @property array<int, int>|null $applied_discounts
+ * @property-read Invoice|null $invoice
+ * @property-read Customer|null $customer
+ */
 class Order extends Model
 {
     use HasFactory;

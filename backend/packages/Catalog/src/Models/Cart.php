@@ -8,6 +8,20 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Omersia\Customer\Models\Customer;
 
+/**
+ * @property int $id
+ * @property mixed $token
+ * @property mixed $customer_id
+ * @property mixed $email
+ * @property mixed $currency
+ * @property mixed $subtotal
+ * @property mixed $total_qty
+ * @property mixed $status
+ * @property array<string, mixed>|null $metadata
+ * @property \Illuminate\Support\Carbon|null $last_activity_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CartItem> $items
+ * @property-read Customer|null $customer
+ */
 class Cart extends Model
 {
     use HasFactory;

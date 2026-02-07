@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property mixed $name
+ * @property mixed $parent_id
+ * @property-read MediaFolder|null $parent
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, MediaFolder> $children
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, MediaItem> $items
+ */
 class MediaFolder extends Model
 {
     protected $fillable = [

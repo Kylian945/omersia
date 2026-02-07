@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * @property int $id
+ * @property mixed $name
+ * @property mixed $display_name
+ * @property mixed $group
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Role> $roles
+ */
 class Permission extends Model
 {
     use HasFactory;

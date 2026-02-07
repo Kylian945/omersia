@@ -8,6 +8,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property mixed $shipping_method_id
+ * @property mixed $name
+ * @property array<string, mixed>|null $countries
+ * @property mixed $postal_codes
+ * @property bool $is_active
+ * @property-read ShippingMethod|null $shippingMethod
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ShippingRate> $rates
+ */
 class ShippingZone extends Model
 {
     protected $fillable = [

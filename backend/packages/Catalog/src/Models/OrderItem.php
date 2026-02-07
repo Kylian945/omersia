@@ -8,6 +8,22 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $order_id
+ * @property mixed $product_id
+ * @property mixed $variant_id
+ * @property mixed $name
+ * @property mixed $sku
+ * @property mixed $quantity
+ * @property mixed $image_url
+ * @property float|int|string|null $unit_price
+ * @property float|int|string|null $total_price
+ * @property array<string, mixed>|null $meta
+ * @property-read Order|null $order
+ * @property-read Product|null $product
+ * @property-read ProductVariant|null $variant
+ */
 class OrderItem extends Model
 {
     use HasFactory;

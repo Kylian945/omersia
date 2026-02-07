@@ -9,12 +9,16 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Omersia\Shared\Contracts\RepositoryInterface;
 
+/** @template TModel of Model */
 abstract class BaseRepository implements RepositoryInterface
 {
+    /** @var TModel */
     protected Model $model;
 
+    /** @var Builder<TModel> */
     protected Builder $query;
 
+    /** @param TModel $model */
     public function __construct(Model $model)
     {
         $this->model = $model;
@@ -23,11 +27,16 @@ abstract class BaseRepository implements RepositoryInterface
 
     protected function resetQuery(): self
     {
-        $this->query = $this->model->newQuery();
+        /** @var Builder<TModel> $query */
+        $query = $this->model->newQuery();
+        $this->query = $query;
 
         return $this;
     }
 
+    /**
+     * @return Collection<int, TModel>
+     */
     public function all(): Collection
     {
         $result = $this->query->get();
@@ -36,26 +45,45 @@ abstract class BaseRepository implements RepositoryInterface
         return $result;
     }
 
+    /**
+     * @return TModel|null
+     */
     public function find(int $id): ?Model
     {
         return $this->model->find($id);
     }
 
+    /**
+     * @return TModel
+     */
     public function findOrFail(int $id): Model
     {
         return $this->model->findOrFail($id);
     }
 
+    /**
+     * @return TModel|null
+     */
     public function findBy(string $field, mixed $value): ?Model
     {
         return $this->model->where($field, $value)->first();
     }
 
+    /**
+     * @return Collection<int, TModel>
+     */
     public function findAllBy(string $field, mixed $value): Collection
     {
-        return $this->model->where($field, $value)->get();
+        /** @var Collection<int, TModel> $result */
+        $result = $this->model->where($field, $value)->get();
+
+        return $result;
     }
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     * @return TModel
+     */
     public function create(array $attributes): Model
     {
         return $this->model->create($attributes);
@@ -73,8 +101,12 @@ abstract class BaseRepository implements RepositoryInterface
         return $this->model->destroy($id) > 0;
     }
 
+    /**
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<TModel>
+     */
     public function paginate(int $perPage = 15)
     {
+        /** @var \Illuminate\Contracts\Pagination\LengthAwarePaginator<TModel> $result */
         $result = $this->query->paginate($perPage);
         $this->resetQuery();
 

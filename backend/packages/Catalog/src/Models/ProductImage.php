@@ -7,6 +7,14 @@ namespace Omersia\Catalog\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $product_id
+ * @property mixed $path
+ * @property mixed $position
+ * @property bool $is_main
+ * @property-read Product|null $product
+ */
 class ProductImage extends Model
 {
     protected $fillable = [

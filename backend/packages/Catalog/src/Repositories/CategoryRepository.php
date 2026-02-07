@@ -9,6 +9,7 @@ use Omersia\Catalog\Contracts\CategoryRepositoryInterface;
 use Omersia\Catalog\Models\Category;
 use Omersia\Shared\Repositories\BaseRepository;
 
+/** @extends BaseRepository<Category> */
 class CategoryRepository extends BaseRepository implements CategoryRepositoryInterface
 {
     public function __construct(Category $model)

@@ -25,9 +25,12 @@ final class RoleUpdateRequest extends FormRequest
     public function rules(): array
     {
         $role = $this->route('role');
+        $roleId = is_object($role) && isset($role->id)
+            ? (int) $role->id
+            : (is_numeric($role) ? (int) $role : null);
 
         return [
-            'name' => ['required', 'string', 'max:255', Rule::unique('roles', 'name')->ignore($role->id)],
+            'name' => ['required', 'string', 'max:255', Rule::unique('roles', 'name')->ignore($roleId)],
             'display_name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'permissions' => ['array'],

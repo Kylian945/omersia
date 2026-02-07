@@ -10,6 +10,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Omersia\Core\Models\Shop;
 
+/**
+ * @property int $id
+ * @property mixed $shop_id
+ * @property mixed $name
+ * @property mixed $code
+ * @property mixed $description
+ * @property bool $is_default
+ * @property-read Shop|null $shop
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Customer> $customers
+ */
 class CustomerGroup extends Model
 {
     use HasFactory;

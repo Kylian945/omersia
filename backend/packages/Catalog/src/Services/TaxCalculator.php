@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Omersia\Catalog\Services;
 
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Omersia\Catalog\Models\TaxRate;
 use Omersia\Catalog\Models\TaxZone;
 use Omersia\Core\Models\Shop;
 
@@ -46,6 +48,7 @@ class TaxCalculator
             ];
         }
 
+        /** @var EloquentCollection<int, TaxRate> $taxRates */
         $taxRates = $taxZone->activeTaxRates()->orderBy('priority')->get();
 
         if ($taxRates->isEmpty()) {

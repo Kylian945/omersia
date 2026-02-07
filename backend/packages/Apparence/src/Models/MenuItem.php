@@ -7,6 +7,20 @@ namespace Omersia\Apparence\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $menu_id
+ * @property mixed $parent_id
+ * @property mixed $type
+ * @property mixed $label
+ * @property mixed $category_id
+ * @property mixed $url
+ * @property bool $is_active
+ * @property mixed $position
+ * @property-read Menu|null $menu
+ * @property-read MenuItem|null $parent
+ * @property-read \Omersia\Catalog\Models\Category|null $category
+ */
 class MenuItem extends Model
 {
     protected $fillable = [

@@ -275,7 +275,8 @@ class ThemeController
             }
 
             // Extract and save pages.json before closing ZIP
-            $pagesConfigPath = $this->pageConfigService->extractAndSavePagesConfig($zip, (object) ['slug' => $slug]);
+            $temporaryTheme = new Theme(['slug' => $slug]);
+            $pagesConfigPath = $this->pageConfigService->extractAndSavePagesConfig($zip, $temporaryTheme);
 
             $zip->close();
 

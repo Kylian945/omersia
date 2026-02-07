@@ -97,7 +97,7 @@ class EcommercePageBuilderController extends Controller
 
         $translation = $page->translations()->firstOrCreate(
             ['locale' => $locale],
-            ['title' => $page->type.' - '.$page->slug ?? 'Page']
+            ['title' => ($page->type ?? 'page').' - '.($page->slug ?? 'page')]
         );
 
         $translation->update(['content_json' => $decoded]);

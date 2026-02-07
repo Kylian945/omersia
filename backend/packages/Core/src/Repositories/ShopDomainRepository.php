@@ -9,6 +9,7 @@ use Omersia\Core\Contracts\ShopDomainRepositoryInterface;
 use Omersia\Core\Models\ShopDomain;
 use Omersia\Shared\Repositories\BaseRepository;
 
+/** @extends BaseRepository<ShopDomain> */
 class ShopDomainRepository extends BaseRepository implements ShopDomainRepositoryInterface
 {
     public function __construct(ShopDomain $model)

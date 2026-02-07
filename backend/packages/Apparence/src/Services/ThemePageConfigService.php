@@ -153,7 +153,7 @@ class ThemePageConfigService
             return 'skipped';
         }
 
-        if ($existingPage && $forceUpdate) {
+        if ($existingPage) {
             // Delete existing translations
             $existingPage->translations()->delete();
             $existingPage->delete();

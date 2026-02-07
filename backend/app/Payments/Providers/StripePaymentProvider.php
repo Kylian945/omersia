@@ -71,8 +71,8 @@ class StripePaymentProvider implements PaymentProvider
             'amount' => $amount,
             'currency' => $currency,
             'metadata' => [
-                'order_id' => $order->id,
-                'order_num' => $order->number ?? '',
+                'order_id' => (string) $order->id,
+                'order_num' => (string) ($order->number ?? ''),
             ],
             'automatic_payment_methods' => ['enabled' => true],
         ]);

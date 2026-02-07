@@ -10,7 +10,7 @@ use Omersia\Catalog\Models\Product;
 final class ProductSearchService
 {
     /**
-     * @param array<string, mixed> $filters
+     * @param  array<string, mixed>  $filters
      * @return array{query: string, products: Collection<int, Product>, facets: array<string, mixed>}
      */
     public function search(string $query, string $locale, int $limit, array $filters = []): array
@@ -53,7 +53,7 @@ final class ProductSearchService
 
         if (! empty($categoryIds)) {
             $results = $results->filter(function ($product) use ($categoryIds) {
-                if (! $product->categories) {
+                if ($product->categories->isEmpty()) {
                     return false;
                 }
 
@@ -111,7 +111,7 @@ final class ProductSearchService
     }
 
     /**
-     * @param Collection<int, Product> $products
+     * @param  Collection<int, Product>  $products
      * @return array<string, mixed>
      */
     private function buildFacets(Collection $products): array
@@ -120,7 +120,7 @@ final class ProductSearchService
         $prices = [];
 
         foreach ($products as $product) {
-            if ($product->categories) {
+            if ($product->categories->isNotEmpty()) {
                 foreach ($product->categories as $category) {
                     $catId = $category->id;
                     if (! isset($categories[$catId])) {

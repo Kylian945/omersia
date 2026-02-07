@@ -241,6 +241,8 @@ fi
 
 # Create root .env with all configuration before starting containers
 cat > ".env" <<EOF
+APP_ENV=local
+APP_DEBUG=true
 DB_DATABASE=$DB_NAME
 DB_USERNAME=$DB_USERNAME
 DB_PASSWORD=$DB_PASSWORD

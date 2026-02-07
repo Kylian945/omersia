@@ -8,7 +8,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Omersia\Api\DTO\CartItemDTO;
 use Omersia\Api\DTO\DiscountApplicationDTO;
-use Omersia\Api\Services\DiscountEvaluationService;
 use Omersia\Catalog\Models\Cart;
 use Omersia\Customer\Models\Customer;
 use Omersia\Sales\Models\Discount;
@@ -20,7 +19,7 @@ final class CartService
     ) {}
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     public function sync(array $data, ?Customer $customer): array
@@ -102,7 +101,7 @@ final class CartService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array{status:int, payload:array<string, mixed>}
      */
     public function applyDiscount(array $data, ?Customer $customer, int $shopId): array
@@ -207,7 +206,7 @@ final class CartService
     }
 
     /**
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      * @return array<string, mixed>
      */
     public function applyAutomaticDiscounts(array $data, ?Customer $customer, int $shopId): array

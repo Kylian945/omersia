@@ -8,6 +8,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * @property int $id
+ * @property mixed $product_id
+ * @property mixed $sku
+ * @property mixed $name
+ * @property bool $is_active
+ * @property bool $manage_stock
+ * @property mixed $stock_qty
+ * @property float $price
+ * @property float $compare_at_price
+ * @property-read Product|null $product
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductOptionValue> $values
+ */
 class ProductVariant extends Model
 {
     protected $fillable = [

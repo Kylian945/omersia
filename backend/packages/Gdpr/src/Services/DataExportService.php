@@ -170,9 +170,9 @@ class DataExportService
 
         return [
             'items' => $cart->items->map(fn ($item) => [
-                'product_name' => $item->product?->name,
-                'quantity' => $item->quantity,
-                'price' => $item->price,
+                'product_name' => $item->product?->translation()?->name,
+                'quantity' => $item->qty,
+                'price' => $item->unit_price,
             ])->toArray(),
         ];
     }

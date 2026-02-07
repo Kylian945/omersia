@@ -8,6 +8,17 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property int $order_id
+ * @property string $number
+ * @property \Illuminate\Support\Carbon|null $issued_at
+ * @property float|int|string|null $total
+ * @property string|null $currency
+ * @property string|null $pdf_path
+ * @property array<string, mixed>|null $data
+ * @property-read Order|null $order
+ */
 class Invoice extends Model
 {
     use HasFactory;

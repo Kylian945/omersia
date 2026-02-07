@@ -9,6 +9,9 @@ use Illuminate\Database\Eloquent\Model;
 
 interface RepositoryInterface
 {
+    /**
+     * @return Collection<int, Model>
+     */
     public function all(): Collection;
 
     public function find(int $id): ?Model;
@@ -17,14 +20,23 @@ interface RepositoryInterface
 
     public function findBy(string $field, mixed $value): ?Model;
 
+    /**
+     * @return Collection<int, Model>
+     */
     public function findAllBy(string $field, mixed $value): Collection;
 
+    /**
+     * @param  array<string, mixed>  $attributes
+     */
     public function create(array $attributes): Model;
 
     public function update(int $id, array $attributes): bool;
 
     public function delete(int $id): bool;
 
+    /**
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<Model>
+     */
     public function paginate(int $perPage = 15);
 
     public function with(array $relations): self;

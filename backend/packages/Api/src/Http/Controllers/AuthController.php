@@ -208,7 +208,7 @@ class AuthController extends Controller
     {
         $user = $request->user(); // Sanctum retourne ici un Customer
 
-        if ($user && $user->currentAccessToken()) {
+        if ($user) {
             $user->currentAccessToken()->delete();
         }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Omersia\Api\Services\Catalog;
 
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Omersia\Catalog\Models\Category;
 use Omersia\Catalog\Models\Product;
 

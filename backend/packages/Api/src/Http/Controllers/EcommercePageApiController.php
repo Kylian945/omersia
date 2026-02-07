@@ -59,7 +59,6 @@ class EcommercePageApiController extends Controller
      *             @OA\Property(
      *                 property="content",
      *                 type="object",
-     *
      *                 @OA\Property(property="sections", type="array", @OA\Items(type="object"))
      *             )
      *         )

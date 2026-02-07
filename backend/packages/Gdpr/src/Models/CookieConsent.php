@@ -8,6 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Omersia\Customer\Models\Customer;
 
+/**
+ * @property int $id
+ * @property mixed $customer_id
+ * @property mixed $session_id
+ * @property mixed $ip_address
+ * @property mixed $user_agent
+ * @property bool $necessary
+ * @property bool $functional
+ * @property bool $analytics
+ * @property bool $marketing
+ * @property mixed $consent_version
+ * @property \Illuminate\Support\Carbon|null $consented_at
+ * @property \Illuminate\Support\Carbon|null $expires_at
+ * @property-read Customer|null $customer
+ */
 class CookieConsent extends Model
 {
     protected $fillable = [

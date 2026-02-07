@@ -9,6 +9,7 @@ use Omersia\Catalog\Contracts\ProductVariantRepositoryInterface;
 use Omersia\Catalog\Models\ProductVariant;
 use Omersia\Shared\Repositories\BaseRepository;
 
+/** @extends BaseRepository<ProductVariant> */
 class ProductVariantRepository extends BaseRepository implements ProductVariantRepositoryInterface
 {
     public function __construct(ProductVariant $model)
@@ -65,13 +66,17 @@ class ProductVariantRepository extends BaseRepository implements ProductVariantR
             return false;
         }
 
-        return $variant->decrement('stock_qty', $quantity);
+        $variant->decrement('stock_qty', $quantity);
+
+        return true;
     }
 
     public function incrementStock(int $variantId, int $quantity): bool
     {
         $variant = $this->findOrFail($variantId);
 
-        return $variant->increment('stock_qty', $quantity);
+        $variant->increment('stock_qty', $quantity);
+
+        return true;
     }
 }

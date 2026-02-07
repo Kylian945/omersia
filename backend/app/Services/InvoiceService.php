@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Omersia\Catalog\Models\Invoice;
 use Omersia\Catalog\Models\Order;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class InvoiceService
 {
@@ -165,10 +167,8 @@ class InvoiceService
 
     /**
      * Télécharge le PDF d'une facture
-     *
-     * @return \Illuminate\Http\Response|\Symfony\Component\HttpFoundation\BinaryFileResponse|null
      */
-    public function downloadPdf(Invoice $invoice)
+    public function downloadPdf(Invoice $invoice): StreamedResponse|BinaryFileResponse|null
     {
         if (! $invoice->pdf_path || ! Storage::exists($invoice->pdf_path)) {
             // Si le PDF n'existe pas, le régénérer

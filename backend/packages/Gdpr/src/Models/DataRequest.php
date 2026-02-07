@@ -8,6 +8,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Omersia\Customer\Models\Customer;
 
+/**
+ * @property int $id
+ * @property mixed $customer_id
+ * @property mixed $type
+ * @property mixed $status
+ * @property mixed $reason
+ * @property mixed $admin_notes
+ * @property mixed $processed_by
+ * @property \Illuminate\Support\Carbon|null $requested_at
+ * @property \Illuminate\Support\Carbon|null $processed_at
+ * @property \Illuminate\Support\Carbon|null $completed_at
+ * @property mixed $export_file_path
+ * @property \Illuminate\Support\Carbon|null $export_expires_at
+ * @property bool $data_deleted
+ * @property array<string, mixed>|null $deleted_data_summary
+ * @property-read Customer|null $customer
+ * @property-read \App\Models\User|null $processedBy
+ */
 class DataRequest extends Model
 {
     protected $fillable = [

@@ -6,6 +6,13 @@ namespace Omersia\Catalog\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property mixed $name
+ * @property mixed $prefix
+ * @property int $current_value
+ * @property int $padding
+ */
 class Sequence extends Model
 {
     protected $fillable = [

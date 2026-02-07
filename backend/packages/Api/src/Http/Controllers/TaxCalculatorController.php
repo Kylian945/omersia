@@ -113,7 +113,6 @@ class TaxCalculatorController extends Controller
      *                 property="address",
      *                 type="object",
      *                 required={"country"},
-     *
      *                 @OA\Property(property="country", type="string", example="FR"),
      *                 @OA\Property(property="state", type="string", nullable=true, example="Île-de-France"),
      *                 @OA\Property(property="postal_code", type="string", nullable=true, example="75001")

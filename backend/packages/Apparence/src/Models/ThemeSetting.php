@@ -7,6 +7,15 @@ namespace Omersia\Apparence\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $theme_id
+ * @property mixed $key
+ * @property string $value
+ * @property mixed $type
+ * @property mixed $group
+ * @property-read Theme|null $theme
+ */
 class ThemeSetting extends Model
 {
     protected $fillable = [

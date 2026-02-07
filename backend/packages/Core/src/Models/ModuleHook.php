@@ -7,6 +7,17 @@ namespace Omersia\Core\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $module_slug
+ * @property mixed $hook_name
+ * @property mixed $component_path
+ * @property mixed $condition
+ * @property int $priority
+ * @property bool $is_active
+ * @property array<string, mixed>|null $metadata
+ * @property-read Module|null $module
+ */
 class ModuleHook extends Model
 {
     protected $fillable = [

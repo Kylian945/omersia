@@ -10,6 +10,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Omersia\Core\Models\Shop;
 
+/**
+ * @property int $id
+ * @property mixed $shop_id
+ * @property mixed $name
+ * @property mixed $code
+ * @property mixed $description
+ * @property array<string, mixed>|null $countries
+ * @property array<string, mixed>|null $states
+ * @property array<string, mixed>|null $postal_codes
+ * @property bool $is_active
+ * @property int $priority
+ * @property-read Shop|null $shop
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, TaxRate> $taxRates
+ */
 class TaxZone extends Model
 {
     use HasFactory;

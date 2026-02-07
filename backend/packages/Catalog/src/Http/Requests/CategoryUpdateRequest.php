@@ -25,6 +25,9 @@ final class CategoryUpdateRequest extends FormRequest
     public function rules(): array
     {
         $category = $this->route('category');
+        $categoryId = is_object($category) && isset($category->id)
+            ? (int) $category->id
+            : (is_numeric($category) ? (int) $category : null);
 
         return [
             'name' => ['required', 'string', 'max:255'],
@@ -32,14 +35,14 @@ final class CategoryUpdateRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('category_translations', 'slug')->where(function ($query) use ($category) {
-                    return $query->where('category_id', '!=', $category->id);
+                Rule::unique('category_translations', 'slug')->where(function ($query) use ($categoryId) {
+                    return $query->where('category_id', '!=', $categoryId);
                 }),
             ],
             'description' => ['nullable', 'string'],
             'meta_title' => ['nullable', 'string', 'max:255'],
             'meta_description' => ['nullable', 'string', 'max:500'],
-            'parent_id' => ['nullable', 'integer', 'exists:categories,id', Rule::notIn([$category->id])],
+            'parent_id' => ['nullable', 'integer', 'exists:categories,id', Rule::notIn([$categoryId])],
             'is_active' => ['nullable', 'boolean'],
             'position' => ['nullable', 'integer', 'min:0'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:2048'],

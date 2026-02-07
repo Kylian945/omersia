@@ -15,6 +15,41 @@ use Omersia\Catalog\Models\Product;
 use Omersia\Customer\Models\Customer;
 use Omersia\Customer\Models\CustomerGroup;
 
+/**
+ * @property int $id
+ * @property mixed $shop_id
+ * @property mixed $name
+ * @property mixed $type
+ * @property mixed $method
+ * @property mixed $code
+ * @property mixed $value_type
+ * @property mixed $value
+ * @property mixed $min_subtotal
+ * @property mixed $min_quantity
+ * @property mixed $buy_quantity
+ * @property mixed $get_quantity
+ * @property mixed $buy_applies_to
+ * @property mixed $get_applies_to
+ * @property bool $get_is_free
+ * @property mixed $get_discount_value
+ * @property mixed $product_scope
+ * @property mixed $customer_selection
+ * @property bool $is_active
+ * @property \Illuminate\Support\Carbon|null $starts_at
+ * @property \Illuminate\Support\Carbon|null $ends_at
+ * @property mixed $usage_limit
+ * @property mixed $usage_limit_per_customer
+ * @property bool $applies_once_per_order
+ * @property bool $combines_with_product_discounts
+ * @property bool $combines_with_order_discounts
+ * @property bool $combines_with_shipping_discounts
+ * @property mixed $priority
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $products
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Category> $collections
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CustomerGroup> $customerGroups
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Customer> $customers
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, DiscountUsage> $usages
+ */
 class Discount extends Model
 {
     use HasFactory;

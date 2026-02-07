@@ -7,6 +7,17 @@ namespace Omersia\Apparence\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property mixed $ecommerce_page_id
+ * @property mixed $locale
+ * @property mixed $title
+ * @property array<string, mixed>|null $content_json
+ * @property mixed $meta_title
+ * @property mixed $meta_description
+ * @property bool $noindex
+ * @property-read EcommercePage|null $page
+ */
 class EcommercePageTranslation extends Model
 {
     use HasFactory;

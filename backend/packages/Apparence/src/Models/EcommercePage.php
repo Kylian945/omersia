@@ -9,6 +9,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Omersia\Core\Models\Shop;
 
+/**
+ * @property int $id
+ * @property mixed $shop_id
+ * @property mixed $type
+ * @property mixed $home
+ * @property mixed $category
+ * @property mixed $product
+ * @property mixed $slug
+ * @property array<string, mixed>|null $config
+ * @property bool $is_active
+ * @property-read Shop|null $shop
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, EcommercePageTranslation> $translations
+ */
 class EcommercePage extends Model
 {
     use HasFactory;

@@ -25,9 +25,12 @@ final class ShippingMethodUpdateRequest extends FormRequest
     public function rules(): array
     {
         $shippingMethod = $this->route('shipping_method');
+        $shippingMethodId = is_object($shippingMethod) && isset($shippingMethod->id)
+            ? (int) $shippingMethod->id
+            : (is_numeric($shippingMethod) ? (int) $shippingMethod : null);
 
         return [
-            'code' => ['required', 'string', 'max:255', Rule::unique('shipping_methods', 'code')->ignore($shippingMethod->id)],
+            'code' => ['required', 'string', 'max:255', Rule::unique('shipping_methods', 'code')->ignore($shippingMethodId)],
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'price' => ['required', 'numeric', 'min:0'],

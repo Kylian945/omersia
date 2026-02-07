@@ -7,6 +7,14 @@ namespace Omersia\CMS\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property mixed $shop_id
+ * @property mixed $type
+ * @property bool $is_active
+ * @property bool $is_home
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, PageTranslation> $translations
+ */
 class Page extends Model
 {
     protected $table = 'cms_pages';

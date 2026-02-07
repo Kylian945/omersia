@@ -8,6 +8,21 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property mixed $code
+ * @property mixed $name
+ * @property mixed $description
+ * @property float|int|string|null $price
+ * @property mixed $delivery_time
+ * @property bool $is_active
+ * @property bool $use_weight_based_pricing
+ * @property bool $use_zone_based_pricing
+ * @property float|int|string|null $free_shipping_threshold
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Order> $orders
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ShippingZone> $zones
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ShippingRate> $rates
+ */
 class ShippingMethod extends Model
 {
     use HasFactory;

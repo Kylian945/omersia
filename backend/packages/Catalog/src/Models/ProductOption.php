@@ -8,6 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property mixed $product_id
+ * @property mixed $name
+ * @property mixed $position
+ * @property-read Product|null $product
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductOptionValue> $values
+ */
 class ProductOption extends Model
 {
     protected $fillable = [

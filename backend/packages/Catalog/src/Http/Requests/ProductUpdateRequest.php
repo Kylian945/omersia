@@ -25,7 +25,13 @@ final class ProductUpdateRequest extends FormRequest
     public function rules(): array
     {
         $product = $this->route('product');
-        $type = $this->input('type', $product->type ?? 'simple');
+        $productId = is_object($product) && isset($product->id)
+            ? (int) $product->id
+            : (is_numeric($product) ? (int) $product : null);
+        $defaultType = is_object($product) && isset($product->type)
+            ? (string) $product->type
+            : 'simple';
+        $type = (string) $this->input('type', $defaultType);
 
         $rules = [
             'type' => ['required', 'in:simple,variant'],
@@ -53,7 +59,7 @@ final class ProductUpdateRequest extends FormRequest
         ];
 
         if ($type === 'simple') {
-            $rules['sku'] = ['required', 'string', 'max:255', Rule::unique('products', 'sku')->ignore($product->id)];
+            $rules['sku'] = ['required', 'string', 'max:255', Rule::unique('products', 'sku')->ignore($productId)];
             $rules['stock_qty'] = ['nullable', 'integer', 'min:0'];
             $rules['price'] = ['required', 'numeric', 'min:0'];
             $rules['compare_at_price'] = ['nullable', 'numeric', 'min:0', 'gte:price'];

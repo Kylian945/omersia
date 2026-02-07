@@ -48,8 +48,10 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(
  *         property="translations",
  *         type="array",
+ *
  *         @OA\Items(ref="#/components/schemas/CategoryTranslation")
  *     ),
+ *
  *     @OA\Property(
  *         property="parent",
  *         ref="#/components/schemas/Category",
@@ -58,6 +60,7 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(
  *         property="children",
  *         type="array",
+ *
  *         @OA\Items(ref="#/components/schemas/Category")
  *     )
  * )
@@ -112,11 +115,14 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(
  *         property="values",
  *         type="array",
+ *
  *         @OA\Items(ref="#/components/schemas/ProductVariantValue")
  *     ),
+ *
  *     @OA\Property(
  *         property="option_values",
  *         type="array",
+ *
  *         @OA\Items(ref="#/components/schemas/OptionValue")
  *     )
  * )
@@ -131,8 +137,10 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(
  *         property="values",
  *         type="array",
+ *
  *         @OA\Items(
  *             type="object",
+ *
  *             @OA\Property(property="id", type="integer", example=1),
  *             @OA\Property(property="value", type="string", example="S"),
  *             @OA\Property(property="position", type="integer", example=1)
@@ -162,21 +170,28 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(
  *         property="translations",
  *         type="array",
+ *
  *         @OA\Items(ref="#/components/schemas/ProductTranslation")
  *     ),
+ *
  *     @OA\Property(
  *         property="categories",
  *         type="array",
+ *
  *         @OA\Items(ref="#/components/schemas/Category")
  *     ),
+ *
  *     @OA\Property(
  *         property="images",
  *         type="array",
+ *
  *         @OA\Items(ref="#/components/schemas/ProductImage")
  *     ),
+ *
  *     @OA\Property(
  *         property="variants",
  *         type="array",
+ *
  *         @OA\Items(ref="#/components/schemas/ProductVariant")
  *     )
  * )
@@ -193,8 +208,10 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(
  *         property="links",
  *         type="array",
+ *
  *         @OA\Items(
  *             type="object",
+ *
  *             @OA\Property(property="url", type="string", nullable=true),
  *             @OA\Property(property="label", type="string"),
  *             @OA\Property(property="active", type="boolean")
@@ -209,6 +226,7 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(
  *         property="data",
  *         type="array",
+ *
  *         @OA\Items(ref="#/components/schemas/Product")
  *     )
  * )
@@ -220,27 +238,35 @@ use OpenApi\Annotations as OA;
  *     allOf={
  *         @OA\Schema(ref="#/components/schemas/Product"),
  *         @OA\Schema(
+ *
  *             @OA\Property(property="description", type="string", nullable=true),
  *             @OA\Property(property="meta_title", type="string", nullable=true),
  *             @OA\Property(property="meta_description", type="string", nullable=true),
  *             @OA\Property(
  *                 property="options",
  *                 type="array",
+ *
  *                 @OA\Items(ref="#/components/schemas/ProductOption")
  *             ),
+ *
  *             @OA\Property(
  *                 property="variants",
  *                 type="array",
+ *
  *                 @OA\Items(ref="#/components/schemas/ProductVariant")
  *             ),
+ *
  *             @OA\Property(
  *                 property="relatedProducts",
  *                 type="array",
+ *
  *                 @OA\Items(ref="#/components/schemas/Product")
  *             ),
+ *
  *             @OA\Property(
  *                 property="related_products",
  *                 type="array",
+ *
  *                 @OA\Items(ref="#/components/schemas/Product")
  *             )
  *         )

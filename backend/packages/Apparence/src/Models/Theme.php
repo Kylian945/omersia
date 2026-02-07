@@ -10,6 +10,26 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Omersia\Core\Models\Shop;
 
+/**
+ * @property int $id
+ * @property mixed $shop_id
+ * @property mixed $name
+ * @property mixed $slug
+ * @property mixed $description
+ * @property mixed $version
+ * @property mixed $author
+ * @property mixed $preview_image
+ * @property mixed $zip_path
+ * @property mixed $component_path
+ * @property mixed $pages_config_path
+ * @property array<string, mixed>|null $widgets_config
+ * @property array<string, mixed>|null $settings_schema
+ * @property bool $is_active
+ * @property bool $is_default
+ * @property array<string, mixed>|null $metadata
+ * @property-read Shop|null $shop
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ThemeSetting> $settings
+ */
 class Theme extends Model
 {
     use HasFactory;

@@ -18,6 +18,7 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(
  *         property="products",
  *         type="array",
+ *
  *         @OA\Items(ref="#/components/schemas/Product")
  *     )
  * )
@@ -30,6 +31,7 @@ use OpenApi\Annotations as OA;
  *     @OA\Property(
  *         property="categories",
  *         type="array",
+ *
  *         @OA\Items(ref="#/components/schemas/Category")
  *     )
  * )

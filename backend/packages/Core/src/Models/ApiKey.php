@@ -8,6 +8,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+/**
+ * @property int $id
+ * @property mixed $name
+ * @property mixed $key
+ * @property bool $active
+ * @property int|null $shop_id
+ * @property int|null $usage_count
+ * @property \Illuminate\Support\Carbon|null $expires_at
+ */
 class ApiKey extends Model
 {
     use HasFactory;

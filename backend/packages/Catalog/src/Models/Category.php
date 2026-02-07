@@ -10,6 +10,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property int $id
+ * @property mixed $shop_id
+ * @property mixed $parent_id
+ * @property mixed $is_active
+ * @property mixed $position
+ * @property mixed $image_path
+ * @property-read Category|null $getImageUrlAttribute
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Category> $children
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, CategoryTranslation> $translations
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $products
+ */
 class Category extends Model
 {
     use HasFactory;

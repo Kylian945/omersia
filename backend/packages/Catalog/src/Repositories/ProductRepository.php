@@ -10,6 +10,7 @@ use Omersia\Catalog\Contracts\ProductRepositoryInterface;
 use Omersia\Catalog\Models\Product;
 use Omersia\Shared\Repositories\BaseRepository;
 
+/** @extends BaseRepository<Product> */
 class ProductRepository extends BaseRepository implements ProductRepositoryInterface
 {
     public function __construct(Product $model)

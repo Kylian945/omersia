@@ -7,6 +7,17 @@ namespace Omersia\Admin\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $name
+ * @property mixed $path
+ * @property mixed $mime_type
+ * @property mixed $size
+ * @property mixed $width
+ * @property mixed $height
+ * @property mixed $folder_id
+ * @property-read MediaFolder|null $folder
+ */
 class MediaItem extends Model
 {
     protected $table = 'media_library';

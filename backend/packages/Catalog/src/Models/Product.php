@@ -12,6 +12,26 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Laravel\Scout\Searchable;
 
+/**
+ * @property int $id
+ * @property mixed $shop_id
+ * @property mixed $sku
+ * @property mixed $type
+ * @property bool $is_active
+ * @property bool $manage_stock
+ * @property mixed $stock_qty
+ * @property float $price
+ * @property float $compare_at_price
+ * @property string|null $main_image_url
+ * @property-read \Omersia\Core\Models\Shop|null $shop
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductTranslation> $translations
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Category> $categories
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductImage> $images
+ * @property-read ProductImage|null $mainImage
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, Product> $relatedProducts
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductOption> $options
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductVariant> $variants
+ */
 class Product extends Model
 {
     use HasFactory;
@@ -88,7 +108,7 @@ class Product extends Model
     }
 
     // related products
-    public function relatedProducts()
+    public function relatedProducts(): BelongsToMany
     {
         return $this->belongsToMany(
             self::class,

@@ -7,6 +7,17 @@ namespace Omersia\Catalog\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $shipping_method_id
+ * @property mixed $shipping_zone_id
+ * @property float|int|string|null $min_weight
+ * @property float|int|string|null $max_weight
+ * @property float|int|string|null $price
+ * @property int $priority
+ * @property-read ShippingMethod|null $shippingMethod
+ * @property-read ShippingZone|null $shippingZone
+ */
 class ShippingRate extends Model
 {
     protected $fillable = [

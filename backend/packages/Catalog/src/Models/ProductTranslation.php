@@ -8,6 +8,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $product_id
+ * @property mixed $locale
+ * @property mixed $name
+ * @property mixed $slug
+ * @property mixed $short_description
+ * @property mixed $description
+ * @property mixed $meta_title
+ * @property mixed $meta_description
+ * @property-read Product|null $product
+ */
 class ProductTranslation extends Model
 {
     use HasFactory;

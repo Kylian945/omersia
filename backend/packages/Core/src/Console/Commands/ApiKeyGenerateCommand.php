@@ -37,7 +37,7 @@ class ApiKeyGenerateCommand extends Command
             // 2. Generate the plain key (will be shown only once)
             $plainKey = Str::random(64);
 
-            if ($existingKey && $force) {
+            if ($existingKey) {
                 // Regenerate existing key
                 $this->warn("Regenerating API key '{$name}'...");
                 $hashedKey = hash('sha256', $plainKey);

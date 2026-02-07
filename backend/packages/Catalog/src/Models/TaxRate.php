@@ -8,6 +8,18 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $tax_zone_id
+ * @property mixed $name
+ * @property mixed $type
+ * @property float|int|string|null $rate
+ * @property bool $compound
+ * @property bool $shipping_taxable
+ * @property int $priority
+ * @property bool $is_active
+ * @property-read TaxZone|null $taxZone
+ */
 class TaxRate extends Model
 {
     use HasFactory;

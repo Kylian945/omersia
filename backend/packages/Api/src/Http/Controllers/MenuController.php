@@ -248,11 +248,11 @@ class MenuController extends Controller
                                     'slug' => $gcTranslation?->slug,
                                     'name' => $gcTranslation?->name,
                                 ];
-                            })->values();
+                            })->values()->all();
                         }
 
                         return $childData;
-                    })->values();
+                    })->values()->all();
                 }
 
                 $data['category'] = $categoryData;

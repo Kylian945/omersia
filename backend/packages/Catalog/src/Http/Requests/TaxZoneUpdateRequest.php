@@ -25,10 +25,13 @@ final class TaxZoneUpdateRequest extends FormRequest
     public function rules(): array
     {
         $taxZone = $this->route('tax_zone');
+        $taxZoneId = is_object($taxZone) && isset($taxZone->id)
+            ? (int) $taxZone->id
+            : (is_numeric($taxZone) ? (int) $taxZone : null);
 
         return [
             'name' => ['required', 'string', 'max:255'],
-            'code' => ['required', 'string', 'max:50', Rule::unique('tax_zones', 'code')->ignore($taxZone->id)],
+            'code' => ['required', 'string', 'max:50', Rule::unique('tax_zones', 'code')->ignore($taxZoneId)],
             'description' => ['nullable', 'string'],
             'countries' => ['nullable', 'array'],
             'countries_input' => ['nullable', 'string'],

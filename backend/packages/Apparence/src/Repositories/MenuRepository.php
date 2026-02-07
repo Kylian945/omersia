@@ -9,6 +9,7 @@ use Omersia\Apparence\Contracts\MenuRepositoryInterface;
 use Omersia\Apparence\Models\Menu;
 use Omersia\Shared\Repositories\BaseRepository;
 
+/** @extends BaseRepository<Menu> */
 class MenuRepository extends BaseRepository implements MenuRepositoryInterface
 {
     public function __construct(Menu $model)
@@ -35,17 +36,19 @@ class MenuRepository extends BaseRepository implements MenuRepositoryInterface
 
     public function createWithItems(array $menuData, array $items): Menu
     {
+        /** @var Menu $menu */
         $menu = $this->create($menuData);
 
         foreach ($items as $itemData) {
             $menu->items()->create($itemData);
         }
 
-        return $menu->fresh('items');
+        return $menu->fresh('items') ?? $menu->load('items');
     }
 
     public function updateWithItems(int $menuId, array $menuData, array $items): bool
     {
+        /** @var Menu $menu */
         $menu = $this->findOrFail($menuId);
 
         $menu->update($menuData);
@@ -61,6 +64,7 @@ class MenuRepository extends BaseRepository implements MenuRepositoryInterface
 
     public function deleteWithItems(int $menuId): bool
     {
+        /** @var Menu $menu */
         $menu = $this->findOrFail($menuId);
         $menu->items()->delete();
 
@@ -69,8 +73,10 @@ class MenuRepository extends BaseRepository implements MenuRepositoryInterface
 
     public function duplicateMenu(int $menuId, string $newName): Menu
     {
+        /** @var Menu $original */
         $original = $this->with(['items'])->findOrFail($menuId);
 
+        /** @var Menu $newMenu */
         $newMenu = $this->create([
             'shop_id' => $original->shop_id,
             'name' => $newName,
@@ -86,6 +92,6 @@ class MenuRepository extends BaseRepository implements MenuRepositoryInterface
             ]);
         }
 
-        return $newMenu->fresh('items');
+        return $newMenu->fresh('items') ?? $newMenu->load('items');
     }
 }

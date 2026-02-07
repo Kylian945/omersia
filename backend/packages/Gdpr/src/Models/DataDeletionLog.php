@@ -7,6 +7,22 @@ namespace Omersia\Gdpr\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $customer_id
+ * @property mixed $customer_email
+ * @property mixed $data_request_id
+ * @property array<string, mixed>|null $deleted_tables
+ * @property array<string, mixed>|null $anonymized_tables
+ * @property mixed $total_records_deleted
+ * @property mixed $total_records_anonymized
+ * @property mixed $deleted_by
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property mixed $deletion_method
+ * @property mixed $notes
+ * @property-read DataRequest|null $dataRequest
+ * @property-read \App\Models\User|null $deletedBy
+ */
 class DataDeletionLog extends Model
 {
     protected $fillable = [

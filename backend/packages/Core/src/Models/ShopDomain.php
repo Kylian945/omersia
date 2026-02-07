@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $shop_id
+ * @property mixed $domain
+ * @property mixed $is_primary
+ * @property-read Shop|null $shop
+ */
 class ShopDomain extends Model
 {
     use HasFactory;

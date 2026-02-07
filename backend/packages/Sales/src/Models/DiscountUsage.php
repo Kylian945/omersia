@@ -10,6 +10,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Omersia\Catalog\Models\Order;
 use Omersia\Customer\Models\Customer;
 
+/**
+ * @property int $id
+ * @property mixed $discount_id
+ * @property mixed $order_id
+ * @property mixed $customer_id
+ * @property mixed $usage_count
+ * @property-read Discount|null $discount
+ * @property-read Order|null $order
+ * @property-read Customer|null $customer
+ */
 class DiscountUsage extends Model
 {
     use HasFactory;

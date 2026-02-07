@@ -9,6 +9,7 @@ use Omersia\Apparence\Contracts\EcommercePageRepositoryInterface;
 use Omersia\Apparence\Models\EcommercePage;
 use Omersia\Shared\Repositories\BaseRepository;
 
+/** @extends BaseRepository<EcommercePage> */
 class EcommercePageRepository extends BaseRepository implements EcommercePageRepositoryInterface
 {
     public function __construct(EcommercePage $model)
@@ -58,6 +59,7 @@ class EcommercePageRepository extends BaseRepository implements EcommercePageRep
 
     public function updatePageConfig(int $pageId, array $config): bool
     {
+        /** @var EcommercePage $page */
         $page = $this->findOrFail($pageId);
 
         return $page->update(['config' => $config]);
@@ -65,8 +67,10 @@ class EcommercePageRepository extends BaseRepository implements EcommercePageRep
 
     public function duplicatePage(int $pageId, string $newTitle): EcommercePage
     {
+        /** @var EcommercePage $original */
         $original = $this->with(['translations'])->findOrFail($pageId);
 
+        /** @var EcommercePage $newPage */
         $newPage = $this->create([
             'shop_id' => $original->shop_id,
             'type' => $original->type,
@@ -84,7 +88,7 @@ class EcommercePageRepository extends BaseRepository implements EcommercePageRep
             ]);
         }
 
-        return $newPage->fresh('translations');
+        return $newPage->fresh('translations') ?? $newPage->load('translations');
     }
 
     public function getPagesByType(string $type, int $shopId): Collection

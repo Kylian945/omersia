@@ -9,6 +9,7 @@ use Omersia\Apparence\Contracts\ThemeRepositoryInterface;
 use Omersia\Apparence\Models\Theme;
 use Omersia\Shared\Repositories\BaseRepository;
 
+/** @extends BaseRepository<Theme> */
 class ThemeRepository extends BaseRepository implements ThemeRepositoryInterface
 {
     public function __construct(Theme $model)
@@ -47,6 +48,7 @@ class ThemeRepository extends BaseRepository implements ThemeRepositoryInterface
             ->where('id', '!=', $themeId)
             ->update(['is_active' => false]);
 
+        /** @var Theme $theme */
         $theme = $this->findOrFail($themeId);
 
         return $theme->update(['is_active' => true]);
@@ -58,6 +60,7 @@ class ThemeRepository extends BaseRepository implements ThemeRepositoryInterface
             ->where('id', '!=', $themeId)
             ->update(['is_default' => false]);
 
+        /** @var Theme $theme */
         $theme = $this->findOrFail($themeId);
 
         return $theme->update(['is_default' => true]);
@@ -70,6 +73,7 @@ class ThemeRepository extends BaseRepository implements ThemeRepositoryInterface
 
     public function updateSettings(int $themeId, array $settings): bool
     {
+        /** @var Theme $theme */
         $theme = $this->findOrFail($themeId);
 
         foreach ($settings as $key => $value) {
@@ -84,6 +88,7 @@ class ThemeRepository extends BaseRepository implements ThemeRepositoryInterface
 
     public function getSetting(int $themeId, string $key, $default = null)
     {
+        /** @var Theme $theme */
         $theme = $this->findOrFail($themeId);
 
         return $theme->getSetting($key, $default);
@@ -91,8 +96,10 @@ class ThemeRepository extends BaseRepository implements ThemeRepositoryInterface
 
     public function duplicate(int $themeId, string $newName): ?Theme
     {
+        /** @var Theme $original */
         $original = $this->with(['settings'])->findOrFail($themeId);
 
+        /** @var Theme $newTheme */
         $newTheme = $this->create([
             'shop_id' => $original->shop_id,
             'name' => $newName,
@@ -118,7 +125,7 @@ class ThemeRepository extends BaseRepository implements ThemeRepositoryInterface
             ]);
         }
 
-        return $newTheme;
+        return $newTheme->fresh('settings') ?? $newTheme->load('settings');
     }
 
     public function install(array $themeData): Theme

@@ -7,6 +7,19 @@ namespace Omersia\CMS\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property int $id
+ * @property mixed $page_id
+ * @property mixed $locale
+ * @property mixed $title
+ * @property mixed $slug
+ * @property mixed $content
+ * @property array<string, mixed>|null $content_json
+ * @property mixed $meta_title
+ * @property mixed $meta_description
+ * @property bool $noindex
+ * @property-read Page|null $page
+ */
 class PageTranslation extends Model
 {
     protected $table = 'cms_page_translations';
