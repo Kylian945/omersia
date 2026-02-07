@@ -12,6 +12,7 @@ use Omersia\Apparence\Http\Requests\MenuStoreRequest;
 use Omersia\Apparence\Models\Menu;
 use Omersia\Apparence\Models\MenuItem;
 use Omersia\Catalog\Models\Category;
+use Omersia\CMS\Models\Page;
 
 class MenuController extends Controller
 {
@@ -69,9 +70,14 @@ class MenuController extends Controller
         $menus = Menu::orderBy('location')->orderBy('name')->get();
 
         $menuItems = $menu->items()
-            ->with(['category.translations' => function ($q) {
-                $q->where('locale', 'fr');
-            }])
+            ->with([
+                'category.translations' => function ($q) {
+                    $q->where('locale', 'fr');
+                },
+                'cmsPage.translations' => function ($q) {
+                    $q->where('locale', 'fr');
+                },
+            ])
             ->orderBy('position')
             ->orderBy('id')
             ->paginate(25);
@@ -87,7 +93,11 @@ class MenuController extends Controller
             $q->where('locale', 'fr');
         }])->get();
 
-        return view('admin::apparence.menu.create', compact('menu', 'categories'));
+        $cmsPages = Page::with(['translations' => function ($q) {
+            $q->where('locale', 'fr');
+        }])->get();
+
+        return view('admin::apparence.menu.create', compact('menu', 'categories', 'cmsPages'));
     }
 
     public function store(MenuItemStoreRequest $request)
@@ -101,22 +111,17 @@ class MenuController extends Controller
         $data['position'] = $data['position'] ?? 1;
 
         if ($data['type'] === 'category') {
-            if (! empty($data['category_id'])) {
-                $category = Category::with(['translations' => function ($q) {
-                    $q->where('locale', 'fr');
-                }])->find($data['category_id']);
-
-                if ($category) {
-                    $translation = $category->translations->first();
-                    $slug = $translation?->slug;
-
-                    $data['url'] = $slug ? '/categories/'.$slug : null;
-                }
-            }
+            $data['url'] = $this->resolveCategoryUrl($data['category_id'] ?? null);
+            $data['cms_page_id'] = null;
+        } elseif ($data['type'] === 'cms_page') {
+            $data['category_id'] = null;
+            $data['url'] = $this->resolveCmsPageUrl($data['cms_page_id'] ?? null);
         } elseif ($data['type'] === 'link') {
             $data['category_id'] = null;
+            $data['cms_page_id'] = null;
         } elseif ($data['type'] === 'text') {
             $data['category_id'] = null;
+            $data['cms_page_id'] = null;
             $data['url'] = null;
         }
 
@@ -135,7 +140,11 @@ class MenuController extends Controller
             $q->where('locale', 'fr');
         }])->get();
 
-        return view('admin::apparence.menu.edit', compact('menuItem', 'categories'));
+        $cmsPages = Page::with(['translations' => function ($q) {
+            $q->where('locale', 'fr');
+        }])->get();
+
+        return view('admin::apparence.menu.edit', compact('menuItem', 'categories', 'cmsPages'));
     }
 
     public function update(MenuItemUpdateRequest $request, MenuItem $menu)
@@ -148,22 +157,17 @@ class MenuController extends Controller
         $data['position'] = $data['position'] ?? $menuItem->position ?? 1;
 
         if ($data['type'] === 'category') {
-            if (! empty($data['category_id'])) {
-                $category = Category::with(['translations' => function ($q) {
-                    $q->where('locale', 'fr');
-                }])->find($data['category_id']);
-
-                if ($category) {
-                    $translation = $category->translations->first();
-                    $slug = $translation?->slug;
-
-                    $data['url'] = $slug ? '/categories/'.$slug : null;
-                }
-            }
+            $data['url'] = $this->resolveCategoryUrl($data['category_id'] ?? null);
+            $data['cms_page_id'] = null;
+        } elseif ($data['type'] === 'cms_page') {
+            $data['category_id'] = null;
+            $data['url'] = $this->resolveCmsPageUrl($data['cms_page_id'] ?? null);
         } elseif ($data['type'] === 'link') {
             $data['category_id'] = null;
+            $data['cms_page_id'] = null;
         } elseif ($data['type'] === 'text') {
             $data['category_id'] = null;
+            $data['cms_page_id'] = null;
             $data['url'] = null;
         }
 
@@ -184,5 +188,49 @@ class MenuController extends Controller
         return redirect()
             ->route('admin.apparence.menus.index', ['menu' => $slug])
             ->with('success', 'Élément de menu supprimé.');
+    }
+
+    protected function resolveCategoryUrl(mixed $categoryId): ?string
+    {
+        if (! is_numeric($categoryId)) {
+            return null;
+        }
+
+        $categoryId = (int) $categoryId;
+
+        $category = Category::with(['translations' => function ($q) {
+            $q->where('locale', 'fr');
+        }])->find($categoryId);
+
+        if (! $category) {
+            return null;
+        }
+
+        $translation = $category->translations->first();
+        $slug = $translation?->slug;
+
+        return $slug ? '/categories/'.$slug : null;
+    }
+
+    protected function resolveCmsPageUrl(mixed $cmsPageId): ?string
+    {
+        if (! is_numeric($cmsPageId)) {
+            return null;
+        }
+
+        $cmsPageId = (int) $cmsPageId;
+
+        $page = Page::with(['translations' => function ($q) {
+            $q->where('locale', 'fr');
+        }])->find($cmsPageId);
+
+        if (! $page) {
+            return null;
+        }
+
+        $translation = $page->translations->first();
+        $slug = $translation?->slug;
+
+        return $slug ? '/content/'.$slug : null;
     }
 }

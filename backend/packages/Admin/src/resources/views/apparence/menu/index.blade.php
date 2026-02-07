@@ -12,7 +12,7 @@
                     Menu
                 </div>
                 <div class="text-xs text-gray-500">
-                    Gérez les liens affichés dans votre navigation : catégories, liens personnalisés, textes.
+                    Gérez les liens affichés dans votre navigation : catégories, pages CMS, liens personnalisés, textes.
                 </div>
             </div>
 
@@ -73,6 +73,8 @@
                             <td class="py-2 px-3 text-xxxs text-gray-500">
                                 @if ($item->type === 'category')
                                     Catégorie
+                                @elseif($item->type === 'cms_page')
+                                    Page CMS
                                 @elseif($item->type === 'link')
                                     Lien spécifique
                                 @elseif($item->type === 'text')
@@ -83,6 +85,8 @@
                             </td>
                             <td class="py-2 px-3 text-xxxs text-gray-500">
                                 @if ($item->type === 'category' && $item->category)
+                                    {{ $item->url }}
+                                @elseif($item->type === 'cms_page')
                                     {{ $item->url }}
                                 @elseif($item->type === 'link')
                                     {{ $item->url }}

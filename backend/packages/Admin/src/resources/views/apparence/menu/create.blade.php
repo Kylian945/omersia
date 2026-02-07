@@ -9,7 +9,7 @@
             Ajouter un élément au menu "{{ $menu->name }} ({{ $menu->location }})"
         </div>
         <div class="text-xxxs text-gray-500">
-            Choisissez un label puis liez-le à une catégorie ou à une URL spécifique.
+            Choisissez un label puis liez-le à une catégorie, une page CMS ou une URL spécifique.
         </div>
     </div>
 
@@ -44,6 +44,7 @@
                     <select name="type" x-model="type"
                         class="w-full rounded-xl border border-gray-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900">
                         <option value="category">Catégorie</option>
+                        <option value="cms_page">Page CMS</option>
                         <option value="link">Lien spécifique</option>
                     </select>
                     @error('type')
@@ -83,6 +84,30 @@
                     @endforeach
                 </select>
                 @error('category_id')
+                    <div class="text-xxxs text-red-500 mt-0.5">{{ $message }}</div>
+                @enderror
+            </div>
+
+            {{-- Page CMS (si type = cms_page) --}}
+            <div x-show="type === 'cms_page'">
+                <label class="block text-xxxs font-medium text-gray-700 mb-1">
+                    Page CMS liée
+                </label>
+                <select name="cms_page_id"
+                    class="w-full rounded-xl border border-gray-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900">
+                    <option value="">Choisir une page CMS</option>
+                    @foreach ($cmsPages as $page)
+                        @php
+                            $translation = $page->translation('fr') ?? $page->translations->first();
+                            $title = $translation?->title ?? ('Page ID ' . $page->id);
+                            $slug = $translation?->slug ? ' (' . $translation->slug . ')' : '';
+                        @endphp
+                        <option value="{{ $page->id }}" @selected(old('cms_page_id') == $page->id)>
+                            {{ $title . $slug }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('cms_page_id')
                     <div class="text-xxxs text-red-500 mt-0.5">{{ $message }}</div>
                 @enderror
             </div>

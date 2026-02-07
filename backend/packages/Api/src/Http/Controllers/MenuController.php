@@ -86,8 +86,8 @@ class MenuController extends Controller
      *                     @OA\Property(
      *                         property="type",
      *                         type="string",
-     *                         enum={"category","link","text"},
-     *                         description="Type de l'item: category = lié à une catégorie, link = URL libre, text = texte seul",
+     *                         enum={"category","cms_page","link","text"},
+     *                         description="Type de l'item: category = lié à une catégorie, cms_page = lié à une page CMS, link = URL libre, text = texte seul",
      *                         example="category"
      *                     ),
      *                     @OA\Property(
@@ -204,6 +204,9 @@ class MenuController extends Controller
                             'category.children.children.translations' => function ($t) use ($locale) {
                                 $t->where('locale', $locale);
                             },
+                            'cmsPage.translations' => function ($t) use ($locale) {
+                                $t->where('locale', $locale);
+                            },
                         ]);
                 },
             ])
@@ -260,6 +263,21 @@ class MenuController extends Controller
                 // URL sécurisée auto pour les catégories
                 if (! $data['url'] && $slug) {
                     $data['url'] = '/categories/'.$slug;
+                }
+            }
+
+            if ($item->type === 'cms_page' && $item->cmsPage) {
+                $translation = $item->cmsPage->translations->first();
+                $slug = $translation?->slug;
+
+                $data['cms_page'] = [
+                    'id' => $item->cmsPage->id,
+                    'slug' => $slug,
+                    'title' => $translation?->title,
+                ];
+
+                if (! $data['url'] && $slug) {
+                    $data['url'] = '/content/'.$slug;
                 }
             }
 

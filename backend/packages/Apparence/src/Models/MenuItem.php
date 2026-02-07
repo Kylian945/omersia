@@ -14,12 +14,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property mixed $type
  * @property mixed $label
  * @property mixed $category_id
+ * @property mixed $cms_page_id
  * @property mixed $url
  * @property bool $is_active
  * @property mixed $position
  * @property-read Menu|null $menu
  * @property-read MenuItem|null $parent
  * @property-read \Omersia\Catalog\Models\Category|null $category
+ * @property-read \Omersia\CMS\Models\Page|null $cmsPage
  */
 class MenuItem extends Model
 {
@@ -29,6 +31,7 @@ class MenuItem extends Model
         'type',
         'label',
         'category_id',
+        'cms_page_id',
         'url',
         'is_active',
         'position',
@@ -52,5 +55,10 @@ class MenuItem extends Model
     {
         // adapte le namespace à ton projet
         return $this->belongsTo(\Omersia\Catalog\Models\Category::class, 'category_id');
+    }
+
+    public function cmsPage(): BelongsTo
+    {
+        return $this->belongsTo(\Omersia\CMS\Models\Page::class, 'cms_page_id');
     }
 }
