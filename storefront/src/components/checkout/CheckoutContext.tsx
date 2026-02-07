@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, ReactNode } from "react";
+import { createContext, useContext } from "react";
 import type { Address } from "@/lib/api";
 import {
   CheckoutIdentityState,
@@ -76,8 +76,10 @@ export type CheckoutContextType = {
   shippingCostBase: number;
 
   // Payment
-  paymentMethod: "card" | "paypal" | "applepay" | null;
-  setPaymentMethod: (method: "card" | "paypal" | "applepay" | null) => void;
+  paymentMethod: "card" | "paypal" | "applepay" | "test" | null;
+  setPaymentMethod: (
+    method: "card" | "paypal" | "applepay" | "test" | null
+  ) => void;
 
   // Promo codes
   showPromo: boolean;

@@ -120,7 +120,7 @@ class PaymentAuthorizationTest extends TestCase
         $response->assertJsonValidationErrors(['order_id', 'provider']);
     }
 
-    public function payment_intent_validates_provider_must_be_stripe(): void
+    public function payment_intent_rejects_unknown_provider(): void
     {
         $user = Customer::factory()->create();
         $order = Order::factory()->draft()->create(['customer_id' => $user->id]);
@@ -132,7 +132,44 @@ class PaymentAuthorizationTest extends TestCase
             ], $this->authenticatedHeaders($user));
 
         $response->assertStatus(422);
-        $response->assertJsonValidationErrors(['provider']);
+        $response->assertJson([
+            'ok' => false,
+        ]);
+        $this->assertStringContainsString(
+            'Payment provider [invalid_provider] not found or disabled.',
+            (string) $response->json('message')
+        );
+    }
+
+    public function payment_intent_accepts_manual_test_provider(): void
+    {
+        $user = Customer::factory()->create();
+        $order = Order::factory()->draft()->create([
+            'customer_id' => $user->id,
+            'total' => 100.00,
+            'currency' => 'EUR',
+        ]);
+
+        $response = $this
+            ->postJson('/api/v1/payments/intent', [
+                'order_id' => $order->id,
+                'provider' => 'manual_test',
+            ], $this->authenticatedHeaders($user));
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'ok' => true,
+            'data' => [
+                'provider' => 'manual_test',
+                'status' => 'succeeded',
+                'order_id' => $order->id,
+                'order_number' => $order->number,
+            ],
+        ]);
+
+        $order->refresh();
+        $this->assertSame('paid', $order->payment_status);
+        $this->assertSame('confirmed', $order->status);
     }
 
     public function payment_intent_validates_order_exists(): void

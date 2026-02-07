@@ -15,17 +15,12 @@ class PaymentController extends Controller
      */
     public function index()
     {
-        // On récupère ou crée le provider Stripe
-        $stripeProvider = PaymentProvider::firstOrCreate(
-            ['code' => 'stripe'],
-            [
-                'name' => 'Stripe',
-                'enabled' => false,
-                'config' => [
-                    'mode' => 'test',
-                ],
-            ]
-        );
+        PaymentProvider::ensureCoreProviders();
+
+        // On récupère le provider Stripe
+        $stripeProvider = PaymentProvider::query()
+            ->where('code', 'stripe')
+            ->firstOrFail();
 
         $stripeConfig = $stripeProvider->config ?? [];
 
@@ -53,17 +48,11 @@ class PaymentController extends Controller
      */
     public function stripe()
     {
-        $stripeProvider = PaymentProvider::firstOrCreate(
-            ['code' => 'stripe'],
-            [
-                'name' => 'Stripe',
-                'enabled' => false,
-                'config' => [
-                    'mode' => 'test',
-                    'currency' => 'eur',
-                ],
-            ]
-        );
+        PaymentProvider::ensureCoreProviders();
+
+        $stripeProvider = PaymentProvider::query()
+            ->where('code', 'stripe')
+            ->firstOrFail();
 
         $config = $stripeProvider->config ?? [];
 
@@ -84,19 +73,12 @@ class PaymentController extends Controller
      */
     public function updateStripe(UpdateStripeConfigRequest $request)
     {
+        PaymentProvider::ensureCoreProviders();
         $validated = $request->validated();
 
-        $stripeProvider = PaymentProvider::firstOrCreate(
-            ['code' => 'stripe'],
-            [
-                'name' => 'Stripe',
-                'enabled' => false,
-                'config' => [
-                    'mode' => 'test',
-                    'currency' => 'eur',
-                ],
-            ]
-        );
+        $stripeProvider = PaymentProvider::query()
+            ->where('code', 'stripe')
+            ->firstOrFail();
 
         $enabled = $request->boolean('enabled');
         $config = $stripeProvider->config ?? [];

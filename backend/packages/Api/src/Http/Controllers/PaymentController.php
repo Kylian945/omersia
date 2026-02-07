@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Payments\PaymentProviderManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use InvalidArgumentException;
 use Omersia\Catalog\Models\Order;
 use Omersia\Payment\Models\PaymentProvider;
 use OpenApi\Annotations as OA;
@@ -68,6 +69,8 @@ class PaymentController extends Controller
      */
     public function getAvailableMethods()
     {
+        PaymentProvider::ensureCoreProviders();
+
         $methods = PaymentProvider::where('enabled', true)
             ->select('id', 'name', 'code')
             ->get();
@@ -81,7 +84,7 @@ class PaymentController extends Controller
     /**
      * @OA\Post(
      *     path="/api/v1/payments/intent",
-     *     summary="Créer une intention de paiement (Stripe)",
+     *     summary="Créer une intention de paiement",
      *     tags={"Paiement"},
      *     security={{"api.key": {}, "sanctum": {}}},
      *
@@ -129,19 +132,26 @@ class PaymentController extends Controller
      */
     public function createIntent(Request $request)
     {
+        PaymentProvider::ensureCoreProviders();
+
         $data = $request->validate([
             'order_id' => ['required', 'integer', 'exists:orders,id'],
-            'provider' => ['required', 'string', 'in:stripe'], // pour l’instant
+            'provider' => ['required', 'string'],
         ]);
 
         $order = Order::where('id', $data['order_id'])
             ->where('customer_id', $request->user()->id)
             ->firstOrFail();
 
-        // ✅ utilise bien ton manager
-        $provider = $this->providers->resolve($data['provider']);
+        try {
+            $provider = $this->providers->resolve($data['provider']);
+        } catch (InvalidArgumentException $e) {
+            return response()->json([
+                'ok' => false,
+                'message' => $e->getMessage(),
+            ], 422);
+        }
 
-        // 🧠 crée ou réutilise l'intent (idempotent)
         $result = $provider->createPaymentIntent($order);
 
         // DCA-014: Logger la création d'intention de paiement

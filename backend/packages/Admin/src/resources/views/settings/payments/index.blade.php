@@ -12,7 +12,10 @@
                 Configurez les moyens de paiement disponibles sur votre boutique.
             </p>
             <p class="text-xs text-neutral-500">
-                Stripe est intégré nativement. Les autres moyens de paiement peuvent être ajoutés via des modules.
+                Stripe est intégré nativement. Un moyen de paiement de test (sans Stripe) est actif par défaut.
+            </p>
+            <p class="text-xs text-neutral-500">
+                Les autres moyens de paiement peuvent être ajoutés via des modules.
             </p>
         </div>
 
@@ -198,12 +201,24 @@
                                 </span>
                             @endif
 
-                            @if ($configRoute)
-                                <a href="{{ route($configRoute) }}"
-                                    class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs bg-white hover:bg-neutral-50">
-                                    Configurer
-                                </a>
-                            @endif
+                            <div class="flex items-center gap-2">
+                                @if ($configRoute)
+                                    <a href="{{ route($configRoute) }}"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs bg-white hover:bg-neutral-50">
+                                        Configurer
+                                    </a>
+                                @endif
+
+                                <form method="POST"
+                                    action="{{ route('admin.settings.payments.toggle', $provider->id) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <button type="submit"
+                                        class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border text-xs {{ $provider->enabled ? 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' }}">
+                                        {{ $provider->enabled ? 'Désactiver' : 'Activer' }}
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 @empty

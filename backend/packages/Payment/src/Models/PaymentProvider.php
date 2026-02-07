@@ -35,4 +35,32 @@ class PaymentProvider extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public static function ensureCoreProviders(): void
+    {
+        self::query()->firstOrCreate(
+            ['code' => 'stripe'],
+            [
+                'name' => 'Stripe',
+                'enabled' => false,
+                'config' => [
+                    'mode' => 'test',
+                    'currency' => 'eur',
+                ],
+            ]
+        );
+
+        self::query()->firstOrCreate(
+            ['code' => 'manual_test'],
+            [
+                'name' => 'Paiement de test',
+                'enabled' => true,
+                'config' => [
+                    'description' => 'Moyen de paiement de test local (sans Stripe).',
+                    'module_name' => 'Core',
+                    'is_test_gateway' => true,
+                ],
+            ]
+        );
+    }
 }

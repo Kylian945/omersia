@@ -4,33 +4,36 @@ import { StripePaymentForm } from "../components/StripePaymentForm";
 import { useEffect, useState } from "react";
 import { useCheckoutContext } from "../CheckoutContext";
 import { useCart } from "@/components/cart/CartContext";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import type { PaymentMethod } from "@/lib/types/checkout-types";
 import { ModuleHooks } from "@/components/modules/ModuleHooks";
 import { logger } from "@/lib/logger";
 
-type PaymentMethodCode = "card" | "paypal" | "applepay" | null;
+type PaymentMethodCode = "card" | "paypal" | "applepay" | "test" | null;
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
   stripe: "Carte bancaire (Visa, Mastercard)",
+  manual_test: "Paiement de test (sans Stripe)",
   paypal: "PayPal",
   applepay: "Apple Pay / Google Pay",
 };
 
 const PAYMENT_METHOD_CODE_MAP: Record<string, PaymentMethodCode> = {
   stripe: "card",
+  manual_test: "test",
   paypal: "paypal",
   applepay: "applepay",
 };
 
 export function PaymentStep() {
+  const router = useRouter();
   const {
     paymentMethod,
     setPaymentMethod,
     orderId,
     orderNumber,
     shippingCostBase,
-    taxTotal,
     appliedPromos,
     automaticDiscountTotal,
   } = useCheckoutContext();
@@ -38,6 +41,8 @@ export function PaymentStep() {
   const [availableMethods, setAvailableMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [testSubmitting, setTestSubmitting] = useState(false);
 
   // Calculer les réductions
   const promoDiscount = appliedPromos
@@ -108,6 +113,48 @@ export function PaymentStep() {
     };
   }, [paymentMethod, setPaymentMethod]);
 
+  const handleTestPayment = async () => {
+    if (!orderId || !orderNumber) {
+      setActionError("La commande n'est pas encore prête. Veuillez réessayer.");
+      return;
+    }
+
+    setTestSubmitting(true);
+    setActionError(null);
+
+    try {
+      const res = await fetch("/api/payments/intent", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          order_id: orderId,
+          provider: "manual_test",
+        }),
+      });
+
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok || !json?.ok) {
+        setActionError(
+          json?.message || "Impossible de valider le paiement de test."
+        );
+        return;
+      }
+
+      localStorage.removeItem("omersia_cart_items");
+      router.push(`/checkout/success/${encodeURIComponent(orderNumber)}`);
+    } catch (err: unknown) {
+      logger.error("Manual test payment failed", err);
+      setActionError("Erreur réseau lors du paiement de test.");
+    } finally {
+      setTestSubmitting(false);
+    }
+  };
+
   return (
     <div className="space-y-3">
       <h2 className="text-sm font-semibold text-neutral-900">
@@ -127,6 +174,12 @@ export function PaymentStep() {
       {error && (
         <p className="text-xs text-red-600">
           {error}
+        </p>
+      )}
+
+      {actionError && (
+        <p className="text-xs text-red-600">
+          {actionError}
         </p>
       )}
 
@@ -204,6 +257,30 @@ export function PaymentStep() {
             Intégration Apple Pay / Google Pay (via Stripe ou autre provider)
             à implémenter ici.
           </p>
+        )}
+
+        {paymentMethod === "test" && (
+          <>
+            {!orderId && (
+              <p className="text-xs text-neutral-500 flex gap-2 items-center">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Initialisation de la commande en cours…
+              </p>
+            )}
+
+            {orderId && (
+              <button
+                type="button"
+                onClick={handleTestPayment}
+                disabled={testSubmitting}
+                className="w-full rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900 disabled:opacity-60"
+              >
+                {testSubmitting
+                  ? "Validation du paiement de test..."
+                  : "Valider la commande (paiement test)"}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

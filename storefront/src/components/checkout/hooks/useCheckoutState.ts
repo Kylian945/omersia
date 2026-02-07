@@ -259,8 +259,8 @@ export function useCheckoutState(
 
   // Payment
   const [paymentMethod, setPaymentMethod] = useState<
-    "card" | "paypal" | "applepay" | null
-  >("card");
+    "card" | "paypal" | "applepay" | "test" | null
+  >(null);
 
   // Promo codes
   const [showPromo, setShowPromo] = useState(false);
