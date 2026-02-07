@@ -214,6 +214,20 @@ else
     echo "DB_DATABASE=$DB_NAME" >> "$BACKEND_DIR/.env"
 fi
 
+# Ensure DB_USERNAME exists and is set
+if grep -q "^DB_USERNAME=" "$BACKEND_DIR/.env"; then
+    sed_inplace "s/^DB_USERNAME=.*/DB_USERNAME=$DB_USERNAME/" "$BACKEND_DIR/.env"
+else
+    echo "DB_USERNAME=$DB_USERNAME" >> "$BACKEND_DIR/.env"
+fi
+
+# Ensure DB_PASSWORD exists and is set
+if grep -q "^DB_PASSWORD=" "$BACKEND_DIR/.env"; then
+    sed_inplace "s/^DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/" "$BACKEND_DIR/.env"
+else
+    echo "DB_PASSWORD=$DB_PASSWORD" >> "$BACKEND_DIR/.env"
+fi
+
 # Ensure realtime broadcasting env (Reverb via Pusher protocol)
 ensure_env_var() {
     local file="$1"
