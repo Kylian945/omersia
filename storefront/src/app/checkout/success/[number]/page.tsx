@@ -6,15 +6,25 @@ import { HeaderCheckout } from "@/components/common/HeaderCheckout";
 import { Footer } from "@/components/common/Footer";
 import { Container } from "@/components/common/Container";
 import { fetchUserSSR } from "@/lib/auth/fetchUserSSR";
-import { getOrderByNumber, getShopInfo } from "@/lib/api";
+import { confirmDraftOrderByNumber, getShopInfo } from "@/lib/api";
+import { buildImageUrl } from "@/lib/image-utils";
+import { OrderSuccessStatusWatcher } from "@/components/checkout/OrderSuccessStatusWatcher";
 
 type Props = {
   params: Promise<{ number: string }>;
+  searchParams: Promise<{ payment_intent?: string | string[] }>;
 };
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+function resolveItemImage(path?: string | null): string {
+  if (!path) return "/images/product-placeholder.jpg";
 
-export default async function OrderSuccessPage({ params }: Props) {
+  return buildImageUrl({ path }) || "/images/product-placeholder.jpg";
+}
+
+export default async function OrderSuccessPage({
+  params,
+  searchParams,
+}: Props) {
   const user = await fetchUserSSR();
   const shopInfo = await getShopInfo();
   if (!user) redirect("/login");
@@ -23,8 +33,14 @@ export default async function OrderSuccessPage({ params }: Props) {
   const token = cookieStore.get("auth_token")?.value;
 
   const number = (await params).number;
+  const resolvedSearchParams = await searchParams;
+  const paymentIntentParam = resolvedSearchParams.payment_intent;
+  const paymentIntentId = Array.isArray(paymentIntentParam)
+    ? paymentIntentParam[0]
+    : paymentIntentParam;
+
   const order = token
-    ? await getOrderByNumber(number, token)
+    ? await confirmDraftOrderByNumber(number, token, paymentIntentId)
     : null;
 
   if (!order) {
@@ -32,6 +48,8 @@ export default async function OrderSuccessPage({ params }: Props) {
     redirect("/account");
   }
 
+  const isConfirmed =
+    order.status === "confirmed" && order.payment_status === "paid";
 
   return (
     <>
@@ -40,25 +58,61 @@ export default async function OrderSuccessPage({ params }: Props) {
         <Container>
           <div className="max-w-4xl mx-auto">
             {/* Success message */}
-            <div className="rounded-2xl bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 p-6 mb-6">
+            <div
+              className={`rounded-2xl border p-6 mb-6 ${
+                isConfirmed
+                  ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200"
+                  : "bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200"
+              }`}
+            >
               <div className="flex items-start gap-4">
                 <div className="shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">
+                  <div
+                    className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                      isConfirmed ? "bg-green-500" : "bg-amber-500"
+                    }`}
+                  >
                     <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-xl font-semibold tracking-tight text-green-900">
-                    Commande validée !
+                  <h1
+                    className={`text-xl font-semibold tracking-tight ${
+                      isConfirmed ? "text-green-900" : "text-amber-900"
+                    }`}
+                  >
+                    {isConfirmed ? "Commande validée !" : "Paiement reçu, validation en cours"}
                   </h1>
-                  <p className="mt-1 text-sm text-green-700">
-                    Merci pour votre achat. Un email de confirmation a été envoyé à <span className="font-medium">{order.customer_email}</span>
+                  <p
+                    className={`mt-1 text-sm ${
+                      isConfirmed ? "text-green-700" : "text-amber-700"
+                    }`}
+                  >
+                    {isConfirmed
+                      ? "Merci pour votre achat. Un email de confirmation a été envoyé à"
+                      : "Votre paiement est bien enregistré. La commande sera visible dès validation définitive."}{" "}
+                    {isConfirmed && (
+                      <span className="font-medium">{order.customer_email}</span>
+                    )}
                   </p>
-                  <p className="mt-2 text-xs text-green-600">
+                  <p
+                    className={`mt-2 text-xs ${
+                      isConfirmed ? "text-green-600" : "text-amber-600"
+                    }`}
+                  >
                     Numéro de commande : <span className="font-mono font-semibold">{order.number}</span>
                   </p>
+                  {!isConfirmed && (
+                    <OrderSuccessStatusWatcher
+                      customerId={user.id}
+                      orderNumber={order.number}
+                      initialStatus={order.status}
+                      initialPaymentStatus={order.payment_status}
+                      paymentIntentId={paymentIntentId}
+                    />
+                  )}
                 </div>
               </div>
             </div>
@@ -142,11 +196,7 @@ export default async function OrderSuccessPage({ params }: Props) {
                         <div className="flex items-center gap-1.5">
                           <div className="relative w-10 h-10 rounded-md overflow-hidden">
                             <Image
-                              src={
-                                item.image_url && item.image_url !== ""
-                                  ? `${BACKEND_URL}/storage/${item.image_url.replace(/^\/+/, "")}`
-                                  : "/images/product-placeholder.jpg" // mets ton placeholder
-                              }
+                              src={resolveItemImage(item.image_url)}
                               alt={item.name}
                               fill
                               sizes="40px"

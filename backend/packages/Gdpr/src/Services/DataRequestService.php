@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omersia\Gdpr\Services;
 
+use App\Events\Realtime\GdprRequestUpdated;
 use Omersia\Gdpr\DTO\DataRequestDTO;
 use Omersia\Gdpr\Models\DataRequest;
 
@@ -22,7 +23,11 @@ class DataRequestService
      */
     public function createRequest(DataRequestDTO $dto): DataRequest
     {
-        return DataRequest::create($dto->toArray());
+        $request = DataRequest::create($dto->toArray());
+        $request->refresh();
+        event(GdprRequestUpdated::fromModel($request));
+
+        return $request;
     }
 
     /**
@@ -31,10 +36,14 @@ class DataRequestService
     public function processAccessRequest(DataRequest $request, int $userId): void
     {
         $request->markAsProcessing($userId);
+        $request->refresh();
+        event(GdprRequestUpdated::fromModel($request));
 
         // Les données sont déjà accessibles via le compte client
         // On marque juste comme complété
         $request->markAsCompleted();
+        $request->refresh();
+        event(GdprRequestUpdated::fromModel($request));
     }
 
     /**
@@ -43,11 +52,15 @@ class DataRequestService
     public function processExportRequest(DataRequest $request, int $userId): void
     {
         $request->markAsProcessing($userId);
+        $request->refresh();
+        event(GdprRequestUpdated::fromModel($request));
 
         // Générer le fichier d'export
         $this->dataExportService->generateExportFile($request);
 
         $request->markAsCompleted();
+        $request->refresh();
+        event(GdprRequestUpdated::fromModel($request));
     }
 
     /**
@@ -56,6 +69,8 @@ class DataRequestService
     public function processDeletionRequest(DataRequest $request, int $userId): void
     {
         $request->markAsProcessing($userId);
+        $request->refresh();
+        event(GdprRequestUpdated::fromModel($request));
 
         $customer = $request->customer;
 
@@ -65,6 +80,8 @@ class DataRequestService
         if (! $check['can_delete']) {
             $reasons = implode(' ', $check['reasons']);
             $request->markAsRejected($reasons);
+            $request->refresh();
+            event(GdprRequestUpdated::fromModel($request));
 
             return;
         }
@@ -73,6 +90,8 @@ class DataRequestService
         $this->dataDeletionService->deleteCustomerData($customer, $request, $userId);
 
         $request->markAsCompleted();
+        $request->refresh();
+        event(GdprRequestUpdated::fromModel($request));
     }
 
     /**

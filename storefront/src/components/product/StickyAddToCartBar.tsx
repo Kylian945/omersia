@@ -5,6 +5,7 @@ import { Container } from "../common/Container";
 import { ProductWithVariants } from "@/lib/types/product-types";
 import { SimpleAddToCart } from "./SimpleAddToCart";
 import { StickyVariantSelector } from "./StickyVariantSelector";
+import { getMainImageUrl } from "@/lib/image-utils";
 
 type StickyAddToCartBarProps = {
   product: ProductWithVariants;
@@ -18,7 +19,8 @@ export function StickyAddToCartBar({
   const [visible, setVisible] = useState(false);
   const barRef = useRef<HTMLDivElement | null>(null);
 
-  const t = product.translations?.[0]!;
+  const productName = product.translations?.[0]?.name || "Produit";
+  const imageUrl = getMainImageUrl(product);
 
   const hasVariants =
     !!product.has_variants &&
@@ -93,7 +95,7 @@ export function StickyAddToCartBar({
                   Vous regardez
                 </div>
                 <div className="text-xs font-medium text-neutral-900 truncate">
-                  {t.name}
+                  {productName}
                 </div>
               </div>
               <div className="self-start rounded-full bg-indigo-100/90 px-2 py-0.5 text-xxxs text-indigo-900 border border-indigo-200">
@@ -114,7 +116,7 @@ export function StickyAddToCartBar({
                 Vous regardez
               </div>
               <div className="text-xs font-medium text-neutral-900 truncate">
-                {t.name}
+                {productName}
               </div>
               <div className="text-xs text-neutral-500">
                 {inStock ? (
@@ -134,7 +136,7 @@ export function StickyAddToCartBar({
             <div className="w-full md:w-auto flex items-center gap-2">
               <SimpleAddToCart
                 productId={product.id}
-                name={t?.name || "Produit"}
+                name={productName}
                 price={
                   typeof product.price === "number" ? product.price : 0
                 }
@@ -143,6 +145,7 @@ export function StickyAddToCartBar({
                     ? product.compare_at_price
                     : undefined
                 }
+                imageUrl={imageUrl || undefined}
                 disabled={!inStock}
               />
             </div>

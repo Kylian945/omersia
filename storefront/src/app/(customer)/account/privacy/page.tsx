@@ -3,13 +3,20 @@ import { DataRequestForm, DataRequestsList } from "@/components/gdpr";
 import { Footer } from "@/components/common/Footer";
 import { Header } from "@/components/common/Header";
 import { Book, Box, Pencil, Trash2 } from "lucide-react";
+import { fetchUserSSR } from "@/lib/auth/fetchUserSSR";
+import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "Mes données personnelles - RGPD",
   description: "Gérez vos données personnelles et exercez vos droits RGPD",
 };
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const user = await fetchUserSSR();
+  if (!user) {
+    redirect("/login");
+  }
+
   return (
     <>
       <Header />
@@ -24,7 +31,7 @@ export default function PrivacyPage() {
 
           {/* Liste des demandes */}
           <div className="bg-white rounded-lg shadow p-6">
-            <DataRequestsList />
+            <DataRequestsList customerId={user.id} />
           </div>
         </div>
 

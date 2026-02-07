@@ -40,8 +40,23 @@ Route::get('/', [DashboardController::class, 'index'])
     ->name('admin.dashboard');
 Route::get('/metrics/active-carts', [DashboardController::class, 'activeCartsCount'])
     ->name('admin.metrics.active-carts');
+Route::get('/metrics/orders-chart', [DashboardController::class, 'ordersChartData'])
+    ->name('admin.metrics.orders-chart');
+Route::get('/metrics/latest-orders', [DashboardController::class, 'latestOrdersData'])
+    ->name('admin.metrics.latest-orders');
 Route::get('/dashboard/export', [DashboardController::class, 'export'])
     ->name('admin.dashboard.export');
+Route::get('/notifications/payment-success-audio', function () {
+    abort_unless(auth()->user()?->can('orders.view'), 403);
+
+    $path = public_path('notifications/notif_payment_success.mp3');
+    abort_unless(is_file($path), 404);
+
+    return response()->file($path, [
+        'Content-Type' => 'audio/mpeg',
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->name('admin.notifications.payment-success-audio');
 
 // Resources
 Route::resource('products', ProductController::class);

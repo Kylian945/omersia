@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omersia\Catalog\Http\Controllers;
 
+use App\Events\Realtime\OrderUpdated;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -85,7 +86,11 @@ class OrderController extends Controller
             'carrier' => ['nullable', 'string'],
         ]);
 
-        if (isset($validated['status'])) {
+        $confirmDraftOrder = isset($validated['status'])
+            && $validated['status'] === 'confirmed'
+            && $order->isDraft();
+
+        if (isset($validated['status']) && ! $confirmDraftOrder) {
             $order->status = $validated['status'];
         }
 
@@ -109,7 +114,14 @@ class OrderController extends Controller
             $order->meta = $meta;
         }
 
-        $order->save();
+        if ($confirmDraftOrder) {
+            $order->confirm();
+            $order->refresh();
+        } else {
+            $order->save();
+            $order->refresh();
+            event(OrderUpdated::fromModel($order));
+        }
 
         // Envoi d'emails selon le changement de statut
         $this->sendStatusUpdateEmail($order, $previousStatus, $validated);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omersia\Admin\Http\Controllers;
 
+use App\Events\Realtime\GdprRequestUpdated;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Omersia\Gdpr\Models\DataRequest;
@@ -146,6 +147,8 @@ class GdprController extends Controller
         ]);
 
         $dataRequest->markAsRejected($validated['reason']);
+        $dataRequest->refresh();
+        event(GdprRequestUpdated::fromModel($dataRequest));
 
         return redirect()
             ->route('admin.settings.gdpr.show', $dataRequest)
@@ -166,6 +169,8 @@ class GdprController extends Controller
         $dataRequest->update([
             'admin_notes' => $validated['note'],
         ]);
+        $dataRequest->refresh();
+        event(GdprRequestUpdated::fromModel($dataRequest));
 
         return back()->with('success', 'Note ajoutée avec succès.');
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omersia\Catalog\Http\Controllers;
 
+use App\Events\Realtime\ProductStockUpdated;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Omersia\Catalog\DTO\ProductCreateDTO;
@@ -36,9 +37,13 @@ class ProductController extends Controller
                 },
                 'images',
                 'mainImage',
-                'variants',
                 'categories',
             ])
+            ->withCount('variants')
+            ->withSum(
+                'variants as variants_stock_qty',
+                'stock_qty'
+            )
             ->when($search !== '', function ($query) use ($search) {
                 $like = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search).'%';
 
@@ -88,6 +93,7 @@ class ProductController extends Controller
 
         // Créer le produit via le service (avec transaction)
         $product = $this->productCreationService->createProduct($dto, $request);
+        event(ProductStockUpdated::fromModel($product));
 
         return redirect()->route('products.index')
             ->with('success', 'Produit créé avec succès.');
@@ -159,6 +165,7 @@ class ProductController extends Controller
 
         // Mettre à jour le produit via le service (avec transaction)
         $product = $this->productCreationService->updateProduct($product, $dto, $request);
+        event(ProductStockUpdated::fromModel($product));
 
         return redirect()
             ->route('products.edit', $product)

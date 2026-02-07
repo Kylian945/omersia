@@ -1,14 +1,14 @@
 // components/account/OrderDetailClient.tsx
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import { BadgeCheck, Truck, MapPin, CheckCircle2 } from "lucide-react";
 import type { OrderApi } from "@/lib/api";
 import { Button } from "@/components/common/Button";
 import { logger } from "@/lib/logger";
-
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+import { subscribeToPrivateRealtimeEvent } from "@/lib/realtime/reverb-client";
+import { buildImageUrl } from "@/lib/image-utils";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 type AuthUser = {
   id: number;
@@ -20,6 +20,23 @@ type AuthUser = {
 type PropsOrder = {
   order: OrderApi;
   user: AuthUser;
+};
+
+type OrderUpdatedPayload = {
+  order?: {
+    id?: number;
+    number?: string | null;
+    status?: string | null;
+    payment_status?: string | null;
+    fulfillment_status?: string | null;
+    subtotal?: number;
+    discount_total?: number;
+    shipping_total?: number;
+    tax_total?: number;
+    total?: number;
+    placed_at?: string | null;
+    meta?: OrderApi["meta"];
+  };
 };
 
 function badgeClass(status: string) {
@@ -68,8 +85,71 @@ function fmtEUR(n: number) {
   return Number(n).toFixed(2) + " €";
 }
 
-export function OrderDetailClient({ order, user }: PropsOrder) {
+function resolveOrderItemImage(path?: string | null): string | null {
+  if (!path) return null;
+
+  return buildImageUrl({ path });
+}
+
+export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
+  const [order, setOrder] = useState(initialOrder);
   const [isDownloading, setIsDownloading] = useState(false);
+
+  useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+    let isMounted = true;
+
+    subscribeToPrivateRealtimeEvent<OrderUpdatedPayload>({
+      channelName: `customer.orders.${user.id}`,
+      eventName: "orders.updated",
+      onEvent: (payload) => {
+        const incoming = payload.order;
+        if (!incoming) {
+          return;
+        }
+
+        setOrder((currentOrder) => {
+          const isSameOrder =
+            (typeof incoming.id === "number" && incoming.id === currentOrder.id) ||
+            (typeof incoming.number === "string" && incoming.number === currentOrder.number);
+
+          if (!isSameOrder) {
+            return currentOrder;
+          }
+
+          return {
+            ...currentOrder,
+            status: incoming.status ?? currentOrder.status,
+            payment_status: incoming.payment_status ?? currentOrder.payment_status,
+            fulfillment_status: incoming.fulfillment_status ?? currentOrder.fulfillment_status,
+            subtotal: incoming.subtotal ?? currentOrder.subtotal,
+            discount_total: incoming.discount_total ?? currentOrder.discount_total,
+            shipping_total: incoming.shipping_total ?? currentOrder.shipping_total,
+            tax_total: incoming.tax_total ?? currentOrder.tax_total,
+            total: incoming.total ?? currentOrder.total,
+            placed_at: incoming.placed_at ?? currentOrder.placed_at,
+            meta: incoming.meta ?? currentOrder.meta,
+          };
+        });
+      },
+    })
+      .then((cleanup) => {
+        if (!isMounted) {
+          cleanup?.();
+          return;
+        }
+
+        unsubscribe = cleanup;
+      })
+      .catch((error) => {
+        logger.warn("Order realtime subscription failed", error);
+      });
+
+    return () => {
+      isMounted = false;
+      unsubscribe?.();
+    };
+  }, [user.id]);
 
   const handleDownloadInvoice = async () => {
     setIsDownloading(true);
@@ -296,37 +376,42 @@ export function OrderDetailClient({ order, user }: PropsOrder) {
         <div className="lg:col-span-2 rounded-2xl bg-white border border-black/5 shadow-sm p-5">
           <p className="text-xs text-black font-semibold mb-3">Articles</p>
           <div className="divide-y divide-neutral-100">
-            {order.items.map((item) => (
-              <div
-                key={item.id}
-                className="py-3 flex items-center justify-between text-xs"
-              >
-                <div className="flex items-center gap-3">
-                  {item.image_url ? (
-                    <div className="relative w-12 h-12 overflow-hidden rounded">
-                      <Image
-                        src={`${BACKEND_URL}/storage/${item.image_url.replace(/^\/+/, "")}`}
-                        alt={item.name}
-                        fill
-                        sizes="48px"
-                        className="object-cover"
-                      />
+            {order.items.map((item) => {
+              const imageSrc = resolveOrderItemImage(item.image_url);
+
+              return (
+                <div
+                  key={item.id}
+                  className="py-3 flex items-center justify-between text-xs"
+                >
+                  <div className="flex items-center gap-3">
+                    {imageSrc ? (
+                      <div className="relative w-12 h-12 overflow-hidden rounded">
+                        <OptimizedImage
+                          src={imageSrc}
+                          alt={item.name}
+                          fill
+                          sizes="48px"
+                          className="object-cover"
+                          fallback={<span className="text-xxxs text-neutral-400">Image</span>}
+                        />
+                      </div>
+                    ) : (
+                      <span className="text-xxxs text-neutral-400">Image</span>
+                    )}
+                    <div className="flex flex-col">
+                      <span className="font-medium text-neutral-900">
+                        {item.name}
+                      </span>
+                      <span className="text-neutral-500">Qté {item.quantity}</span>
                     </div>
-                  ) : (
-                    <span className="text-xxxs text-neutral-400">Image</span>
-                  )}
-                  <div className="flex flex-col">
-                    <span className="font-medium text-neutral-900">
-                      {item.name}
-                    </span>
-                    <span className="text-neutral-500">Qté {item.quantity}</span>
+                  </div>
+                  <div className="text-neutral-900 font-medium">
+                    {fmtEUR(item.total_price)}
                   </div>
                 </div>
-                <div className="text-neutral-900 font-medium">
-                  {fmtEUR(item.total_price)}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {/* Totaux */}

@@ -85,3 +85,45 @@ export async function getOrderByNumber(
 
   return data;
 }
+
+type ConfirmOrderResponse = {
+  message?: string;
+  order?: OrderApi;
+};
+
+export async function confirmDraftOrderByNumber(
+  number: string,
+  authToken?: string,
+  paymentIntentId?: string
+): Promise<OrderApi | null> {
+  const current = await getOrderByNumber(number, authToken);
+  if (!current) return null;
+
+  if (current.status !== "draft") {
+    return current;
+  }
+
+  const body =
+    paymentIntentId && paymentIntentId.trim().length > 0
+      ? { payment_intent_id: paymentIntentId }
+      : {};
+
+  const { res, data } = await apiJson<ConfirmOrderResponse>(
+    `/orders/${current.id}/confirm`,
+    {
+      method: "POST",
+      authToken,
+      body,
+      cache: "no-store",
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    logger.warn("confirmDraftOrderByNumber failed:", res.status, text);
+    return current;
+  }
+
+  // Re-fetch full order payload (items + shipping relations) after confirmation.
+  return (await getOrderByNumber(number, authToken)) ?? data?.order ?? current;
+}

@@ -222,9 +222,11 @@ export function CartProvider({
 
       if (existingIndex !== -1) {
         const next = [...prev];
+        const existingItem = next[existingIndex];
         next[existingIndex] = {
-          ...next[existingIndex],
-          qty: next[existingIndex].qty + item.qty,
+          ...existingItem,
+          qty: existingItem.qty + item.qty,
+          imageUrl: existingItem.imageUrl || item.imageUrl,
         };
         return next;
       }

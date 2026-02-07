@@ -102,7 +102,9 @@ export function buildImageUrl(img?: ImageLike | null): string | null {
   // Sinon, construire l'URL à partir du path
   if (img.path) {
     const cleanPath = img.path.replace(/^\/+/, "");
-    const storagePath = `/storage/${cleanPath}`;
+    const storagePath = cleanPath.startsWith("storage/")
+      ? `/${cleanPath}`
+      : `/storage/${cleanPath}`;
 
     if (USE_IMAGE_PROXY) {
       return `/api/image-proxy?path=${encodeURIComponent(storagePath)}`;

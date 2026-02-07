@@ -301,3 +301,12 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        window.omersiaGdprRealtimeConfig = {
+            requestId: @json($request->id),
+        };
+    </script>
+    @vite(['packages/Admin/src/resources/js/gdpr-realtime.js'])
+@endpush

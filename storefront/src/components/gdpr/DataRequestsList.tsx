@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "../common/Button";
+import { logger } from "@/lib/logger";
+import { subscribeToPrivateRealtimeEvent } from "@/lib/realtime/reverb-client";
 
 interface DataRequest {
   id: number;
@@ -13,6 +15,10 @@ interface DataRequest {
   export_file_path: string | null;
   export_expires_at: string | null;
 }
+
+type DataRequestUpdatedPayload = {
+  request?: DataRequest;
+};
 
 const requestTypeLabels: Record<string, string> = {
   access: "Accès aux données",
@@ -35,7 +41,23 @@ const statusColors: Record<string, string> = {
   rejected: "bg-red-100 text-red-800",
 };
 
-export function DataRequestsList() {
+type Props = {
+  customerId: number;
+};
+
+function sortByRequestedAt(requests: DataRequest[]): DataRequest[] {
+  return [...requests].sort((a, b) => {
+    const aTime = Number.isFinite(new Date(a.requested_at).getTime())
+      ? new Date(a.requested_at).getTime()
+      : 0;
+    const bTime = Number.isFinite(new Date(b.requested_at).getTime())
+      ? new Date(b.requested_at).getTime()
+      : 0;
+    return bTime - aTime;
+  });
+}
+
+export function DataRequestsList({ customerId }: Props) {
   const [requests, setRequests] = useState<DataRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +65,49 @@ export function DataRequestsList() {
   useEffect(() => {
     loadRequests();
   }, []);
+
+  useEffect(() => {
+    let unsubscribe: (() => void) | null = null;
+    let isMounted = true;
+
+    subscribeToPrivateRealtimeEvent<DataRequestUpdatedPayload>({
+      channelName: `customer.gdpr.${customerId}`,
+      eventName: "gdpr.requests.updated",
+      onEvent: (payload) => {
+        const incoming = payload.request;
+        if (!incoming?.id) {
+          return;
+        }
+
+        setRequests((currentRequests) => {
+          const index = currentRequests.findIndex((item) => item.id === incoming.id);
+          if (index === -1) {
+            return sortByRequestedAt([incoming, ...currentRequests]);
+          }
+
+          const updated = [...currentRequests];
+          updated[index] = { ...updated[index], ...incoming };
+          return sortByRequestedAt(updated);
+        });
+      },
+    })
+      .then((cleanup) => {
+        if (!isMounted) {
+          cleanup?.();
+          return;
+        }
+
+        unsubscribe = cleanup;
+      })
+      .catch((subscriptionError) => {
+        logger.warn("GDPR realtime subscription failed", subscriptionError);
+      });
+
+    return () => {
+      isMounted = false;
+      unsubscribe?.();
+    };
+  }, [customerId]);
 
   const loadRequests = async () => {
     try {
@@ -54,7 +119,7 @@ export function DataRequestsList() {
       }
 
       const data = await res.json();
-      setRequests(data);
+      setRequests(sortByRequestedAt(data));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Une erreur est survenue");
     } finally {

@@ -302,3 +302,12 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        window.omersiaOrderRealtimeConfig = {
+            orderId: null,
+        };
+    </script>
+    @vite(['packages/Admin/src/resources/js/orders-realtime.js'])
+@endpush

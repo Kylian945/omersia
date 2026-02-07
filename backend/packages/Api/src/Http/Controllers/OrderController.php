@@ -5,18 +5,22 @@ declare(strict_types=1);
 namespace Omersia\Api\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Payments\PaymentProviderManager;
+use App\Payments\Providers\StripePaymentProvider;
 use Illuminate\Http\Request;
 use Omersia\Api\DTO\OrderCreateDTO;
 use Omersia\Api\DTO\OrderUpdateDTO;
 use Omersia\Api\Services\OrderCreationService;
 use Omersia\Catalog\Models\Order;
 use Omersia\Catalog\Models\ShippingMethod;
+use Omersia\Payment\Models\Payment;
 use OpenApi\Annotations as OA;
 
 class OrderController extends Controller
 {
     public function __construct(
-        private readonly OrderCreationService $orderCreationService
+        private readonly OrderCreationService $orderCreationService,
+        private readonly PaymentProviderManager $paymentProviderManager
     ) {}
 
     /**
@@ -458,11 +462,56 @@ class OrderController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
+        $validated = $request->validate([
+            'payment_intent_id' => ['nullable', 'string'],
+        ]);
+
         $order = Order::where('id', $id)
             ->where('customer_id', $user->id)
             ->firstOrFail();
 
         if ($order->isDraft()) {
+            if ($order->payment_status !== 'paid') {
+                $intentId = $validated['payment_intent_id'] ?? null;
+
+                $paymentQuery = Payment::where('order_id', $order->id)
+                    ->where('provider_code', 'stripe');
+
+                if (is_string($intentId) && trim($intentId) !== '') {
+                    $payment = (clone $paymentQuery)
+                        ->where('provider_payment_id', $intentId)
+                        ->first();
+                } else {
+                    $payment = (clone $paymentQuery)
+                        ->orderByDesc('id')
+                        ->first();
+                    $intentId = $payment?->provider_payment_id;
+                }
+
+                if (! $payment || ! is_string($intentId) || trim($intentId) === '') {
+                    return response()->json([
+                        'message' => 'Paiement Stripe introuvable pour cette commande.',
+                    ], 422);
+                }
+
+                $provider = $this->paymentProviderManager->resolve('stripe');
+
+                if (! $provider instanceof StripePaymentProvider) {
+                    return response()->json([
+                        'message' => 'Provider Stripe indisponible.',
+                    ], 500);
+                }
+
+                $provider->syncPaymentIntent($intentId);
+                $order->refresh();
+
+                if ($order->payment_status !== 'paid') {
+                    return response()->json([
+                        'message' => 'Le paiement Stripe n’est pas encore confirmé.',
+                    ], 422);
+                }
+            }
+
             $order->confirm(); // Utilise la méthode du modèle
 
             return response()->json([

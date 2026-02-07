@@ -214,6 +214,63 @@ else
     echo "DB_DATABASE=$DB_NAME" >> "$BACKEND_DIR/.env"
 fi
 
+# Ensure realtime broadcasting env (Reverb via Pusher protocol)
+ensure_env_var() {
+    local file="$1"
+    local key="$2"
+    local value="$3"
+
+    if grep -q "^${key}=" "$file"; then
+        sed_inplace "s|^${key}=.*|${key}=${value}|" "$file"
+    else
+        echo "${key}=${value}" >> "$file"
+    fi
+}
+
+REVERB_APP_ID_CURRENT=$(grep -E "^REVERB_APP_ID=" "$BACKEND_DIR/.env" | tail -n 1 | cut -d= -f2-)
+REVERB_APP_KEY_CURRENT=$(grep -E "^REVERB_APP_KEY=" "$BACKEND_DIR/.env" | tail -n 1 | cut -d= -f2-)
+REVERB_APP_SECRET_CURRENT=$(grep -E "^REVERB_APP_SECRET=" "$BACKEND_DIR/.env" | tail -n 1 | cut -d= -f2-)
+
+if [ -z "$REVERB_APP_ID_CURRENT" ]; then
+    REVERB_APP_ID_CURRENT=$(( (RANDOM % 900000) + 100000 ))
+fi
+if [ -z "$REVERB_APP_KEY_CURRENT" ]; then
+    REVERB_APP_KEY_CURRENT=$(openssl rand -hex 12)
+fi
+if [ -z "$REVERB_APP_SECRET_CURRENT" ]; then
+    REVERB_APP_SECRET_CURRENT=$(openssl rand -hex 12)
+fi
+
+ensure_env_var "$BACKEND_DIR/.env" "BROADCAST_DRIVER" "pusher"
+
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_APP_ID" "$REVERB_APP_ID_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_APP_KEY" "$REVERB_APP_KEY_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_APP_SECRET" "$REVERB_APP_SECRET_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_HOST" "localhost"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_PORT" "8080"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_SCHEME" "http"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_SERVER_HOST" "0.0.0.0"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_SERVER_PORT" "8080"
+
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_APP_ID" "$REVERB_APP_ID_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_APP_KEY" "$REVERB_APP_KEY_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_APP_SECRET" "$REVERB_APP_SECRET_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_APP_CLUSTER" "mt1"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_HOST" "localhost"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_PORT" "8080"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_SCHEME" "http"
+
+ensure_env_var "$BACKEND_DIR/.env" "VITE_REVERB_APP_KEY" "\${REVERB_APP_KEY}"
+ensure_env_var "$BACKEND_DIR/.env" "VITE_REVERB_HOST" "\${REVERB_HOST}"
+ensure_env_var "$BACKEND_DIR/.env" "VITE_REVERB_PORT" "\${REVERB_PORT}"
+ensure_env_var "$BACKEND_DIR/.env" "VITE_REVERB_SCHEME" "\${REVERB_SCHEME}"
+
+# Ensure storefront public realtime env
+ensure_env_var "$STOREFRONT_DIR/.env.local" "NEXT_PUBLIC_REVERB_APP_KEY" "$REVERB_APP_KEY_CURRENT"
+ensure_env_var "$STOREFRONT_DIR/.env.local" "NEXT_PUBLIC_REVERB_HOST" "localhost"
+ensure_env_var "$STOREFRONT_DIR/.env.local" "NEXT_PUBLIC_REVERB_PORT" "8080"
+ensure_env_var "$STOREFRONT_DIR/.env.local" "NEXT_PUBLIC_REVERB_SCHEME" "http"
+
 echo ""
 
 # Step 4: Build and start Docker services

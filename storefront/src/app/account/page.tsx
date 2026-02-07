@@ -9,28 +9,7 @@ import { AccountAddresses } from "@/components/account/AccountAddresses";
 import { AccountProfile } from "@/components/account/AccountProfile";
 import { cookies } from "next/headers";
 import { LogoutButton } from "@/components/auth/LogoutButton";
-
-
-function formatOrderStatus(status: string): { label: string; badgeClass: string } {
-  switch (status) {
-    case "confirmed":
-      return { label: "Confirmée", badgeClass: "bg-blue-100 text-blue-700" };
-    case "processing":
-      return { label: "En préparation", badgeClass: "bg-sky-100 text-sky-700" };
-    case "in_transit":
-      return { label: "En transit", badgeClass: "bg-cyan-100 text-cyan-700" };
-    case "out_for_delivery":
-      return { label: "En cours de livraison", badgeClass: "bg-teal-100 text-teal-700" };
-    case "delivered":
-      return { label: "Livrée", badgeClass: "bg-lime-100 text-lime-700" };
-    case "refunded":
-      return { label: "Remboursée", badgeClass: "bg-gray-100 text-gray-700" };
-    case "cancelled":
-      return { label: "Annulée", badgeClass: "bg-gray-100 text-gray-700" };
-    default:
-      return { label: status, badgeClass: "bg-neutral-100 text-neutral-700" };
-  }
-}
+import { AccountOrdersRealtime } from "@/components/account/AccountOrdersRealtime";
 
 export default async function AccountPage() {
   const token = (await cookies()).get("auth_token")?.value;
@@ -87,52 +66,7 @@ export default async function AccountPage() {
               <div className="orders">
                 <p className="text-xs text-black mt-6 font-semibold">Commandes</p>
                 <div className="mt-2 rounded-2xl bg-white border border-black/5 shadow-sm p-5 space-y-3">
-                  {orders.length === 0 ? (
-                    <p className="text-xs text-neutral-500">
-                      Vous n’avez pas encore passé de commande.
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      {orders.map((order) => {
-                        const { label, badgeClass } = formatOrderStatus(order.status);
-                        return (
-                          <Link
-                            href={`/account/order/${order.number}`}
-                            key={order.id}
-                            className="border border-black/5 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white shadow-sm"
-                          >
-                            <div className="flex flex-col text-xs">
-                              <span className="font-semibold text-neutral-900">
-                                Commande #{order.number}
-                              </span>
-                              <span className="text-neutral-500 text-xs">
-                                Passée le{" "}
-                                {new Date(order.placed_at).toLocaleDateString("fr-FR")}
-                              </span>
-                            </div>
-
-                            <div className="flex-1 sm:px-6 mt-2 sm:mt-0 text-xs flex gap-6 items-center">
-                              {/* items_count vient de withCount */}
-                              {order.items_count} article
-                              {order.items_count > 1 && "s"}
-                              <span
-                                className={`px-2 py-0.5 rounded-full mt-1 text-xs font-medium ${badgeClass}`}
-                              >
-                                {label}
-                              </span>
-                            </div>
-
-                            <div className="flex flex-col items-end text-xs sm:w-32 mt-3 sm:mt-0">
-                              <span className="font-semibold">Total</span>
-                              <span className="text-neutral-900">
-                                {Number(order.total).toFixed(2)} €
-                              </span>
-                            </div>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
+                  <AccountOrdersRealtime customerId={user.id} initialOrders={orders} />
                 </div>
               </div>
             </div>

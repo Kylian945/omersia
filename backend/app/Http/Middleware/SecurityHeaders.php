@@ -41,6 +41,8 @@ class SecurityHeaders
             );
         }
 
+        $isProduction = app()->environment('production');
+
         $cspDirectives = [
             "default-src 'self'",
             "script-src 'self' 'nonce-{$nonce}' https://js.stripe.com https://maps.googleapis.com",
@@ -53,11 +55,14 @@ class SecurityHeaders
             "base-uri 'self'",
             "form-action 'self'",
             "frame-ancestors 'none'",
-            'upgrade-insecure-requests',
         ];
 
+        if ($isProduction) {
+            $cspDirectives[] = 'upgrade-insecure-requests';
+        }
+
         // Mode Report-Only en développement, enforcing en production
-        if (app()->environment('production')) {
+        if ($isProduction) {
             $response->headers->set('Content-Security-Policy', implode('; ', $cspDirectives));
         } else {
             // Report-Only mode pour tester sans bloquer

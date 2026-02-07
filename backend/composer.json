@@ -13,6 +13,7 @@
         "darkaonline/l5-swagger": "^8.6",
         "guzzlehttp/guzzle": "^7.2",
         "laravel/framework": "^11.0",
+        "laravel/reverb": "^1.7",
         "laravel/sanctum": "^4.0",
         "laravel/scout": "^10.23",
         "laravel/tinker": "^2.8",
@@ -29,6 +30,7 @@
         "omersia/payment": "*",
         "omersia/sales": "*",
         "omersia/shared": "*",
+        "pusher/pusher-php-server": "^7.2",
         "stripe/stripe-php": "^19.0"
     },
     "require-dev": {

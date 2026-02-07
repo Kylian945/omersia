@@ -17,6 +17,8 @@
     },
     "dependencies": {
         "chart.js": "^4.5.1",
+        "laravel-echo": "^2.3.0",
+        "pusher-js": "^8.4.0",
         "quill": "^2.0.3",
         "sortablejs": "^1.15.6"
     }

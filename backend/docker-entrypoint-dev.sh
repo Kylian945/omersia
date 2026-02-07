@@ -22,6 +22,9 @@ php artisan storage:link --force
 echo "Starting Vite dev server in background..."
 npm run dev &
 
+echo "Starting Reverb server in background..."
+php artisan reverb:start --host=0.0.0.0 --port=8080 &
+
 echo "Waiting for Vite to be ready..."
 MAX_WAIT=30
 WAITED=0

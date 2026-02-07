@@ -67,7 +67,7 @@
             </div>
             <div class="flex items-center gap-3">
                 <div class="text-xxs text-gray-400">
-                    {{ array_sum($chartData) }} commandes
+                    <span id="orders-chart-total">{{ array_sum($chartData) }}</span> commandes
                 </div>
                 {{-- Bouton Export --}}
                 <div class="relative">
@@ -108,7 +108,7 @@
         {{-- Ventes de la période --}}
         <div class="rounded-2xl bg-white p-3 shadow-sm border border-black/5">
             <div class="text-xxxs text-gray-500">Ventes - {{ $periodLabel }}</div>
-            <div class="mt-1 text-lg font-semibold tracking-tight">
+            <div id="kpi-period-sales" class="mt-1 text-lg font-semibold tracking-tight">
                 {{ number_format($periodSales ?? 0, 2, ',', ' ') }} €
             </div>
 
@@ -116,11 +116,19 @@
                 @php
                     $isUp = ($salesDiffDirection ?? null) === 'up';
                 @endphp
-                <div class="mt-1 text-xxxs {{ $isUp ? 'text-emerald-500' : 'text-red-500' }}">
+                <div
+                    id="kpi-sales-diff"
+                    data-compare-label="{{ $compareLabel }}"
+                    class="mt-1 text-xxxs {{ $isUp ? 'text-emerald-500' : 'text-red-500' }}"
+                >
                     {{ $isUp ? '+' : '-' }}{{ number_format($salesDiffPercent, 1, ',', ' ') }}% vs {{ $compareLabel }}
                 </div>
             @else
-                <div class="mt-1 text-xxxs text-gray-400">
+                <div
+                    id="kpi-sales-diff"
+                    data-compare-label="{{ $compareLabel }}"
+                    class="mt-1 text-xxxs text-gray-400"
+                >
                     Pas de comparaison disponible
                 </div>
             @endif
@@ -129,10 +137,10 @@
         {{-- Commandes de la période --}}
         <div class="rounded-2xl bg-white p-3 shadow-sm border border-black/5">
             <div class="text-xxxs text-gray-500">Commandes - {{ $periodLabel }}</div>
-            <div class="mt-1 text-lg font-semibold">
+            <div id="kpi-period-orders-count" class="mt-1 text-lg font-semibold">
                 {{ $periodOrdersCount ?? 0 }}
             </div>
-            <div class="mt-1 text-xxxs text-gray-400">
+            <div id="kpi-average-order-value" class="mt-1 text-xxxs text-gray-400">
                 Moyenne {{ $periodOrdersCount ? number_format($averageOrderValue, 2, ',', ' ') . ' €' : '—' }}
             </div>
         </div>
@@ -176,7 +184,7 @@
                 <div>
                     <div class="text-xs font-semibold text-gray-800">Dernières commandes</div>
                 </div>
-                <span class="text-xxxs text-gray-400">
+                <span id="latest-orders-count" class="text-xxxs text-gray-400">
                     {{ isset($lastOrders) ? $lastOrders->count() . ' dernières' : 'Bientôt' }}
                 </span>
             </div>
@@ -191,7 +199,7 @@
                         <th class="py-1 text-left font-medium text-gray-400">Status</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="latest-orders-body">
                     @forelse($lastOrders ?? [] as $order)
                         <tr class="border-b border-gray-50">
                             <td class="py-1">
@@ -252,7 +260,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td class="py-2 text-xxxs text-gray-400" colspan="4">
+                            <td class="py-2 text-xxxs text-gray-400" colspan="5">
                                 Aucune commande pour le moment.
                             </td>
                         </tr>
@@ -295,7 +303,9 @@
             chartData: @json($chartData),
             chartPreviousData: @json($chartPreviousData),
             todayIndex: @json($todayIndex),
-            activeCartsRoute: "{{ route('admin.metrics.active-carts') }}"
+            activeCartsRoute: "{{ route('admin.metrics.active-carts') }}",
+            ordersChartRoute: "{{ route('admin.metrics.orders-chart', request()->only(['period', 'date_from', 'date_to'])) }}",
+            latestOrdersRoute: "{{ route('admin.metrics.latest-orders') }}"
         };
     </script>
     @vite(['packages/Admin/src/resources/js/dashboard-chart.js', 'packages/Admin/src/resources/js/dashboard.js'])

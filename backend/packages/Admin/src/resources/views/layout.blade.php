@@ -487,7 +487,35 @@
         </div>
     </div>
 
+    @php
+        $pusherConfig = config('broadcasting.connections.pusher', []);
+        $pusherOptions = $pusherConfig['options'] ?? [];
+        $pusherScheme = (string) ($pusherOptions['scheme'] ?? 'http');
+        $pusherPort = (int) ($pusherOptions['port'] ?? ($pusherScheme === 'https' ? 443 : 80));
+    @endphp
+    <script>
+        window.omersiaRealtimeConfig = {
+            enabled: @json(config('broadcasting.default') === 'pusher' && !empty($pusherConfig['key'])),
+            key: @json($pusherConfig['key'] ?? ''),
+            cluster: @json($pusherConfig['options']['cluster'] ?? 'mt1'),
+            wsHost: @json($pusherOptions['host'] ?? request()->getHost()),
+            wsPort: @json($pusherPort),
+            wssPort: @json($pusherPort),
+            forceTLS: @json($pusherScheme === 'https'),
+            authEndpoint: '/broadcasting/auth',
+            csrfToken: @json(csrf_token()),
+        };
+    </script>
+
     @vite(['packages/Admin/src/resources/js/toast.js'])
+    @can('orders.view')
+        <script>
+            window.omersiaOrderSoundConfig = {
+                paymentSuccessUrl: @json('/admin/notifications/payment-success-audio'),
+            };
+        </script>
+        @vite(['packages/Admin/src/resources/js/order-paid-sound-notification.js'])
+    @endcan
     @stack('scripts')
 
 </body>

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omersia\Catalog\Models;
 
+use App\Events\Realtime\OrderUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Omersia\Customer\Models\Customer;
+use Omersia\Catalog\Services\OrderInventoryService;
 use Omersia\Sales\Mail\OrderConfirmationMail;
 
 /**
@@ -119,9 +121,13 @@ class Order extends Model
     public function confirm()
     {
         if ($this->status === 'draft') {
+            app(OrderInventoryService::class)->deductStockForOrder($this);
+
             $this->status = 'confirmed';
             $this->placed_at = now();
             $this->save();
+            $this->refresh();
+            event(OrderUpdated::fromModel($this));
 
             // DCA-014: Logger la confirmation de commande
             Log::channel('transactions')->info('Order confirmed', [

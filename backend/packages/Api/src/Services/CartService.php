@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omersia\Api\Services;
 
+use App\Events\Realtime\ActiveCartsCountUpdated;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Omersia\Api\DTO\CartItemDTO;
@@ -27,6 +28,12 @@ final class CartService
         $cartToken = $data['token'] ?? null;
 
         return DB::transaction(function () use ($data, $customer, $cartToken) {
+            $broadcastActiveCarts = static function (): void {
+                DB::afterCommit(static function (): void {
+                    event(new ActiveCartsCountUpdated(Cart::where('status', 'open')->count()));
+                });
+            };
+
             $cart = $cartToken
                 ? Cart::where('token', $cartToken)->first()
                 : null;
@@ -35,6 +42,7 @@ final class CartService
                 if ($cart) {
                     $cart->items()->delete();
                     $cart->delete();
+                    $broadcastActiveCarts();
                 }
 
                 return [
@@ -89,6 +97,7 @@ final class CartService
             $cart->total_qty = $totalQty;
             $cart->last_activity_at = now();
             $cart->save();
+            $broadcastActiveCarts();
 
             return [
                 'id' => $cart->id,

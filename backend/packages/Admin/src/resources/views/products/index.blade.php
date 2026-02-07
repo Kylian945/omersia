@@ -46,6 +46,7 @@
                         <th class="py-2 px-3 text-left font-medium text-slate-600">Type</th>
                         <th class="py-2 px-3 text-left font-medium text-slate-600">SKU</th>
                         <th class="py-2 px-3 text-left font-medium text-slate-600">Catégories</th>
+                        <th class="py-2 px-3 text-left font-medium text-slate-600">Stock</th>
                         <th class="py-2 px-3 text-left font-medium text-slate-600">Actif</th>
                         <th class="py-2 px-3 text-right font-medium text-slate-600">Actions</th>
                     </tr>
@@ -54,8 +55,12 @@
                     @foreach ($products as $product)
                         @php
                             $t = $product->translation('fr');
-                            $variantCount = $product->variants->count();
+                            $variantCount = (int) ($product->variants_count ?? 0);
                             $isVariant = $product->type === 'variant' || $variantCount > 0;
+                            $globalStockQty = $isVariant
+                                ? (int) ($product->variants_stock_qty ?? 0)
+                                : (int) $product->stock_qty;
+                            $stockIsManaged = $isVariant || (bool) $product->manage_stock;
                         @endphp
                         <tr class="border-b border-gray-50 hover:bg-[#fafafa]">
                             {{-- Nom --}}
@@ -111,6 +116,37 @@
                             {{-- Catégories --}}
                             <td class="py-2 px-3 text-gray-500 text-xxxs">
                                 {{ $product->categories->count() }} cat.
+                            </td>
+
+                            {{-- Stock --}}
+                            <td class="py-2 px-3">
+                                <div class="flex flex-col leading-tight">
+                                    <span
+                                        id="product-stock-value-{{ $product->id }}"
+                                        data-product-stock-id="{{ $product->id }}"
+                                        data-product-is-variant="{{ $isVariant ? '1' : '0' }}"
+                                        data-product-manage-stock="{{ $product->manage_stock ? '1' : '0' }}"
+                                        class="font-semibold text-xs {{ $stockIsManaged && $globalStockQty <= 0 ? 'text-red-600' : 'text-gray-900' }}"
+                                    >
+                                        @if ($stockIsManaged)
+                                            {{ $globalStockQty }}
+                                        @else
+                                            —
+                                        @endif
+                                    </span>
+                                    <span
+                                        id="product-stock-note-{{ $product->id }}"
+                                        class="text-xxxs text-gray-400"
+                                    >
+                                        @if ($isVariant)
+                                            Global ({{ $variantCount }} variantes)
+                                        @elseif ($product->manage_stock)
+                                            Stock simple
+                                        @else
+                                            Stock non géré
+                                        @endif
+                                    </span>
+                                </div>
                             </td>
 
                             {{-- Actif --}}
@@ -182,3 +218,7 @@
         </x-admin::modal>
     @endforeach
 @endsection
+
+@push('scripts')
+    @vite(['packages/Admin/src/resources/js/products-stock-realtime.js'])
+@endpush

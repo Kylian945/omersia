@@ -272,6 +272,273 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function ordersChartData()
+    {
+        $period = request('period', 'month'); // day, week, month, year, custom
+        $now = Carbon::now();
+        $compareLabel = 'mois dernier';
+
+        if ($period === 'custom' && request('date_from') && request('date_to')) {
+            $startDate = Carbon::parse(request('date_from'))->startOfDay();
+            $endDate = Carbon::parse(request('date_to'))->endOfDay();
+
+            $diffInDays = $startDate->diffInDays($endDate);
+            $previousEndDate = $startDate->copy()->subDay()->endOfDay();
+            $previousStartDate = $previousEndDate->copy()->subDays($diffInDays)->startOfDay();
+            $compareLabel = 'période précédente';
+        } else {
+            switch ($period) {
+                case 'day':
+                    $startDate = Carbon::today();
+                    $endDate = Carbon::today()->endOfDay();
+                    $previousStartDate = Carbon::yesterday();
+                    $previousEndDate = Carbon::yesterday()->endOfDay();
+                    $compareLabel = 'hier';
+                    break;
+                case 'week':
+                    $startDate = Carbon::now()->startOfWeek();
+                    $endDate = Carbon::now()->endOfWeek();
+                    $previousStartDate = Carbon::now()->subWeek()->startOfWeek();
+                    $previousEndDate = Carbon::now()->subWeek()->endOfWeek();
+                    $compareLabel = 'semaine dernière';
+                    break;
+                case 'year':
+                    $startDate = Carbon::now()->startOfYear();
+                    $endDate = Carbon::now()->endOfYear();
+                    $previousStartDate = Carbon::now()->subYear()->startOfYear();
+                    $previousEndDate = Carbon::now()->subYear()->endOfYear();
+                    $compareLabel = 'année dernière';
+                    break;
+                case 'month':
+                default:
+                    $startDate = Carbon::now()->startOfMonth();
+                    $endDate = Carbon::now()->endOfMonth();
+                    $previousStartDate = Carbon::now()->subMonth()->startOfMonth();
+                    $previousEndDate = Carbon::now()->subMonth()->endOfMonth();
+                    $compareLabel = 'mois dernier';
+                    break;
+            }
+        }
+
+        $periodSales = (float) Order::whereBetween('placed_at', [$startDate, $endDate])
+            ->confirmed()
+            ->where('payment_status', 'paid')
+            ->sum('total');
+
+        $periodOrdersCount = (int) Order::whereBetween('placed_at', [$startDate, $endDate])
+            ->confirmed()
+            ->where('payment_status', 'paid')
+            ->count();
+
+        $averageOrderValue = $periodOrdersCount > 0
+            ? $periodSales / $periodOrdersCount
+            : 0.0;
+
+        $previousPeriodSales = (float) Order::whereBetween('placed_at', [$previousStartDate, $previousEndDate])
+            ->confirmed()
+            ->where('payment_status', 'paid')
+            ->sum('total');
+
+        $salesDiffPercent = null;
+        $salesDiffDirection = null; // up | down | null
+
+        if ($previousPeriodSales > 0) {
+            $diff = $periodSales - $previousPeriodSales;
+            $salesDiffPercent = abs(($diff / $previousPeriodSales) * 100);
+            $salesDiffDirection = $diff >= 0 ? 'up' : 'down';
+        } elseif ($periodSales > 0 && $previousPeriodSales == 0.0) {
+            $salesDiffPercent = 100.0;
+            $salesDiffDirection = 'up';
+        }
+
+        $ordersInPeriod = Order::whereBetween('placed_at', [$startDate, $endDate])
+            ->confirmed()
+            ->selectRaw('DATE(placed_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $ordersInPreviousPeriod = Order::whereBetween('placed_at', [$previousStartDate, $previousEndDate])
+            ->confirmed()
+            ->selectRaw('DATE(placed_at) as date, COUNT(*) as count')
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $chartLabels = [];
+        $chartData = [];
+        $chartPreviousData = [];
+        $todayIndex = null;
+
+        if ($period === 'day') {
+            $dayOrdersCountForChart = (int) Order::whereBetween('placed_at', [$startDate, $endDate])
+                ->confirmed()
+                ->count();
+
+            for ($hour = 0; $hour < 24; $hour++) {
+                $chartLabels[] = $hour.'h';
+                $chartData[] = $hour === 12 ? $dayOrdersCountForChart : 0;
+                $chartPreviousData[] = 0;
+            }
+
+            $todayIndex = (int) $now->format('H');
+        } elseif ($period === 'week') {
+            $current = $startDate->copy();
+            $previousCurrent = $previousStartDate->copy();
+            $index = 0;
+
+            while ($current <= $endDate) {
+                $dateString = $current->format('Y-m-d');
+                $previousDateString = $previousCurrent->format('Y-m-d');
+
+                $chartLabels[] = $current->locale('fr')->isoFormat('ddd D');
+                $chartData[] = $ordersInPeriod->get($dateString)->count ?? 0;
+                $chartPreviousData[] = $ordersInPreviousPeriod->get($previousDateString)->count ?? 0;
+
+                if ($current->isSameDay($now)) {
+                    $todayIndex = $index;
+                }
+
+                $current->addDay();
+                $previousCurrent->addDay();
+                $index++;
+            }
+        } elseif ($period === 'year') {
+            $ordersInYear = Order::whereBetween('placed_at', [$startDate, $endDate])
+                ->confirmed()
+                ->selectRaw('MONTH(placed_at) as month, COUNT(*) as count')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month');
+
+            $ordersInPreviousYear = Order::whereBetween('placed_at', [$previousStartDate, $previousEndDate])
+                ->confirmed()
+                ->selectRaw('MONTH(placed_at) as month, COUNT(*) as count')
+                ->groupBy('month')
+                ->orderBy('month')
+                ->get()
+                ->keyBy('month');
+
+            $months = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+
+            for ($month = 1; $month <= 12; $month++) {
+                $chartLabels[] = $months[$month - 1];
+                $chartData[] = $ordersInYear->get($month)->count ?? 0;
+                $chartPreviousData[] = $ordersInPreviousYear->get($month)->count ?? 0;
+
+                if ($month == (int) $now->format('m')) {
+                    $todayIndex = $month - 1;
+                }
+            }
+        } elseif ($period === 'custom') {
+            $current = $startDate->copy();
+            $previousCurrent = $previousStartDate->copy();
+            $index = 0;
+
+            while ($current <= $endDate) {
+                $dateString = $current->format('Y-m-d');
+                $previousDateString = $previousCurrent->format('Y-m-d');
+
+                $chartLabels[] = $current->format('d/m');
+                $chartData[] = $ordersInPeriod->get($dateString)->count ?? 0;
+                $chartPreviousData[] = $ordersInPreviousPeriod->get($previousDateString)->count ?? 0;
+
+                if ($current->isSameDay($now)) {
+                    $todayIndex = $index;
+                }
+
+                $current->addDay();
+                $previousCurrent->addDay();
+                $index++;
+            }
+        } else {
+            $current = $startDate->copy();
+            $previousCurrent = $previousStartDate->copy();
+            $index = 0;
+
+            while ($current <= $endDate) {
+                $dateString = $current->format('Y-m-d');
+                $previousDateString = $previousCurrent->format('Y-m-d');
+
+                $chartLabels[] = $current->day;
+                $chartData[] = $ordersInPeriod->get($dateString)->count ?? 0;
+                $chartPreviousData[] = $ordersInPreviousPeriod->get($previousDateString)->count ?? 0;
+
+                if ($current->isSameDay($now)) {
+                    $todayIndex = $index;
+                }
+
+                $current->addDay();
+                $previousCurrent->addDay();
+                $index++;
+            }
+        }
+
+        return response()->json([
+            'labels' => $chartLabels,
+            'data' => $chartData,
+            'previous_data' => $chartPreviousData,
+            'today_index' => $todayIndex,
+            'total_orders' => (int) array_sum($chartData),
+            'period_sales' => $periodSales,
+            'period_orders_count' => $periodOrdersCount,
+            'average_order_value' => $averageOrderValue,
+            'sales_diff_percent' => $salesDiffPercent,
+            'sales_diff_direction' => $salesDiffDirection,
+            'compare_label' => $compareLabel,
+        ]);
+    }
+
+    public function latestOrdersData()
+    {
+        $orders = Order::with('customer:id,firstname,lastname')
+            ->latest('placed_at')
+            ->confirmed()
+            ->take(5)
+            ->get();
+
+        $rows = $orders->map(function (Order $order) {
+            $paymentStatus = (string) ($order->payment_status ?? 'unknown');
+            [$paymentLabel, $paymentBadgeClass] = $this->paymentBadgeMeta($paymentStatus);
+
+            $statusValue = (string) ($order->status ?? 'unknown');
+            $statusLabel = (string) ($order->status_label ?? ucfirst($statusValue));
+            $statusBadgeClass = $this->orderStatusBadgeClass($statusValue);
+
+            $customerDisplay = $order->customer_name;
+            if (! is_string($customerDisplay) || trim($customerDisplay) === '') {
+                $customerFirstname = $order->customer?->firstname;
+                $customerLastname = $order->customer?->lastname;
+                $hasCustomerNames = is_string($customerFirstname) && trim($customerFirstname) !== ''
+                    && is_string($customerLastname) && trim($customerLastname) !== '';
+
+                $customerDisplay = $hasCustomerNames
+                    ? substr($customerFirstname, 0, 1).'.'.$customerLastname
+                    : '—';
+            }
+
+            return [
+                'id' => (int) $order->id,
+                'display_number' => '#'.($order->number ?? $order->id),
+                'show_url' => route('admin.orders.show', $order->id),
+                'customer_display' => $customerDisplay,
+                'total_display' => number_format((float) ($order->total ?? 0), 2, ',', ' ').' €',
+                'payment_label' => $paymentLabel,
+                'payment_badge_class' => $paymentBadgeClass,
+                'status_label' => $statusLabel,
+                'status_badge_class' => $statusBadgeClass,
+            ];
+        })->values();
+
+        return response()->json([
+            'orders' => $rows,
+            'count' => $rows->count(),
+        ]);
+    }
+
     public function export()
     {
         $this->authorize('orders.export');
@@ -342,6 +609,30 @@ class DashboardController extends Controller
             default:
                 return $this->exportCSV($periodLabel, $startDate, $endDate, $periodSales, $periodOrdersCount, $averageOrderValue, $ordersInPeriod, $filename);
         }
+    }
+
+    private function paymentBadgeMeta(string $status): array
+    {
+        return match ($status) {
+            'paid' => ['Payée', 'bg-emerald-50 text-emerald-600 border-emerald-100'],
+            'pending', 'awaiting_payment' => ['En attente', 'bg-yellow-50 text-yellow-700 border-yellow-100'],
+            'cancelled' => ['Annulée', 'bg-red-50 text-red-600 border-red-100'],
+            default => [ucfirst($status), 'bg-gray-50 text-gray-600 border-gray-100'],
+        };
+    }
+
+    private function orderStatusBadgeClass(string $status): string
+    {
+        return match ($status) {
+            'confirmed' => 'bg-blue-50 text-blue-700 border-blue-100',
+            'processing' => 'bg-sky-50 text-sky-700 border-indigo-100',
+            'in_transit' => 'bg-cyan-50 text-cyan-700 border-cyan-100',
+            'out_for_delivery' => 'bg-teal-50 text-teal-700 border-teal-100',
+            'delivered' => 'bg-lime-50 text-lime-700 border-lime-100',
+            'refunded' => 'bg-gray-50 text-gray-700 border-gray-100',
+            'cancelled' => 'bg-red-50 text-red-700 border-red-100',
+            default => 'bg-neutral-50 text-neutral-700 border-neutral-100',
+        };
     }
 
     private function exportCSV($periodLabel, $startDate, $endDate, $periodSales, $periodOrdersCount, $averageOrderValue, $ordersInPeriod, $filename)

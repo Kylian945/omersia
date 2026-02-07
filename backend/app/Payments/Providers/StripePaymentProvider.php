@@ -5,6 +5,7 @@ declare(strict_types=1);
 
 namespace App\Payments\Providers;
 
+use App\Events\Realtime\OrderUpdated;
 use App\Payments\Contracts\PaymentProvider;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -120,6 +121,7 @@ class StripePaymentProvider implements PaymentProvider
         Log::channel('transactions')->info('Stripe webhook received', [
             'event_id' => $event->id,
             'event_type' => $event->type,
+            'event_object_id' => $event->data->object->id ?? null,
             'ip' => request()->ip(),
         ]);
 
@@ -135,6 +137,42 @@ class StripePaymentProvider implements PaymentProvider
         }
     }
 
+    /**
+     * Synchronize an intent status directly from Stripe (fallback when webhook is unavailable).
+     */
+    public function syncPaymentIntent(string $intentId): bool
+    {
+        try {
+            $intent = $this->client->paymentIntents->retrieve($intentId, []);
+        } catch (\Throwable $e) {
+            Log::warning('Stripe intent sync failed', [
+                'intent_id' => $intentId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+
+        $status = $intent->status ?? null;
+
+        if ($status === 'succeeded') {
+            $this->markPaymentAsSucceeded($intent);
+
+            return true;
+        }
+
+        if (in_array($status, ['canceled', 'requires_payment_method'], true)) {
+            $this->markPaymentAsFailed($intent);
+        }
+
+        Log::info('Stripe intent sync ignored non-final status', [
+            'intent_id' => $intentId,
+            'status' => $status,
+        ]);
+
+        return false;
+    }
+
     protected function markPaymentAsSucceeded($intent): void
     {
         /** @var Payment|null $payment */
@@ -143,6 +181,10 @@ class StripePaymentProvider implements PaymentProvider
             ->first();
 
         if (! $payment) {
+            Log::warning('Stripe succeeded webhook ignored: payment not found', [
+                'intent_id' => $intent->id,
+            ]);
+
             return;
         }
 
@@ -175,6 +217,8 @@ class StripePaymentProvider implements PaymentProvider
             'payment_status' => 'paid',
             'payment_provider' => 'stripe',
         ]);
+        $order->refresh();
+        event(OrderUpdated::fromModel($order));
 
         // 🔥 Confirmer la commande si elle est en brouillon
         if ($order->isDraft()) {
@@ -230,6 +274,10 @@ class StripePaymentProvider implements PaymentProvider
             ->first();
 
         if (! $payment) {
+            Log::warning('Stripe failed webhook ignored: payment not found', [
+                'intent_id' => $intent->id,
+            ]);
+
             return;
         }
 
@@ -264,6 +312,8 @@ class StripePaymentProvider implements PaymentProvider
         $order->update([
             'payment_status' => 'failed',
         ]);
+        $order->refresh();
+        event(OrderUpdated::fromModel($order));
 
         // Envoi de l'email d'échec de paiement
         try {

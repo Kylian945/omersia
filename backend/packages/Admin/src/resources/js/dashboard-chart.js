@@ -2,11 +2,17 @@ import { Chart, registerables } from 'chart.js';
 
 // Enregistrer tous les composants Chart.js
 Chart.register(...registerables);
+let ordersChartInstance = null;
 
 // Initialiser le graphique quand les données sont disponibles
 export function initOrdersChart(labels, data, previousData, todayIndex) {
     const ctx = document.getElementById('ordersChart');
     if (!ctx) return;
+
+    if (ordersChartInstance) {
+        ordersChartInstance.destroy();
+        ordersChartInstance = null;
+    }
 
     // Créer deux segments pour la période actuelle : avant/jusqu'à aujourd'hui (solid) et après aujourd'hui (dashed)
     const datasets = [];
@@ -70,7 +76,7 @@ export function initOrdersChart(labels, data, previousData, todayIndex) {
         pointBorderWidth: 2,
     });
 
-    new Chart(ctx, {
+    ordersChartInstance = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,

@@ -75,6 +75,7 @@ services:
     container_name: omersia-backend
     ports:
       - "5173:5173" # Vite dev server
+      - "8080:8080" # Reverb websocket server
     volumes:
       - ./backend:/var/www/html
       - /var/www/html/vendor

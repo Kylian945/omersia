@@ -30,7 +30,8 @@ export function useCheckoutState(
   }, []);
 
   // User
-  const effectiveUser = initialUser;
+  const [effectiveUser, setEffectiveUser] = useState<AuthUser | null>(initialUser);
+  const effectiveUserRef = useRef<AuthUser | null>(initialUser);
 
   // Identity
   const [identity, setIdentity] = useState<CheckoutIdentityState>({
@@ -44,6 +45,64 @@ export function useCheckoutState(
   const updateIdentity = useCallback((patch: Partial<CheckoutIdentityState>) => {
     setIdentity((prev) => ({ ...prev, ...patch }));
   }, []);
+
+  const applyAuthenticatedUser = useCallback((user: AuthUser | null) => {
+    effectiveUserRef.current = user;
+    setEffectiveUser(user);
+
+    if (!user) {
+      return;
+    }
+
+    setIdentity((prev) => ({
+      ...prev,
+      id: String(user.id),
+      firstName: prev.firstName || user.firstname || "",
+      lastName: prev.lastName || user.lastname || "",
+      email: user.email || prev.email,
+    }));
+  }, []);
+
+  const refreshCheckoutAuth = useCallback(async (): Promise<{
+    user: AuthUser | null;
+    unavailable: boolean;
+  }> => {
+    try {
+      const res = await fetch("/auth/me", {
+        method: "GET",
+        credentials: "include",
+        cache: "no-store",
+        headers: {
+          Accept: "application/json",
+        },
+      });
+
+      if (!res.ok) {
+        return {
+          user: effectiveUserRef.current,
+          unavailable: true,
+        };
+      }
+
+      const data = (await res.json().catch(() => null)) as
+        | { authenticated?: boolean; user?: AuthUser | null }
+        | null;
+
+      const nextUser = data?.authenticated ? data.user ?? null : null;
+      applyAuthenticatedUser(nextUser);
+
+      return {
+        user: nextUser,
+        unavailable: false,
+      };
+    } catch (error: unknown) {
+      logger.warn("Unable to refresh checkout auth state", error);
+      return {
+        user: effectiveUserRef.current,
+        unavailable: true,
+      };
+    }
+  }, [applyAuthenticatedUser]);
 
   // Addresses
   const [addresses, setAddresses] = useState<Address[]>(initialAddresses || []);
@@ -223,10 +282,51 @@ export function useCheckoutState(
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Error Modal
+  const [errorModalOpen, setErrorModalOpen] = useState(false);
+  const [errorModalMessage, setErrorModalMessage] = useState("");
+  const [errorModalOnClose, setErrorModalOnClose] = useState<(() => void) | undefined>();
+
+  const showErrorModal = useCallback((message: string, onClose?: () => void) => {
+    setErrorModalMessage(message);
+    setErrorModalOnClose(() => onClose);
+    setErrorModalOpen(true);
+  }, []);
+
+  const closeErrorModal = useCallback(() => {
+    setErrorModalOpen(false);
+    if (errorModalOnClose) {
+      errorModalOnClose();
+      setErrorModalOnClose(undefined);
+    }
+  }, [errorModalOnClose]);
+
   // Reset submitting when changing steps
   useEffect(() => {
     setSubmitting(false);
   }, [currentStep]);
+
+  useEffect(() => {
+    void refreshCheckoutAuth();
+
+    const handleAuthChanged = () => {
+      void refreshCheckoutAuth();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void refreshCheckoutAuth();
+      }
+    };
+
+    window.addEventListener("auth:changed", handleAuthChanged);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("auth:changed", handleAuthChanged);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [refreshCheckoutAuth]);
 
   // Create or update order when reaching step 4
   const { cartId, items } = useCart();
@@ -300,6 +400,7 @@ export function useCheckoutState(
   useEffect(() => {
     if (
       currentStep === 4 &&
+      !!effectiveUser &&
       !isCreatingOrder.current &&
       shippingMethodId &&
       address.line1 &&
@@ -311,6 +412,30 @@ export function useCheckoutState(
         setSubmitting(true);
 
         try {
+          const { user: currentUser, unavailable: authUnavailable } =
+            await refreshCheckoutAuth();
+
+          if (authUnavailable) {
+            showErrorModal(
+              "Le service d'authentification est indisponible. Veuillez réessayer dans quelques instants."
+            );
+            setSubmitting(false);
+            isCreatingOrder.current = false;
+            return;
+          }
+
+          if (!currentUser) {
+            showErrorModal(
+              "Votre session a expiré. Veuillez vous reconnecter pour finaliser la commande.",
+              () => {
+                window.location.href = "/login?redirect=%2Fcheckout";
+              }
+            );
+            setSubmitting(false);
+            isCreatingOrder.current = false;
+            return;
+          }
+
           // Récupérer l'ID de l'adresse sélectionnée (pas "new")
           const shippingAddressId = typeof selectedAddressId === 'number' ? selectedAddressId : null;
 
@@ -362,6 +487,18 @@ export function useCheckoutState(
             body: JSON.stringify(orderPayload),
           });
 
+          if (res.status === 401) {
+            showErrorModal(
+              "Votre session a expiré. Veuillez vous reconnecter pour finaliser la commande.",
+              () => {
+                window.location.href = "/login?redirect=%2Fcheckout";
+              }
+            );
+            setSubmitting(false);
+            isCreatingOrder.current = false;
+            return;
+          }
+
           if (!res.ok) {
             const errorData = await res.json().catch(() => ({}));
             showErrorModal(
@@ -378,7 +515,7 @@ export function useCheckoutState(
           setOrderNumber(data.number);
           setSubmitting(false);
           isCreatingOrder.current = false;
-        } catch (err: unknown) {
+        } catch {
           showErrorModal("Erreur réseau lors de la commande");
           setSubmitting(false);
           isCreatingOrder.current = false;
@@ -389,6 +526,7 @@ export function useCheckoutState(
     }
   }, [
     currentStep,
+    effectiveUser,
     shippingMethodId,
     selectedAddressId,
     appliedPromos,
@@ -404,26 +542,9 @@ export function useCheckoutState(
     address.line1,
     address.zip,
     address.city,
+    refreshCheckoutAuth,
+    showErrorModal,
   ]);
-
-  // Error Modal
-  const [errorModalOpen, setErrorModalOpen] = useState(false);
-  const [errorModalMessage, setErrorModalMessage] = useState("");
-  const [errorModalOnClose, setErrorModalOnClose] = useState<(() => void) | undefined>();
-
-  const showErrorModal = useCallback((message: string, onClose?: () => void) => {
-    setErrorModalMessage(message);
-    setErrorModalOnClose(() => onClose);
-    setErrorModalOpen(true);
-  }, []);
-
-  const closeErrorModal = useCallback(() => {
-    setErrorModalOpen(false);
-    if (errorModalOnClose) {
-      errorModalOnClose();
-      setErrorModalOnClose(undefined);
-    }
-  }, [errorModalOnClose]);
 
   return {
     // Navigation
