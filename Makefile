@@ -39,7 +39,7 @@ EXEC_STOREFRONT = $(DOCKER_COMPOSE) exec -T storefront
 EXEC_BACKEND_IT = $(DOCKER_COMPOSE) exec backend
 EXEC_MYSQL_IT = $(DOCKER_COMPOSE) exec mysql
 
-.PHONY: help install setup-env setup-db apikey admin dev test lint clean build check-docker audit update update-composer update-npm
+.PHONY: help install setup-env setup-db apikey admin dev test lint clean build check-docker audit update update-composer update-npm db\:delete
 
 # Docker container check - used as dependency for commands that need running containers
 check-docker:
@@ -94,6 +94,7 @@ help:
 	@printf "$(CYAN)│$(RESET)  $(ICON_DATABASE)  $(CYAN)%-18s$(RESET) %s\n" "make setup-db" "Setup database (migrate + seed)"
 	@printf "$(CYAN)│$(RESET)  $(ICON_DATABASE)  $(CYAN)%-18s$(RESET) %s\n" "make migrate" "Run database migrations"
 	@printf "$(CYAN)│$(RESET)  $(ICON_DATABASE)  $(CYAN)%-18s$(RESET) %s\n" "make migrate-fresh" "Fresh migration with seed data"
+	@printf "$(CYAN)│$(RESET)  $(ICON_DATABASE)  $(CYAN)%-18s$(RESET) %s\n" "make db:delete" "Delete all DB tables (wipe)"
 	@printf "$(CYAN)│$(RESET)  $(ICON_KEY)  $(CYAN)%-18s$(RESET) %s\n" "make apikey" "Generate new API key"
 	@printf "$(CYAN)│$(RESET)  $(ICON_LOCK)  $(CYAN)%-18s$(RESET) %s\n" "make admin" "Create admin user"
 	@printf "$(CYAN)│$(RESET)\n"
@@ -266,6 +267,16 @@ migrate-fresh: check-docker
 
 db: check-docker
 	@$(EXEC_MYSQL_IT) mysql -u omersia -psecret omersia
+
+db\:delete: check-docker
+	@echo ""
+	@printf "$(BRIGHT_CYAN)$(ICON_DATABASE) Wiping database tables...$(RESET)\n"
+	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
+	@echo ""
+	@$(EXEC_BACKEND) php artisan db:wipe --force
+	@echo ""
+	@printf "$(BRIGHT_GREEN)✅ Database wiped. You can run: $(CYAN)make install$(RESET)\n"
+	@echo ""
 
 tinker: check-docker
 	@$(EXEC_BACKEND_IT) php artisan tinker
