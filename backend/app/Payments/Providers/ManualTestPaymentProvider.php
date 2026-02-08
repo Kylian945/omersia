@@ -48,10 +48,13 @@ class ManualTestPaymentProvider implements PaymentProvider
             'payment_provider' => 'manual_test',
         ]);
         $order->refresh();
-        event(OrderUpdated::fromModel($order));
 
+        // confirm() diffuse déjà OrderUpdated avec le statut confirmé.
         if ($order->isDraft()) {
             $order->confirm();
+            $order->refresh();
+        } else {
+            event(OrderUpdated::fromModel($order));
         }
 
         try {

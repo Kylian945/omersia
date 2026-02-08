@@ -1,7 +1,6 @@
+/* eslint-disable @next/next/no-img-element */
 import { getAspectRatioClass, getObjectFitClass, getObjectPositionClass } from '@/lib/widget-helpers';
 import { validateAspectRatio, validateObjectFit, validateObjectPosition, validateNumericSize } from '@/lib/css-variable-sanitizer';
-import Image from 'next/image';
-import { normalizeImageUrl } from '@/lib/image-loader';
 
 interface ImageWidgetProps {
   props: {
@@ -57,21 +56,12 @@ export function ImageWidget({ props }: ImageWidgetProps) {
     style.width = `${safeWidth}px`;
   }
 
-  const normalizedUrl = normalizeImageUrl(props.url);
-
   return (
-    <div
-      className={`relative w-full ${aspectRatioClass}`}
+    <img
+      src={props.url}
+      alt={props.alt || ""}
+      className={`w-full ${aspectRatioClass} ${objectFitClass} ${objectPositionClass}`}
       style={style}
-    >
-      <Image
-        src={normalizedUrl}
-        alt={props.alt || ""}
-        fill
-        sizes="100vw"
-        unoptimized
-        className={`${objectFitClass} ${objectPositionClass}`}
-      />
-    </div>
+    />
   );
 }

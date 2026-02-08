@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
 import { subscribeToPrivateRealtimeEvent } from "@/lib/realtime/reverb-client";
+import { useCart } from "@/components/cart/CartContext";
 
 type Props = {
   customerId: number;
@@ -33,9 +34,11 @@ export function OrderSuccessStatusWatcher({
   paymentIntentId,
 }: Props) {
   const router = useRouter();
+  const { clear: clearCart } = useCart();
   const [status, setStatus] = useState(initialStatus);
   const [paymentStatus, setPaymentStatus] = useState(initialPaymentStatus);
   const hasRefreshedRef = useRef(false);
+  const hasClearedCartRef = useRef(false);
   const statusRef = useRef(initialStatus);
   const paymentStatusRef = useRef(initialPaymentStatus);
 
@@ -48,6 +51,13 @@ export function OrderSuccessStatusWatcher({
   useEffect(() => {
     paymentStatusRef.current = paymentStatus;
   }, [paymentStatus]);
+
+  useEffect(() => {
+    if (isConfirmedAndPaid(status, paymentStatus) && !hasClearedCartRef.current) {
+      hasClearedCartRef.current = true;
+      clearCart();
+    }
+  }, [status, paymentStatus, clearCart]);
 
   useEffect(() => {
     if (!isChecking) {

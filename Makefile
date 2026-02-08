@@ -185,7 +185,7 @@ test: check-docker
 	@$(EXEC_BACKEND) env APP_ENV=testing DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan test --no-coverage
 	@echo ""
 	@printf "$(BLUE)➜ Frontend tests (Vitest)...$(RESET)\n"
-	@$(EXEC_STOREFRONT) npm run test --if-present || true
+	@$(EXEC_STOREFRONT) npm run test --if-present
 	@echo ""
 	@printf "$(BRIGHT_GREEN)✅ All tests completed!$(RESET)\n"
 	@echo ""

@@ -218,15 +218,18 @@ class StripePaymentProvider implements PaymentProvider
             'payment_provider' => 'stripe',
         ]);
         $order->refresh();
-        event(OrderUpdated::fromModel($order));
 
-        // 🔥 Confirmer la commande si elle est en brouillon
+        // 🔥 Confirmer la commande si elle est en brouillon.
+        // La méthode confirm() diffuse déjà OrderUpdated avec le statut confirmé.
         if ($order->isDraft()) {
             $order->confirm();
+            $order->refresh();
             Log::info('Order confirmed after successful payment', [
                 'order_id' => $order->id,
                 'order_number' => $order->number,
             ]);
+        } else {
+            event(OrderUpdated::fromModel($order));
         }
 
         // 📄 Générer la facture

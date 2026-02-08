@@ -12,6 +12,7 @@ import {
 import type { CartItem } from "@/components/cart/CartContext";
 import type { AuthUser } from "@/lib/types/user-types";
 import { logger } from "@/lib/logger";
+import { safeDecodeURIComponent } from "@/lib/utils/error-utils";
 
 type FrontCheckoutPayload = {
   cartId?: number;
@@ -33,7 +34,8 @@ type FrontCheckoutPayload = {
 export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get("auth_token")?.value;
+    const rawToken = cookieStore.get("auth_token")?.value;
+    const token = rawToken ? safeDecodeURIComponent(rawToken) : null;
 
     if (!token) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
@@ -49,7 +51,7 @@ export async function POST(req: Request) {
       }
     );
 
-    if (meRes.status === 401) {
+    if (meRes.status === 401 || meRes.status === 403) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 

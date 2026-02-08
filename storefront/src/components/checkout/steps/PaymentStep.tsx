@@ -145,7 +145,6 @@ export function PaymentStep() {
         return;
       }
 
-      localStorage.removeItem("omersia_cart_items");
       router.push(`/checkout/success/${encodeURIComponent(orderNumber)}`);
     } catch (err: unknown) {
       logger.error("Manual test payment failed", err);

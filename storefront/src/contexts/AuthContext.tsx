@@ -39,11 +39,20 @@ export function AuthProvider({ children, initialUser = null }: AuthProviderProps
       });
 
       if (!res.ok) {
-        setUser(null);
+        // Only clear local auth state when the API explicitly says the token is invalid.
+        if (res.status === 401 || res.status === 403) {
+          setUser(null);
+        }
         return;
       }
 
-      const data = await res.json();
+      const data = (await res.json().catch(() => null)) as
+        | { authenticated?: boolean; user?: AuthUser | null; unavailable?: boolean }
+        | null;
+
+      if (data?.unavailable) {
+        return;
+      }
 
       if (data?.authenticated && data.user) {
         setUser(data.user);
@@ -52,7 +61,7 @@ export function AuthProvider({ children, initialUser = null }: AuthProviderProps
       }
     } catch (error) {
       logger.error("Error fetching user:", error);
-      setUser(null);
+      // Keep the current user on transient failures.
     } finally {
       setIsLoading(false);
     }

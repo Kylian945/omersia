@@ -154,8 +154,6 @@ function StripeCheckoutForm({
 
     setSubmitting(true);
 
-    localStorage.removeItem("omersia_cart_items");
-
     const returnUrl =
       `${window.location.origin}/checkout/success/` +
       (orderNumber ?? "");

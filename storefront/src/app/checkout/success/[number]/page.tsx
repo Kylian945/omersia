@@ -104,15 +104,13 @@ export default async function OrderSuccessPage({
                   >
                     Numéro de commande : <span className="font-mono font-semibold">{order.number}</span>
                   </p>
-                  {!isConfirmed && (
-                    <OrderSuccessStatusWatcher
-                      customerId={user.id}
-                      orderNumber={order.number}
-                      initialStatus={order.status}
-                      initialPaymentStatus={order.payment_status}
-                      paymentIntentId={paymentIntentId}
-                    />
-                  )}
+                  <OrderSuccessStatusWatcher
+                    customerId={user.id}
+                    orderNumber={order.number}
+                    initialStatus={order.status}
+                    initialPaymentStatus={order.payment_status}
+                    paymentIntentId={paymentIntentId}
+                  />
                 </div>
               </div>
             </div>

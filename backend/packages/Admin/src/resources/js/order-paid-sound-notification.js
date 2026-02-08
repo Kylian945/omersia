@@ -1,10 +1,13 @@
 import { subscribeToPrivateEvent } from "./realtime-client";
 
 const DEFAULT_SOUND_URL = "/admin/notifications/payment-success-audio";
+const FALLBACK_SOUND_URL = "/notifications/notif_payment_success.mp3";
 const STORAGE_KEY = "omersia_paid_order_notifications";
 const MAX_TRACKED_ORDERS = 150;
 let hasUnlockedAudio = false;
-const pendingOrderIds = new Set();
+const pendingOrderKeys = new Set();
+let removeUnlockListeners = null;
+let hasSwitchedToFallbackSource = false;
 
 function readNotifiedOrders() {
     try {
@@ -19,8 +22,8 @@ function readNotifiedOrders() {
         }
 
         return parsed
-            .map((value) => Number(value))
-            .filter((value) => Number.isFinite(value) && value > 0);
+            .map((value) => String(value))
+            .filter((value) => value.length > 0);
     } catch {
         return [];
     }
@@ -34,13 +37,13 @@ function writeNotifiedOrders(orderIds) {
     }
 }
 
-function hasAlreadyNotified(orderId) {
-    return readNotifiedOrders().includes(orderId);
+function hasAlreadyNotified(orderKey) {
+    return readNotifiedOrders().includes(orderKey);
 }
 
-function markAsNotified(orderId) {
-    const current = readNotifiedOrders().filter((id) => id !== orderId);
-    current.push(orderId);
+function markAsNotified(orderKey) {
+    const current = readNotifiedOrders().filter((id) => id !== orderKey);
+    current.push(orderKey);
 
     // Keep storage bounded.
     const bounded = current.slice(-MAX_TRACKED_ORDERS);
@@ -60,19 +63,38 @@ function resolveSoundUrl() {
     }
 }
 
+function resolveFallbackSoundUrl() {
+    try {
+        return new URL(FALLBACK_SOUND_URL, window.location.origin).toString();
+    } catch {
+        return FALLBACK_SOUND_URL;
+    }
+}
+
 function getNotificationAudio() {
     const soundUrl = resolveSoundUrl();
 
     if (notificationAudio) {
         if (notificationAudio.src !== soundUrl) {
+            hasSwitchedToFallbackSource = false;
             notificationAudio.src = soundUrl;
             notificationAudio.load();
         }
         return notificationAudio;
     }
 
-    notificationAudio = new Audio(soundUrl);
+    notificationAudio = new Audio();
+    notificationAudio.src = soundUrl;
     notificationAudio.preload = "auto";
+    notificationAudio.addEventListener("error", () => {
+        if (hasSwitchedToFallbackSource) {
+            return;
+        }
+
+        hasSwitchedToFallbackSource = true;
+        notificationAudio.src = resolveFallbackSoundUrl();
+        notificationAudio.load();
+    });
 
     return notificationAudio;
 }
@@ -92,6 +114,7 @@ async function playSound() {
 
 async function unlockAudioAfterUserInteraction() {
     if (hasUnlockedAudio) {
+        detachUnlockListeners();
         return true;
     }
 
@@ -103,9 +126,10 @@ async function unlockAudioAfterUserInteraction() {
         audio.currentTime = 0;
         audio.muted = false;
         hasUnlockedAudio = true;
+        detachUnlockListeners();
         flushPendingNotifications();
     } catch {
-        // Keep silent: some browsers still block until another interaction.
+        // Keep silent and keep listeners attached to retry on next interaction.
     }
 
     return hasUnlockedAudio;
@@ -120,48 +144,82 @@ function isPaidAndEligible(order) {
     return order?.status !== "draft" && order?.status !== "cancelled";
 }
 
-async function tryPlayForOrder(orderId) {
+function buildOrderNotificationKey(order) {
+    const orderId = Number(order?.id ?? 0);
+    if (!Number.isFinite(orderId) || orderId <= 0) {
+        return null;
+    }
+
+    const placedAt = typeof order?.placed_at === "string" && order.placed_at.length > 0
+        ? order.placed_at
+        : "na";
+
+    return `${orderId}:${placedAt}`;
+}
+
+async function tryPlayForOrder(orderKey) {
     const isPlayable = hasUnlockedAudio || await unlockAudioAfterUserInteraction();
     if (!isPlayable) {
-        pendingOrderIds.add(orderId);
+        pendingOrderKeys.add(orderKey);
         return;
     }
 
     const played = await playSound();
     if (played) {
-        markAsNotified(orderId);
-        pendingOrderIds.delete(orderId);
+        markAsNotified(orderKey);
+        pendingOrderKeys.delete(orderKey);
         return;
     }
 
-    pendingOrderIds.add(orderId);
+    pendingOrderKeys.add(orderKey);
 }
 
 function flushPendingNotifications() {
-    if (!hasUnlockedAudio || pendingOrderIds.size === 0) {
+    if (!hasUnlockedAudio || pendingOrderKeys.size === 0) {
         return;
     }
 
-    const ids = Array.from(pendingOrderIds);
-    ids.forEach((orderId) => {
-        void tryPlayForOrder(orderId);
+    const keys = Array.from(pendingOrderKeys);
+    keys.forEach((orderKey) => {
+        void tryPlayForOrder(orderKey);
     });
 }
 
+function detachUnlockListeners() {
+    if (typeof removeUnlockListeners === "function") {
+        removeUnlockListeners();
+        removeUnlockListeners = null;
+    }
+}
+
+function attachUnlockListeners() {
+    if (removeUnlockListeners) {
+        return;
+    }
+
+    const handler = () => {
+        void unlockAudioAfterUserInteraction();
+    };
+
+    window.addEventListener("pointerdown", handler, {
+        passive: true,
+    });
+
+    window.addEventListener("keydown", handler);
+
+    window.addEventListener("touchstart", handler, {
+        passive: true,
+    });
+
+    removeUnlockListeners = () => {
+        window.removeEventListener("pointerdown", handler);
+        window.removeEventListener("keydown", handler);
+        window.removeEventListener("touchstart", handler);
+    };
+}
+
 function initOrderPaidNotification() {
-    window.addEventListener("pointerdown", unlockAudioAfterUserInteraction, {
-        once: true,
-        passive: true,
-    });
-
-    window.addEventListener("keydown", unlockAudioAfterUserInteraction, {
-        once: true,
-    });
-
-    window.addEventListener("touchstart", unlockAudioAfterUserInteraction, {
-        once: true,
-        passive: true,
-    });
+    attachUnlockListeners();
 
     // Eager preload to reduce delay on first notification.
     getNotificationAudio().load();
@@ -171,9 +229,8 @@ function initOrderPaidNotification() {
         "orders.updated",
         (payload) => {
             const order = payload?.order;
-            const orderId = Number(order?.id ?? 0);
-
-            if (!Number.isFinite(orderId) || orderId <= 0) {
+            const orderKey = buildOrderNotificationKey(order);
+            if (!orderKey) {
                 return;
             }
 
@@ -181,15 +238,16 @@ function initOrderPaidNotification() {
                 return;
             }
 
-            if (hasAlreadyNotified(orderId)) {
+            if (hasAlreadyNotified(orderKey)) {
                 return;
             }
 
-            void tryPlayForOrder(orderId);
+            void tryPlayForOrder(orderKey);
         }
     );
 
     window.addEventListener("beforeunload", () => {
+        detachUnlockListeners();
         if (typeof stopRealtime === "function") {
             stopRealtime();
         }

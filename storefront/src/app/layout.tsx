@@ -10,13 +10,15 @@ import { ModuleSystemInitializer } from "@/components/ModuleSystemInitializer";
 import { getThemeSettings } from "@/lib/api-theme";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { cookies } from "next/headers";
+import { safeDecodeURIComponent } from "@/lib/utils/error-utils";
 
 const BACKEND_URL = process.env.API_INTERNAL_URL;
 const API_KEY = process.env.FRONT_API_KEY;
 
 async function getInitialUser() {
   const cookieStore = await cookies();
-  const token = cookieStore.get("auth_token")?.value;
+  const rawToken = cookieStore.get("auth_token")?.value;
+  const token = rawToken ? safeDecodeURIComponent(rawToken) : null;
 
   if (!token) return null;
 

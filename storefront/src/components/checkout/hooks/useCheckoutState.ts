@@ -78,6 +78,14 @@ export function useCheckoutState(
       });
 
       if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          applyAuthenticatedUser(null);
+          return {
+            user: null,
+            unavailable: false,
+          };
+        }
+
         return {
           user: effectiveUserRef.current,
           unavailable: true,
@@ -85,8 +93,15 @@ export function useCheckoutState(
       }
 
       const data = (await res.json().catch(() => null)) as
-        | { authenticated?: boolean; user?: AuthUser | null }
+        | { authenticated?: boolean; user?: AuthUser | null; unavailable?: boolean }
         | null;
+
+      if (data?.unavailable) {
+        return {
+          user: effectiveUserRef.current,
+          unavailable: true,
+        };
+      }
 
       const nextUser = data?.authenticated ? data.user ?? null : null;
       applyAuthenticatedUser(nextUser);
