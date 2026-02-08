@@ -307,12 +307,12 @@ export default async function OrderSuccessPage({
 
           {/* CTA Actions */}
           <div className="max-w-4xl mx-auto mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-            <a
+            <Link
               href="/account"
               className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-neutral-900 text-white text-sm font-medium hover:bg-black transition"
             >
               Voir mes commandes
-            </a>
+            </Link>
             <Link
               href="/"
               className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-neutral-200 bg-white text-neutral-900 text-sm font-medium hover:bg-neutral-50 transition"
