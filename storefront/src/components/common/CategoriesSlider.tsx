@@ -115,7 +115,7 @@ export function CategoriesSlider({
         <div className="embla__container">
           {categories.map((category) => (
             <div
-              key={category.slug}
+              key={category.id}
               className="embla__slide pb-4"
               data-slides-mobile={slidesPerView.mobile}
               data-slides-desktop={slidesPerView.desktop}

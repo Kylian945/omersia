@@ -11,12 +11,19 @@ export type CategoryNode = {
 
 export type MenuCategory = CategoryNode;
 
+export type CmsPageNode = {
+  id: number;
+  slug: string | null;
+  title: string | null;
+};
+
 export type MenuItem = {
   id: number;
   label: string;
-  type: "category" | "link" | "text";
+  type: "category" | "cms_page" | "link" | "text";
   url: string | null;
   category?: MenuCategory | null;
+  cms_page?: CmsPageNode | null;
 };
 
 export type MenuResponse = {

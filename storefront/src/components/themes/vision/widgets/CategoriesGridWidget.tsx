@@ -42,9 +42,10 @@ export async function CategoriesGridWidget({
   if (categorySlugs && categorySlugs.length > 0) {
     // Filter out empty strings
     const validSlugs = categorySlugs.filter((slug) => slug && slug.trim());
-    if (validSlugs.length > 0) {
+    const uniqueSlugs = Array.from(new Set(validSlugs));
+    if (uniqueSlugs.length > 0) {
       // Filter categories by selected slugs and preserve order
-      categories = validSlugs
+      categories = uniqueSlugs
         .map((slug) => allCategories.find((cat) => cat.slug === slug))
         .filter((cat) => cat !== undefined) as typeof allCategories;
     }

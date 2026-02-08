@@ -459,6 +459,11 @@ if [ "$DEMO_DATA" = "true" ]; then
     docker exec omersia-backend php artisan db:seed --class=DemoProductsSeeder --force > /dev/null 2>&1
     stop_spinner $SPINNER_PID "success" "Demo products imported"
 
+    show_spinner "Creating demo shipping method..." &
+    SPINNER_PID=$!
+    docker exec omersia-backend php artisan db:seed --class=DemoShippingMethodSeeder --force > /dev/null 2>&1
+    stop_spinner $SPINNER_PID "success" "Demo shipping method ready"
+
     show_spinner "Creating demo menu..." &
     SPINNER_PID=$!
     docker exec omersia-backend php artisan db:seed --class=DemoMenuSeeder --force > /dev/null 2>&1
