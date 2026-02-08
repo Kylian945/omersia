@@ -28,7 +28,7 @@ final class CustomerRegisterRequest extends FormRequest
             'firstname' => ['required', 'string', 'max:255'],
             'lastname' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:customers,email'],
-            'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers(), 'confirmed'],
+            'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers()->symbols()->uncompromised(), 'confirmed'],
             'newsletter' => ['sometimes', 'boolean'],
         ];
     }

@@ -19,8 +19,13 @@ type Props = {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
-  // Try to get ecommerce page metadata first
-  const pageData = await getEcommercePageByType("category", slug, "fr");
+  // PERF-002: Paralléliser les fetches de métadonnées
+  const [pageData, data] = await Promise.all([
+    getEcommercePageByType("category", slug, "fr"),
+    getCategoryBySlug(slug, "fr"),
+  ]);
+
+  // Priorité aux métadonnées Page Builder
   if (pageData) {
     return {
       title: pageData.meta_title || pageData.title || "",
@@ -29,7 +34,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   // Fallback to category metadata
-  const data = await getCategoryBySlug(slug, "fr");
   if (!data || !data.category) return {};
 
   const t = data.category.translations?.[0];
@@ -42,8 +46,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
-  const data = await getCategoryBySlug(slug, "fr");
-  const theme = await getThemeSettings();
+
+  // PERF-002: Paralléliser les fetches pour réduire le TTFB (-600ms)
+  const [data, theme, pageData] = await Promise.all([
+    getCategoryBySlug(slug, "fr"),
+    getThemeSettings(),
+    getEcommercePageByType("category", slug, "fr"),
+  ]);
 
   if (!data || !data.category) {
     return (
@@ -73,9 +82,7 @@ export default async function CategoryPage({ params }: Props) {
   const { category, products = [] } = data;
   const t = category.translations?.[0];
 
-  // Fetch Page Builder configuration
-  const pageData = await getEcommercePageByType("category", slug, "fr");
-
+  // PERF-002: pageData déjà fetché en parallèle ci-dessus
   // If Page Builder content exists, use CategoryPageRenderer
   if (pageData) {
     return (

@@ -55,6 +55,12 @@ class AppServiceProvider extends ServiceProvider
             if (config('app.debug')) {
                 Log::critical('APP_DEBUG is enabled in production!');
             }
+
+            // SEC-004: Vérifier que STRIPE_WEBHOOK_SECRET est configuré
+            $stripeWebhookSecret = config('services.stripe.webhook_secret');
+            if (empty($stripeWebhookSecret) || str_starts_with($stripeWebhookSecret, 'CHANGE_ME')) {
+                Log::critical('STRIPE_WEBHOOK_SECRET is not properly configured!');
+            }
         }
     }
 }

@@ -84,11 +84,35 @@ class OrderCreationService
 
     /**
      * Mettre à jour une commande existante
+     * DCA-001: Validation des prix côté serveur pour éviter le price tampering
      */
     public function updateOrder(Order $order, OrderUpdateDTO $dto): Order
     {
         return DB::transaction(function () use ($order, $dto) {
-            // Mettre à jour les champs principaux
+            // DCA-001: Récupérer la méthode de livraison pour valider le prix
+            $shippingMethod = ShippingMethod::findOrFail($dto->shippingMethodId);
+
+            // Construire un OrderCreateDTO temporaire pour la validation
+            $createDto = new OrderCreateDTO(
+                customerId: $order->customer_id,
+                cartId: $order->cart_id,
+                shippingMethodId: $dto->shippingMethodId,
+                currency: $dto->currency,
+                customerEmail: $dto->customerEmail,
+                customerFirstname: $dto->customerFirstname,
+                customerLastname: $dto->customerLastname,
+                shippingAddress: $dto->shippingAddress,
+                billingAddress: $dto->billingAddress,
+                items: $dto->items,
+                discountTotal: $dto->discountTotal,
+                shippingTotal: $shippingMethod->price, // DCA-001: Toujours utiliser le prix serveur
+                taxTotal: $dto->taxTotal,
+            );
+
+            // DCA-001: Valider les prix côté serveur
+            $validationResult = $this->priceValidationService->validateAndRecalculate($createDto);
+
+            // Mettre à jour avec les valeurs vérifiées
             $order->currency = $dto->currency;
             $order->shipping_method_id = $dto->shippingMethodId;
             $order->customer_email = $dto->customerEmail;
@@ -96,14 +120,19 @@ class OrderCreationService
             $order->customer_lastname = $dto->customerLastname;
             $order->shipping_address = $dto->shippingAddress;
             $order->billing_address = $dto->billingAddress;
-            $order->discount_total = $dto->discountTotal;
-            $order->shipping_total = $dto->shippingTotal;
+            $order->subtotal = $validationResult['verified_subtotal'];
+            $order->discount_total = $validationResult['verified_discount_total'];
+            $order->shipping_total = $shippingMethod->price; // DCA-001: Prix serveur
             $order->tax_total = $dto->taxTotal;
-            $order->total = $dto->total;
+            $order->total = $validationResult['verified_subtotal']
+                - $validationResult['verified_discount_total']
+                + $shippingMethod->price
+                + $dto->taxTotal;
+            $order->applied_discounts = $validationResult['discount_ids'];
             $order->save();
 
-            // Synchroniser les items
-            $this->orderItemService->syncItems($order, $dto->items);
+            // Synchroniser les items avec les prix vérifiés
+            $this->orderItemService->syncItems($order, $validationResult['verified_items']);
 
             return $order->fresh(['items']);
         });

@@ -18,6 +18,7 @@ use Omersia\Sales\Mail\OrderConfirmationMail;
 
 /**
  * @property int $id
+ * @property int|null $cart_id
  * @property string|null $number
  * @property string|null $currency
  * @property string|null $status
@@ -40,6 +41,8 @@ use Omersia\Sales\Mail\OrderConfirmationMail;
  * @property array<int, int>|null $applied_discounts
  * @property-read Invoice|null $invoice
  * @property-read Customer|null $customer
+ * @property-read string|null $customer_name
+ * @property-read string $status_label
  */
 class Order extends Model
 {
@@ -106,6 +109,21 @@ class Order extends Model
         };
     }
 
+    /**
+     * Accessor pour le nom complet du client
+     */
+    public function getCustomerNameAttribute(): ?string
+    {
+        $firstname = trim((string) $this->customer_firstname);
+        $lastname = trim((string) $this->customer_lastname);
+
+        if ($firstname === '' && $lastname === '') {
+            return null;
+        }
+
+        return trim($firstname.' '.$lastname);
+    }
+
     // Scopes pour filtrer les commandes
     public function scopeConfirmed($query)
     {
@@ -130,22 +148,27 @@ class Order extends Model
             event(OrderUpdated::fromModel($this));
 
             // DCA-014: Logger la confirmation de commande
+            // SEC-025: Masquer le PII (email) dans les logs
+            $maskedEmail = $this->customer_email
+                ? substr($this->customer_email, 0, 3).'***@'.(explode('@', $this->customer_email)[1] ?? 'unknown')
+                : null;
+
             Log::channel('transactions')->info('Order confirmed', [
                 'order_id' => $this->id,
                 'order_number' => $this->number,
                 'customer_id' => $this->customer_id,
-                'customer_email' => $this->customer_email,
+                'customer_email_masked' => $maskedEmail,
                 'total' => $this->total,
                 'currency' => $this->currency,
                 'payment_status' => $this->payment_status,
                 'placed_at' => $this->placed_at->toIso8601String(),
             ]);
 
-            // Envoi de l'email de confirmation de commande
+            // LAR-014: Envoi de l'email de confirmation en queue pour ne pas bloquer
             try {
                 $customer = $this->customer;
                 if ($customer) {
-                    Mail::to($customer->email)->send(new OrderConfirmationMail($this));
+                    Mail::to($customer->email)->queue(new OrderConfirmationMail($this));
                 }
             } catch (\Exception $e) {
                 Log::error('Erreur envoi email confirmation de commande: '.$e->getMessage(), [

@@ -9,6 +9,7 @@ backend/.env
 backend/.env.*
 !backend/.env.example
 !backend/.env.*.example
+!backend/.env.testing
 
 # Storefront
 storefront/.env.local

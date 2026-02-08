@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace Omersia\Shared\Tests;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
+use Tests\TestCase;
 
-abstract class PackageTestCase extends BaseTestCase
+/**
+ * Base test case for all package tests
+ * Extends Tests\TestCase to inherit database safety checks (SQLite in-memory only)
+ */
+abstract class PackageTestCase extends TestCase
 {
     use RefreshDatabase;
 

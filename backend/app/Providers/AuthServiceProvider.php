@@ -4,13 +4,23 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Policies\AddressPolicy;
+use App\Policies\OrderPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Omersia\Catalog\Models\Order;
+use Omersia\Customer\Models\Address;
 
 class AuthServiceProvider extends ServiceProvider
 {
-    protected $policies = [];
+    /**
+     * SEC-001: Enregistrement des Policies pour prévenir les IDOR
+     */
+    protected $policies = [
+        Order::class => OrderPolicy::class,
+        Address::class => AddressPolicy::class,
+    ];
 
     public function boot(): void
     {

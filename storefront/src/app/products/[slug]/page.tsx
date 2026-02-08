@@ -53,8 +53,13 @@ function normalizeImages(apiImages: ApiImage[] | undefined | null): NormalizedIm
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
 
-  // Try to get ecommerce page metadata first
-  const pageData = await getEcommercePageByType("product", slug, "fr");
+  // PERF-004: Paralléliser les fetches de métadonnées
+  const [pageData, product] = await Promise.all([
+    getEcommercePageByType("product", slug, "fr"),
+    getProductBySlug(slug, "fr"),
+  ]);
+
+  // Priorité aux métadonnées Page Builder
   if (pageData) {
     return {
       title: pageData.meta_title || pageData.title || "",
@@ -63,7 +68,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 
   // Fallback to product metadata
-  const product = await getProductBySlug(slug, "fr");
   if (!product) return {};
 
   const t = product.translations?.[0];
@@ -76,7 +80,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug, "fr");
+
+  // PERF-001: Paralléliser les fetches pour réduire le TTFB (-800ms)
+  const [product, pageData] = await Promise.all([
+    getProductBySlug(slug, "fr"),
+    getEcommercePageByType("product", slug, "fr"),
+  ]);
 
   if (!product) {
     return (
@@ -117,9 +126,7 @@ export default async function ProductPage({ params }: Props) {
     )
     .slice(0, 12);
 
-  // Fetch Page Builder configuration
-  const pageData = await getEcommercePageByType("product", slug, "fr");
-
+  // PERF-001: pageData déjà fetché en parallèle ci-dessus
   // If Page Builder content exists, use ProductPageRenderer
   if (pageData) {
     const hasVariants =

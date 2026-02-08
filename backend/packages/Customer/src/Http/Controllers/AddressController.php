@@ -139,7 +139,7 @@ class AddressController extends Controller
 
     protected function authorizeAddress(Customer $customer, Address $address): void
     {
-        if ($address->user_id !== $customer->id) {
+        if ($address->customer_id !== $customer->id) {
             abort(403);
         }
     }

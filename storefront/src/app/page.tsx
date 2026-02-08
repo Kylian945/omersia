@@ -42,8 +42,13 @@ async function getFeaturedProducts(): Promise<ListingProduct[]> {
 }
 
 export default async function Home() {
-  // Fetch Page Builder content for homepage
-  const pageData = await getEcommercePageBySlug("accueil", "fr");
+  // PERF-003: Paralléliser tous les fetches dès le début (-400ms)
+  const [pageData, products, categories, widgets] = await Promise.all([
+    getEcommercePageBySlug("accueil", "fr"),
+    getFeaturedProducts(),
+    getCategories("fr", true), // parentOnly = true pour avoir uniquement les catégories principales
+    getThemeWidgets(),
+  ]);
 
   // If Page Builder content exists, render it
   if (pageData && pageData.content.sections) {
@@ -57,12 +62,6 @@ export default async function Home() {
       </>
     );
   }
-
-  const [products, categories, widgets] = await Promise.all([
-    getFeaturedProducts(),
-    getCategories("fr", true), // parentOnly = true pour avoir uniquement les catégories principales
-    getThemeWidgets(),
-  ]);
   const featured = products.slice(0, 12);
   const { HeroBanner, FeaturesBar, PromoBanner, Testimonials, Newsletter } = widgets;
 

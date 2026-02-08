@@ -136,15 +136,25 @@ class Product extends Model
 
     /**
      * Get the indexable data array for the model.
+     * LAR-001: Fix N+1 - Eager load relations before accessing them
      */
     public function toSearchableArray(): array
     {
         $translation = $this->translation();
 
+        // LAR-001: Eager load categories if not already loaded
+        if (! $this->relationLoaded('categories')) {
+            $this->load('categories');
+        }
+
         // For variant products, calculate total stock from all active variants
         $stockQty = $this->stock_qty;
         if ($this->hasVariants()) {
-            $stockQty = $this->variants()
+            // LAR-001: Eager load variants if not already loaded
+            if (! $this->relationLoaded('variants')) {
+                $this->load('variants');
+            }
+            $stockQty = $this->variants
                 ->where('is_active', true)
                 ->sum('stock_qty');
         }
@@ -164,7 +174,7 @@ class Product extends Model
             'type' => $this->type,
             'shop_id' => $this->shop_id,
             'image_url' => $this->main_image_url,
-            'categories' => $this->categories->pluck('id')->toArray(),
+            'categories' => $this->categories->pluck('id')->all(),
         ];
     }
 

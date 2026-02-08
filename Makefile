@@ -182,7 +182,7 @@ test: check-docker
 	@echo ""
 	@printf "$(BLUE)➜ Backend tests (PHPUnit)...$(RESET)\n"
 	@$(EXEC_BACKEND) php artisan config:clear >/dev/null
-	@$(EXEC_BACKEND) env APP_ENV=testing DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan test --no-coverage
+	@$(EXEC_BACKEND) env APP_ENV=testing DB_CONNECTION=sqlite DB_DATABASE=:memory: APP_KEY=base64:VjuvYILi/Pq3nHGWRVoheVnOClQt4cvyrt9kX6hOxA0= php artisan test --no-coverage
 	@echo ""
 	@printf "$(BLUE)➜ Frontend tests (Vitest)...$(RESET)\n"
 	@$(EXEC_STOREFRONT) npm run test --if-present

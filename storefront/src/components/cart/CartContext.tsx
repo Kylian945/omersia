@@ -7,6 +7,7 @@ import {
   useEffect,
   useRef,
   useCallback,
+  useMemo,
   ReactNode,
 } from "react";
 import { CartItem } from "@/lib/types/product-types";
@@ -221,7 +222,7 @@ export function CartProvider({
     `${item.id}-${item.variantId ?? 'none'}-${item.variantLabel ?? 'none'}`,
   []);
 
-  const addItem = (item: CartItem, showModal: boolean = true) => {
+  const addItem = useCallback((item: CartItem, showModal: boolean = true) => {
     setItems((prev) => {
       // Build a Map for O(1) lookup instead of O(n) findIndex
       const itemKey = getItemKey(item);
@@ -252,30 +253,30 @@ export function CartProvider({
         setIsOpen(true);
       }
     }
-  };
+  }, [getItemKey, cartType]);
 
-  const removeItem = (index: number) => {
+  const removeItem = useCallback((index: number) => {
     setItems((prev) => prev.filter((_, i) => i !== index));
-  };
+  }, []);
 
-  const updateQty = (index: number, qty: number) => {
+  const updateQty = useCallback((index: number, qty: number) => {
     if (qty <= 0) {
-      removeItem(index);
+      setItems((prev) => prev.filter((_, i) => i !== index));
       return;
     }
     setItems((prev) =>
       prev.map((item, i) => (i === index ? { ...item, qty } : item))
     );
-  };
+  }, []);
 
-  const clear = () => {
+  const clear = useCallback(() => {
     setItems([]);
     // Optionnel : tu peux garder le token pour tracker un panier vide
-  };
+  }, []);
 
-  const openCart = () => setIsOpen(true);
-  const closeCart = () => setIsOpen(false);
-  const toggleCart = () => setIsOpen((v) => !v);
+  const openCart = useCallback(() => setIsOpen(true), []);
+  const closeCart = useCallback(() => setIsOpen(false), []);
+  const toggleCart = useCallback(() => setIsOpen((v) => !v), []);
 
   const totalQty = items.reduce((sum, item) => sum + item.qty, 0);
   const subtotal = items.reduce(
@@ -288,26 +289,30 @@ export function CartProvider({
     router.push('/cart');
   };
 
+  // PERF-018: Mémoiser la valeur du contexte pour éviter les re-renders inutiles
+  const contextValue = useMemo<CartContextType>(
+    () => ({
+      items,
+      addItem,
+      removeItem,
+      updateQty,
+      clear,
+      isOpen,
+      openCart,
+      closeCart,
+      toggleCart,
+      totalQty,
+      subtotal,
+      cartToken,
+      cartId,
+      cartType,
+      isHydrated,
+    }),
+    [items, isOpen, totalQty, subtotal, cartToken, cartId, cartType, isHydrated, addItem, removeItem, updateQty, clear, openCart, closeCart, toggleCart]
+  );
+
   return (
-    <CartContext.Provider
-      value={{
-        items,
-        addItem,
-        removeItem,
-        updateQty,
-        clear,
-        isOpen,
-        openCart,
-        closeCart,
-        toggleCart,
-        totalQty,
-        subtotal,
-        cartToken,
-        cartId,
-        cartType,
-        isHydrated,
-      }}
-    >
+    <CartContext.Provider value={contextValue}>
       {children}
 
       {/* Modal de confirmation d'ajout au panier (mode page uniquement) */}
