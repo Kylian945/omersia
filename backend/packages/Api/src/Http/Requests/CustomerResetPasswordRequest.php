@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Omersia\Api\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rules\Password;
 
 final class CustomerResetPasswordRequest extends FormRequest
 {
@@ -26,7 +27,8 @@ final class CustomerResetPasswordRequest extends FormRequest
         return [
             'token' => ['required'],
             'email' => ['required', 'email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            // DCA-009: Aligner avec CustomerRegisterRequest (mixedCase + numbers)
+            'password' => ['required', 'string', Password::min(8)->mixedCase()->numbers(), 'confirmed'],
         ];
     }
 
@@ -45,7 +47,7 @@ final class CustomerResetPasswordRequest extends FormRequest
 
             'password.required' => 'Le mot de passe est obligatoire.',
             'password.string' => 'Le mot de passe doit être une chaîne de caractères.',
-            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères, avec majuscules, minuscules et chiffres.',
             'password.confirmed' => 'Les mots de passe ne correspondent pas.',
         ];
     }

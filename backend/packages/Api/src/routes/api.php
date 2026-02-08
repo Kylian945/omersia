@@ -148,27 +148,29 @@ Route::middleware('api.key')->group(function () {
         // ORDERS (listing + show par numéro)
         Route::get('/orders', [OrderController::class, 'index'])
             ->name('storefront.orders.index');
-        Route::post('/orders', [OrderController::class, 'store'])
-            ->name('storefront.orders.store');
         Route::get('/orders/{number}', [OrderController::class, 'show'])
             ->name('storefront.orders.show');
-
-        // CHECKOUT : création / mise à jour de la commande depuis le front
-        Route::put('/orders/{order}', [OrderController::class, 'update'])
-            ->name('storefront.orders.update');
-
-        // Confirmer une commande brouillon (après paiement réussi)
-        Route::post('/orders/{id}/confirm', [OrderController::class, 'confirmOrder'])
-            ->name('storefront.orders.confirm');
-
-        // Télécharger la facture d'une commande
         Route::get('/orders/{number}/invoice', [OrderController::class, 'downloadInvoice'])
             ->name('storefront.orders.invoice');
 
-        // PAYMENT INTENT (Stripe, extensible à d'autres providers)
-        // → utilisé par /api/payments/intent côté Next
-        Route::post('/payments/intent', [PaymentController::class, 'createIntent'])
-            ->name('storefront.payments.intent');
+        // DCA-003: Rate limiting strict sur checkout/payment pour éviter abus
+        Route::middleware('throttle:checkout')->group(function () {
+            // Création de commande
+            Route::post('/orders', [OrderController::class, 'store'])
+                ->name('storefront.orders.store');
+
+            // Mise à jour de commande (checkout)
+            Route::put('/orders/{order}', [OrderController::class, 'update'])
+                ->name('storefront.orders.update');
+
+            // Confirmation de commande brouillon (après paiement réussi)
+            Route::post('/orders/{id}/confirm', [OrderController::class, 'confirmOrder'])
+                ->name('storefront.orders.confirm');
+
+            // Payment intent (Stripe)
+            Route::post('/payments/intent', [PaymentController::class, 'createIntent'])
+                ->name('storefront.payments.intent');
+        });
     });
 
     /*

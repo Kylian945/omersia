@@ -188,32 +188,56 @@ class ProductController extends Controller
 
     /**
      * API endpoint for products list (for builder)
+     * DCA-004: Ajout pagination pour éviter chargement illimité
      */
-    public function apiList()
+    public function apiList(Request $request)
     {
         $this->authorize('products.view');
 
-        $products = Product::with(['translations' => function ($query) {
+        $perPage = min((int) $request->query('per_page', 50), 100); // Max 100
+        $search = trim((string) $request->query('q', ''));
+
+        $query = Product::with(['translations' => function ($query) {
             $query->where('locale', 'fr');
         }, 'images' => function ($query) {
             $query->where('is_main', true);
         }])
-            ->where('is_active', true)
-            ->orderByDesc('id')
-            ->get()
-            ->map(function ($product) {
-                $translation = $product->translations->first();
-                $mainImage = $product->images->first();
+            ->where('is_active', true);
 
-                return [
-                    'id' => $product->id,
-                    'name' => $translation?->name ?? 'Sans nom',
-                    'slug' => $translation?->slug ?? '',
-                    'price' => $product->price,
-                    'image' => $mainImage ? asset('storage/'.$mainImage->path) : null,
-                ];
+        // Recherche optionnelle
+        if ($search !== '') {
+            $like = '%'.str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $search).'%';
+            $query->where(function ($q) use ($like) {
+                $q->where('sku', 'like', $like)
+                    ->orWhereHas('translations', function ($q) use ($like) {
+                        $q->where('locale', 'fr')->where('name', 'like', $like);
+                    });
             });
+        }
 
-        return response()->json($products);
+        $paginator = $query->orderByDesc('id')->paginate($perPage);
+
+        $products = $paginator->getCollection()->map(function ($product) {
+            $translation = $product->translations->first();
+            $mainImage = $product->images->first();
+
+            return [
+                'id' => $product->id,
+                'name' => $translation?->name ?? 'Sans nom',
+                'slug' => $translation?->slug ?? '',
+                'price' => $product->price,
+                'image' => $mainImage ? asset('storage/'.$mainImage->path) : null,
+            ];
+        });
+
+        return response()->json([
+            'data' => $products,
+            'meta' => [
+                'current_page' => $paginator->currentPage(),
+                'last_page' => $paginator->lastPage(),
+                'per_page' => $paginator->perPage(),
+                'total' => $paginator->total(),
+            ],
+        ]);
     }
 }

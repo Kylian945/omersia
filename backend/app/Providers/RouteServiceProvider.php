@@ -46,9 +46,14 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perHour(5)->by($request->ip());
         });
 
-        // Rate limit pour les webhooks
+        // Rate limit pour les webhooks (DCA-002)
         RateLimiter::for('webhooks', function (Request $request) {
-            return Limit::perMinute(100)->by($request->ip());
+            return Limit::perMinute(60)->by($request->ip());
+        });
+
+        // Rate limit strict pour checkout/payment (DCA-003)
+        RateLimiter::for('checkout', function (Request $request) {
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
         });
 
         // Rate limit pour l'upload

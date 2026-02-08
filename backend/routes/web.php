@@ -29,6 +29,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::post('/webhooks/stripe', [StripeWebhookController::class, 'handle']);
+// DCA-002: Rate limiting sur webhook Stripe pour éviter DoS
+Route::middleware('throttle:webhooks')
+    ->post('/webhooks/stripe', [StripeWebhookController::class, 'handle']);
 
 require __DIR__.'/auth.php';
