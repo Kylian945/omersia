@@ -70,7 +70,7 @@ export function useCheckoutShipping() {
         }
 
         setShippingLoading(false);
-      } catch (err: unknown) {
+      } catch {
         if (cancelled) return;
         setShippingError("Erreur réseau");
         setShippingLoading(false);
@@ -82,7 +82,16 @@ export function useCheckoutShipping() {
     return () => {
       cancelled = true;
     };
-  }, [subtotal, address.zip, address.country]);
+  }, [
+    subtotal,
+    address.zip,
+    address.country,
+    shippingMethodId,
+    setShippingMethods,
+    setShippingMethodId,
+    setShippingLoading,
+    setShippingError,
+  ]);
 
   return {
     shippingMethods,

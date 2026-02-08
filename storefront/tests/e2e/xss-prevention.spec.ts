@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
 /**
  * E2E Tests for XSS Prevention (DCA-003)
@@ -9,14 +9,6 @@ import { test, expect, Page } from '@playwright/test';
 
 test.describe('XSS Prevention in Page Builder', () => {
   test.describe.configure({ mode: 'serial' });
-
-  let testPageUrl: string;
-
-  test.beforeAll(async () => {
-    // Note: In a real scenario, you would create a test page via API
-    // For now, we'll assume a test page exists or will be created
-    testPageUrl = '/test-xss-page';
-  });
 
   test('should prevent CSS injection via desktopWidth', async ({ page }) => {
     // Scenario: Attacker tries to inject CSS by setting desktopWidth to malicious value
@@ -288,10 +280,6 @@ test.describe('XSS Prevention in Page Builder', () => {
     expect(clickTriggered).toBe(false);
 
     // Verify onclick attribute doesn't exist in DOM
-    const elementsWithOnClick = await page.$$eval('*', (elements) =>
-      elements.filter((el) => el.hasAttribute('onclick'))
-    );
-
     // Filter out legitimate onclick handlers (e.g., from frameworks)
     const maliciousOnClicks = await page.$$eval('*', (elements) =>
       elements.filter((el) => {

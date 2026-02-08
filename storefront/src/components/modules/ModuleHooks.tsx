@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, ComponentType } from "react";
+import { useEffect, useMemo, useState, ComponentType } from "react";
 import { getModuleHookComponents, ModuleHookContext } from "@/lib/module-system";
 import { logger } from "@/lib/logger";
 
@@ -29,11 +29,19 @@ export function ModuleHooks({ hookName, context = {}, fallback = null }: ModuleH
     Array<{ component: ComponentType<Record<string, unknown>>; moduleSlug: string; priority: number }>
   >([]);
   const [loading, setLoading] = useState(true);
+  const contextKey = useMemo(() => JSON.stringify(context), [context]);
+  const parsedContext = useMemo<ModuleHookContext>(() => {
+    try {
+      return JSON.parse(contextKey) as ModuleHookContext;
+    } catch {
+      return {};
+    }
+  }, [contextKey]);
 
   useEffect(() => {
     async function loadComponents() {
       try {
-        const hookComponents = await getModuleHookComponents(hookName, context);
+        const hookComponents = await getModuleHookComponents(hookName, parsedContext);
         setComponents(hookComponents);
       } catch (error) {
         logger.error(`[ModuleHooks] Error loading components for ${hookName}:`, error);
@@ -44,7 +52,7 @@ export function ModuleHooks({ hookName, context = {}, fallback = null }: ModuleH
     }
 
     loadComponents();
-  }, [hookName, JSON.stringify(context)]);
+  }, [hookName, parsedContext]);
 
   if (loading) {
     return <>{fallback}</>;
@@ -57,7 +65,7 @@ export function ModuleHooks({ hookName, context = {}, fallback = null }: ModuleH
   return (
     <>
       {components.map(({ component: Component, moduleSlug }) => (
-        <Component key={moduleSlug} {...context} />
+        <Component key={moduleSlug} {...parsedContext} />
       ))}
     </>
   );

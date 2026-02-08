@@ -9,7 +9,7 @@ import { Button } from "@/components/common/Button";
 import { ModuleHooks } from "@/components/modules/ModuleHooks";
 
 export default function CartPage() {
-  const { items, subtotal, totalQty, updateQty, removeItem, clear, isHydrated } = useCart();
+  const { items, subtotal, totalQty, updateQty, removeItem, isHydrated } = useCart();
 
   const handleQtyChange = (index: number, value: string) => {
     const qty = Math.max(1, Number(value) || 1);

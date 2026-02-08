@@ -13,6 +13,7 @@ import { CartItem } from "@/lib/types/product-types";
 import { AddToCartModal } from "./AddToCartModal";
 import { useRouter } from "next/navigation";
 import { logger } from "@/lib/logger";
+import { useHydrated } from "@/hooks/useHydrated";
 
 // Debounce delay for localStorage and backend sync (ms)
 const SYNC_DEBOUNCE_MS = 300;
@@ -52,50 +53,56 @@ export function CartProvider({
 }) {
   const router = useRouter();
 
-  // Lazy initialization - load from localStorage only once during initial render
-  const [items, setItems] = useState<CartItem[]>(() => {
-    if (typeof window === "undefined") return [];
-
-    try {
-      const raw = window.localStorage.getItem(CART_STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw) as CartItem[];
-        if (Array.isArray(parsed)) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      logger.error("Failed to parse cart from localStorage", e);
-    }
-
-    return [];
-  });
-
-  const [cartToken, setCartToken] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-
-    try {
-      return window.localStorage.getItem(CART_TOKEN_STORAGE_KEY);
-    } catch {
-      return null;
-    }
-  });
+  // Keep first server/client render deterministic to avoid hydration mismatches.
+  const [items, setItems] = useState<CartItem[]>([]);
+  const [cartToken, setCartToken] = useState<string | null>(null);
 
   const [isOpen, setIsOpen] = useState(false);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const isHydrated = useHydrated();
+  const [isStorageLoaded, setIsStorageLoaded] = useState(false);
   const [cartId, setCartId] = useState<number | null>(null);
   const [showAddToCartModal, setShowAddToCartModal] = useState(false);
   const [lastAddedItem, setLastAddedItem] = useState<CartItem | null>(null);
 
-  // 1) Mark as hydrated after mount
   useEffect(() => {
-    setIsHydrated(true);
-  }, []);
+    if (!isHydrated || isStorageLoaded) return;
+
+    const timeoutId = window.setTimeout(() => {
+      let storedItems: CartItem[] = [];
+      let storedToken: string | null = null;
+
+      try {
+        const rawItems = window.localStorage.getItem(CART_STORAGE_KEY);
+        if (rawItems) {
+          const parsedItems = JSON.parse(rawItems) as CartItem[];
+          if (Array.isArray(parsedItems)) {
+            storedItems = parsedItems;
+          }
+        }
+      } catch (e) {
+        logger.error("Failed to parse cart from localStorage", e);
+      }
+
+      try {
+        storedToken = window.localStorage.getItem(CART_TOKEN_STORAGE_KEY);
+      } catch (e) {
+        logger.error("Failed to read cart token from localStorage", e);
+      }
+
+      setItems(storedItems);
+      setCartToken(storedToken);
+      setIsStorageLoaded(true);
+    }, 0);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [isHydrated, isStorageLoaded]);
 
   // 2) Sauvegarde dans localStorage à chaque changement d'items (debounced)
   const localStorageTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    if (!isHydrated) return;
+    if (!isHydrated || !isStorageLoaded) return;
 
     // Clear previous timeout
     if (localStorageTimeoutRef.current) {
@@ -116,12 +123,12 @@ export function CartProvider({
         clearTimeout(localStorageTimeoutRef.current);
       }
     };
-  }, [items, isHydrated]);
+  }, [items, isHydrated, isStorageLoaded]);
 
   // 3) Sync avec le backend Laravel (debounced)
   const backendSyncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   useEffect(() => {
-    if (!isHydrated) return;
+    if (!isHydrated || !isStorageLoaded) return;
 
     // Si aucun item et pas de token, pas la peine de sync
     if (!items.length && !cartToken) return;
@@ -207,7 +214,7 @@ export function CartProvider({
         clearTimeout(backendSyncTimeoutRef.current);
       }
     };
-  }, [items, cartToken, isHydrated]);
+  }, [items, cartToken, isHydrated, isStorageLoaded]);
 
   // Helper to create a unique key for cart items
   const getItemKey = useCallback((item: CartItem) =>

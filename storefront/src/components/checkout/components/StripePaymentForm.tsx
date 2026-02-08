@@ -13,6 +13,9 @@ import { logger } from "@/lib/logger";
 
 const stripePublishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 const stripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
+const stripeConfigurationError = stripePublishableKey
+  ? null
+  : "Stripe n'est pas configuré. Veuillez contacter le support.";
 
 type StripePaymentFormProps = {
   orderId: number;
@@ -22,8 +25,8 @@ type StripePaymentFormProps = {
 
 export function StripePaymentForm({ orderId, orderNumber, total }: StripePaymentFormProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isErrorModalOpen, setIsErrorModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(stripeConfigurationError);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState(Boolean(stripeConfigurationError));
 
   const openErrorModal = (message: string) => {
     setError(message);
@@ -33,20 +36,12 @@ export function StripePaymentForm({ orderId, orderNumber, total }: StripePayment
   const closeErrorModal = () => setIsErrorModalOpen(false);
 
   useEffect(() => {
-    if (!orderId) return;
-    if (!stripePublishableKey) {
-      openErrorModal(
-        "Stripe n'est pas configuré. Veuillez contacter le support."
-      );
-      return;
-    }
+    if (!orderId || !stripePublishableKey) return;
 
     let cancelled = false;
 
     (async () => {
       try {
-        setError(null);
-
         const res = await fetch("/api/payments/intent", {
           method: "POST",
           credentials: "include",
@@ -93,6 +88,8 @@ export function StripePaymentForm({ orderId, orderNumber, total }: StripePayment
 
         if (!cancelled) {
           setClientSecret(cs);
+          setError(null);
+          setIsErrorModalOpen(false);
         }
       } catch (e: unknown) {
         logger.error("StripePaymentForm error", e);

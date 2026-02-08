@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use Omersia\Customer\Models\Customer;
 use Omersia\Catalog\Services\OrderInventoryService;
+use Omersia\Customer\Models\Customer;
 use Omersia\Sales\Mail\OrderConfirmationMail;
 
 /**

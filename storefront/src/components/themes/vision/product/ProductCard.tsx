@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import type { ListingProduct } from "@/components/product/ListingProducts";
 import { getMainImage } from "@/lib/image-utils";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
+import { useHydrated } from "@/hooks/useHydrated";
 
 type Variant = {
   id: number;
@@ -24,12 +24,8 @@ type Props = {
 };
 
 export function ProductCard({ product, hrefBase = "/products" }: Props) {
-  const [mounted, setMounted] = useState(false);
   const themeSettings = useThemeSettings();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const isHydrated = useHydrated();
 
   const t = product.translations?.[0];
   const slug = t?.slug;
@@ -37,11 +33,11 @@ export function ProductCard({ product, hrefBase = "/products" }: Props) {
   const image = getMainImage(product);
 
   // Use theme settings only after client-side mount to avoid hydration mismatch
-  const productCardStyle = mounted ? themeSettings.productCardStyle : 'bordered';
-  const productHoverEffect = mounted ? themeSettings.productHoverEffect : 'lift';
-  const borderRadius = mounted ? themeSettings.borderRadius : '12px';
-  const productBadgesDisplay = mounted ? themeSettings.productBadgesDisplay : 'block';
-  const productImageRatio = mounted ? themeSettings.productImageRatio : '100%';
+  const productCardStyle = isHydrated ? themeSettings.productCardStyle : 'bordered';
+  const productHoverEffect = isHydrated ? themeSettings.productHoverEffect : 'lift';
+  const borderRadius = isHydrated ? themeSettings.borderRadius : '12px';
+  const productBadgesDisplay = isHydrated ? themeSettings.productBadgesDisplay : 'block';
+  const productImageRatio = isHydrated ? themeSettings.productImageRatio : '100%';
 
   const variants: Variant[] = Array.isArray(product.variants)
     ? product.variants

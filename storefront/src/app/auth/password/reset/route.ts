@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       encodeURIComponent("Votre mot de passe a été réinitialisé avec succès. Vous pouvez maintenant vous connecter.")
     );
     return NextResponse.redirect(url);
-  } catch (e) {
+  } catch {
     const url = new URL("/password/reset", FRONTEND_URL);
     url.searchParams.set("token", token);
     url.searchParams.set("email", email);

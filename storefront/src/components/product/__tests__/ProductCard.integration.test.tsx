@@ -3,14 +3,15 @@
  * Demonstrates usage of test utilities infrastructure
  */
 
-import { render, screen, waitFor } from '@/__tests__/setup/test-utils'
+import { render, screen } from '@/__tests__/setup/test-utils'
 import { createProduct, resetProductFactory } from '@/__tests__/factories'
+import type { ProductFactory } from '@/__tests__/factories/product.factory'
 
 // This is an example test showing how to use the new test utilities
 // In a real scenario, you would import the actual ProductCard component
 
 // Mock ProductCard for demonstration purposes
-const ProductCard = ({ product }: { product: any }) => (
+const ProductCard = ({ product }: { product: ProductFactory }) => (
   <div data-testid="product-card">
     <h2>{product.name}</h2>
     <p>{product.price} {product.currency}</p>

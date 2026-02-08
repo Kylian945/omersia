@@ -26,38 +26,22 @@ const LoadingPlaceholder = () => (
   <div className="aspect-4/5 bg-neutral-100 animate-pulse rounded-2xl" />
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type ProductCardComponent = ComponentType<any>;
+type ProductCardComponent = ComponentType<Props>;
 
-// Cache for dynamically loaded theme components - prevents recreation on each render
-const themeComponentCache = new Map<string, ProductCardComponent>();
-
-function getThemedComponent(themePath: string): ProductCardComponent {
-  // Return cached component if available
-  if (themeComponentCache.has(themePath)) {
-    return themeComponentCache.get(themePath)!;
+const VisionProductCard = dynamic<Props>(
+  async () =>
+    import("@/components/themes/vision/product/ProductCard").then(
+      (mod) => mod.ProductCard as ProductCardComponent
+    ),
+  {
+    loading: LoadingPlaceholder,
+    ssr: false,
   }
+);
 
-  // Create and cache the dynamic component
-  const DynamicComponent = dynamic(
-    () =>
-      import(`@/components/themes/${themePath}/product/ProductCard`)
-        .then((mod) => mod.ProductCard)
-        .catch(() =>
-          // Fallback to vision theme if the theme component doesn't exist
-          import(`@/components/themes/vision/product/ProductCard`).then(
-            (mod) => mod.ProductCard
-          )
-        ),
-    {
-      loading: LoadingPlaceholder,
-      ssr: false,
-    }
-  );
-
-  themeComponentCache.set(themePath, DynamicComponent);
-  return DynamicComponent;
-}
+const productCardByTheme: Record<string, ProductCardComponent> = {
+  vision: VisionProductCard,
+};
 
 /**
  * Client-side Themed ProductCard - Loads the appropriate ProductCard
@@ -68,6 +52,6 @@ export const ThemedProductCardClient = memo(function ThemedProductCardClient({
   themePath = "vision",
   ...props
 }: Props) {
-  const ProductCard = getThemedComponent(themePath);
+  const ProductCard = productCardByTheme[themePath] ?? VisionProductCard;
   return <ProductCard {...props} />;
 });

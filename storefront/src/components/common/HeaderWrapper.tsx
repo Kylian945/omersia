@@ -1,28 +1,35 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { ModuleHooks } from "@/components/modules/ModuleHooks";
+import { useHydrated } from "@/hooks/useHydrated";
 
 type HeaderWrapperProps = {
   children: React.ReactNode;
 };
 
 export function HeaderWrapper({ children }: HeaderWrapperProps) {
-  const [headerStyle, setHeaderStyle] = useState<string>("classic");
-  const [isSticky, setIsSticky] = useState<boolean>(true);
+  const isHydrated = useHydrated();
 
-  useEffect(() => {
-    // Lire les CSS variables injectées par le ThemeProvider
+  const headerStyle = useMemo(() => {
+    if (!isHydrated) return "classic";
+
     const style = getComputedStyle(document.documentElement)
       .getPropertyValue("--theme-header-style")
       .trim();
+
+    return style || "classic";
+  }, [isHydrated]);
+
+  const isSticky = useMemo(() => {
+    if (!isHydrated) return true;
+
     const sticky = getComputedStyle(document.documentElement)
       .getPropertyValue("--theme-header-sticky")
       .trim();
 
-    if (style) setHeaderStyle(style);
-    if (sticky) setIsSticky(sticky === "yes");
-  }, []);
+    return sticky ? sticky === "yes" : true;
+  }, [isHydrated]);
 
   // Base classes
   let classes = "z-40";

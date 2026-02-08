@@ -39,13 +39,21 @@ EXEC_STOREFRONT = $(DOCKER_COMPOSE) exec -T storefront
 EXEC_BACKEND_IT = $(DOCKER_COMPOSE) exec backend
 EXEC_MYSQL_IT = $(DOCKER_COMPOSE) exec mysql
 
-.PHONY: help install setup-env setup-db apikey admin dev test lint clean build check-docker audit update update-composer update-npm db\:delete
+.PHONY: help install setup-env setup-db apikey admin dev test lint clean build check-docker audit update update-composer update-npm guard-wipe db\:delete
 
 # Docker container check - used as dependency for commands that need running containers
 check-docker:
 	@$(DOCKER_COMPOSE) ps --status running --format '{{.Service}}' 2>/dev/null | grep -q backend || \
 		(printf "$(RED)$(ICON_DOCKER) Docker containers are not running.$(RESET)\n" && \
 		 printf "$(YELLOW)   Run $(CYAN)make dev$(YELLOW) or $(CYAN)make install$(YELLOW) first.$(RESET)\n" && exit 1)
+
+# Safety check for destructive database operations
+guard-wipe:
+	@if [ "$(CONFIRM_WIPE)" != "yes" ]; then \
+		printf "$(RED)$(ICON_DATABASE) Refusing destructive database operation.$(RESET)\n"; \
+		printf "$(YELLOW)   Re-run with: $(CYAN)make $(MAKECMDGOALS) CONFIRM_WIPE=yes$(RESET)\n"; \
+		exit 1; \
+	fi
 
 # Default target
 help:
@@ -93,8 +101,8 @@ help:
 	@printf "$(CYAN)│$(RESET)  $(ICON_PACKAGE)  $(CYAN)%-18s$(RESET) %s\n" "make setup-env" "Setup environment files only"
 	@printf "$(CYAN)│$(RESET)  $(ICON_DATABASE)  $(CYAN)%-18s$(RESET) %s\n" "make setup-db" "Setup database (migrate + seed)"
 	@printf "$(CYAN)│$(RESET)  $(ICON_DATABASE)  $(CYAN)%-18s$(RESET) %s\n" "make migrate" "Run database migrations"
-	@printf "$(CYAN)│$(RESET)  $(ICON_DATABASE)  $(CYAN)%-18s$(RESET) %s\n" "make migrate-fresh" "Fresh migration with seed data"
-	@printf "$(CYAN)│$(RESET)  $(ICON_DATABASE)  $(CYAN)%-18s$(RESET) %s\n" "make db:delete" "Delete all DB tables (wipe)"
+	@printf "$(CYAN)│$(RESET)  $(ICON_DATABASE)  $(CYAN)%-18s$(RESET) %s\n" "make migrate-fresh" "Fresh migration with seed data (requires CONFIRM_WIPE=yes)"
+	@printf "$(CYAN)│$(RESET)  $(ICON_DATABASE)  $(CYAN)%-18s$(RESET) %s\n" "make db:delete" "Delete all DB tables (requires CONFIRM_WIPE=yes)"
 	@printf "$(CYAN)│$(RESET)  $(ICON_KEY)  $(CYAN)%-18s$(RESET) %s\n" "make apikey" "Generate new API key"
 	@printf "$(CYAN)│$(RESET)  $(ICON_LOCK)  $(CYAN)%-18s$(RESET) %s\n" "make admin" "Create admin user"
 	@printf "$(CYAN)│$(RESET)\n"
@@ -173,7 +181,8 @@ test: check-docker
 	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
 	@echo ""
 	@printf "$(BLUE)➜ Backend tests (PHPUnit)...$(RESET)\n"
-	@$(EXEC_BACKEND) php artisan test
+	@$(EXEC_BACKEND) php artisan config:clear >/dev/null
+	@$(EXEC_BACKEND) env APP_ENV=testing DB_CONNECTION=sqlite DB_DATABASE=:memory: php artisan test --no-coverage
 	@echo ""
 	@printf "$(BLUE)➜ Frontend tests (Vitest)...$(RESET)\n"
 	@$(EXEC_STOREFRONT) npm run test --if-present || true
@@ -262,13 +271,13 @@ build: check-docker
 migrate: check-docker
 	@$(EXEC_BACKEND) php artisan migrate
 
-migrate-fresh: check-docker
+migrate-fresh: check-docker guard-wipe
 	@$(EXEC_BACKEND) php artisan migrate:fresh --seed
 
 db: check-docker
 	@$(EXEC_MYSQL_IT) mysql -u omersia -psecret omersia
 
-db\:delete: check-docker
+db\:delete: check-docker guard-wipe
 	@echo ""
 	@printf "$(BRIGHT_CYAN)$(ICON_DATABASE) Wiping database tables...$(RESET)\n"
 	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"

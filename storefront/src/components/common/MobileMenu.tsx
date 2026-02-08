@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { X, ChevronRight, ChevronLeft } from "lucide-react";
 import { CategoryNode, MenuItem, MenuResponse, ShopInfo } from "@/lib/types/menu-types";
+import { useHydrated } from "@/hooks/useHydrated";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 function getCategoryHref(node: CategoryNode): string {
   if (node.slug) return `/categories/${node.slug}`;
@@ -37,11 +39,8 @@ export function MobileMenu({
   shopInfo: ShopInfo;
 }) {
   const [activeLevel, setActiveLevel] = useState<ActiveLevel>({ level: 1 });
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  const [level2ParentItem, setLevel2ParentItem] = useState<MenuItem | null>(null);
+  const mounted = useHydrated();
 
   const navItems: MenuItem[] =
     menu?.items?.filter(
@@ -55,6 +54,7 @@ export function MobileMenu({
       item.category.children.length > 0;
 
     if (hasChildren) {
+      setLevel2ParentItem(item);
       setActiveLevel({
         level: 2,
         item,
@@ -81,14 +81,24 @@ export function MobileMenu({
 
   const goBack = () => {
     if (activeLevel.level === 3) {
-      setActiveLevel({ level: 2, item: activeLevel.item });
+      if (level2ParentItem) {
+        setActiveLevel({
+          level: 2,
+          item: level2ParentItem,
+          parentLabel: level2ParentItem.label,
+        });
+      } else {
+        setActiveLevel({ level: 1 });
+      }
     } else if (activeLevel.level === 2) {
       setActiveLevel({ level: 1 });
+      setLevel2ParentItem(null);
     }
   };
 
   const handleClose = () => {
     setActiveLevel({ level: 1 });
+    setLevel2ParentItem(null);
     onClose();
   };
 
@@ -118,10 +128,18 @@ export function MobileMenu({
 
             <Link href="/" className="flex items-center gap-2">
               {shopInfo.logo_url ? (
-                <img
+                <OptimizedImage
                   src={shopInfo.logo_url}
                   alt={shopInfo.display_name}
+                  width={120}
+                  height={32}
+                  sizes="120px"
                   className="h-8 w-auto object-contain"
+                  fallback={
+                    <div className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center font-bold">
+                      {shopInfo.display_name?.[0]?.toUpperCase() || "S"}
+                    </div>
+                  }
                 />
               ) : (
                 <div className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center font-bold">

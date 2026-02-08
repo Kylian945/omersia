@@ -20,7 +20,7 @@ export function CategoryPageRenderer({
   products,
   themePath = "vision"
 }: CategoryPageRendererProps) {
-  const { hasNativeContent, content } = pageData;
+  const { content } = pageData;
 
   const t = category.translations?.[0];
 
@@ -87,4 +87,3 @@ export function CategoryPageRenderer({
     </div>
   );
 }
-

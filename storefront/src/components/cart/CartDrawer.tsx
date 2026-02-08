@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { X } from "lucide-react";
 import { useCart } from "./CartContext";
@@ -18,26 +17,13 @@ export function CartDrawer() {
     cartType
   } = useCart();
 
-  // état interne pour gérer l'animation avant unmount
-  const [visible, setVisible] = useState(isOpen);
-
-  useEffect(() => {
-    if (isOpen) {
-      setVisible(true);
-    } else {
-      // attend la fin de l'animation avant de démonter
-      const timeout = setTimeout(() => setVisible(false), 250);
-      return () => clearTimeout(timeout);
-    }
-  }, [isOpen]);
-
   // Ne pas afficher le drawer en mode "page"
   if (cartType === 'page') return null;
 
-  if (!visible && !isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex justify-end">
+    <div
+      className={`fixed inset-0 z-50 flex justify-end ${isOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+    >
       {/* Overlay */}
       <div
         className={`absolute top-0 left-0 bg-black/40 backdrop-blur-sm transition-opacity duration-500 h-full w-full ${isOpen ? "opacity-100" : "opacity-0"

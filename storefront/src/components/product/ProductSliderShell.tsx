@@ -15,7 +15,7 @@ type ShellProps = {
 
 export function ProductSliderShell({
   children,
-  slidesPerView = { desktop: 4, mobile: 2 },
+  slidesPerView: _slidesPerView = { desktop: 4, mobile: 2 },
   slidesToScroll = { desktop: 1, mobile: 1 },
   showArrows = true,
   showDots = true,

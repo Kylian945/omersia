@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       )
     );
     return NextResponse.redirect(url);
-  } catch (e) {
+  } catch {
     const url = new URL("/password/forgot", FRONTEND_URL);
     url.searchParams.set(
       "error",

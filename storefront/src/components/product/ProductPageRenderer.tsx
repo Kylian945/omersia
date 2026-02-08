@@ -11,43 +11,18 @@ import { ThemedProductCard } from './ThemedProductCard';
 import { buildImageUrl } from '@/lib/image-utils';
 import { ModuleHooks } from '@/components/modules/ModuleHooks';
 import { sanitizeHTML } from '@/lib/html-sanitizer';
-import type { ProductTranslation } from '@/lib/types/product-types';
+import type {
+  ProductImage,
+  ProductTranslation,
+  ProductWithVariants
+} from '@/lib/types/product-types';
+import type { ListingProduct } from './ListingProducts';
 
 interface ProductPageRendererProps {
   pageData: EcommercePage;
-  product: {
-    id: number;
-    slug: string;
-    name: string;
-    description?: string;
-    price?: number;
-    compare_at_price?: number | null;
-    sku?: string | null;
-    has_variants?: boolean;
-    main_image_url?: string | null;
-    images?: unknown[];
-    categories?: unknown[];
-    translations?: unknown[];
-    variants?: unknown[];
-    [key: string]: unknown;
-  };
-  relatedProducts?: Array<{
-    id: number;
-    slug?: string;
-    name?: string;
-    price?: number;
-    images?: unknown[];
-    [key: string]: unknown;
-  }>;
+  product: ProductWithVariants;
+  relatedProducts?: ListingProduct[];
 }
-
-type ApiImage = {
-  id: number;
-  url?: string | null;
-  path?: string | null;
-  is_main?: boolean;
-  position?: number | null;
-};
 
 type NormalizedImage = {
   id: number;
@@ -56,7 +31,7 @@ type NormalizedImage = {
   position?: number | null;
 };
 
-function normalizeImages(apiImages: ApiImage[] | undefined | null): NormalizedImage[] {
+function normalizeImages(apiImages: ProductImage[] | undefined | null): NormalizedImage[] {
   if (!apiImages) return [];
   return apiImages.flatMap((img) => {
     const url = buildImageUrl(img);
@@ -75,13 +50,13 @@ export function ProductPageRenderer({
   product,
   relatedProducts = []
 }: ProductPageRendererProps) {
-  const { hasNativeContent, content } = pageData;
+  const { content } = pageData;
 
   const t = product.translations?.[0] as ProductTranslation | undefined;
-  const categories = (product.categories || []) as Array<{ id: number; slug: string; name: string; translations?: ProductTranslation[] }>;
+  const categories = product.categories || [];
 
   // Normalize images
-  const images = normalizeImages(product.images as ApiImage[] | undefined);
+  const images = normalizeImages(product.images);
   let mainImage: NormalizedImage | null = null;
 
   if (images.length > 0) {
@@ -113,7 +88,7 @@ export function ProductPageRenderer({
   let inStock = false;
 
   if (hasVariants) {
-    const activeVariants = (product.variants as any[]).filter(
+    const activeVariants = (product.variants || []).filter(
       (v) => v && (v.is_active === undefined || v.is_active)
     );
 
@@ -395,7 +370,7 @@ export function ProductPageRenderer({
                     Produits associés
                   </h2>
                   <p className="text-sm text-neutral-500">
-                    Découvrez d'autres articles qui complètent ce produit.
+                    Découvrez d&apos;autres articles qui complètent ce produit.
                   </p>
                 </div>
               </div>
@@ -403,7 +378,7 @@ export function ProductPageRenderer({
               <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 md:grid md:grid-cols-4 md:gap-4 md:overflow-visible">
                 {relatedProducts.map((rp) => {
                   return (
-                    <ThemedProductCard key={rp.id} product={rp as any} />
+                    <ThemedProductCard key={rp.id} product={rp} />
                   );
                 })}
               </div>
@@ -412,7 +387,7 @@ export function ProductPageRenderer({
         )}
 
         <StickyAddToCartBar
-          product={product as any}
+          product={product}
           inStock={inStock}
         />
       </div>

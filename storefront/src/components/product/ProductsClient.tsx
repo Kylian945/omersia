@@ -1,16 +1,29 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { FilterPanel } from "@/components/category/FilterPanel";
 import { ListingProductsClient } from "@/components/product/ListingProductsClient";
 import { ThemedProductCardClient } from "@/components/product/ThemedProductCardClient";
 import type { ListingProduct } from "@/components/product/ListingProducts";
 import { Button } from "@/components/common/Button";
 
+type SortOption = "featured" | "price-asc" | "price-desc" | "name-asc";
+
 type Props = {
   products: ListingProduct[];
   themePath?: string;
 };
+
+const sortOptions: SortOption[] = [
+  "featured",
+  "price-asc",
+  "price-desc",
+  "name-asc",
+];
+
+function isSortOption(value: string): value is SortOption {
+  return sortOptions.includes(value as SortOption);
+}
 
 export function ProductsClient({ products, themePath = "vision" }: Props) {
   // Bornes prix globales
@@ -33,18 +46,30 @@ export function ProductsClient({ products, themePath = "vision" }: Props) {
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [priceMin, setPriceMin] = useState<number>(priceBounds.min);
-  const [priceMax, setPriceMax] = useState<number>(priceBounds.max);
+  const [selectedPriceMin, setSelectedPriceMin] = useState<number | null>(null);
+  const [selectedPriceMax, setSelectedPriceMax] = useState<number | null>(null);
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [sort, setSort] = useState<"featured" | "price-asc" | "price-desc" | "name-asc">(
-    "featured"
-  );
+  const [sort, setSort] = useState<SortOption>("featured");
+  const setPriceMin = (value: number) => setSelectedPriceMin(value);
+  const setPriceMax = (value: number) => setSelectedPriceMax(value);
 
-  // Réinitialiser les bornes de prix quand les produits changent (pagination)
-  useEffect(() => {
-    setPriceMin(priceBounds.min);
-    setPriceMax(priceBounds.max);
-  }, [priceBounds.min, priceBounds.max]);
+  const { priceMin, priceMax } = useMemo(() => {
+    const nextMin = selectedPriceMin ?? priceBounds.min;
+    const nextMax = selectedPriceMax ?? priceBounds.max;
+
+    let clampedMin = Math.min(Math.max(nextMin, priceBounds.min), priceBounds.max);
+    let clampedMax = Math.min(Math.max(nextMax, priceBounds.min), priceBounds.max);
+
+    if (clampedMin > clampedMax) {
+      clampedMin = priceBounds.min;
+      clampedMax = priceBounds.max;
+    }
+
+    return {
+      priceMin: clampedMin,
+      priceMax: clampedMax,
+    };
+  }, [selectedPriceMin, selectedPriceMax, priceBounds.min, priceBounds.max]);
 
   const filtered = useMemo(() => {
     const base = products.filter((p) => {
@@ -112,7 +137,12 @@ export function ProductsClient({ products, themePath = "vision" }: Props) {
             <span className="text-neutral-500">Trier par</span>
             <select
               value={sort}
-              onChange={(e) => setSort(e.target.value as any)}
+              onChange={(e) => {
+                const nextSort = e.target.value;
+                if (isSortOption(nextSort)) {
+                  setSort(nextSort);
+                }
+              }}
               className="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
             >
               <option value="featured">Pertinence</option>

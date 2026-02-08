@@ -22,24 +22,28 @@ export function CookieConsentBanner() {
   });
 
   useEffect(() => {
-    checkExistingConsent();
-  }, []);
+    let cancelled = false;
 
-  const checkExistingConsent = async () => {
-    try {
-      const res = await fetch("/api/gdpr/cookie-consent", {
-        credentials: "include",
+    fetch("/api/gdpr/cookie-consent", {
+      credentials: "include",
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled && !data.has_consent) {
+          setShowBanner(true);
+        }
+      })
+      .catch((error) => {
+        logger.error("Error checking cookie consent:", error);
+        if (!cancelled) {
+          setShowBanner(true);
+        }
       });
-      const data = await res.json();
 
-      if (!data.has_consent) {
-        setShowBanner(true);
-      }
-    } catch (error) {
-      logger.error("Error checking cookie consent:", error);
-      setShowBanner(true);
-    }
-  };
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const saveConsent = async (customConsent?: CookieConsent) => {
     const consentToSave = customConsent || consent;

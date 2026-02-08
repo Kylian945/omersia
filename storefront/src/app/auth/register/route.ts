@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const BACKEND_URL = process.env.API_INTERNAL_URL;
 const FRONTEND_URL = process.env.NEXT_PUBLIC_FRONTEND_URL || "http://localhost:8000";
-const API_KEY = process.env.FRONT_API_KEY
+const API_KEY = process.env.FRONT_API_KEY;
 
 
 export async function POST(req: NextRequest) {
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
     }
 
     return response;
-  } catch (e) {
+  } catch {
     const errorMessage = "Service indisponible, réessayez plus tard.";
 
     if (isAjax) {

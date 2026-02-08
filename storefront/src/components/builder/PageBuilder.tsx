@@ -2,7 +2,6 @@ import React from "react";
 import { Container } from "@/components/common/Container";
 import { WidgetBase, Column, Layout } from "./types";
 import { ContainerProvider } from "./ContainerContext";
-import { validateCSSPercentage } from "@/lib/css-sanitizer";
 import { getGapClass, getAlignmentClass, getPaddingClasses, getMarginClasses } from "@/lib/widget-helpers";
 import { validateGap, validateAlignment, validateSpacingConfig } from "@/lib/css-variable-sanitizer";
 import { logger } from "@/lib/logger";

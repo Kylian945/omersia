@@ -16,7 +16,7 @@ export function Pagination({
   currentPage,
   lastPage,
   total,
-  perPage,
+  perPage: _perPage,
   from,
   to,
   onPageChange,

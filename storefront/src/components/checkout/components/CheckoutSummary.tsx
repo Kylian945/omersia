@@ -2,6 +2,7 @@ import type { CartItem } from "@/components/cart/CartContext";
 import { XIcon } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { ModuleHooks } from "@/components/modules/ModuleHooks";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 type LineAdjustment = {
   id: number;
@@ -91,13 +92,15 @@ export function CheckoutSummary({
               key={idx}
               className="flex items-center gap-2 text-xs border-b border-gray-100 pb-2"
             >
-              <div className="w-10 h-10 bg-neutral-50 rounded-lg overflow-hidden flex items-center justify-center">
+              <div className="relative w-10 h-10 bg-neutral-50 rounded-lg overflow-hidden flex items-center justify-center">
                 {item.imageUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <OptimizedImage
                     src={item.imageUrl}
                     alt={item.name}
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="40px"
+                    className="object-cover"
+                    fallback={<span className="text-xxxs text-neutral-400">Image</span>}
                   />
                 ) : (
                   <span className="text-xxxs text-neutral-400">Image</span>

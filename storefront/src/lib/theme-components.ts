@@ -13,9 +13,9 @@ import { logger } from "./logger";
  * ```
  */
 
-type ComponentModule = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [key: string]: ComponentType<any>;
+type ComponentModule<TProps extends object> = {
+  default?: ComponentType<TProps>;
+  [key: string]: ComponentType<TProps> | undefined;
 };
 
 /**
@@ -28,19 +28,25 @@ type ComponentModule = {
 export async function getThemeComponent(
   componentPath: string,
   themePath: string | null | undefined
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<ComponentType<any>> {
+): Promise<ComponentType<Record<string, unknown>>> {
   const theme = themePath || "vision";
 
   try {
     // Try to load from the specified theme
-    const themeModule: ComponentModule = await import(
+    const themeModule = await import(
       `@/components/themes/${theme}/${componentPath}`
-    );
+    ) as ComponentModule<Record<string, unknown>>;
 
     // Get the named export or default export
     const componentName = componentPath.split("/").pop() || "Component";
-    return themeModule[componentName] || themeModule.default;
+    const component =
+      themeModule[componentName] || themeModule.default;
+
+    if (!component) {
+      throw new Error(`Component ${componentName} not found in theme ${theme}`);
+    }
+
+    return component;
   } catch (error) {
     // If theme component doesn't exist, fallback to vision theme
     if (theme !== "vision") {
@@ -48,11 +54,20 @@ export async function getThemeComponent(
         `Component ${componentPath} not found in theme '${theme}', falling back to vision theme`
       );
 
-      const visionModule: ComponentModule = await import(
+      const visionModule = await import(
         `@/components/themes/vision/${componentPath}`
-      );
+      ) as ComponentModule<Record<string, unknown>>;
       const componentName = componentPath.split("/").pop() || "Component";
-      return visionModule[componentName] || visionModule.default;
+      const component =
+        visionModule[componentName] || visionModule.default;
+
+      if (!component) {
+        throw new Error(
+          `Component ${componentName} not found in fallback vision theme`
+        );
+      }
+
+      return component;
     }
 
     // If vision itself doesn't have it, throw the error

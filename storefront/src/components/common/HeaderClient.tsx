@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Container } from "./Container";
 import { ShoppingBag, User, ChevronDown, Search, X, Menu } from "lucide-react";
 import { useCart } from "@/components/cart/CartContext";
@@ -12,6 +12,7 @@ import { SearchDropdown } from "@/components/search/SearchDropdown";
 import { CategoryNode, MenuItem, MenuResponse, ShopInfo } from "@/lib/types/menu-types";
 import { ModuleHooks } from "@/components/modules/ModuleHooks";
 import { useAuth } from "@/contexts/AuthContext";
+import { useHydrated } from "@/hooks/useHydrated";
 
 
 function getCategoryHref(node: CategoryNode): string {
@@ -37,17 +38,17 @@ export function HeaderClient({
   cartType?: string;
 }) {
   const pathname = usePathname();
-  const [activeMegaId, setActiveMegaId] = useState<number | null>(null);
+  const pathKey = pathname ?? "/";
+  const [activeMegaByPath, setActiveMegaByPath] = useState<Record<string, number | null>>({});
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const isHydrated = useHydrated();
 
   const { items, openCart } = useCart();
   const { user, isAuthenticated } = useAuth();
-  const cartCount = mounted ? items.reduce((sum, item) => sum + item.qty, 0) : 0;
-
-  useEffect(() => { setMounted(true); }, []);
+  const activeMegaId = activeMegaByPath[pathKey] ?? null;
+  const cartCount = isHydrated ? items.reduce((sum, item) => sum + item.qty, 0) : 0;
 
   const navItems: MenuItem[] =
     menu?.items?.filter(
@@ -56,18 +57,24 @@ export function HeaderClient({
 
   const simpleFallback = !menu || !navItems.length;
 
-  useEffect(() => {
-    setActiveMegaId(null);
-  }, [pathname]);
-
-  useEffect(() => {
-    if (searchOpen) {
-      setActiveMegaId(null);
-    }
-  }, [searchOpen]);
-
   const toggleMegaMenu = (itemId: number) => {
-    setActiveMegaId((prev) => (prev === itemId ? null : itemId));
+    setActiveMegaByPath((prev) => ({
+      ...prev,
+      [pathKey]: prev[pathKey] === itemId ? null : itemId,
+    }));
+  };
+
+  const closeMegaMenu = () => {
+    setActiveMegaByPath((prev) => {
+      if (prev[pathKey] === null || prev[pathKey] === undefined) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [pathKey]: null,
+      };
+    });
   };
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -167,7 +174,7 @@ export function HeaderClient({
               <nav className="hidden items-center gap-6 text-sm text-neutral-700 md:flex">
                 {simpleFallback
                   ? (
-                    <p className="text-xs text-gray-400 px-6 py-2 border border-dashed rounded-md border-gray-300">Menu principal (Ajouter des éléments dans l'administration)
+                    <p className="text-xs text-gray-400 px-6 py-2 border border-dashed rounded-md border-gray-300">Menu principal (Ajouter des éléments dans l&apos;administration)
                     </p>
                   )
                   : navItems.map((item) => {
@@ -203,7 +210,7 @@ export function HeaderClient({
                             onClick={() =>
                               hasChildren
                                 ? toggleMegaMenu(item.id)
-                                : setActiveMegaId(null)
+                                : closeMegaMenu()
                             }
                             className={
                               "flex items-center gap-1 transition-colors hover:text-black " +
@@ -234,7 +241,10 @@ export function HeaderClient({
                 />
 
                 <button
-                  onClick={() => setSearchOpen(true)}
+                  onClick={() => {
+                    closeMegaMenu();
+                    setSearchOpen(true);
+                  }}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 hover:border-black/40 transition"
                   aria-label="Rechercher"
                 >

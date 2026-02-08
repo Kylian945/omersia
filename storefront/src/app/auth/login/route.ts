@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
     }
 
     return response;
-  } catch (e) {
+  } catch {
     const errorMessage = "Service indisponible, réessayez plus tard.";
 
     if (isAjax) {

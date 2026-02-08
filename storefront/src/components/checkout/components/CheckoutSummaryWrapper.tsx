@@ -41,7 +41,7 @@ export function CheckoutSummaryWrapper() {
 
   // Convertir lineAdjustmentsByCode en format attendu
   const flatLineAdjustments: Record<string, CheckoutLineAdjustment> = {};
-  Object.entries(lineAdjustmentsByCode).forEach(([code, adjustments]) => {
+  Object.values(lineAdjustmentsByCode).forEach((adjustments) => {
     Object.assign(flatLineAdjustments, adjustments);
   });
 

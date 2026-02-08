@@ -2,7 +2,6 @@
 
 import { X, Check, ShoppingBag } from "lucide-react";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
-import Link from "next/link";
 import { useEffect } from "react";
 import { CartItem } from "@/lib/types/product-types";
 import { ModuleHooks } from "../modules/ModuleHooks";

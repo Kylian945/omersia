@@ -1,11 +1,10 @@
 "use client";
 
-import { ReactNode, useMemo, useEffect } from "react";
+import { ReactNode, useCallback, useEffect } from "react";
 import type { Address } from "@/lib/api";
 import { AuthUser } from "@/lib/types/user-types";
 import { CheckoutContext } from "./CheckoutContext";
 import { useCheckoutState } from "./hooks/useCheckoutState";
-import { useCheckoutAddresses } from "./hooks/useCheckoutAddresses";
 import { useCart } from "@/components/cart/CartContext";
 import { getErrorMessage } from "@/lib/utils/error-utils";
 import { logger } from "@/lib/logger";
@@ -285,7 +284,7 @@ export function CheckoutProvider({
 
       // Clear le champ
       state.setPromoCode("");
-    } catch (err: unknown) {
+    } catch {
       state.setPromoError("Erreur lors de l'application du code promo");
     }
   };
@@ -302,13 +301,19 @@ export function CheckoutProvider({
         delete next[code];
         return next;
       });
-    } catch (err: unknown) {
+    } catch {
       state.showErrorModal("Erreur lors de la suppression du code promo");
     }
   };
 
+  const {
+    setAppliedPromos,
+    setLineAdjustmentsByCode,
+    setAutomaticDiscountTotal,
+  } = state;
+
   // Créer la fonction loadAutomaticDiscounts
-  const loadAutomaticDiscounts = async () => {
+  const loadAutomaticDiscounts = useCallback(async () => {
     // Ne charger que si le panier contient des articles
     if (items.length === 0) {
       return;
@@ -341,7 +346,7 @@ export function CheckoutProvider({
       const data = await res.json();
 
       // Retirer les réductions automatiques existantes
-      state.setAppliedPromos((prev) =>
+      setAppliedPromos((prev) =>
         prev.filter((p) => p.origin !== "automatic")
       );
 
@@ -362,12 +367,12 @@ export function CheckoutProvider({
           shippingDiscountAmount: 0,
         }));
 
-        state.setAppliedPromos((prev) => [...prev, ...automaticPromos]);
+        setAppliedPromos((prev) => [...prev, ...automaticPromos]);
       }
 
       // Mettre à jour les ajustements de ligne pour les réductions automatiques
       if (data.line_adjustments_by_code) {
-        state.setLineAdjustmentsByCode((prev) => ({
+        setLineAdjustmentsByCode((prev) => ({
           ...prev,
           ...data.line_adjustments_by_code,
         }));
@@ -379,29 +384,31 @@ export function CheckoutProvider({
         (data.product_discount_total || 0) +
         (data.shipping_discount_total || 0);
 
-      state.setAutomaticDiscountTotal(totalAutoDiscount);
+      setAutomaticDiscountTotal(totalAutoDiscount);
     } catch (err: unknown) {
       // Erreur silencieuse - les réductions automatiques ne doivent pas bloquer le checkout
       logger.error("Erreur lors du chargement des réductions automatiques:", err);
     }
-  };
+  }, [
+    items,
+    setAppliedPromos,
+    setLineAdjustmentsByCode,
+    setAutomaticDiscountTotal,
+  ]);
 
   // Charger les réductions automatiques au montage et quand le panier change
   useEffect(() => {
-    loadAutomaticDiscounts();
-  }, [items]);
+    void loadAutomaticDiscounts();
+  }, [loadAutomaticDiscounts]);
 
-  const contextValue = useMemo(
-    () => ({
-      ...state,
-      handleSaveAddress,
-      handleSaveFirstAddress,
-      handleAddNewAddress,
-      handleApplyPromo,
-      handleRemovePromo,
-    }),
-    [state]
-  );
+  const contextValue = {
+    ...state,
+    handleSaveAddress,
+    handleSaveFirstAddress,
+    handleAddNewAddress,
+    handleApplyPromo,
+    handleRemovePromo,
+  };
 
   return (
     <CheckoutContext.Provider value={contextValue}>

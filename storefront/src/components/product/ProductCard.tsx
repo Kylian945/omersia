@@ -5,6 +5,7 @@ import Link from "next/link";
 import type { ListingProduct } from "./ListingProducts";
 import { getMainImage } from "@/lib/image-utils";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 // On décrit ce que renvoie ton backend pour une variante
 type Variant = {
@@ -167,10 +168,17 @@ export const ProductCard = memo(function ProductCard({ product, hrefBase = "/pro
         }}
       >
         {image ? (
-          <img
+          <OptimizedImage
             src={image}
             alt={t?.name || ""}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+            fill
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            fallback={
+              <div className="absolute inset-0 flex h-full w-full items-center justify-center text-xxxs text-neutral-400">
+                Aucune image
+              </div>
+            }
           />
         ) : (
           <div className="absolute inset-0 flex h-full w-full items-center justify-center text-xxxs text-neutral-400">

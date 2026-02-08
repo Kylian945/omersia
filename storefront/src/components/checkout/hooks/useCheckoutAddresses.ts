@@ -18,7 +18,6 @@ export function useCheckoutAddresses() {
     newAddressForm,
     setNewAddressForm,
     updateNewAddressForm,
-    selectedAddressId,
     setSelectedAddressId,
     effectiveUser,
   } = useCheckoutContext();

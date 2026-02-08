@@ -3,13 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Search, Loader2 } from "lucide-react";
-import { ListingProduct } from "../product/ListingProducts";
-import { getMainImage } from "@/lib/image-utils";
-import { SearchProduct, SearchResponse } from "@/lib/types/search-types";
+import { SearchResponse } from "@/lib/types/search-types";
 import { logger } from "@/lib/logger";
-
-// Alias local pour compatibilité
-type Product = SearchProduct;
+import { OptimizedImage } from "@/components/common/OptimizedImage";
 
 export function SearchDropdown({
   query,
@@ -230,10 +226,18 @@ export function SearchDropdown({
                           className="flex items-center gap-4 p-3 rounded-lg hover:bg-neutral-50 transition"
                         >
                           {image ? (
-                            <img
+                            <OptimizedImage
                               src={image}
                               alt={productName}
+                              width={64}
+                              height={64}
+                              sizes="64px"
                               className="w-16 h-16 object-cover rounded-md shrink-0"
+                              fallback={
+                                <div className="w-16 h-16 bg-neutral-100 rounded-md flex items-center justify-center shrink-0">
+                                  <Search className="w-6 h-6 text-neutral-300" />
+                                </div>
+                              }
                             />
                           ) : (
                             <div className="w-16 h-16 bg-neutral-100 rounded-md flex items-center justify-center shrink-0">

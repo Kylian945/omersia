@@ -99,7 +99,7 @@ export function useCheckoutOrder() {
 
       // Sinon, on reste sur l'étape 4 pour le paiement Stripe
       setSubmitting(false);
-    } catch (err: unknown) {
+    } catch {
       showErrorModal("Erreur réseau lors de la commande");
       setSubmitting(false);
     }

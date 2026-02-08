@@ -26,18 +26,6 @@ const isDevelopment = process.env.NODE_ENV === 'development';
 const isTest = process.env.NODE_ENV === 'test';
 
 /**
- * Format log message with timestamp
- */
-function formatLogMessage(level: LogLevel, message: string, data?: unknown): LogMessage {
-  return {
-    level,
-    message,
-    data,
-    timestamp: new Date().toISOString(),
-  };
-}
-
-/**
  * Log error messages
  * En production : silencieux (peut être étendu pour envoyer à un service externe)
  */
