@@ -1,14 +1,10 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import {
-  createOrder,
-  type CheckoutOrderPayload,
-  type OrderItemInput,
-  getAddressById,
-  OrderApi,
-  updateOrder,
-  apiJson,
-} from "@/lib/api";
+import { createOrder, updateOrder } from "@/lib/api-orders";
+import { getAddressById } from "@/lib/api-addresses";
+import { apiJson } from "@/lib/api-http";
+import type { CheckoutOrderPayload } from "@/lib/types/checkout-types";
+import type { OrderItemInput, OrderApi } from "@/lib/types/order-types";
 import type { CartItem } from "@/components/cart/CartContext";
 import type { AuthUser } from "@/lib/types/user-types";
 import { logger } from "@/lib/logger";

@@ -3,6 +3,9 @@ import { apiJson } from "./api-http";
 import type { Address, AddressInput } from "./types/api-types";
 import { logger } from "./logger";
 
+// Re-export types for consumers
+export type { Address, AddressInput };
+
 export async function getAddresses(
   authToken?: string
 ): Promise<Address[] | null> {
@@ -53,7 +56,7 @@ export async function createAddress(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    logger.warn("createAddress failed:", res.status, text);
+    logger.warn("createAddress failed:", { status: res.status, text });
     return null;
   }
 
@@ -92,7 +95,7 @@ export async function deleteAddress(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    logger.warn("deleteAddress failed:", res.status, text);
+    logger.warn("deleteAddress failed:", { status: res.status, text });
     return false;
   }
 

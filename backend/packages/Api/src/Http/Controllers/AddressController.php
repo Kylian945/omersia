@@ -144,11 +144,9 @@ class AddressController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        $address = Address::where('customer_id', $user->id)->find($id);
+        $address = Address::findOrFail($id);
 
-        if (! $address) {
-            return response()->json(['message' => 'Not found'], 404);
-        }
+        $this->authorize('view', $address);
 
         return response()->json($address);
     }
@@ -200,11 +198,9 @@ class AddressController extends Controller
     {
         $user = $request->user();
 
-        $address = Address::where('customer_id', $user->id)->find($id);
+        $address = Address::findOrFail($id);
 
-        if (! $address) {
-            return response()->json(['message' => 'Not found'], 404);
-        }
+        $this->authorize('update', $address);
 
         $data = $request->validated();
 
@@ -259,11 +255,9 @@ class AddressController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        $address = Address::where('customer_id', $user->id)->find($id);
+        $address = Address::findOrFail($id);
 
-        if (! $address) {
-            return response()->json(['message' => 'Not found'], 404);
-        }
+        $this->authorize('delete', $address);
 
         $address->delete();
 
@@ -311,11 +305,9 @@ class AddressController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        $address = Address::where('customer_id', $user->id)->find($id);
+        $address = Address::findOrFail($id);
 
-        if (! $address) {
-            return response()->json(['message' => 'Not found'], 404);
-        }
+        $this->authorize('setDefault', $address);
 
         Address::where('customer_id', $user->id)->update(['is_default_shipping' => false]);
         $address->update(['is_default_shipping' => true]);
@@ -364,11 +356,9 @@ class AddressController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        $address = Address::where('customer_id', $user->id)->find($id);
+        $address = Address::findOrFail($id);
 
-        if (! $address) {
-            return response()->json(['message' => 'Not found'], 404);
-        }
+        $this->authorize('setDefault', $address);
 
         Address::where('customer_id', $user->id)->update(['is_default_billing' => false]);
         $address->update(['is_default_billing' => true]);

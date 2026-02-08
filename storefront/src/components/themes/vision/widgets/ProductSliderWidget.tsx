@@ -1,4 +1,4 @@
-import { getProducts } from "@/lib/api";
+import { getProducts } from "@/lib/api-products";
 import { ProductSlider } from "@/components/product/ProductSlider";
 import { ListingProduct } from "@/components/product/ListingProducts";
 import { SmartContainer } from "@/components/common/SmartContainer";

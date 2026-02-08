@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { fetchUserSSR } from "@/lib/auth/fetchUserSSR";
-import { setDefaultBillingAddress } from "@/lib/api";
+import { setDefaultBillingAddress } from "@/lib/api-addresses";
 import { cookies } from "next/headers";
 
 type Params = {

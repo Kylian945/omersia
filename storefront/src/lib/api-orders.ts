@@ -38,7 +38,7 @@ export async function createOrder(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    logger.warn("createOrder failed:", res.status, text);
+    logger.warn("createOrder failed:", { status: res.status, text });
     return null;
   }
 
@@ -59,7 +59,7 @@ export async function updateOrder(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    logger.warn("updateOrder failed:", res.status, text);
+    logger.warn("updateOrder failed:", { status: res.status, text });
     return null;
   }
 
@@ -120,7 +120,7 @@ export async function confirmDraftOrderByNumber(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    logger.warn("confirmDraftOrderByNumber failed:", res.status, text);
+    logger.warn("confirmDraftOrderByNumber failed:", { status: res.status, text });
     return current;
   }
 

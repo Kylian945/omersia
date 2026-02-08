@@ -4,7 +4,7 @@ import {
   getAddresses,
   createAddress,
   type AddressInput,
-} from "@/lib/api";
+} from "@/lib/api-addresses";
 import { cookies } from "next/headers";
 import { logger } from "@/lib/logger";
 

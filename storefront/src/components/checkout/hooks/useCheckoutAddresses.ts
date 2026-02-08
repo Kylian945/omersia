@@ -2,7 +2,7 @@
 
 import { useCallback } from "react";
 import { useCheckoutContext } from "../CheckoutContext";
-import type { Address } from "@/lib/api";
+import type { Address } from "@/lib/types/addresses-types";
 import { getErrorMessage } from "@/lib/utils/error-utils";
 
 export function useCheckoutAddresses() {

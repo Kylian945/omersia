@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
-import type { Address } from "@/lib/api";
+import type { Address } from "@/lib/types/addresses-types";
 import {
   CheckoutIdentityState,
   CheckoutAddressFormState,
@@ -252,7 +252,7 @@ export function useCheckoutState(
           }
         }
       } catch (err: unknown) {
-        logger.error(err);
+        logger.error(err instanceof Error ? err.message : String(err));
         if (!cancelled) {
           setShippingError(
             (err instanceof Error ? err.message : String(err)) || "Erreur lors du chargement des livraisons."

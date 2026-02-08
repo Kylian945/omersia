@@ -1,6 +1,6 @@
 "use client";
 
-import { StripePaymentForm } from "../components/StripePaymentForm";
+import dynamic from "next/dynamic";
 import { useEffect, useState } from "react";
 import { useCheckoutContext } from "../CheckoutContext";
 import { useCart } from "@/components/cart/CartContext";
@@ -9,6 +9,20 @@ import { Loader2 } from "lucide-react";
 import type { PaymentMethod } from "@/lib/types/checkout-types";
 import { ModuleHooks } from "@/components/modules/ModuleHooks";
 import { logger } from "@/lib/logger";
+
+// Lazy load Stripe Elements (heavy bundle ~100KB)
+const StripePaymentForm = dynamic(
+  () => import("../components/StripePaymentForm").then((mod) => ({ default: mod.StripePaymentForm })),
+  {
+    loading: () => (
+      <div className="flex items-center gap-2 text-xs text-neutral-500">
+        <Loader2 className="w-3 h-3 animate-spin" />
+        Chargement du formulaire de paiement sécurisé…
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 type PaymentMethodCode = "card" | "paypal" | "applepay" | "test" | null;
 
@@ -94,7 +108,7 @@ export function PaymentStep() {
           }
         }
       } catch (err: unknown) {
-        logger.error(err);
+        logger.error(err instanceof Error ? err.message : String(err));
         if (!cancelled) {
           const errorMessage = err instanceof Error ? err.message : "Erreur lors du chargement des moyens de paiement.";
           setError(errorMessage);

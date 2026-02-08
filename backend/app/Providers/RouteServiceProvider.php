@@ -51,9 +51,12 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by($request->ip());
         });
 
-        // Rate limit strict pour checkout/payment (DCA-003)
+        // Rate limit strict pour checkout/payment (SEC-004)
         RateLimiter::for('checkout', function (Request $request) {
-            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
+            return [
+                Limit::perMinute(3)->by($request->user()?->id ?: $request->ip()),
+                Limit::perHour(20)->by($request->user()?->id ?: $request->ip()),
+            ];
         });
 
         // Rate limit pour l'upload

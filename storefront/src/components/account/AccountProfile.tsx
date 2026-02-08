@@ -93,7 +93,7 @@ export function AccountProfile({ initialUser }: Props) {
       setUser(updated);
       setIsModalOpen(false);
     } catch (e) {
-      logger.error(e);
+      logger.error(e instanceof Error ? e.message : String(e));
       setErrorMsg("Erreur réseau lors de la mise à jour du profil.");
     } finally {
       setLoading(false);

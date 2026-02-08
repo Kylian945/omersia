@@ -1,6 +1,6 @@
 import { CategoriesGrid } from "@/components/common/CategoriesGrid";
 import { CategoriesSlider } from "@/components/common/CategoriesSlider";
-import { getCategories } from "@/lib/api";
+import { getCategories } from "@/lib/api-categories";
 import { getPaddingClasses, getMarginClasses } from "@/lib/widget-helpers";
 import { validateSpacingConfig } from "@/lib/css-variable-sanitizer";
 

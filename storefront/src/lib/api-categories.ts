@@ -26,7 +26,7 @@ export async function getCategories(
   );
 
   if (!res.ok) {
-    logger.warn("Categories fetch failed:", res.status, res.url);
+    logger.warn("Categories fetch failed:", { status: res.status, url: res.url });
     return [];
   }
 
@@ -47,7 +47,7 @@ export const getCategoryBySlug = cache(async (slug: string, locale = "fr"): Prom
   );
 
   if (!res.ok) {
-    logger.warn("Category fetch failed:", res.status, res.url);
+    logger.warn("Category fetch failed:", { status: res.status, url: res.url });
     return null;
   }
 

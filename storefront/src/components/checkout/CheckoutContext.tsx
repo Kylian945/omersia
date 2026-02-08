@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import type { Address } from "@/lib/api";
+import type { Address } from "@/lib/types/addresses-types";
 import {
   CheckoutIdentityState,
   CheckoutAddressFormState,

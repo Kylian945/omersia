@@ -1,7 +1,7 @@
 import { Container } from "./Container";
 import Link from "next/link";
 import { ModuleHooks } from "@/components/modules/ModuleHooks";
-import { getMenu } from "@/lib/api";
+import { getMenu } from "@/lib/api-menu";
 import { MenuItem } from "@/lib/types/menu-types";
 
 function getItemHref(item: MenuItem): string {

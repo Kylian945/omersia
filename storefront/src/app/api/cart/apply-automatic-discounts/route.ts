@@ -1,6 +1,6 @@
 // app/api/cart/apply-automatic-discounts/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { apiJson } from "@/lib/api";
+import { apiJson } from "@/lib/api-http";
 import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {

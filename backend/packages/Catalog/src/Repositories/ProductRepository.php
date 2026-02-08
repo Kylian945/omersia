@@ -20,7 +20,9 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
 
     public function findBySku(string $sku, ?int $shopId = null): ?Product
     {
-        $query = $this->model->where('sku', $sku);
+        $query = $this->model
+            ->where('sku', $sku)
+            ->with(['translations', 'images', 'categories', 'mainImage']);
 
         if ($shopId) {
             $query->where('shop_id', $shopId);
@@ -31,12 +33,17 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
 
     public function getByShopId(int $shopId): Collection
     {
-        return $this->model->where('shop_id', $shopId)->get();
+        return $this->model
+            ->where('shop_id', $shopId)
+            ->with(['translations', 'images', 'categories', 'mainImage'])
+            ->get();
     }
 
     public function getActiveProducts(?int $shopId = null): Collection
     {
-        $query = $this->model->where('is_active', true);
+        $query = $this->model
+            ->where('is_active', true)
+            ->with(['translations', 'images', 'categories', 'mainImage']);
 
         if ($shopId) {
             $query->where('shop_id', $shopId);
@@ -47,9 +54,11 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
 
     public function getByCategory(int $categoryId, ?int $shopId = null): Collection
     {
-        $query = $this->model->whereHas('categories', function ($q) use ($categoryId) {
-            $q->where('categories.id', $categoryId);
-        });
+        $query = $this->model
+            ->whereHas('categories', function ($q) use ($categoryId) {
+                $q->where('categories.id', $categoryId);
+            })
+            ->with(['translations', 'images', 'categories', 'mainImage']);
 
         if ($shopId) {
             $query->where('shop_id', $shopId);
@@ -60,13 +69,15 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
 
     public function searchProducts(string $query, ?int $shopId = null, int $perPage = 15): LengthAwarePaginator
     {
-        $queryBuilder = $this->model->where(function ($q) use ($query) {
-            $q->where('sku', 'LIKE', "%{$query}%")
-                ->orWhereHas('translations', function ($q) use ($query) {
-                    $q->where('name', 'LIKE', "%{$query}%")
-                        ->orWhere('description', 'LIKE', "%{$query}%");
-                });
-        });
+        $queryBuilder = $this->model
+            ->where(function ($q) use ($query) {
+                $q->where('sku', 'LIKE', "%{$query}%")
+                    ->orWhereHas('translations', function ($q) use ($query) {
+                        $q->where('name', 'LIKE', "%{$query}%")
+                            ->orWhere('description', 'LIKE', "%{$query}%");
+                    });
+            })
+            ->with(['translations', 'images', 'categories', 'mainImage']);
 
         if ($shopId) {
             $queryBuilder->where('shop_id', $shopId);
@@ -79,7 +90,8 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
     {
         $query = $this->model
             ->where('is_active', true)
-            ->where('is_featured', true);
+            ->where('is_featured', true)
+            ->with(['translations', 'images', 'categories', 'mainImage']);
 
         if ($shopId) {
             $query->where('shop_id', $shopId);
@@ -92,7 +104,8 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
     {
         $query = $this->model
             ->where('is_active', true)
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->with(['translations', 'images', 'categories', 'mainImage']);
 
         if ($shopId) {
             $query->where('shop_id', $shopId);
@@ -154,6 +167,9 @@ class ProductRepository extends BaseRepository implements ProductRepositoryInter
     {
         $product = $this->findOrFail($productId);
 
-        return $product->relatedProducts()->limit($limit)->get();
+        return $product->relatedProducts()
+            ->with(['translations', 'images', 'categories', 'mainImage'])
+            ->limit($limit)
+            ->get();
     }
 }

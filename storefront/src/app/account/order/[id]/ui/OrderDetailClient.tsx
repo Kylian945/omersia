@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { BadgeCheck, Truck, MapPin, CheckCircle2 } from "lucide-react";
-import type { OrderApi } from "@/lib/api";
+import type { OrderApi } from "@/lib/types/order-types";
 import { Button } from "@/components/common/Button";
 import { logger } from "@/lib/logger";
 import { subscribeToPrivateRealtimeEvent } from "@/lib/realtime/reverb-client";

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { apiJson } from "@/lib/api";
+import { apiJson } from "@/lib/api-http";
 
 type ProfilePayload = {
   firstname: string;

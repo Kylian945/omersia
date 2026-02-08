@@ -2,16 +2,20 @@
 import { unstable_noStore as noStore } from "next/cache";
 import { HeaderClient } from "./HeaderClient";
 import { HeaderWrapper } from "./HeaderWrapper";
-import { getMenu, getShopInfo } from "@/lib/api";
+import { getMenu } from "@/lib/api-menu";
+import { getShopInfo } from "@/lib/api-shop";
 import { getThemeSettings } from "@/lib/api-theme";
 
 export async function Header() {
   // Désactiver complètement le cache pour ce composant
   noStore();
 
-  const menu = await getMenu("main");
-  const shopInfo = await getShopInfo();
-  const themeSettings = await getThemeSettings();
+  // Paralléliser les fetches pour réduire le temps de chargement
+  const [menu, shopInfo, themeSettings] = await Promise.all([
+    getMenu("main"),
+    getShopInfo(),
+    getThemeSettings(),
+  ]);
 
   return (
     <HeaderWrapper>

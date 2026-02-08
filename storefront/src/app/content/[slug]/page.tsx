@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getPageBySlug } from "@/lib/api";
+import { getPageBySlug } from "@/lib/api-pages";
 import { PageBuilderWithTheme } from "@/components/builder/PageBuilderWithTheme";
 import { Header } from "@/components/common/Header";
 import { Footer } from "@/components/common/Footer";

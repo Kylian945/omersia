@@ -6,6 +6,7 @@ namespace Omersia\Api\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -147,16 +148,63 @@ class AuthController extends Controller
     public function login(CustomerLoginRequest $request)
     {
         $credentials = $request->validated();
+        $email = $credentials['email'];
+
+        // SEC-005: Vérifier si le compte est verrouillé
+        $lockoutKey = "login_lockout:{$email}";
+        $attemptsKey = "login_attempts:{$email}";
+
+        $lockoutUntil = Cache::get($lockoutKey);
+        if ($lockoutUntil && now()->lt($lockoutUntil)) {
+            $remainingMinutes = now()->diffInMinutes($lockoutUntil);
+            Log::channel('security')->warning('Login attempt on locked account', [
+                'email' => $email,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'locked_until' => $lockoutUntil,
+            ]);
+
+            throw ValidationException::withMessages([
+                'email' => ["Trop de tentatives de connexion. Veuillez réessayer dans {$remainingMinutes} minutes."],
+            ]);
+        }
 
         // On cherche dans la table customers
         /** @var \Omersia\Customer\Models\Customer|null $customer */
-        $customer = Customer::where('email', $credentials['email'])->first();
+        $customer = Customer::where('email', $email)->first();
 
         if (! $customer || ! Hash::check($credentials['password'], $customer->password)) {
+            // SEC-005: Incrémenter les tentatives échouées
+            $attempts = (int) Cache::get($attemptsKey, 0);
+            $attempts++;
+            Cache::put($attemptsKey, $attempts, now()->addMinutes(30));
+
+            // SEC-005: Verrouiller après 5 échecs
+            if ($attempts >= 5) {
+                $lockoutUntil = now()->addMinutes(30);
+                Cache::put($lockoutKey, $lockoutUntil, now()->addMinutes(30));
+                Cache::forget($attemptsKey);
+
+                Log::channel('security')->alert('Account locked after 5 failed login attempts', [
+                    'email' => $email,
+                    'ip' => $request->ip(),
+                    'user_agent' => $request->userAgent(),
+                    'locked_until' => $lockoutUntil,
+                ]);
+
+                throw ValidationException::withMessages([
+                    'email' => ['Trop de tentatives de connexion. Votre compte est verrouillé pendant 30 minutes.'],
+                ]);
+            }
+
             throw ValidationException::withMessages([
                 'email' => ['Identifiants incorrects.'],
             ]);
         }
+
+        // SEC-005: Réinitialiser le compteur après connexion réussie
+        Cache::forget($attemptsKey);
+        Cache::forget($lockoutKey);
 
         // Optionnel : tu peux révoquer les anciens tokens si tu veux 1 token unique
         // $customer->tokens()->delete();

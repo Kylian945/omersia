@@ -133,7 +133,15 @@ class DiscountEngine
 
     protected function loadActiveDiscounts(Cart $cart): Collection
     {
-        $query = Discount::forShop($this->shopId)->active();
+        $query = Discount::forShop($this->shopId)
+            ->active()
+            ->with([
+                'usages',
+                'products',
+                'collections',
+                'customers',
+                'customerGroups',
+            ]);
 
         if ($cart->discount_code) {
             $query->where(function ($q) use ($cart) {
@@ -166,14 +174,14 @@ class DiscountEngine
     protected function checkUsageLimits(Discount $discount, ?int $customerId): bool
     {
         if ($discount->usage_limit !== null) {
-            $totalUsage = $discount->usages()->sum('usage_count');
+            $totalUsage = $discount->usages->sum('usage_count');
             if ($totalUsage >= $discount->usage_limit) {
                 return false;
             }
         }
 
         if ($discount->usage_limit_per_customer !== null && $customerId) {
-            $customerUsage = $discount->usages()
+            $customerUsage = $discount->usages
                 ->where('customer_id', $customerId)
                 ->sum('usage_count');
 
@@ -199,7 +207,7 @@ class DiscountEngine
                 return false;
             }
 
-            return $discount->customers()->where('customers.id', $customerId)->exists();
+            return $discount->customers->contains('id', $customerId);
         }
 
         if ($discount->customer_selection === 'groups') {
@@ -207,7 +215,7 @@ class DiscountEngine
                 return false;
             }
 
-            return $discount->customerGroups()->whereIn('customer_groups.id', $customerGroupIds)->exists();
+            return $discount->customerGroups->whereIn('id', $customerGroupIds)->isNotEmpty();
         }
 
         return true;

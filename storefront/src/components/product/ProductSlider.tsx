@@ -1,6 +1,16 @@
+import dynamic from "next/dynamic";
 import { ListingProduct } from "./ListingProducts";
 import { ThemedProductCard } from "./ThemedProductCard";
-import { ProductSliderShell } from "./ProductSliderShell";
+
+// Lazy load carousel shell (Embla Carousel is heavy)
+const ProductSliderShell = dynamic(
+  () => import("./ProductSliderShell").then((mod) => ({ default: mod.ProductSliderShell })),
+  {
+    loading: () => (
+      <div className="w-full h-64 bg-neutral-100 animate-pulse rounded-lg" />
+    ),
+  }
+);
 
 type Props = {
   products: ListingProduct[];

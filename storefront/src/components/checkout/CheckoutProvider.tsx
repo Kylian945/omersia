@@ -1,7 +1,7 @@
 "use client";
 
 import { ReactNode, useCallback, useEffect } from "react";
-import type { Address } from "@/lib/api";
+import type { Address } from "@/lib/types/addresses-types";
 import { AuthUser } from "@/lib/types/user-types";
 import { CheckoutContext } from "./CheckoutContext";
 import { useCheckoutState } from "./hooks/useCheckoutState";

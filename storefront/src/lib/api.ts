@@ -1,19 +1,19 @@
 /**
- * API Barrel Exports
+ * ⚠️ DEPRECATED - This barrel export file has been removed for better tree-shaking.
  *
- * NOTE: For better tree-shaking and bundle optimization, prefer direct imports:
- * - import { getProducts } from "@/lib/api-products"
- * - import { getCategories } from "@/lib/api-categories"
+ * Please use direct imports instead:
+ * - Types: import from "@/lib/types/*"
+ * - HTTP client: import from "@/lib/api-http"
+ * - Products: import from "@/lib/api-products"
+ * - Categories: import from "@/lib/api-categories"
+ * - Orders: import from "@/lib/api-orders"
+ * - Addresses: import from "@/lib/api-addresses"
+ * - Pages: import from "@/lib/api-pages"
+ * - Ecommerce Pages: import from "@/lib/api-ecommerce-pages"
+ * - Menu: import from "@/lib/api-menu"
+ * - Shop: import from "@/lib/api-shop"
  *
- * This barrel file is kept for backward compatibility.
+ * This file will be removed in a future version.
  */
-export * from "./types/api-types";
-export * from "./api-http";
-export * from "./api-pages";
-export * from "./api-products";
-export * from "./api-menu";
-export * from "./api-categories";
-export * from "./api-addresses";
-export * from "./api-orders";
-export * from "./api-shop";
-export * from "./api-ecommerce-pages";
+
+// No exports - force migration to direct imports

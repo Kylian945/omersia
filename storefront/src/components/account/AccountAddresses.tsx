@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { PenIcon, Trash2 } from "lucide-react";
-import type { Address } from "@/lib/api";
+import type { Address } from "@/lib/types/addresses-types";
 import { Button } from "@/components/common/Button";
 import { logger } from "@/lib/logger";
 
@@ -160,8 +160,8 @@ export function AccountAddresses({ initialAddresses }: Props) {
 
       setIsModalOpen(false);
     } catch (e) {
-      logger.error(e);
-      setErrorMsg("Erreur réseau lors de l’envoi du formulaire.");
+      logger.error(e instanceof Error ? e.message : String(e));
+      setErrorMsg("Erreur réseau lors de l'envoi du formulaire.");
     } finally {
       setLoading(false);
     }
@@ -209,7 +209,7 @@ export function AccountAddresses({ initialAddresses }: Props) {
       setAddresses((prev) => prev.filter((a) => a.id !== addressToDelete.id));
       closeDeleteModal();
     } catch (e) {
-      logger.error(e);
+      logger.error(e instanceof Error ? e.message : String(e));
       setDeleteError("Erreur réseau lors de la suppression.");
     } finally {
       setLoading(false);

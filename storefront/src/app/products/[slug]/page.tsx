@@ -1,7 +1,7 @@
 import { Container } from "@/components/common/Container";
 import { Footer } from "@/components/common/Footer";
 import { Header } from "@/components/common/Header";
-import { getProductBySlug } from "@/lib/api";
+import { getProductBySlug } from "@/lib/api-products";
 import { getEcommercePageByType } from "@/lib/api-ecommerce-pages";
 import { Metadata } from "next";
 import { ProductGallery } from "@/components/product/ProductGallery";

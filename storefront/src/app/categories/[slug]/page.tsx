@@ -4,7 +4,7 @@ import { Footer } from "@/components/common/Footer";
 import { Container } from "@/components/common/Container";
 import { CategoryProducts } from "@/components/category/CategoryProducts";
 import { CategoryPageRenderer } from "@/components/category/CategoryPageRenderer";
-import { getCategoryBySlug } from "@/lib/api";
+import { getCategoryBySlug } from "@/lib/api-categories";
 import { getEcommercePageByType } from "@/lib/api-ecommerce-pages";
 import { getThemeSettings } from "@/lib/api-theme";
 import Link from "next/link";

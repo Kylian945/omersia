@@ -6,7 +6,8 @@ import { ListingProduct } from "@/components/product/ListingProducts";
 import { ProductSlider } from "@/components/product/ProductSlider";
 import { PageBuilderWithTheme } from "@/components/builder/PageBuilderWithTheme";
 import { getThemeWidgets } from "@/lib/theme-widgets";
-import { getCategoryBySlug, getCategories, getEcommercePageBySlug } from "@/lib/api";
+import { getCategoryBySlug, getCategories } from "@/lib/api-categories";
+import { getEcommercePageBySlug } from "@/lib/api-ecommerce-pages";
 import Link from "next/link";
 import { Metadata } from "next";
 

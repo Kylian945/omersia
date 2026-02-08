@@ -4,7 +4,9 @@ import { HeaderCheckout } from "@/components/common/HeaderCheckout";
 import CheckoutClient from "@/components/checkout/CheckoutClient";
 
 import { fetchUserSSR } from "@/lib/auth/fetchUserSSR"; // adapte le chemin
-import { getAddresses, getShopInfo, type Address } from "@/lib/api"; // ton api.ts storefront
+import { getAddresses } from "@/lib/api-addresses";
+import { getShopInfo } from "@/lib/api-shop";
+import type { Address } from "@/lib/types/addresses-types";
 import { cookies } from "next/headers";
 
 

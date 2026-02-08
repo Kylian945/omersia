@@ -4,7 +4,7 @@ import { Container } from "@/components/common/Container";
 import { useCart } from "@/components/cart/CartContext";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
-import type { Address } from "@/lib/api";
+import type { Address } from "@/lib/types/addresses-types";
 import { AuthUser } from "@/lib/types/user-types";
 import { Button } from "@/components/common/Button";
 

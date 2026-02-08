@@ -10,6 +10,7 @@ use App\Payments\Providers\StripePaymentProvider;
 use Illuminate\Http\Request;
 use Omersia\Api\DTO\OrderCreateDTO;
 use Omersia\Api\DTO\OrderUpdateDTO;
+use Omersia\Api\Exceptions\PriceTamperingException;
 use Omersia\Api\Services\OrderCreationService;
 use Omersia\Catalog\Models\Order;
 use Omersia\Catalog\Models\ShippingMethod;
@@ -216,7 +217,16 @@ class OrderController extends Controller
         $validated['shipping_total'] = $validated['shipping_total'] ?? $shippingMethod->price;
 
         $dto = OrderCreateDTO::fromArray($validated, $user->id);
-        $order = $this->orderCreationService->createOrUpdateDraftOrder($dto, $shippingMethod);
+
+        // DCA-012: Valider les prix côté serveur (via OrderCreationService)
+        try {
+            $order = $this->orderCreationService->createOrUpdateDraftOrder($dto, $shippingMethod);
+        } catch (PriceTamperingException $e) {
+            return response()->json([
+                'error' => 'validation_error',
+                'message' => 'Les prix soumis ne correspondent pas aux prix réels. Veuillez rafraîchir votre panier.',
+            ], 422);
+        }
 
         return response()->json($order, 201);
     }
@@ -373,10 +383,7 @@ class OrderController extends Controller
             return response()->json(['message' => 'Unauthenticated'], 401);
         }
 
-        // Verify ownership to prevent IDOR (DCA-002)
-        if ($order->customer_id !== $user->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('update', $order);
 
         $validated = $request->validate([
             'currency' => ['required', 'string'],
@@ -397,7 +404,16 @@ class OrderController extends Controller
         ]);
 
         $dto = OrderUpdateDTO::fromArray($validated);
-        $order = $this->orderCreationService->updateOrder($order, $dto);
+
+        // DCA-003: Valider les prix côté serveur (via OrderCreationService)
+        try {
+            $order = $this->orderCreationService->updateOrder($order, $dto);
+        } catch (PriceTamperingException $e) {
+            return response()->json([
+                'error' => 'validation_error',
+                'message' => 'Les prix soumis ne correspondent pas aux prix réels. Veuillez rafraîchir votre panier.',
+            ], 422);
+        }
 
         return response()->json($order);
     }

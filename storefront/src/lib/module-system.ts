@@ -217,7 +217,7 @@ function evaluateCondition(condition: string, context: ModuleHookContext): boole
 
     return func(...Object.values(context));
   } catch (error) {
-    logger.error('[Module System] Condition evaluation error:', condition, error);
+    logger.error('[Module System] Condition evaluation error:', { condition, error });
     return false;
   }
 }

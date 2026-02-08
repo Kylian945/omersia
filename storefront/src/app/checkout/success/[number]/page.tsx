@@ -6,7 +6,8 @@ import { HeaderCheckout } from "@/components/common/HeaderCheckout";
 import { Footer } from "@/components/common/Footer";
 import { Container } from "@/components/common/Container";
 import { fetchUserSSR } from "@/lib/auth/fetchUserSSR";
-import { confirmDraftOrderByNumber, getShopInfo } from "@/lib/api";
+import { confirmDraftOrderByNumber } from "@/lib/api-orders";
+import { getShopInfo } from "@/lib/api-shop";
 import { buildImageUrl } from "@/lib/image-utils";
 import { OrderSuccessStatusWatcher } from "@/components/checkout/OrderSuccessStatusWatcher";
 
