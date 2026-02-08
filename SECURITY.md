@@ -1,5 +1,27 @@
 # Politique de Sécurité
 
+## Avertissement / Disclaimer
+
+**Ce logiciel est fourni "EN L'ÉTAT" sans aucune garantie de sécurité.**
+
+En utilisant Omersia, vous reconnaissez que :
+
+- Vous êtes **seul responsable** de la sécurité de votre déploiement
+- Les auteurs ne sont **pas responsables** des failles de sécurité, vols de données ou dommages
+- Vous devez effectuer vos propres audits de sécurité avant mise en production
+- Vous êtes responsable de la conformité légale (RGPD, PCI-DSS, etc.)
+
+| Responsabilité | Propriétaire |
+|----------------|--------------|
+| Correctifs de code | Mainteneurs |
+| Sécurité du déploiement | **Vous** |
+| Protection des données | **Vous** |
+| Conformité légale | **Vous** |
+| Sécurité des clés API | **Vous** |
+| Sécurité infrastructure | **Vous** |
+
+---
+
 ## Versions Supportées
 
 | Version | Supportée          |

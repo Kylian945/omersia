@@ -19,3 +19,31 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+---
+
+ADDITIONAL DISCLAIMERS
+
+SECURITY & DATA PROTECTION:
+This software is provided without any security guarantees. The authors are NOT
+responsible for:
+- Security breaches, hacks, or unauthorized access
+- Data loss, theft, or exposure of personal/sensitive information
+- Compliance with data protection regulations (GDPR, CCPA, PCI-DSS, etc.)
+- Any damages resulting from the deployment or use of this software
+
+Users deploying this software assume FULL RESPONSIBILITY for:
+- Conducting security audits before production use
+- Implementing appropriate security measures
+- Protecting API keys, credentials, and customer data
+- Legal compliance in their jurisdiction
+
+THIRD-PARTY SERVICES:
+This software integrates with external services (Stripe, MeiliSearch, etc.).
+Users must comply with those services' terms and secure their own credentials.
+
+NO LIABILITY:
+In no event shall the authors be liable for any direct, indirect, incidental,
+special, exemplary, or consequential damages (including but not limited to
+loss of data, business interruption, or security incidents) arising from the
+use of this software, even if advised of the possibility of such damages.
