@@ -67,11 +67,11 @@ export default async function RootLayout({
   const cartType = themeSettings.settings.cart?.cart_type || 'drawer';
 
   return (
-    <html lang="fr">
+    <html lang="fr" suppressHydrationWarning>
       <head>
         <ThemeProvider />
       </head>
-      <body className="bg-[#f6f6f7] text-[#111827] antialiased">
+      <body className="bg-[#f6f6f7] text-[#111827] antialiased" suppressHydrationWarning>
         <div className="min-h-screen flex flex-col relative">
           <ModuleSystemInitializer />
           <AuthProvider initialUser={initialUser}>

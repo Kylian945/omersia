@@ -35,6 +35,18 @@ class DemoProductsSeeder extends Seeder
             return;
         }
 
+        // Make seeder idempotent for repeated installs/updates.
+        $alreadySeeded = Product::query()
+            ->where('shop_id', $this->shopId)
+            ->where('sku', 'VET-SWEAT-H-001')
+            ->exists();
+
+        if ($alreadySeeded) {
+            $this->command->warn('Demo products already seeded. Skipping DemoProductsSeeder.');
+
+            return;
+        }
+
         $this->command->info('🌱 Seeding demo categories and products...');
 
         // Créer les catégories
