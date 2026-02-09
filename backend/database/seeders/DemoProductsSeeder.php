@@ -42,7 +42,8 @@ class DemoProductsSeeder extends Seeder
             ->exists();
 
         if ($alreadySeeded) {
-            $this->command->warn('Demo products already seeded. Skipping DemoProductsSeeder.');
+            $this->command->info('Demo products already seeded. Checking for missing image files...');
+            $this->restoreMissingImages();
 
             return;
         }
@@ -703,6 +704,162 @@ class DemoProductsSeeder extends Seeder
     }
 
     /**
+     * Restore missing image files when demo data already exists in DB.
+     * Maps each ProductImage back to its seed source file via SKU + position.
+     */
+    private function restoreMissingImages(): void
+    {
+        $restored = 0;
+
+        // SKU -> seed image filenames mapping
+        $imageMap = $this->getProductImageMap();
+
+        // Restore product images
+        $products = Product::with(['images' => fn ($q) => $q->orderBy('position')])
+            ->where('shop_id', $this->shopId)
+            ->get();
+
+        foreach ($products as $product) {
+            $seedImages = $imageMap[$product->sku] ?? null;
+            if (! $seedImages) {
+                continue;
+            }
+
+            foreach ($product->images as $index => $image) {
+                if (Storage::disk('public')->exists($image->path)) {
+                    continue;
+                }
+
+                $seedImageName = $seedImages[$index] ?? null;
+                if (! $seedImageName) {
+                    continue;
+                }
+
+                $sourcePath = base_path($this->seedImagesPath.'/'.$seedImageName);
+                if (! file_exists($sourcePath)) {
+                    $this->command->warn("⚠️  Seed image not found: {$seedImageName}");
+
+                    continue;
+                }
+
+                Storage::disk('public')->put($image->path, file_get_contents($sourcePath));
+                $restored++;
+            }
+        }
+
+        // Restore category images
+        $restored += $this->restoreMissingCategoryImages();
+
+        if ($restored > 0) {
+            $this->command->info("✅ Restored {$restored} missing image files.");
+        } else {
+            $this->command->info('All image files are present.');
+        }
+    }
+
+    /**
+     * Restore missing category image files.
+     * Handles both: image_path set but file missing, and image_path null.
+     */
+    private function restoreMissingCategoryImages(): int
+    {
+        $restored = 0;
+
+        $categories = Category::with('translations')
+            ->where('shop_id', $this->shopId)
+            ->get();
+
+        foreach ($categories as $category) {
+            // If image_path is set and file exists, skip
+            if ($category->image_path && Storage::disk('public')->exists($category->image_path)) {
+                continue;
+            }
+
+            // Build the full slug to find the seed image
+            $slugParts = [];
+            $current = $category;
+            while ($current) {
+                $translation = $current->translations->where('locale', 'fr')->first();
+                if ($translation) {
+                    array_unshift($slugParts, $translation->name);
+                }
+                $current = $current->parent_id ? Category::with('translations')->find($current->parent_id) : null;
+            }
+
+            if (empty($slugParts)) {
+                continue;
+            }
+
+            $fullSlug = Str::slug(implode('-', $slugParts));
+            $patterns = [
+                "cat_{$fullSlug}.jpg",
+                'cat_'.str_replace('-', '_', $fullSlug).'.jpg',
+            ];
+
+            foreach ($patterns as $imageName) {
+                $sourcePath = base_path($this->seedCategoryImagesPath.'/'.$imageName);
+                if (file_exists($sourcePath)) {
+                    if ($category->image_path) {
+                        // File missing but path exists in DB - re-copy to same path
+                        Storage::disk('public')->put($category->image_path, file_get_contents($sourcePath));
+                    } else {
+                        // image_path never set - copy and update DB
+                        $newPath = $this->copyCategoryImageToStorage($fullSlug, $category->id);
+                        if ($newPath) {
+                            $category->update(['image_path' => $newPath]);
+                        }
+                    }
+                    $restored++;
+
+                    break;
+                }
+            }
+        }
+
+        return $restored;
+    }
+
+    /**
+     * Returns a mapping of product SKU to seed image filenames.
+     */
+    private function getProductImageMap(): array
+    {
+        return [
+            'VET-SWEAT-H-001' => ['sweat-homme.png', 'sweat-homme-2.png', 'sweat-homme-3.png'],
+            'VET-TSHIRT-H-001' => ['tshirt-homme.png'],
+            'VET-DOUDOUNE-H-001' => ['doudoune.png'],
+            'VET-SWEAT-F-001' => ['sweat-femme.png'],
+            'VET-TSHIRT-F-001' => ['tshirt-femme.png'],
+            'VET-BRASSIERE-F-001' => ['brassiere-femme.png'],
+            'VET-CASQUETTE-001' => ['casquette.png'],
+            'VET-LUNETTES-001' => ['lunettes-soleil.png'],
+            'VET-CHAUSSETTES-001' => ['chaussettes.png'],
+            'ACC-GOURDE-001' => ['gourde.png'],
+            'ACC-SERVIETTE-001' => ['serviette.png'],
+            'ACC-ENCEINTE-001' => ['enceinte.png'],
+            'ACC-BARBECUE-001' => ['set-barbecue.png'],
+            'ACC-TABLIER-001' => ['tablier.png'],
+            'ACC-CARNET-001' => ['carnet.png'],
+            'ACC-STYLO-001' => ['stylo.png'],
+            'ACC-MUG-001' => ['mug.png'],
+            'ACC-SOURIS-001' => ['souris.png'],
+            'ACC-CLE-USB-001' => ['cle-usb.png'],
+            'ACC-BATTERIE-001' => ['batterie-externe.png'],
+            'ACC-RECHARGE-001' => ['base-recharge.png'],
+            'ACC-SAC-DOS-001' => ['sac-a-dos.png'],
+            'ACC-SAC-SPORT-001' => ['sac-de-sport.png'],
+            'ACC-SAC-CORDON-001' => ['sac-cordon.png'],
+            'ACC-TOTEBAG-001' => ['totebag.png'],
+            'ACC-PORTE-MONNAIE-001' => ['porte-monnaie.png'],
+            'SPORT-RAQUETTE-001' => ['raquette-padel.png'],
+            'SPORT-BALLE-GOLF-001' => ['balle-golf.png'],
+            'SPORT-TAPIS-YOGA-001' => ['tapis-yoga.png'],
+            'SPORT-GANTS-001' => ['gants-muscu.png'],
+            'SPORT-BASKETS-001' => ['baskets.png'],
+        ];
+    }
+
+    /**
      * Copier une image du dossier de seed vers le storage (simule l'upload du BO)
      */
     private function copyImageToStorage(string $imageName, int $productId): ?string
@@ -728,7 +885,13 @@ class DemoProductsSeeder extends Seeder
 
         // Copier le fichier vers le storage public
         $fileContent = file_get_contents($sourcePath);
-        Storage::disk('public')->put($destinationPath, $fileContent);
+        $written = Storage::disk('public')->put($destinationPath, $fileContent);
+
+        if (! $written) {
+            $this->command->warn("⚠️  Failed to write image to storage: {$destinationPath}");
+
+            return null;
+        }
 
         return $destinationPath;
     }
@@ -761,7 +924,13 @@ class DemoProductsSeeder extends Seeder
 
                 // Copier le fichier vers le storage public
                 $fileContent = file_get_contents($sourcePath);
-                Storage::disk('public')->put($destinationPath, $fileContent);
+                $written = Storage::disk('public')->put($destinationPath, $fileContent);
+
+                if (! $written) {
+                    $this->command->warn("⚠️  Failed to write category image to storage: {$destinationPath}");
+
+                    continue;
+                }
 
                 return $destinationPath;
             }
