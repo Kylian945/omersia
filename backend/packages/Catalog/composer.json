@@ -1,0 +1,16 @@
+{
+  "name": "omersia/catalog",
+  "autoload": {
+    "psr-4": {
+      "Omersia\\Catalog\\": "src/",
+      "Omersia\\Catalog\\Database\\Factories\\": "database/factories/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Omersia\\Catalog\\CatalogServiceProvider"
+      ]
+    }
+  }
+}

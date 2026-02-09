@@ -1,0 +1,22 @@
+{
+    "name": "omersia/customer",
+    "description": "Customer management package for Omersia",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "Omersia\\Customer\\": "src/",
+            "Omersia\\Customer\\Database\\Factories\\": "database/factories/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Omersia\\Customer\\CustomerServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^10.0 || ^11.0"
+    }
+}

@@ -1,0 +1,503 @@
+{
+  "name": "Vision",
+  "slug": "vision",
+  "description": "Thème moderne et élégant pour votre e-commerce avec tous les widgets essentiels",
+  "version": "1.0.0",
+  "author": "Omersia",
+  "widgets": [
+    {
+      "type": "heading",
+      "label": "Titre",
+      "icon": "type",
+      "category": "content"
+    },
+    {
+      "type": "text",
+      "label": "Texte",
+      "icon": "align-left",
+      "category": "content"
+    },
+    {
+      "type": "image",
+      "label": "Image",
+      "icon": "image",
+      "category": "content"
+    },
+    {
+      "type": "video",
+      "label": "Vidéo",
+      "icon": "video",
+      "category": "content"
+    },
+    {
+      "type": "button",
+      "label": "Bouton",
+      "icon": "square-arrow-out-up-right",
+      "category": "content"
+    },
+    {
+      "type": "accordion",
+      "label": "Accordéon",
+      "icon": "list",
+      "category": "content"
+    },
+    {
+      "type": "tabs",
+      "label": "Onglets",
+      "icon": "columns-3",
+      "category": "content"
+    },
+    {
+      "type": "spacer",
+      "label": "Espacement",
+      "icon": "move-vertical",
+      "category": "layout"
+    },
+    {
+      "type": "container",
+      "label": "Container",
+      "icon": "box",
+      "category": "layout"
+    },
+    {
+      "type": "hero_banner",
+      "label": "Hero Banner",
+      "icon": "megaphone",
+      "category": "ecommerce"
+    },
+    {
+      "type": "features_bar",
+      "label": "Barre Features",
+      "icon": "sparkles",
+      "category": "ecommerce"
+    },
+    {
+      "type": "categories_grid",
+      "label": "Grille Catégories",
+      "icon": "grid-3x3",
+      "category": "ecommerce"
+    },
+    {
+      "type": "promo_banner",
+      "label": "Bannière Promo",
+      "icon": "badge-percent",
+      "category": "ecommerce"
+    },
+    {
+      "type": "testimonials",
+      "label": "Témoignages",
+      "icon": "message-circle",
+      "category": "ecommerce"
+    },
+    {
+      "type": "newsletter",
+      "label": "Newsletter",
+      "icon": "mail",
+      "category": "ecommerce"
+    },
+    {
+      "type": "product_slider",
+      "label": "Produits (Slider/Grille)",
+      "icon": "shopping-cart",
+      "category": "ecommerce"
+    }
+  ],
+  "settings_schema": {
+    "colors": {
+      "primary": {
+        "label": "Couleur principale",
+        "type": "color",
+        "default": "#111827",
+        "description": "Utilisée pour les boutons CTA, liens actifs"
+      },
+      "secondary": {
+        "label": "Couleur secondaire",
+        "type": "color",
+        "default": "#6366f1",
+        "description": "Accents secondaires"
+      }
+    },
+    "backgrounds": {
+      "page_bg": {
+        "label": "Fond de page",
+        "type": "color",
+        "default": "#ffffff",
+        "description": "Couleur de fond principale du site"
+      },
+      "card_bg": {
+        "label": "Fond des cartes",
+        "type": "color",
+        "default": "#ffffff",
+        "description": "Cartes produits, conteneurs"
+      },
+      "input_bg": {
+        "label": "Fond des champs",
+        "type": "color",
+        "default": "#ffffff",
+        "description": "Inputs, selects, textarea"
+      },
+      "header_bg": {
+        "label": "Fond du header",
+        "type": "color",
+        "default": "#ffffff",
+        "description": "Barre de navigation"
+      }
+    },
+    "texts": {
+      "heading_color": {
+        "label": "Titres",
+        "type": "color",
+        "default": "#111827",
+        "description": "H1, H2, H3..."
+      },
+      "body_color": {
+        "label": "Texte principal",
+        "type": "color",
+        "default": "#374151",
+        "description": "Paragraphes, contenu"
+      },
+      "muted_color": {
+        "label": "Texte secondaire",
+        "type": "color",
+        "default": "#6b7280",
+        "description": "Descriptions, labels"
+      },
+      "link_color": {
+        "label": "Liens",
+        "type": "color",
+        "default": "#111827",
+        "description": "Liens cliquables"
+      }
+    },
+    "borders": {
+      "border_default": {
+        "label": "Bordure par défaut",
+        "type": "color",
+        "default": "#e5e7eb",
+        "description": "Cartes, inputs, dividers"
+      },
+      "border_hover": {
+        "label": "Bordure au survol",
+        "type": "color",
+        "default": "#111827",
+        "description": "Hover sur éléments interactifs"
+      }
+    },
+    "states": {
+      "success_color": {
+        "label": "Succès (texte)",
+        "type": "color",
+        "default": "#10b981",
+        "description": "Badge \"En stock\""
+      },
+      "success_bg": {
+        "label": "Succès (fond)",
+        "type": "color",
+        "default": "#d1fae5",
+        "description": "Fond badge succès"
+      },
+      "error_color": {
+        "label": "Erreur (texte)",
+        "type": "color",
+        "default": "#ef4444",
+        "description": "Badge \"Indisponible\""
+      },
+      "error_bg": {
+        "label": "Erreur (fond)",
+        "type": "color",
+        "default": "#fee2e2",
+        "description": "Fond badge erreur"
+      },
+      "promo_bg": {
+        "label": "Promo (fond)",
+        "type": "color",
+        "default": "#fbbf24",
+        "description": "Badge promotion"
+      },
+      "promo_text": {
+        "label": "Promo (texte)",
+        "type": "color",
+        "default": "#92400e",
+        "description": "Texte promotion"
+      },
+      "variant_badge_bg": {
+        "label": "Badge variante (fond)",
+        "type": "color",
+        "default": "#ffffff",
+        "description": "Fond sélecteurs de variantes"
+      },
+      "variant_badge_text": {
+        "label": "Badge variante (texte)",
+        "type": "color",
+        "default": "#374151",
+        "description": "Texte sélecteurs de variantes"
+      },
+      "variant_badge_active_bg": {
+        "label": "Badge variante active (fond)",
+        "type": "color",
+        "default": "#111827",
+        "description": "Fond variante sélectionnée"
+      },
+      "variant_badge_active_text": {
+        "label": "Badge variante active (texte)",
+        "type": "color",
+        "default": "#ffffff",
+        "description": "Texte variante sélectionnée"
+      }
+    },
+    "typography": {
+      "heading_font": {
+        "label": "Police des titres",
+        "type": "select",
+        "default": "Inter",
+        "options": ["Inter", "Poppins", "Montserrat", "Roboto", "Open Sans"]
+      },
+      "body_font": {
+        "label": "Police du corps",
+        "type": "select",
+        "default": "Inter",
+        "options": ["Inter", "Poppins", "Montserrat", "Roboto", "Open Sans"]
+      },
+      "heading_weight": {
+        "label": "Graisse des titres",
+        "type": "select",
+        "default": "700",
+        "options": {
+          "400": "Normal",
+          "500": "Medium",
+          "600": "Semi-bold",
+          "700": "Bold",
+          "800": "Extra-bold"
+        }
+      },
+      "h1_size": {
+        "label": "Taille H1 (px)",
+        "type": "number",
+        "default": "48",
+        "min": 32,
+        "max": 72,
+        "description": "Titre principal"
+      },
+      "h2_size": {
+        "label": "Taille H2 (px)",
+        "type": "number",
+        "default": "36",
+        "min": 24,
+        "max": 56,
+        "description": "Titre de section"
+      },
+      "h3_size": {
+        "label": "Taille H3 (px)",
+        "type": "number",
+        "default": "28",
+        "min": 20,
+        "max": 44,
+        "description": "Sous-titre"
+      },
+      "h4_size": {
+        "label": "Taille H4 (px)",
+        "type": "number",
+        "default": "22",
+        "min": 16,
+        "max": 32,
+        "description": "Titre de carte"
+      },
+      "h5_size": {
+        "label": "Taille H5 (px)",
+        "type": "number",
+        "default": "18",
+        "min": 14,
+        "max": 26,
+        "description": "Petit titre"
+      },
+      "h6_size": {
+        "label": "Taille H6 (px)",
+        "type": "number",
+        "default": "16",
+        "min": 12,
+        "max": 22,
+        "description": "Label / légende"
+      },
+      "body_size": {
+        "label": "Taille du texte (px)",
+        "type": "number",
+        "default": "16",
+        "min": 14,
+        "max": 18
+      }
+    },
+    "layout": {
+      "border_radius": {
+        "label": "Arrondi des bordures",
+        "type": "select",
+        "default": "12px",
+        "options": {
+          "0px": "Aucun",
+          "8px": "Petit",
+          "12px": "Moyen",
+          "16px": "Grand",
+          "24px": "Très grand"
+        }
+      },
+      "card_style": {
+        "label": "Style des cartes produit",
+        "type": "select",
+        "default": "bordered",
+        "options": {
+          "minimal": "Minimal",
+          "bordered": "Bordure",
+          "shadowed": "Ombre",
+          "elevated": "Élevé"
+        }
+      }
+    },
+    "header": {
+      "header_style": {
+        "label": "Style visuel",
+        "type": "select",
+        "default": "bordered",
+        "options": {
+          "minimal": "Minimal",
+          "classic": "Classique",
+          "bordered": "Avec bordure"
+        },
+        "description": "Apparence visuelle du header"
+      },
+      "header_sticky": {
+        "label": "Header fixe au scroll",
+        "type": "select",
+        "default": "yes",
+        "options": {
+          "yes": "Oui",
+          "no": "Non"
+        },
+        "description": "Le header reste visible lors du défilement"
+      }
+    },
+    "buttons": {
+      "button_style": {
+        "label": "Style des boutons",
+        "type": "select",
+        "default": "rounded",
+        "options": {
+          "square": "Carré",
+          "rounded": "Arrondi",
+          "pill": "Pilule"
+        }
+      },
+      "button_primary_text": {
+        "label": "Texte bouton principal",
+        "type": "color",
+        "default": "#ffffff",
+        "description": "Couleur du texte sur fond principal"
+      },
+      "button_secondary_text": {
+        "label": "Texte bouton secondaire",
+        "type": "color",
+        "default": "#111827",
+        "description": "Couleur du texte bouton outline"
+      }
+    },
+    "cart": {
+      "cart_type": {
+        "label": "Type de panier",
+        "type": "select",
+        "default": "drawer",
+        "options": {
+          "drawer": "Tiroir (drawer)",
+          "page": "Page panier"
+        },
+        "description": "Mode d'affichage du panier lors du clic sur l'icône"
+      }
+    },
+    "products": {
+      "product_card_style": {
+        "label": "Style des cartes produit",
+        "type": "select",
+        "default": "bordered",
+        "options": {
+          "minimal": "Minimal (sans bordure)",
+          "bordered": "Avec bordure",
+          "shadow": "Avec ombre",
+          "elevated": "Élevé (ombre forte)"
+        },
+        "description": "Apparence des cartes produit"
+      },
+      "product_hover_effect": {
+        "label": "Effet au survol produit",
+        "type": "select",
+        "default": "lift",
+        "options": {
+          "none": "Aucun",
+          "scale": "Agrandissement",
+          "lift": "Élévation",
+          "shadow": "Ombre renforcée"
+        },
+        "description": "Animation lors du survol d'une carte produit"
+      },
+      "show_product_badges": {
+        "label": "Afficher les badges produit",
+        "type": "select",
+        "default": "yes",
+        "options": {
+          "yes": "Oui",
+          "no": "Non"
+        },
+        "description": "Badges 'Nouveau', 'Promo', 'Épuisé'"
+      },
+      "show_quick_add": {
+        "label": "Bouton 'Ajout rapide'",
+        "type": "select",
+        "default": "yes",
+        "options": {
+          "yes": "Oui",
+          "no": "Non"
+        },
+        "description": "Afficher le bouton d'ajout au panier sur les cartes"
+      },
+      "product_image_ratio": {
+        "label": "Ratio image produit",
+        "type": "select",
+        "default": "square",
+        "options": {
+          "square": "Carré (1:1)",
+          "portrait": "Portrait (3:4)",
+          "landscape": "Paysage (4:3)"
+        },
+        "description": "Format des images produit"
+      },
+      "products_per_row_desktop": {
+        "label": "Produits par ligne (desktop)",
+        "type": "number",
+        "default": "4",
+        "min": 2,
+        "max": 6,
+        "description": "Nombre de produits par ligne sur grand écran"
+      },
+      "products_per_row_tablet": {
+        "label": "Produits par ligne (tablette)",
+        "type": "number",
+        "default": "3",
+        "min": 2,
+        "max": 4,
+        "description": "Nombre de produits par ligne sur tablette"
+      },
+      "products_per_row_mobile": {
+        "label": "Produits par ligne (mobile)",
+        "type": "number",
+        "default": "2",
+        "min": 1,
+        "max": 2,
+        "description": "Nombre de produits par ligne sur mobile"
+      }
+    }
+  },
+  "settings": {
+    "primary": "#2563eb",
+    "secondary": "#7c3aed"
+  },
+  "metadata": {
+    "technologies": ["Next.js 16", "Tailwind CSS", "TypeScript"],
+    "features": ["Responsive", "SEO optimisé", "Performance élevée", "17 widgets"]
+  }
+}

@@ -1,0 +1,26 @@
+.env
+.env.*
+.env.docker
+!.env.example
+!.env.*.example
+
+# Backend
+backend/.env
+backend/.env.*
+!backend/.env.example
+!backend/.env.*.example
+!backend/.env.testing
+
+# Storefront
+storefront/.env.local
+storefront/.env.*.local
+
+# IDE and OS
+.DS_Store
+.idea/
+.vscode/
+
+# Ai
+.claude
+CLAUDE.md
+

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/omersia/omersia/discussions
+    about: Posez des questions et discutez avec la communauté
+  - name: 📚 Documentation
+    url: https://github.com/omersia/omersia/tree/main/docs
+    about: Consultez la documentation avant de poser une question

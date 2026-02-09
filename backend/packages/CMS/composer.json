@@ -1,0 +1,15 @@
+{
+  "name": "omersia/cms",
+  "autoload": {
+    "psr-4": {
+      "Omersia\\CMS\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Omersia\\CMS\\CMSServiceProvider"
+      ]
+    }
+  }
+}

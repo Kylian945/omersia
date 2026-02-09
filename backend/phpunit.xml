@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         colors="true"
+         cacheDirectory=".phpunit.cache"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/Unit</directory>
+        </testsuite>
+        <testsuite name="Feature">
+            <directory>tests/Feature</directory>
+        </testsuite>
+        <!-- Packages avec tests actifs -->
+        <testsuite name="Catalog">
+            <directory>packages/Catalog/tests</directory>
+            <exclude>packages/Catalog/tests/Unit/CartTest.php</exclude>
+            <exclude>packages/Catalog/tests/Unit/CategoryTest.php</exclude>
+            <exclude>packages/Catalog/tests/Unit/OrderTest.php</exclude>
+            <exclude>packages/Catalog/tests/Unit/ProductRepositoryTest.php</exclude>
+            <exclude>packages/Catalog/tests/Unit/ProductTest.php</exclude>
+            <exclude>packages/Catalog/tests/Unit/TaxCalculatorTest.php</exclude>
+            <exclude>packages/Catalog/tests/Unit/Services</exclude>
+        </testsuite>
+        <testsuite name="Shared">
+            <directory>packages/Shared/tests</directory>
+        </testsuite>
+        <!-- Packages en attente d'annotations @test (réactiver quand prêts)
+        <testsuite name="Core">
+            <directory>packages/Core/tests</directory>
+        </testsuite>
+        <testsuite name="Customer">
+            <directory>packages/Customer/tests</directory>
+        </testsuite>
+        <testsuite name="Payment">
+            <directory>packages/Payment/tests</directory>
+        </testsuite>
+        <testsuite name="Sales">
+            <directory>packages/Sales/tests</directory>
+        </testsuite>
+        <testsuite name="Apparence">
+            <directory>packages/Apparence/tests</directory>
+        </testsuite>
+        <testsuite name="Api">
+            <directory>packages/Api/tests</directory>
+        </testsuite>
+        -->
+    </testsuites>
+    
+    <source>
+        <include>
+            <directory>app</directory>
+            <directory>packages/Core/src</directory>
+            <directory>packages/Catalog/src</directory>
+            <directory>packages/Customer/src</directory>
+            <directory>packages/Payment/src</directory>
+            <directory>packages/Sales/src</directory>
+            <directory>packages/Apparence/src</directory>
+            <directory>packages/Admin/src</directory>
+            <directory>packages/Api/src</directory>
+            <directory>packages/CMS/src</directory>
+            <directory>packages/Shared/src</directory>
+        </include>
+        <exclude>
+            <directory>packages/*/src/database</directory>
+            <directory>packages/*/src/resources</directory>
+        </exclude>
+    </source>
+    
+    <coverage>
+        <report>
+            <html outputDirectory="coverage-report"/>
+            <clover outputFile="coverage.xml"/>
+        </report>
+    </coverage>
+    
+    <php>
+        <env name="APP_ENV" value="testing"/>
+        <env name="APP_DEBUG" value="true"/>
+        <env name="APP_KEY" value="base64:VjuvYILi/Pq3nHGWRVoheVnOClQt4cvyrt9kX6hOxA0="/>
+        <env name="BCRYPT_ROUNDS" value="4"/>
+        <env name="CACHE_DRIVER" value="array"/>
+        <env name="DB_CONNECTION" value="sqlite"/>
+        <env name="DB_DATABASE" value=":memory:"/>
+        <env name="MAIL_MAILER" value="array"/>
+        <env name="QUEUE_CONNECTION" value="sync"/>
+        <env name="SESSION_DRIVER" value="array"/>
+        <env name="TELESCOPE_ENABLED" value="false"/>
+        <env name="SCOUT_DRIVER" value="null"/>
+        <env name="FRONT_API_KEY" value="test-api-key-for-testing"/>
+    </php>
+</phpunit>

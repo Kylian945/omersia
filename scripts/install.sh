@@ -1,0 +1,619 @@
+#!/bin/bash
+set -e
+
+# ========================================
+# Omersia Installation Script
+# ========================================
+# Complete setup using Docker containers
+# Usage: ./scripts/install.sh
+# Non-interactive: INTERACTIVE=false ./scripts/install.sh
+# Option: DB_NAME=mydb INTERACTIVE=false ./scripts/install.sh
+# ========================================
+
+# Configuration
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+
+# Ensure all scripts are executable (fixes Windows/NTFS permission issues)
+chmod +x "$PROJECT_ROOT/scripts/"*.sh 2>/dev/null || true
+chmod +x "$PROJECT_ROOT/backend/docker-entrypoint"*.sh 2>/dev/null || true
+BACKEND_DIR="$PROJECT_ROOT/backend"
+STOREFRONT_DIR="$PROJECT_ROOT/storefront"
+INTERACTIVE="${INTERACTIVE:-true}"
+DEMO_DATA="${DEMO_DATA:-false}"
+ADMIN_EMAIL="${ADMIN_EMAIL:-admin@omersia.com}"
+ADMIN_PASSWORD="${ADMIN_PASSWORD:-}"
+PASSWORD_AUTO_GENERATED="false"
+
+# Database defaults
+DB_NAME="${DB_NAME:-omersia}"
+DB_ROOT_PASSWORD="${DB_ROOT_PASSWORD:-secret}"
+DB_USERNAME="${DB_USERNAME:-omersia}"
+DB_PASSWORD="${DB_PASSWORD:-secret}"
+
+# Source CLI utilities
+source "$PROJECT_ROOT/scripts/cli-utils.sh"
+
+# Error handler
+error_exit() {
+    print_error "$1"
+    exit 1
+}
+
+# ========================================
+# HTTP readiness helpers
+# ========================================
+http_ready() {
+    local url="$1"
+
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsS --max-time 2 "$url" >/dev/null 2>&1
+        return $?
+    fi
+
+    if command -v wget >/dev/null 2>&1; then
+        wget -q -T 2 -O /dev/null "$url" >/dev/null 2>&1
+        return $?
+    fi
+
+    # If no HTTP client is available, don't block the install
+    return 0
+}
+
+wait_for_url() {
+    local url="$1"
+    local timeout="${2:-180}"
+    local interval="${3:-2}"
+    local start
+    start=$(date +%s)
+
+    while true; do
+        if http_ready "$url"; then
+            return 0
+        fi
+
+        if [ $(( $(date +%s) - start )) -ge "$timeout" ]; then
+            return 1
+        fi
+
+        sleep "$interval"
+    done
+}
+
+# ========================================
+# MAIN INSTALLATION
+# ========================================
+
+print_banner
+
+# Step 1: Check Prerequisites
+print_step_fancy "1" "10" "Checking prerequisites..." "$ICON_SEARCH"
+
+# Check Docker
+if ! command -v docker &> /dev/null; then
+    error_exit "Docker is not installed. Please install Docker first."
+fi
+print_success "Docker found: $(docker --version | head -n1)"
+
+# Check Docker Compose (V2 preferred, fallback to V1)
+if docker compose version &> /dev/null; then
+    DOCKER_COMPOSE="docker compose"
+    print_success "Docker Compose V2 found"
+elif command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+    print_success "Docker Compose V1 found"
+else
+    error_exit "Docker Compose is not installed. Please install Docker Compose first."
+fi
+
+# Check if Docker daemon is running
+if ! docker info &> /dev/null; then
+    error_exit "Docker daemon is not running. Please start Docker first."
+fi
+print_success "Docker daemon is running"
+
+echo ""
+
+# Step 2: Interactive configuration (collect ALL user input before starting containers)
+print_step_fancy "2" "10" "Interactive configuration..." "$ICON_PACKAGE"
+
+if [ "$INTERACTIVE" = "true" ]; then
+    echo ""
+    print_info "Let's configure your Omersia installation"
+    echo ""
+
+    # Database name
+    printf "${CYAN}Database name${RESET} [${DIM}$DB_NAME${RESET}]: "
+    read -r INPUT_DB
+    if [ -n "$INPUT_DB" ]; then
+        DB_NAME="$INPUT_DB"
+    fi
+    print_success "Database: $DB_NAME"
+    echo ""
+
+    # Admin credentials
+    print_info "Admin credentials"
+    printf "${CYAN}Email${RESET} [${DIM}$ADMIN_EMAIL${RESET}]: "
+    read -r INPUT_EMAIL
+    if [ -n "$INPUT_EMAIL" ]; then
+        ADMIN_EMAIL="$INPUT_EMAIL"
+    fi
+
+    printf "${CYAN}Password${RESET} (leave empty to auto-generate): "
+    read -rs INPUT_PASSWORD
+    echo ""
+
+    if [ -n "$INPUT_PASSWORD" ]; then
+        ADMIN_PASSWORD="$INPUT_PASSWORD"
+    else
+        ADMIN_PASSWORD=$(openssl rand -base64 12)
+        PASSWORD_AUTO_GENERATED="true"
+        printf "${YELLOW}Generated password: ${ADMIN_PASSWORD}${RESET}\n"
+    fi
+    print_success "Admin email: $ADMIN_EMAIL"
+    echo ""
+
+    # Demo data
+    printf "${YELLOW}Would you like to install demo products? (y/N)${RESET}\n"
+    read -r -p "> " RESPONSE
+    echo ""
+    if [[ "$RESPONSE" =~ ^[Yy]$ ]]; then
+        DEMO_DATA="true"
+        print_success "Demo data will be installed"
+    else
+        print_info "Demo data will be skipped"
+    fi
+    echo ""
+else
+    # Non-interactive mode - generate password if not provided
+    if [ -z "$ADMIN_PASSWORD" ]; then
+        ADMIN_PASSWORD=$(openssl rand -base64 12)
+        PASSWORD_AUTO_GENERATED="true"
+        print_warning "Generated random password: $ADMIN_PASSWORD"
+    fi
+    print_success "Database: $DB_NAME"
+    print_success "Admin email: $ADMIN_EMAIL"
+    print_success "Demo data: $DEMO_DATA"
+    echo ""
+fi
+
+echo ""
+
+# Step 3: Setup environment files
+print_step_fancy "3" "10" "Setting up environment files..." "$ICON_PACKAGE"
+
+if [ ! -f "$BACKEND_DIR/.env" ]; then
+    cp "$BACKEND_DIR/.env.example" "$BACKEND_DIR/.env"
+    print_success "Created backend/.env"
+else
+    print_warning "backend/.env already exists, skipping"
+fi
+
+if [ ! -f "$STOREFRONT_DIR/.env.local" ]; then
+    cp "$STOREFRONT_DIR/.env.example" "$STOREFRONT_DIR/.env.local"
+    print_success "Created storefront/.env.local"
+else
+    print_warning "storefront/.env.local already exists, skipping"
+fi
+
+# Verify backend .env has correct Docker settings
+if grep -q "DB_HOST=mysql" "$BACKEND_DIR/.env"; then
+    print_success "backend/.env configured for Docker MySQL"
+else
+    print_warning "Updating backend/.env for Docker MySQL..."
+    sed_inplace 's/DB_HOST=127.0.0.1/DB_HOST=mysql/g' "$BACKEND_DIR/.env"
+    sed_inplace 's/DB_USERNAME=root/DB_USERNAME=omersia/g' "$BACKEND_DIR/.env"
+    sed_inplace 's/DB_PASSWORD=$/DB_PASSWORD=secret/g' "$BACKEND_DIR/.env"
+    sed_inplace 's/MAIL_HOST=127.0.0.1/MAIL_HOST=mailpit/g' "$BACKEND_DIR/.env"
+    print_success "Updated backend/.env for Docker"
+fi
+
+# Ensure DB_DATABASE exists and is set
+if grep -q "^DB_DATABASE=" "$BACKEND_DIR/.env"; then
+    sed_inplace "s/^DB_DATABASE=.*/DB_DATABASE=$DB_NAME/" "$BACKEND_DIR/.env"
+else
+    echo "DB_DATABASE=$DB_NAME" >> "$BACKEND_DIR/.env"
+fi
+
+# Ensure DB_USERNAME exists and is set
+if grep -q "^DB_USERNAME=" "$BACKEND_DIR/.env"; then
+    sed_inplace "s/^DB_USERNAME=.*/DB_USERNAME=$DB_USERNAME/" "$BACKEND_DIR/.env"
+else
+    echo "DB_USERNAME=$DB_USERNAME" >> "$BACKEND_DIR/.env"
+fi
+
+# Ensure DB_PASSWORD exists and is set
+if grep -q "^DB_PASSWORD=" "$BACKEND_DIR/.env"; then
+    sed_inplace "s/^DB_PASSWORD=.*/DB_PASSWORD=$DB_PASSWORD/" "$BACKEND_DIR/.env"
+else
+    echo "DB_PASSWORD=$DB_PASSWORD" >> "$BACKEND_DIR/.env"
+fi
+
+# Ensure realtime broadcasting env (Reverb via Pusher protocol)
+ensure_env_var() {
+    local file="$1"
+    local key="$2"
+    local value="$3"
+
+    if grep -q "^${key}=" "$file"; then
+        sed_inplace "s|^${key}=.*|${key}=${value}|" "$file"
+    else
+        echo "${key}=${value}" >> "$file"
+    fi
+}
+
+REVERB_APP_ID_CURRENT=$(grep -E "^REVERB_APP_ID=" "$BACKEND_DIR/.env" | tail -n 1 | cut -d= -f2-)
+REVERB_APP_KEY_CURRENT=$(grep -E "^REVERB_APP_KEY=" "$BACKEND_DIR/.env" | tail -n 1 | cut -d= -f2-)
+REVERB_APP_SECRET_CURRENT=$(grep -E "^REVERB_APP_SECRET=" "$BACKEND_DIR/.env" | tail -n 1 | cut -d= -f2-)
+
+if [ -z "$REVERB_APP_ID_CURRENT" ]; then
+    REVERB_APP_ID_CURRENT=$(( (RANDOM % 900000) + 100000 ))
+fi
+if [ -z "$REVERB_APP_KEY_CURRENT" ]; then
+    REVERB_APP_KEY_CURRENT=$(openssl rand -hex 12)
+fi
+if [ -z "$REVERB_APP_SECRET_CURRENT" ]; then
+    REVERB_APP_SECRET_CURRENT=$(openssl rand -hex 12)
+fi
+
+ensure_env_var "$BACKEND_DIR/.env" "BROADCAST_DRIVER" "pusher"
+
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_APP_ID" "$REVERB_APP_ID_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_APP_KEY" "$REVERB_APP_KEY_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_APP_SECRET" "$REVERB_APP_SECRET_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_HOST" "localhost"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_PORT" "8080"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_SCHEME" "http"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_SERVER_HOST" "0.0.0.0"
+ensure_env_var "$BACKEND_DIR/.env" "REVERB_SERVER_PORT" "8080"
+
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_APP_ID" "$REVERB_APP_ID_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_APP_KEY" "$REVERB_APP_KEY_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_APP_SECRET" "$REVERB_APP_SECRET_CURRENT"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_APP_CLUSTER" "mt1"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_HOST" "localhost"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_PORT" "8080"
+ensure_env_var "$BACKEND_DIR/.env" "PUSHER_SCHEME" "http"
+
+ensure_env_var "$BACKEND_DIR/.env" "VITE_REVERB_APP_KEY" "\${REVERB_APP_KEY}"
+ensure_env_var "$BACKEND_DIR/.env" "VITE_REVERB_HOST" "\${REVERB_HOST}"
+ensure_env_var "$BACKEND_DIR/.env" "VITE_REVERB_PORT" "\${REVERB_PORT}"
+ensure_env_var "$BACKEND_DIR/.env" "VITE_REVERB_SCHEME" "\${REVERB_SCHEME}"
+
+# Ensure storefront public realtime env
+ensure_env_var "$STOREFRONT_DIR/.env.local" "NEXT_PUBLIC_REVERB_APP_KEY" "$REVERB_APP_KEY_CURRENT"
+ensure_env_var "$STOREFRONT_DIR/.env.local" "NEXT_PUBLIC_REVERB_HOST" "localhost"
+ensure_env_var "$STOREFRONT_DIR/.env.local" "NEXT_PUBLIC_REVERB_PORT" "8080"
+ensure_env_var "$STOREFRONT_DIR/.env.local" "NEXT_PUBLIC_REVERB_SCHEME" "http"
+
+echo ""
+
+# Step 4: Build and start Docker services
+print_step_fancy "4" "10" "Building and starting Docker services..." "$ICON_DOCKER"
+
+cd "$PROJECT_ROOT"
+
+# Ensure .env.docker exists for Docker Compose defaults
+if [ ! -f ".env.docker" ] && [ -f ".env.docker.example" ]; then
+    cp ".env.docker.example" ".env.docker"
+    print_success "Created .env.docker from .env.docker.example"
+fi
+
+# Resolve MEILI_MASTER_KEY for root .env (prefer .env.docker)
+MEILI_MASTER_KEY_VALUE=""
+if [ -f ".env.docker" ]; then
+    MEILI_MASTER_KEY_VALUE=$(grep -E "^MEILI_MASTER_KEY=" ".env.docker" | tail -n 1 | cut -d= -f2-)
+fi
+if [ -z "$MEILI_MASTER_KEY_VALUE" ] && [ -f ".env.docker.example" ]; then
+    MEILI_MASTER_KEY_VALUE=$(grep -E "^MEILI_MASTER_KEY=" ".env.docker.example" | tail -n 1 | cut -d= -f2-)
+fi
+if [ -z "$MEILI_MASTER_KEY_VALUE" ]; then
+    MEILI_MASTER_KEY_VALUE="masterKey"
+fi
+
+# Create root .env with all configuration before starting containers
+cat > ".env" <<EOF
+APP_ENV=local
+APP_DEBUG=true
+DB_DATABASE=$DB_NAME
+DB_USERNAME=$DB_USERNAME
+DB_PASSWORD=$DB_PASSWORD
+DB_ROOT_PASSWORD=$DB_ROOT_PASSWORD
+MEILI_MASTER_KEY=$MEILI_MASTER_KEY_VALUE
+FRONT_API_KEY=temporary_key_will_be_replaced
+EOF
+print_success "Created root .env with configuration"
+
+# Show spinner while building
+show_spinner "Building Docker images..." &
+SPINNER_PID=$!
+$DOCKER_COMPOSE build --quiet 2>&1 | grep -v "Warning" || true
+stop_spinner $SPINNER_PID "success" "Docker images built"
+
+# Show spinner while starting
+show_spinner "Starting containers..." &
+SPINNER_PID=$!
+$DOCKER_COMPOSE up -d 2>&1 | grep -v "Warning" || true
+stop_spinner $SPINNER_PID "success" "Docker services started"
+
+echo ""
+
+# Step 5: Wait for MySQL
+print_step_fancy "5" "10" "Waiting for MySQL to be ready..." "$ICON_DATABASE"
+
+# Start spinner while waiting
+show_spinner "Connecting to MySQL..." &
+SPINNER_PID=$!
+
+MAX_ATTEMPTS=30
+ATTEMPT=0
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+    if docker exec omersia-mysql mysqladmin ping -h localhost --silent &> /dev/null; then
+        stop_spinner $SPINNER_PID "success" "MySQL is ready!"
+        break
+    fi
+    ATTEMPT=$((ATTEMPT + 1))
+    if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+        stop_spinner $SPINNER_PID "error" "MySQL failed to start"
+        error_exit "MySQL failed to start after $MAX_ATTEMPTS attempts"
+    fi
+    sleep 2
+done
+
+echo ""
+
+# Step 6: Create database and grant privileges
+print_step_fancy "6" "10" "Setting up database..." "$ICON_DATABASE"
+
+# Ensure DB exists (idempotent)
+show_spinner "Ensuring database '$DB_NAME' exists..." &
+SPINNER_PID=$!
+docker exec omersia-mysql mysql -uroot -p"$DB_ROOT_PASSWORD" -e "
+CREATE DATABASE IF NOT EXISTS \`$DB_NAME\`
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+" >/dev/null 2>&1 || {
+    stop_spinner $SPINNER_PID "error" "DB create failed"
+    error_exit "Failed to create database '$DB_NAME'"
+}
+stop_spinner $SPINNER_PID "success" "Database ensured"
+
+# NEW: Grant privileges to app user on selected database
+show_spinner "Granting privileges on '$DB_NAME'..." &
+SPINNER_PID=$!
+docker exec omersia-mysql mysql -uroot -p"$DB_ROOT_PASSWORD" -e "
+CREATE USER IF NOT EXISTS '$DB_USERNAME'@'%' IDENTIFIED BY '$DB_PASSWORD';
+GRANT ALL PRIVILEGES ON \`$DB_NAME\`.* TO '$DB_USERNAME'@'%';
+FLUSH PRIVILEGES;
+" >/dev/null 2>&1 || {
+    stop_spinner $SPINNER_PID "error" "Privileges grant failed"
+    error_exit "Failed to grant privileges for '$DB_USERNAME' on '$DB_NAME'"
+}
+stop_spinner $SPINNER_PID "success" "Privileges granted"
+
+# Clear Laravel caches so config is reloaded
+docker exec omersia-backend php artisan config:clear >/dev/null 2>&1 || true
+docker exec omersia-backend php artisan cache:clear >/dev/null 2>&1 || true
+
+echo ""
+
+# Step 7: Wait for backend dependencies
+print_step_fancy "7" "10" "Installing backend dependencies..." "$ICON_PACKAGE"
+
+# Start spinner while waiting
+show_spinner "Installing Composer packages..." &
+SPINNER_PID=$!
+
+MAX_ATTEMPTS=60
+ATTEMPT=0
+while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+    if docker exec omersia-backend test -f /var/www/html/vendor/autoload.php &> /dev/null; then
+        stop_spinner $SPINNER_PID "success" "Backend dependencies installed!"
+        break
+    fi
+    ATTEMPT=$((ATTEMPT + 1))
+    if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+        stop_spinner $SPINNER_PID "error" "Installation failed"
+        error_exit "Backend dependencies failed to install after $MAX_ATTEMPTS attempts. Check logs: docker-compose logs backend"
+    fi
+    sleep 3
+done
+
+echo ""
+
+# Step 8: Generate APP_KEY and run migrations
+print_step_fancy "8" "10" "Setting up Laravel application..." "$ICON_KEY"
+
+show_spinner "Generating APP_KEY..." &
+SPINNER_PID=$!
+docker exec omersia-backend php artisan key:generate --ansi > /dev/null 2>&1
+stop_spinner $SPINNER_PID "success" "APP_KEY generated"
+
+show_spinner "Running database migrations..." &
+SPINNER_PID=$!
+docker exec omersia-backend php artisan migrate --force > /dev/null 2>&1
+stop_spinner $SPINNER_PID "success" "Database migrations completed"
+
+echo ""
+
+# Step 9: Seed shop, roles and permissions
+print_step_fancy "9" "10" "Seeding initial data..." "$ICON_DATABASE"
+
+show_spinner "Creating shop..." &
+SPINNER_PID=$!
+docker exec omersia-backend php artisan db:seed --class=ShopSeeder --force > /dev/null 2>&1
+stop_spinner $SPINNER_PID "success" "Shop created"
+
+show_spinner "Setting up roles and permissions..." &
+SPINNER_PID=$!
+docker exec omersia-backend php artisan db:seed --class=RolesAndPermissionsSeeder --force > /dev/null 2>&1
+stop_spinner $SPINNER_PID "success" "Roles and permissions configured"
+
+show_spinner "Installing default theme..." &
+SPINNER_PID=$!
+docker exec omersia-backend php artisan db:seed --class=DefaultThemeSeeder --force > /dev/null 2>&1
+stop_spinner $SPINNER_PID "success" "Default theme installed"
+
+if [ "$DEMO_DATA" = "true" ]; then
+    show_spinner "Importing demo products..." &
+    SPINNER_PID=$!
+    docker exec omersia-backend php artisan db:seed --class=DemoProductsSeeder --force > /dev/null 2>&1
+    stop_spinner $SPINNER_PID "success" "Demo products imported"
+
+    show_spinner "Creating demo shipping method..." &
+    SPINNER_PID=$!
+    docker exec omersia-backend php artisan db:seed --class=DemoShippingMethodSeeder --force > /dev/null 2>&1
+    stop_spinner $SPINNER_PID "success" "Demo shipping method ready"
+
+    show_spinner "Creating demo menu..." &
+    SPINNER_PID=$!
+    docker exec omersia-backend php artisan db:seed --class=DemoMenuSeeder --force > /dev/null 2>&1
+    stop_spinner $SPINNER_PID "success" "Demo menu created"
+
+    show_spinner "Initializing homepage with demo content..." &
+    SPINNER_PID=$!
+    docker exec omersia-backend php artisan omersia:init-pages --demo --force > /dev/null 2>&1
+    stop_spinner $SPINNER_PID "success" "Homepage initialized with demo content"
+else
+    print_info "Skipping demo data"
+
+    show_spinner "Initializing homepage..." &
+    SPINNER_PID=$!
+    docker exec omersia-backend php artisan omersia:init-pages --force > /dev/null 2>&1
+    stop_spinner $SPINNER_PID "success" "Homepage initialized"
+fi
+
+# Refresh storefront to regenerate Tailwind CSS classes
+show_spinner "Refreshing frontend styles..." &
+SPINNER_PID=$!
+$DOCKER_COMPOSE restart storefront > /dev/null 2>&1
+stop_spinner $SPINNER_PID "success" "Frontend styles refreshed"
+
+echo ""
+
+# Step 10: Create admin user and generate API key
+print_step_fancy "10" "10" "Finalizing setup..." "$ICON_LOCK"
+
+show_spinner "Creating admin user..." &
+SPINNER_PID=$!
+docker exec omersia-backend php artisan admin:create --email="$ADMIN_EMAIL" --password="$ADMIN_PASSWORD" --no-interaction > /dev/null 2>&1 || {
+    stop_spinner $SPINNER_PID "warning" "Admin creation via CLI failed"
+    print_warning "You may need to create it manually"
+    SPINNER_PID=""
+}
+if [ -n "$SPINNER_PID" ]; then
+    stop_spinner $SPINNER_PID "success" "Admin user created: $ADMIN_EMAIL"
+fi
+
+echo ""
+
+show_spinner "Generating API key..." &
+SPINNER_PID=$!
+API_KEY_OUTPUT=$(docker exec omersia-backend php artisan apikey:generate --sync --force 2>&1)
+stop_spinner $SPINNER_PID "success" "API key generated and synced"
+
+# Extract API key from output (64 character alphanumeric string)
+API_KEY=$(echo "$API_KEY_OUTPUT" | grep -oE 'Key:[[:space:]]+[a-zA-Z0-9]+' | awk '{print $2}')
+
+# Update root .env for docker-compose
+cd "$PROJECT_ROOT"
+if [ -n "$API_KEY" ]; then
+    if [ -f ".env" ]; then
+        # Update existing .env
+        if grep -q "^FRONT_API_KEY=" ".env"; then
+            sed_inplace "s/^FRONT_API_KEY=.*/FRONT_API_KEY=$API_KEY/" ".env"
+        else
+            echo "FRONT_API_KEY=$API_KEY" >> ".env"
+        fi
+    else
+        # Create new .env
+        echo "FRONT_API_KEY=$API_KEY" > ".env"
+    fi
+fi
+
+# Restart storefront to pick up new API key
+$DOCKER_COMPOSE up -d --force-recreate storefront >/dev/null 2>&1 || true
+
+echo ""
+
+# ========================================
+# INSTALLATION COMPLETE
+# ========================================
+
+echo ""
+echo ""
+print_double_separator 75
+echo ""
+typewriter_effect "🎉  Installation Complete! Omersia is ready to use." 0.03
+echo ""
+print_double_separator 75
+echo ""
+
+# Admin credentials box
+if [ -n "$ADMIN_EMAIL" ]; then
+    echo ""
+    printf "${GREEN}╭─ ${ICON_LOCK} Admin Credentials ──────────────────────────────────╮${RESET}\n"
+    printf "${GREEN}│${RESET}\n"
+    printf "${GREEN}│${RESET}  Email:    ${BRIGHT_CYAN}%-45s${RESET}\n" "$ADMIN_EMAIL"
+    if [ "$PASSWORD_AUTO_GENERATED" = "true" ]; then
+        printf "${GREEN}│${RESET}  Password: ${BRIGHT_YELLOW}%-45s${RESET}\n" "$ADMIN_PASSWORD"
+    else
+        printf "${GREEN}│${RESET}  Password: ${DIM}%-45s${RESET}\n" "••••••••••••••••"
+    fi
+    printf "${GREEN}│${RESET}\n"
+    printf "${GREEN}╰────────────────────────────────────────────────────────╯${RESET}\n"
+fi
+
+# API Key box
+if [ -n "$API_KEY" ]; then
+    echo ""
+    printf "${BLUE}╭─ ${ICON_KEY} API Key ────────────────────────────────────────────╮${RESET}\n"
+    printf "${BLUE}│${RESET}\n"
+    printf "${BLUE}│${RESET}  ${BRIGHT_CYAN}%-54s${RESET}\n" "$API_KEY"
+    printf "${BLUE}│${RESET}  ${DIM}%-54s${RESET}\n" "(saved in storefront/.env.local)"
+    printf "${BLUE}│${RESET}\n"
+    printf "${BLUE}╰────────────────────────────────────────────────────────╯${RESET}\n"
+fi
+
+# Access URLs box
+echo ""
+show_spinner "Waiting for admin panel to be ready..." &
+SPINNER_PID=$!
+if wait_for_url "http://localhost:8000/admin" 240 2; then
+    stop_spinner $SPINNER_PID "success" "Admin panel is ready"
+else
+    stop_spinner $SPINNER_PID "warning" "Admin panel not ready yet (still starting)"
+fi
+
+show_spinner "Waiting for storefront to be ready..." &
+SPINNER_PID=$!
+if wait_for_url "http://localhost:8000" 240 2; then
+    stop_spinner $SPINNER_PID "success" "Storefront is ready"
+else
+    stop_spinner $SPINNER_PID "warning" "Storefront not ready yet (still starting)"
+fi
+
+echo ""
+printf "${BRIGHT_CYAN}╭─ 🌐 Access URLs ───────────────────────────────────────╮${RESET}\n"
+printf "${BRIGHT_CYAN}│${RESET}\n"
+printf "${BRIGHT_CYAN}│${RESET}  ${ICON_LOCK}  Admin panel:  ${BRIGHT_BLUE}%-32s${RESET}\n" "http://localhost:8000/admin"
+printf "${BRIGHT_CYAN}│${RESET}  ${ICON_PACKAGE}  Storefront:   ${BRIGHT_BLUE}%-32s${RESET}\n" "http://localhost:8000"
+printf "${BRIGHT_CYAN}│${RESET}  📧  Mailpit:      ${BRIGHT_BLUE}%-32s${RESET}\n" "http://localhost:8025"
+printf "${BRIGHT_CYAN}│${RESET}\n"
+printf "${BRIGHT_CYAN}╰────────────────────────────────────────────────────────╯${RESET}\n"
+
+# Useful commands box
+echo ""
+printf "${CYAN}╭─ 💡 Useful Commands ───────────────────────────────────╮${RESET}\n"
+printf "${CYAN}│${RESET}\n"
+printf "${CYAN}│${RESET}  ${BRIGHT_CYAN}make dev${RESET}              Start development environment\n"
+printf "${CYAN}│${RESET}  ${BRIGHT_CYAN}make test${RESET}             Run tests\n"
+printf "${CYAN}│${RESET}  ${BRIGHT_CYAN}make lint${RESET}             Run linters\n"
+printf "${CYAN}│${RESET}  ${BRIGHT_CYAN}docker-compose logs -f${RESET}  View logs\n"
+printf "${CYAN}│${RESET}\n"
+printf "${CYAN}╰────────────────────────────────────────────────────────╯${RESET}\n"
+
+echo ""
+echo ""
+printf "${BRIGHT_GREEN}${ICON_SPARKLES} Happy coding! ${ICON_SPARKLES}${RESET}\n"
+echo ""
+echo ""

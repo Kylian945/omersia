@@ -1,0 +1,55 @@
+version: 2
+updates:
+  # Backend - Composer dependencies
+  - package-ecosystem: "composer"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "kylian"
+    labels:
+      - "dependencies"
+      - "backend"
+      - "composer"
+    commit-message:
+      prefix: "chore(backend)"
+      include: "scope"
+
+  # Storefront - npm dependencies
+  - package-ecosystem: "npm"
+    directory: "/storefront"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "kylian"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "npm"
+    commit-message:
+      prefix: "chore(storefront)"
+      include: "scope"
+
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/.github/workflows"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "kylian"
+    labels:
+      - "dependencies"
+      - "ci-cd"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"

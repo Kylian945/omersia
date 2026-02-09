@@ -1,0 +1,23 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app
+        - packages/Admin/src
+        - packages/Api/src
+        - packages/Apparence/src
+        - packages/CMS/src
+        - packages/Catalog/src
+        - packages/Core/src
+        - packages/Customer/src
+        - packages/Gdpr/src
+        - packages/Payment/src
+        - packages/Sales/src
+        - packages/Shared/src
+
+    excludePaths:
+        - packages/*/src/database/migrations
+        - packages/*/src/resources/views
+
+    level: 5

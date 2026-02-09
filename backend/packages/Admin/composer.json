@@ -1,0 +1,15 @@
+{
+  "name": "omersia/admin",
+  "autoload": {
+    "psr-4": {
+      "Omersia\\Admin\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Omersia\\Admin\\AdminServiceProvider"
+      ]
+    }
+  }
+}

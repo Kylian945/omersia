@@ -1,0 +1,22 @@
+{
+  "name": "omersia/payment",
+  "description": "Payment management package for Omersia",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Omersia\\Payment\\": "src/",
+      "Omersia\\Payment\\Database\\Factories\\": "database/factories/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Omersia\\Payment\\PaymentServiceProvider"
+      ]
+    }
+  },
+  "require": {
+    "php": "^8.2",
+    "illuminate/support": "^10.0 || ^11.0"
+  }
+}

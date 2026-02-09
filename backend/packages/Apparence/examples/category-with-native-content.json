@@ -1,0 +1,367 @@
+{
+  "pages": [
+    {
+      "type": "category",
+      "slug": "categories",
+      "hasNativeContent": true,
+      "translations": {
+        "fr": {
+          "title": "Catégorie",
+          "meta_title": "Catégorie - Notre boutique",
+          "meta_description": "Explorez tous les produits de cette catégorie",
+          "content": {
+            "beforeNative": {
+              "sections": [
+                {
+                  "id": "section-category-hero",
+                  "settings": {
+                    "background": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    "paddingTop": 80,
+                    "paddingBottom": 80,
+                    "fullWidth": false
+                  },
+                  "columns": [
+                    {
+                      "id": "col-hero",
+                      "width": 100,
+                      "widgets": [
+                        {
+                          "id": "widget-category-title",
+                          "type": "heading",
+                          "props": {
+                            "tag": "h1",
+                            "text": "{{category.name}}",
+                            "style": {
+                              "color": "#ffffff",
+                              "textAlign": "center"
+                            }
+                          }
+                        },
+                        {
+                          "id": "widget-category-desc",
+                          "type": "text",
+                          "props": {
+                            "html": "<p style='color: #ffffff; text-align: center; font-size: 1.125rem;'>{{category.description}}</p>"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "section-category-features",
+                  "settings": {
+                    "background": "#ffffff",
+                    "paddingTop": 30,
+                    "paddingBottom": 30,
+                    "fullWidth": false
+                  },
+                  "columns": [
+                    {
+                      "id": "col-features",
+                      "width": 100,
+                      "widgets": [
+                        {
+                          "id": "widget-features",
+                          "type": "features_bar",
+                          "props": {
+                            "items": [
+                              {
+                                "icon": "truck",
+                                "title": "Livraison gratuite",
+                                "description": "Dès 50€ d'achat"
+                              },
+                              {
+                                "icon": "shield-check",
+                                "title": "Garantie qualité",
+                                "description": "Produits certifiés"
+                              },
+                              {
+                                "icon": "refresh",
+                                "title": "Retours faciles",
+                                "description": "Sous 30 jours"
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "afterNative": {
+              "sections": [
+                {
+                  "id": "section-category-info",
+                  "settings": {
+                    "background": "#f9fafb",
+                    "paddingTop": 60,
+                    "paddingBottom": 60,
+                    "fullWidth": false
+                  },
+                  "columns": [
+                    {
+                      "id": "col-info-text",
+                      "width": 50,
+                      "widgets": [
+                        {
+                          "id": "widget-info-title",
+                          "type": "heading",
+                          "props": {
+                            "tag": "h2",
+                            "text": "À propos de cette catégorie"
+                          }
+                        },
+                        {
+                          "id": "widget-info-content",
+                          "type": "text",
+                          "props": {
+                            "html": "<p>Cette catégorie regroupe une sélection de produits de qualité, soigneusement choisis pour répondre à vos besoins. Découvrez notre gamme complète et profitez de nos meilleurs prix.</p><p>Tous nos produits sont garantis et respectent les normes en vigueur.</p>"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "col-info-accordion",
+                      "width": 50,
+                      "widgets": [
+                        {
+                          "id": "widget-accordion",
+                          "type": "accordion",
+                          "props": {
+                            "items": [
+                              {
+                                "title": "Livraison et retours",
+                                "content": "Livraison gratuite dès 50€ d'achat. Retours gratuits sous 30 jours."
+                              },
+                              {
+                                "title": "Garantie",
+                                "content": "Tous nos produits sont garantis et certifiés conformes aux normes en vigueur."
+                              },
+                              {
+                                "title": "Service client",
+                                "content": "Notre équipe est disponible 24/7 pour répondre à toutes vos questions."
+                              },
+                              {
+                                "title": "Paiement sécurisé",
+                                "content": "Nous acceptons les cartes bancaires, PayPal et autres moyens de paiement sécurisés."
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "section-subcategories",
+                  "settings": {
+                    "background": "#ffffff",
+                    "paddingTop": 60,
+                    "paddingBottom": 60,
+                    "fullWidth": false
+                  },
+                  "columns": [
+                    {
+                      "id": "col-subcategories-heading",
+                      "width": 100,
+                      "widgets": [
+                        {
+                          "id": "widget-subcategories-title",
+                          "type": "heading",
+                          "props": {
+                            "tag": "h2",
+                            "text": "Explorez nos sous-catégories"
+                          }
+                        },
+                        {
+                          "id": "widget-subcategories-desc",
+                          "type": "text",
+                          "props": {
+                            "html": "<p>Affinez votre recherche en explorant nos différentes sous-catégories</p>"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "col-subcategories-grid",
+                      "width": 100,
+                      "widgets": [
+                        {
+                          "id": "widget-subcategories-grid",
+                          "type": "categories_grid",
+                          "props": {
+                            "columns": 4,
+                            "itemsPerRow": 4,
+                            "showOnlySubcategories": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "section-related-categories",
+                  "settings": {
+                    "background": "#f9fafb",
+                    "paddingTop": 60,
+                    "paddingBottom": 60,
+                    "fullWidth": false
+                  },
+                  "columns": [
+                    {
+                      "id": "col-related-heading",
+                      "width": 100,
+                      "widgets": [
+                        {
+                          "id": "widget-related-title",
+                          "type": "heading",
+                          "props": {
+                            "tag": "h2",
+                            "text": "Catégories similaires"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "col-related-grid",
+                      "width": 100,
+                      "widgets": [
+                        {
+                          "id": "widget-related-grid",
+                          "type": "categories_grid",
+                          "props": {
+                            "columns": 3,
+                            "itemsPerRow": 3,
+                            "excludeCurrentCategory": true
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "id": "section-newsletter",
+                  "settings": {
+                    "background": "#ffffff",
+                    "paddingTop": 60,
+                    "paddingBottom": 60,
+                    "fullWidth": false
+                  },
+                  "columns": [
+                    {
+                      "id": "col-newsletter",
+                      "width": 100,
+                      "widgets": [
+                        {
+                          "id": "widget-newsletter",
+                          "type": "newsletter",
+                          "props": {
+                            "title": "Restez informé des nouveautés",
+                            "description": "Inscrivez-vous à notre newsletter pour recevoir nos dernières offres et nouveautés dans cette catégorie",
+                            "placeholder": "Votre adresse email"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        "en": {
+          "title": "Category",
+          "meta_title": "Category - Our shop",
+          "meta_description": "Explore all products in this category",
+          "content": {
+            "beforeNative": {
+              "sections": [
+                {
+                  "id": "section-category-hero",
+                  "settings": {
+                    "background": "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                    "paddingTop": 80,
+                    "paddingBottom": 80,
+                    "fullWidth": false
+                  },
+                  "columns": [
+                    {
+                      "id": "col-hero",
+                      "width": 100,
+                      "widgets": [
+                        {
+                          "id": "widget-category-title",
+                          "type": "heading",
+                          "props": {
+                            "tag": "h1",
+                            "text": "{{category.name}}",
+                            "style": {
+                              "color": "#ffffff",
+                              "textAlign": "center"
+                            }
+                          }
+                        },
+                        {
+                          "id": "widget-category-desc",
+                          "type": "text",
+                          "props": {
+                            "html": "<p style='color: #ffffff; text-align: center; font-size: 1.125rem;'>{{category.description}}</p>"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            "afterNative": {
+              "sections": [
+                {
+                  "id": "section-related-categories",
+                  "settings": {
+                    "background": "#f9fafb",
+                    "paddingTop": 60,
+                    "paddingBottom": 60,
+                    "fullWidth": false
+                  },
+                  "columns": [
+                    {
+                      "id": "col-related-heading",
+                      "width": 100,
+                      "widgets": [
+                        {
+                          "id": "widget-related-title",
+                          "type": "heading",
+                          "props": {
+                            "tag": "h2",
+                            "text": "Similar categories"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "id": "col-related-grid",
+                      "width": 100,
+                      "widgets": [
+                        {
+                          "id": "widget-related-grid",
+                          "type": "categories_grid",
+                          "props": {
+                            "columns": 3,
+                            "itemsPerRow": 3
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

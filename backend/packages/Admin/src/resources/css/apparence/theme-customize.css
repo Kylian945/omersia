@@ -1,0 +1,32 @@
+/* Theme customization - Color input styles */
+
+/* Style pour les inputs de couleur circulaires */
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0;
+    border-radius: 9999px;
+}
+
+input[type="color"]::-webkit-color-swatch {
+    border: 2px solid #e5e7eb;
+    border-radius: 9999px;
+    transition: border-color 0.2s;
+}
+
+input[type="color"]::-moz-color-swatch {
+    border: 2px solid #e5e7eb;
+    border-radius: 9999px;
+}
+
+input[type="color"]:hover::-webkit-color-swatch {
+    border-color: #9ca3af;
+}
+
+input[type="color"]:focus {
+    outline: none;
+}
+
+input[type="color"]:focus::-webkit-color-swatch {
+    border-color: #111827;
+    box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
+}

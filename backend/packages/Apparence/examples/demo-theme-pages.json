@@ -1,0 +1,992 @@
+{
+  "pages": [
+    {
+      "type": "home",
+      "slug": "accueil",
+      "translations": {
+        "fr": {
+          "title": "Accueil",
+          "meta_title": "Bienvenue sur notre boutique",
+          "meta_description": "Découvrez notre sélection de produits exceptionnels avec livraison gratuite et service client 24/7",
+          "noindex": false,
+          "content": {
+            "sections": [
+              {
+                "id": "section-hero",
+                "columns": [
+                  {
+                    "id": "col-hero",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-hero",
+                        "type": "hero_banner",
+                        "props": {
+                          "badge": "Nouvelle collection",
+                          "title": "Découvrez notre sélection",
+                          "padding": {
+                            "top": "2xl",
+                            "bottom": "2xl"
+                          },
+                          "subtitle": "Les meilleurs produits pour vous",
+                          "primaryCta": {
+                            "href": "/products",
+                            "text": "Voir les produits"
+                          },
+                          "description": "Explorez notre collection exclusive de produits soigneusement sélectionnés pour vous offrir la meilleure expérience.",
+                          "secondaryCta": {
+                            "href": "/about",
+                            "text": "En savoir plus"
+                          }
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "padding": {
+                    "top": "",
+                    "bottom": ""
+                  },
+                  "fullWidth": true,
+                  "background": "#ffffff",
+                  "paddingTop": 0,
+                  "paddingBottom": 0
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-features",
+                "columns": [
+                  {
+                    "id": "col-features",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-features",
+                        "type": "features_bar",
+                        "props": {
+                          "items": [
+                            {
+                              "icon": "truck",
+                              "title": "Livraison gratuite",
+                              "description": "Sur toutes les commandes de plus de 50€"
+                            },
+                            {
+                              "icon": "shield-check",
+                              "title": "Paiement sécurisé",
+                              "description": "Transactions 100% sécurisées"
+                            },
+                            {
+                              "icon": "refresh",
+                              "title": "Retours gratuits",
+                              "description": "Sous 30 jours sans questions"
+                            },
+                            {
+                              "icon": "headset",
+                              "title": "Support 24/7",
+                              "description": "Service client toujours disponible"
+                            }
+                          ],
+                          "features": [
+                            {
+                              "icon": "Truck",
+                              "title": "Livraison gratuite",
+                              "description": "À partir de 50€ d'achat"
+                            },
+                            {
+                              "icon": "ShieldCheck",
+                              "title": "Paiement sécurisé",
+                              "description": "Transactions 100% sécurisées"
+                            },
+                            {
+                              "icon": "Undo2",
+                              "title": "Retours faciles",
+                              "description": "30 jours pour changer d'avis"
+                            },
+                            {
+                              "icon": "MessageCircle",
+                              "title": "Support client",
+                              "description": "Disponible 7j/7"
+                            }
+                          ]
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "fullWidth": true,
+                  "background": "#ffffff",
+                  "paddingTop": 40,
+                  "paddingBottom": 40
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-categories",
+                "columns": [
+                  {
+                    "id": "col-categories-heading",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-categories-title",
+                        "type": "heading",
+                        "props": {
+                          "tag": "h2",
+                          "text": "Nos catégories",
+                          "align": "left"
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      },
+                      {
+                        "id": "widget-categories-desc",
+                        "type": "text",
+                        "props": {
+                          "html": "<p>Explorez notre large gamme de produits organisés par catégorie</p>"
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  },
+                  {
+                    "id": "col-categories-grid",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-categories-grid",
+                        "type": "categories_grid",
+                        "props": {
+                          "gap": 16,
+                          "title": "Découvrez nos catégories",
+                          "columns": 3,
+                          "autoplay": false,
+                          "showDots": true,
+                          "showArrows": true,
+                          "displayMode": "slider",
+                          "itemsPerRow": 3,
+                          "categorySlugs": [],
+                          "maxCategories": null,
+                          "slidesPerView": {
+                            "mobile": 2,
+                            "desktop": 4
+                          },
+                          "slidesToScroll": {
+                            "mobile": 2,
+                            "desktop": 4
+                          }
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "padding": {
+                    "top": "2xl",
+                    "bottom": "2xl"
+                  },
+                  "fullWidth": false,
+                  "background": "#ffffff",
+                  "paddingTop": 60,
+                  "paddingBottom": 60
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-featured-products",
+                "columns": [
+                  {
+                    "id": "col-products-heading",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-products-title",
+                        "type": "heading",
+                        "props": {
+                          "tag": "h2",
+                          "text": "Produits populaires"
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  },
+                  {
+                    "id": "col-products-slider",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-product-slider",
+                        "type": "product_slider",
+                        "props": {
+                          "gap": 16,
+                          "mode": "latest",
+                          "limit": 8,
+                          "title": "Les plus vendus",
+                          "columns": {
+                            "mobile": 2,
+                            "desktop": 4
+                          },
+                          "autoplay": false,
+                          "showDots": true,
+                          "productIds": [],
+                          "showArrows": true,
+                          "displayMode": "slider",
+                          "categorySlug": "",
+                          "slidesPerView": {
+                            "mobile": 2,
+                            "desktop": 4
+                          },
+                          "slidesToScroll": {
+                            "mobile": 2,
+                            "desktop": 4
+                          }
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "padding": {
+                    "top": "2xl",
+                    "bottom": "2xl"
+                  },
+                  "fullWidth": false,
+                  "background": "#fafafa",
+                  "paddingTop": 60,
+                  "paddingBottom": 60
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-promo",
+                "columns": [
+                  {
+                    "id": "col-promo",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-promo",
+                        "type": "promo_banner",
+                        "props": {
+                          "badge": "Offre limitée",
+                          "title": "-20% sur votre première commande",
+                          "ctaHref": "/register",
+                          "ctaText": "J'en profite",
+                          "variant": "gradient",
+                          "description": "Inscrivez-vous à notre newsletter et bénéficiez d'une réduction immédiate"
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "padding": {
+                    "top": "2xl",
+                    "bottom": "2xl"
+                  },
+                  "fullWidth": false,
+                  "background": "#ffffff",
+                  "paddingTop": 60,
+                  "paddingBottom": 60
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-testimonials",
+                "columns": [
+                  {
+                    "id": "col-testimonials-content",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-testimonials",
+                        "type": "testimonials",
+                        "props": {
+                          "testimonials": [
+                            {
+                              "name": "Marie Dupont",
+                              "role": "Cliente satisfaite",
+                              "rating": 5,
+                              "content": "Excellente qualité et service impeccable. Je recommande vivement !"
+                            },
+                            {
+                              "name": "Jean Martin",
+                              "role": "Client régulier",
+                              "rating": 5,
+                              "content": "Livraison rapide et produits conformes à mes attentes."
+                            },
+                            {
+                              "name": "Sophie Bernard",
+                              "role": "Nouvelle cliente",
+                              "rating": 5,
+                              "content": "Une très belle découverte, je reviendrai c'est sûr !"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "padding": {
+                    "top": "2xl",
+                    "bottom": "2xl"
+                  },
+                  "fullWidth": false,
+                  "background": "#ffffff",
+                  "paddingTop": 60,
+                  "paddingBottom": 60
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-newsletter",
+                "columns": [
+                  {
+                    "id": "col-newsletter",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-newsletter",
+                        "type": "newsletter",
+                        "props": {
+                          "title": "Restez informé",
+                          "description": "Inscrivez-vous à notre newsletter pour recevoir nos dernières offres et nouveautés",
+                          "placeholder": "Votre adresse email"
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "margin": {
+                    "top": "2xl"
+                  },
+                  "padding": {
+                    "top": "2xl",
+                    "bottom": "2xl"
+                  },
+                  "fullWidth": false,
+                  "background": "#fafafa",
+                  "paddingTop": 60,
+                  "paddingBottom": 60
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              }
+            ]
+          }
+        },
+        "en": {
+          "title": "Home",
+          "meta_title": "Welcome to our shop",
+          "meta_description": "Discover our selection of exceptional products with free delivery and 24/7 customer service",
+          "noindex": false,
+          "content": {
+            "sections": [
+              {
+                "id": "section-hero",
+                "columns": [
+                  {
+                    "id": "col-hero",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-hero",
+                        "type": "hero_banner",
+                        "props": {
+                          "badge": "New collection",
+                          "title": "Discover our selection",
+                          "padding": {
+                            "top": "2xl",
+                            "bottom": "2xl"
+                          },
+                          "subtitle": "The best products for you",
+                          "primaryCta": {
+                            "href": "/products",
+                            "text": "View products"
+                          },
+                          "description": "Explore our exclusive collection of carefully selected products to offer you the best experience.",
+                          "secondaryCta": {
+                            "href": "/about",
+                            "text": "Learn more"
+                          }
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "padding": {
+                    "top": "",
+                    "bottom": ""
+                  },
+                  "fullWidth": true,
+                  "background": "#ffffff",
+                  "paddingTop": 0,
+                  "paddingBottom": 0
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-features",
+                "columns": [
+                  {
+                    "id": "col-features",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-features",
+                        "type": "features_bar",
+                        "props": {
+                          "items": [
+                            {
+                              "icon": "truck",
+                              "title": "Free delivery",
+                              "description": "On all orders over 50€"
+                            },
+                            {
+                              "icon": "shield-check",
+                              "title": "Secure payment",
+                              "description": "100% secure transactions"
+                            },
+                            {
+                              "icon": "refresh",
+                              "title": "Free returns",
+                              "description": "Within 30 days, no questions asked"
+                            },
+                            {
+                              "icon": "headset",
+                              "title": "24/7 Support",
+                              "description": "Customer service always available"
+                            }
+                          ],
+                          "features": [
+                            {
+                              "icon": "Truck",
+                              "title": "Free delivery",
+                              "description": "On orders over 50€"
+                            },
+                            {
+                              "icon": "ShieldCheck",
+                              "title": "Secure payment",
+                              "description": "100% secure transactions"
+                            },
+                            {
+                              "icon": "Undo2",
+                              "title": "Easy returns",
+                              "description": "30 days to change your mind"
+                            },
+                            {
+                              "icon": "MessageCircle",
+                              "title": "Customer support",
+                              "description": "Available 7 days a week"
+                            }
+                          ]
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "fullWidth": true,
+                  "background": "#ffffff",
+                  "paddingTop": 40,
+                  "paddingBottom": 40
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-categories",
+                "columns": [
+                  {
+                    "id": "col-categories-heading",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-categories-title",
+                        "type": "heading",
+                        "props": {
+                          "tag": "h2",
+                          "text": "Our categories",
+                          "align": "left"
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      },
+                      {
+                        "id": "widget-categories-desc",
+                        "type": "text",
+                        "props": {
+                          "html": "<p>Explore our wide range of products organized by category</p>"
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  },
+                  {
+                    "id": "col-categories-grid",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-categories-grid",
+                        "type": "categories_grid",
+                        "props": {
+                          "gap": 16,
+                          "title": "Discover our categories",
+                          "columns": 3,
+                          "autoplay": false,
+                          "showDots": true,
+                          "showArrows": true,
+                          "displayMode": "slider",
+                          "itemsPerRow": 3,
+                          "categorySlugs": [],
+                          "maxCategories": null,
+                          "slidesPerView": {
+                            "mobile": 2,
+                            "desktop": 4
+                          },
+                          "slidesToScroll": {
+                            "mobile": 2,
+                            "desktop": 4
+                          }
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "padding": {
+                    "top": "2xl",
+                    "bottom": "2xl"
+                  },
+                  "fullWidth": false,
+                  "background": "#ffffff",
+                  "paddingTop": 60,
+                  "paddingBottom": 60
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-featured-products",
+                "columns": [
+                  {
+                    "id": "col-products-heading",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-products-title",
+                        "type": "heading",
+                        "props": {
+                          "tag": "h2",
+                          "text": "Popular products"
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  },
+                  {
+                    "id": "col-products-slider",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-product-slider",
+                        "type": "product_slider",
+                        "props": {
+                          "gap": 16,
+                          "mode": "latest",
+                          "limit": 8,
+                          "title": "Best sellers",
+                          "columns": {
+                            "mobile": 2,
+                            "desktop": 4
+                          },
+                          "autoplay": false,
+                          "showDots": true,
+                          "productIds": [],
+                          "showArrows": true,
+                          "displayMode": "slider",
+                          "categorySlug": "",
+                          "slidesPerView": {
+                            "mobile": 2,
+                            "desktop": 4
+                          },
+                          "slidesToScroll": {
+                            "mobile": 2,
+                            "desktop": 4
+                          }
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "padding": {
+                    "top": "2xl",
+                    "bottom": "2xl"
+                  },
+                  "fullWidth": false,
+                  "background": "#fafafa",
+                  "paddingTop": 60,
+                  "paddingBottom": 60
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-promo",
+                "columns": [
+                  {
+                    "id": "col-promo",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-promo",
+                        "type": "promo_banner",
+                        "props": {
+                          "badge": "Limited offer",
+                          "title": "-20% on your first order",
+                          "ctaHref": "/register",
+                          "ctaText": "Get it now",
+                          "variant": "gradient",
+                          "description": "Sign up for our newsletter and get an immediate discount"
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "padding": {
+                    "top": "2xl",
+                    "bottom": "2xl"
+                  },
+                  "fullWidth": false,
+                  "background": "#ffffff",
+                  "paddingTop": 60,
+                  "paddingBottom": 60
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-testimonials",
+                "columns": [
+                  {
+                    "id": "col-testimonials-content",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-testimonials",
+                        "type": "testimonials",
+                        "props": {
+                          "testimonials": [
+                            {
+                              "name": "Marie Dupont",
+                              "role": "Satisfied customer",
+                              "rating": 5,
+                              "content": "Excellent quality and impeccable service. Highly recommended!"
+                            },
+                            {
+                              "name": "Jean Martin",
+                              "role": "Regular customer",
+                              "rating": 5,
+                              "content": "Fast delivery and products that meet my expectations."
+                            },
+                            {
+                              "name": "Sophie Bernard",
+                              "role": "New customer",
+                              "rating": 5,
+                              "content": "A great discovery, I will definitely come back!"
+                            }
+                          ]
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "padding": {
+                    "top": "2xl",
+                    "bottom": "2xl"
+                  },
+                  "fullWidth": false,
+                  "background": "#ffffff",
+                  "paddingTop": 60,
+                  "paddingBottom": 60
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              },
+              {
+                "id": "section-newsletter",
+                "columns": [
+                  {
+                    "id": "col-newsletter",
+                    "width": 100,
+                    "widgets": [
+                      {
+                        "id": "widget-newsletter",
+                        "type": "newsletter",
+                        "props": {
+                          "title": "Stay informed",
+                          "description": "Subscribe to our newsletter to receive our latest offers and news",
+                          "placeholder": "Your email address"
+                        },
+                        "visibility": {
+                          "mobile": true,
+                          "tablet": true,
+                          "desktop": true
+                        }
+                      }
+                    ],
+                    "visibility": {
+                      "mobile": true,
+                      "tablet": true,
+                      "desktop": true
+                    },
+                    "mobileWidth": 100,
+                    "desktopWidth": 100
+                  }
+                ],
+                "settings": {
+                  "margin": {
+                    "top": "2xl"
+                  },
+                  "padding": {
+                    "top": "2xl",
+                    "bottom": "2xl"
+                  },
+                  "fullWidth": false,
+                  "background": "#fafafa",
+                  "paddingTop": 60,
+                  "paddingBottom": 60
+                },
+                "visibility": {
+                  "mobile": true,
+                  "tablet": true,
+                  "desktop": true
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ]
+}
