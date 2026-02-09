@@ -187,6 +187,7 @@ class Order extends Model
 
     /**
      * Enregistrer l'utilisation des réductions appliquées
+     * et désactiver automatiquement les discounts qui atteignent leur limite
      */
     public function recordDiscountUsage(array $discountIds): void
     {
@@ -200,6 +201,43 @@ class Order extends Model
                 'order_id' => $this->id,
                 'customer_id' => $this->customer_id,
                 'usage_count' => 1,
+            ]);
+
+            // Vérifier et désactiver le discount si la limite globale est atteinte
+            $this->checkAndDeactivateDiscountIfLimitReached($discountId);
+        }
+    }
+
+    /**
+     * Vérifie si un discount a atteint sa limite d'utilisation globale
+     * et le désactive automatiquement si c'est le cas
+     */
+    private function checkAndDeactivateDiscountIfLimitReached(int $discountId): void
+    {
+        $discount = \Omersia\Sales\Models\Discount::find($discountId);
+
+        if (! $discount || ! $discount->is_active) {
+            return;
+        }
+
+        // Vérifier uniquement la limite globale (pas par client)
+        if ($discount->usage_limit === null) {
+            return;
+        }
+
+        $totalUsage = \Omersia\Sales\Models\DiscountUsage::where('discount_id', $discountId)
+            ->sum('usage_count');
+
+        if ($totalUsage >= $discount->usage_limit) {
+            $discount->is_active = false;
+            $discount->save();
+
+            Log::channel('transactions')->info('Discount automatically deactivated - usage limit reached', [
+                'discount_id' => $discount->id,
+                'discount_code' => $discount->code,
+                'discount_name' => $discount->name,
+                'usage_limit' => $discount->usage_limit,
+                'total_usage' => $totalUsage,
             ]);
         }
     }

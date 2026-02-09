@@ -16,29 +16,76 @@ class DiscountEvaluationService
      */
     public function evaluate(DiscountApplicationDTO $dto): DiscountEvaluationResultDTO
     {
-        // 1) Vérifier l'éligibilité du client
+        // 1) Vérifier les limites d'utilisation
+        $usageLimitCheck = $this->checkUsageLimits($dto);
+        if (! $usageLimitCheck['ok']) {
+            return DiscountEvaluationResultDTO::failure($usageLimitCheck['message']);
+        }
+
+        // 2) Vérifier l'éligibilité du client
         $eligibilityCheck = $this->checkCustomerEligibility($dto);
         if (! $eligibilityCheck['ok']) {
             return DiscountEvaluationResultDTO::failure($eligibilityCheck['message']);
         }
 
-        // 2) Déterminer les produits éligibles selon le scope
+        // 4) Déterminer les produits éligibles selon le scope
         $eligibleProductIds = $this->getEligibleProductIds($dto);
 
-        // 3) Vérifier si des produits du panier sont éligibles
+        // 5) Vérifier si des produits du panier sont éligibles
         $matchingCheck = $this->checkProductMatching($dto, $eligibleProductIds);
         if (! $matchingCheck['ok']) {
             return DiscountEvaluationResultDTO::failure($matchingCheck['message']);
         }
 
-        // 4) Vérifier les conditions de commande (montant minimum, quantité)
+        // 6) Vérifier les conditions de commande (montant minimum, quantité)
         $conditionsCheck = $this->checkOrderConditions($dto);
         if (! $conditionsCheck['ok']) {
             return DiscountEvaluationResultDTO::failure($conditionsCheck['message']);
         }
 
-        // 5) Calculer les montants de réduction
+        // 7) Calculer les montants de réduction
         return $this->calculateDiscounts($dto, $eligibleProductIds);
+    }
+
+    /**
+     * Vérifie les limites d'utilisation globale et par client
+     */
+    private function checkUsageLimits(DiscountApplicationDTO $dto): array
+    {
+        $discount = $dto->discount;
+        $customer = $dto->customer;
+
+        // Charger les usages si pas déjà chargés
+        if (! $discount->relationLoaded('usages')) {
+            $discount->load('usages');
+        }
+
+        // Vérifier la limite d'utilisation globale
+        if ($discount->usage_limit !== null) {
+            $totalUsage = $discount->usages->sum('usage_count');
+            if ($totalUsage >= $discount->usage_limit) {
+                return [
+                    'ok' => false,
+                    'message' => 'Ce code promo a atteint sa limite d\'utilisation.',
+                ];
+            }
+        }
+
+        // Vérifier la limite d'utilisation par client
+        if ($discount->usage_limit_per_customer !== null && $customer) {
+            $customerUsage = $discount->usages
+                ->where('customer_id', $customer->id)
+                ->sum('usage_count');
+
+            if ($customerUsage >= $discount->usage_limit_per_customer) {
+                return [
+                    'ok' => false,
+                    'message' => 'Vous avez déjà utilisé ce code promo le nombre maximum de fois autorisé.',
+                ];
+            }
+        }
+
+        return ['ok' => true];
     }
 
     /**

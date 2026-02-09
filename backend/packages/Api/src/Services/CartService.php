@@ -119,6 +119,7 @@ final class CartService
 
         /** @var Discount|null $discount */
         $discount = Discount::forShop($shopId)
+            ->with(['usages', 'products', 'collections', 'customers', 'customerGroups'])
             ->where('method', 'code')
             ->whereRaw('UPPER(code) = ?', [$code])
             ->where('is_active', true)
@@ -233,6 +234,7 @@ final class CartService
         $productIds = array_unique($productIds);
 
         $discounts = Discount::forShop($shopId)
+            ->with(['usages', 'products', 'collections', 'customers', 'customerGroups'])
             ->where('method', 'automatic')
             ->where('is_active', true)
             ->where(function ($q) {
