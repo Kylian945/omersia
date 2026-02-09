@@ -105,12 +105,20 @@ class OrderCreationService
                 billingAddress: $dto->billingAddress,
                 items: $dto->items,
                 discountTotal: $dto->discountTotal,
-                shippingTotal: $shippingMethod->price, // DCA-001: Toujours utiliser le prix serveur
+                shippingTotal: $dto->shippingTotal, // Utiliser le prix calculé par le frontend (inclut livraison gratuite)
                 taxTotal: $dto->taxTotal,
             );
 
             // DCA-001: Valider les prix côté serveur
             $validationResult = $this->priceValidationService->validateAndRecalculate($createDto);
+
+            // Calculer le prix de livraison correct (avec seuil livraison gratuite)
+            $calculatedShippingPrice = $shippingMethod->calculatePrice(
+                $validationResult['verified_subtotal'],
+                null, // weight
+                $dto->shippingAddress['country'] ?? null,
+                $dto->shippingAddress['postcode'] ?? null
+            );
 
             // Mettre à jour avec les valeurs vérifiées
             $order->currency = $dto->currency;
@@ -122,11 +130,11 @@ class OrderCreationService
             $order->billing_address = $dto->billingAddress;
             $order->subtotal = $validationResult['verified_subtotal'];
             $order->discount_total = $validationResult['verified_discount_total'];
-            $order->shipping_total = $shippingMethod->price; // DCA-001: Prix serveur
+            $order->shipping_total = $calculatedShippingPrice;
             $order->tax_total = $dto->taxTotal;
             $order->total = $validationResult['verified_subtotal']
                 - $validationResult['verified_discount_total']
-                + $shippingMethod->price
+                + $calculatedShippingPrice
                 + $dto->taxTotal;
             $order->applied_discounts = $validationResult['discount_ids'];
             $order->save();

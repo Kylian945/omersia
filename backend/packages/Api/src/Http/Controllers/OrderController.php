@@ -409,6 +409,13 @@ class OrderController extends Controller
         try {
             $order = $this->orderCreationService->updateOrder($order, $dto);
         } catch (PriceTamperingException $e) {
+            \Log::warning('Price validation failed in update', [
+                'field' => $e->field,
+                'submitted' => $e->submitted,
+                'expected' => $e->expected,
+                'message' => $e->getMessage(),
+                'order_id' => $order->id,
+            ]);
             return response()->json([
                 'error' => 'validation_error',
                 'message' => 'Les prix soumis ne correspondent pas aux prix réels. Veuillez rafraîchir votre panier.',

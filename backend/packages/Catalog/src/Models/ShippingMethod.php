@@ -50,8 +50,8 @@ class ShippingMethod extends Model
         'is_active' => 'boolean',
         'use_weight_based_pricing' => 'boolean',
         'use_zone_based_pricing' => 'boolean',
-        'free_shipping_threshold' => 'decimal:2',
-        'price' => 'decimal:2',
+        'free_shipping_threshold' => 'float',
+        'price' => 'float',
     ];
 
     public function orders(): HasMany

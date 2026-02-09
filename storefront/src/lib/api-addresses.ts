@@ -28,15 +28,20 @@ export async function getAddressById(
   id: number,
   authToken?: string
 ): Promise<Address | null> {
+  logger.debug("getAddressById called:", { id, hasToken: !!authToken });
+
   const { res, data } = await apiJson<Address>(`/addresses/${id}`, {
     authToken,
     cache: "no-store",
   });
 
   if (!res.ok) {
-    if (res.status !== 404) {
-      logger.warn("getAddressById failed:", res.status);
-    }
+    logger.warn("getAddressById failed:", {
+      id,
+      status: res.status,
+      statusText: res.statusText,
+      hasToken: !!authToken,
+    });
     return null;
   }
 

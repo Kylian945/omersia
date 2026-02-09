@@ -26,15 +26,25 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
 
-        // Super admin bypass
+        // Super admin bypass (seulement pour les User admin, pas les Customer)
         Gate::before(function ($user, $ability) {
-            if ($user->hasRole('super-admin')) {
+            // Ne pas appliquer aux Customer (API storefront)
+            if ($user instanceof \Omersia\Customer\Models\Customer) {
+                return null; // Continuer vers la Policy normale
+            }
+
+            if (method_exists($user, 'hasRole') && $user->hasRole('super-admin')) {
                 return true;
             }
+
+            return null;
         });
 
-        // Accès admin de base
+        // Accès admin de base (seulement pour les User admin)
         Gate::define('access-admin', function ($user) {
+            if (! method_exists($user, 'roles')) {
+                return false;
+            }
             return $user->roles()->exists();
         });
 
@@ -44,6 +54,9 @@ class AuthServiceProvider extends ServiceProvider
                 $permissions = DB::table('permissions')->pluck('name');
                 foreach ($permissions as $permission) {
                     Gate::define($permission, function ($user) use ($permission) {
+                        if (! method_exists($user, 'hasPermission')) {
+                            return false;
+                        }
                         return $user->hasPermission($permission);
                     });
                 }

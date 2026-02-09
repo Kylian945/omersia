@@ -146,6 +146,15 @@ class AddressController extends Controller
 
         $address = Address::findOrFail($id);
 
+        // Debug: Log les infos pour diagnostiquer le problème
+        \Log::debug('AddressController::show debug', [
+            'address_id' => $id,
+            'address_customer_id' => $address->customer_id,
+            'user_class' => get_class($user),
+            'user_id' => $user->id,
+            'match' => $address->customer_id === $user->id,
+        ]);
+
         $this->authorize('view', $address);
 
         return response()->json($address);
