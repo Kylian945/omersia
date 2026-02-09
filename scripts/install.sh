@@ -241,9 +241,22 @@ ensure_env_var() {
     fi
 }
 
-REVERB_APP_ID_CURRENT=$(grep -E "^REVERB_APP_ID=" "$BACKEND_DIR/.env" | tail -n 1 | cut -d= -f2-)
-REVERB_APP_KEY_CURRENT=$(grep -E "^REVERB_APP_KEY=" "$BACKEND_DIR/.env" | tail -n 1 | cut -d= -f2-)
-REVERB_APP_SECRET_CURRENT=$(grep -E "^REVERB_APP_SECRET=" "$BACKEND_DIR/.env" | tail -n 1 | cut -d= -f2-)
+# Read existing values (prefer PUSHER_ as source of truth, fallback to REVERB_)
+# Ignore ${...} variable references - treat as empty so we regenerate actual values
+read_env_val() {
+    local val
+    val=$(grep -E "^$1=" "$BACKEND_DIR/.env" | tail -n 1 | cut -d= -f2-)
+    # Strip ${...} references - they are not actual values
+    case "$val" in *'${'*) val="" ;; esac
+    echo "$val"
+}
+
+REVERB_APP_ID_CURRENT=$(read_env_val "PUSHER_APP_ID")
+[ -z "$REVERB_APP_ID_CURRENT" ] && REVERB_APP_ID_CURRENT=$(read_env_val "REVERB_APP_ID")
+REVERB_APP_KEY_CURRENT=$(read_env_val "PUSHER_APP_KEY")
+[ -z "$REVERB_APP_KEY_CURRENT" ] && REVERB_APP_KEY_CURRENT=$(read_env_val "REVERB_APP_KEY")
+REVERB_APP_SECRET_CURRENT=$(read_env_val "PUSHER_APP_SECRET")
+[ -z "$REVERB_APP_SECRET_CURRENT" ] && REVERB_APP_SECRET_CURRENT=$(read_env_val "REVERB_APP_SECRET")
 
 if [ -z "$REVERB_APP_ID_CURRENT" ]; then
     REVERB_APP_ID_CURRENT=$(( (RANDOM % 900000) + 100000 ))

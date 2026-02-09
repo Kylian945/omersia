@@ -48,10 +48,17 @@ class DemoProductsSeeder extends Seeder
             return;
         }
 
+        // Check if demo categories already exist (e.g. from a partial previous run)
+        $categoriesAlreadyExist = CategoryTranslation::where('slug', 'accueil')
+            ->whereHas('category', fn ($q) => $q->where('shop_id', $this->shopId))
+            ->exists();
+
         $this->command->info('🌱 Seeding demo categories and products...');
 
-        // Créer les catégories
-        $categories = $this->createCategories();
+        // Créer les catégories (skip if already present to avoid duplicates)
+        $categories = $categoriesAlreadyExist
+            ? $this->resolveExistingCategories()
+            : $this->createCategories();
         $this->command->info('✅ Created '.count($categories).' categories');
 
         // Créer les produits
@@ -199,6 +206,56 @@ class DemoProductsSeeder extends Seeder
                     }
                 }
             }
+        }
+
+        return $categories;
+    }
+
+    /**
+     * Resolve existing demo categories by slug instead of creating duplicates.
+     */
+    private function resolveExistingCategories(): array
+    {
+        $this->command->info('ℹ️  Demo categories already exist, resolving...');
+
+        $categories = [];
+        $allCategories = Category::with('translations')
+            ->where('shop_id', $this->shopId)
+            ->get();
+
+        // Build slug -> category mapping using translations
+        foreach ($allCategories as $category) {
+            $translation = $category->translations->where('locale', 'fr')->first();
+            if (! $translation) {
+                continue;
+            }
+
+            // Build full path: e.g. "Vêtements/Homme"
+            $path = $translation->name;
+            if ($category->parent_id) {
+                $parent = $allCategories->find($category->parent_id);
+                if ($parent) {
+                    $parentTranslation = $parent->translations->where('locale', 'fr')->first();
+                    if ($parentTranslation) {
+                        $parentPath = $parentTranslation->name;
+
+                        // Check grandparent for level 3
+                        if ($parent->parent_id) {
+                            $grandparent = $allCategories->find($parent->parent_id);
+                            if ($grandparent) {
+                                $gpTranslation = $grandparent->translations->where('locale', 'fr')->first();
+                                if ($gpTranslation) {
+                                    $parentPath = $gpTranslation->name.'/'.$parentPath;
+                                }
+                            }
+                        }
+
+                        $path = $parentPath.'/'.$translation->name;
+                    }
+                }
+            }
+
+            $categories[$path] = $category;
         }
 
         return $categories;
