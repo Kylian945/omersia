@@ -25,21 +25,21 @@ export default async function AccountPage() {
   return (
     <>
       <Header />
-      <main className="flex-1 pt-10 pb-6 bg-neutral-50 flex">
+      <main className="flex-1 pt-10 pb-6 bg-[var(--theme-page-bg,#f6f6f7)] flex">
         <Container>
           <div className="w-full flex flex-col justify-between h-full">
             <div>
               <div className="flex flex-wrap justify-between w-full">
                 <div className="flex flex-col">
-                  <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+                  <h1 className="text-2xl font-semibold tracking-tight text-[var(--theme-heading-color,#111827)]">
                     Mon compte
                   </h1>
-                  <p className="mt-1 text-xs text-neutral-500">
+                  <p className="mt-1 text-xs text-[var(--theme-muted-color,#6b7280)]">
                     Gérez vos informations personnelles et consultez vos commandes.
                   </p>
                 </div>
                 <div className="logout pt-3">
-                  <LogoutButton className="inline-flex items-center justify-center px-4 py-2 text-xs font-medium text-white bg-black rounded-lg hover:bg-black/90 transition">
+                  <LogoutButton className="inline-flex items-center justify-center px-4 py-2 text-xs font-medium text-[var(--theme-button-primary-text,#ffffff)] bg-[var(--theme-primary,#111827)] rounded-lg hover:opacity-90 transition">
                     Se déconnecter
                   </LogoutButton>
                 </div>
@@ -47,10 +47,10 @@ export default async function AccountPage() {
 
               {/* Profil */}
               <div className="profile">
-                <p className="text-xs text-black font-semibold mt-6">Profil</p>
-                <div className="flex flex-wrap gap-3 mt-2 rounded-2xl bg-white border border-black/5 shadow-sm p-5">
+                <p className="text-xs text-[var(--theme-heading-color,#111827)] font-semibold mt-6">Profil</p>
+                <div className="theme-panel theme-account-card flex flex-wrap gap-3 mt-2 rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5">
                   <div className="self-start flex-1 flex flex-col">
-                    <p className="text-xs text-black font-semibold mb-2">Identité</p>
+                    <p className="text-xs text-[var(--theme-heading-color,#111827)] font-semibold mb-2">Identité</p>
                     <AccountProfile
                       initialUser={{
                         firstname: user.firstname,
@@ -67,13 +67,13 @@ export default async function AccountPage() {
 
               {/* Commandes */}
               <div className="orders">
-                <p className="text-xs text-black mt-6 font-semibold">Commandes</p>
-                <div className="mt-2 rounded-2xl bg-white border border-black/5 shadow-sm p-5 space-y-3">
+                <p className="text-xs text-[var(--theme-heading-color,#111827)] mt-6 font-semibold">Commandes</p>
+                <div className="theme-panel theme-account-card mt-2 rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5 space-y-3">
                   <AccountOrdersRealtime customerId={user.id} initialOrders={orders} />
                 </div>
               </div>
             </div>
-            <Link href="/account/privacy" className="text-xs hover:underline mt-4 block bottom-0 text-neutral-500">
+            <Link href="/account/privacy" className="text-xs hover:underline mt-4 block bottom-0 text-[var(--theme-muted-color,#6b7280)]">
               Mes données personnelles
             </Link>
           </div>

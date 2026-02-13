@@ -43,6 +43,7 @@ class DefaultPageConfigService
                                             'text' => 'En savoir plus',
                                             'href' => '/about',
                                         ],
+                                        'image' => '',
                                     ],
                                 ],
                             ],

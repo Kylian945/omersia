@@ -21,3 +21,5 @@ yarn-error.log
 /packages/Modules/*
 /public/images/modules/*
 !/public/images/modules/no-icon.png
+/packages/Apparence/src/resources/views/themes
+!/packages/Apparence/src/resources/views/themes/vision

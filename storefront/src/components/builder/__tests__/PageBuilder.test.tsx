@@ -304,6 +304,37 @@ describe('PageBuilder', () => {
         expect(section.style.paddingBottom).toBe('60px');
       }
     });
+
+    it('should not force a white background when section background is empty', () => {
+      const layout: Layout = {
+        sections: [
+          {
+            id: 'section-1',
+            settings: {
+              background: '',
+              paddingTop: 40,
+              paddingBottom: 60,
+            },
+            columns: [
+              {
+                id: 'col-1',
+                desktopWidth: 100,
+                mobileWidth: 100,
+                widgets: [],
+              },
+            ],
+          },
+        ],
+      };
+
+      const { container } = render(<PageBuilder layout={layout} widgets={mockWidgets} />);
+
+      const section = container.querySelector('section');
+      expect(section).toBeTruthy();
+      if (section) {
+        expect(section.style.backgroundColor).toBe('');
+      }
+    });
   });
 
   describe('XSS prevention integration', () => {

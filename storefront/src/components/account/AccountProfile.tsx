@@ -102,31 +102,31 @@ export function AccountProfile({ initialUser }: Props) {
 
   return (
     <>
-      <div className="flex-1 rounded-2xl bg-white border border-black/5 shadow-sm p-5 space-y-3">
+      <div className="theme-account-card flex-1 rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5 space-y-3">
         <div>
           <div className="flex justify-between items-baseline">
-            <div className="text-xs text-neutral-500">Nom complet</div>
+            <div className="text-xs text-[var(--theme-muted-color,#6b7280)]">Nom complet</div>
             <button
               type="button"
               onClick={openModal}
-              className="w-6 h-6 flex items-center justify-center rounded-md border border-gray-200 text-black hover:bg-gray-100"
+              className="w-6 h-6 flex items-center justify-center rounded-md border border-[var(--theme-border-default,#e5e7eb)] text-[var(--theme-heading-color,#111827)] hover:bg-[var(--theme-input-bg,#ffffff)]"
             >
               <PenIcon className="w-3 h-3" />
             </button>
           </div>
-          <div className="text-xs font-medium text-neutral-900">
+          <div className="text-xs font-medium text-[var(--theme-heading-color,#111827)]">
             {(user.firstname || "") + " " + (user.lastname || "")}
           </div>
         </div>
         <div>
-          <div className="text-xs text-neutral-500">Adresse e-mail</div>
-          <div className="text-xs font-medium text-neutral-900">
+          <div className="text-xs text-[var(--theme-muted-color,#6b7280)]">Adresse e-mail</div>
+          <div className="text-xs font-medium text-[var(--theme-heading-color,#111827)]">
             {user.email}
           </div>
         </div>
         <div>
-          <div className="text-xs text-neutral-500">Téléphone</div>
-          <div className="text-xs font-medium text-neutral-900">
+          <div className="text-xs text-[var(--theme-muted-color,#6b7280)]">Téléphone</div>
+          <div className="text-xs font-medium text-[var(--theme-heading-color,#111827)]">
             {user.phone || "Non renseigné"}
           </div>
         </div>
@@ -134,15 +134,15 @@ export function AccountProfile({ initialUser }: Props) {
 
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-4 border border-neutral-200">
+          <div className="theme-account-card bg-[var(--theme-card-bg,#ffffff)] rounded-2xl shadow-xl w-full max-w-md p-4 border border-[var(--theme-border-default,#e5e7eb)]">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-semibold text-neutral-900">
+              <h2 className="text-sm font-semibold text-[var(--theme-heading-color,#111827)]">
                 Modifier mon profil
               </h2>
               <button
                 type="button"
                 onClick={closeModal}
-                className="text-xs text-neutral-500 hover:text-neutral-900"
+                className="text-xs text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-heading-color,#111827)]"
               >
                 Fermer
               </button>
@@ -151,7 +151,7 @@ export function AccountProfile({ initialUser }: Props) {
             <div className="space-y-2 text-xs">
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xxxs text-neutral-600 mb-1">
+                  <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                     Prénom *
                   </label>
                   <input
@@ -160,11 +160,11 @@ export function AccountProfile({ initialUser }: Props) {
                     onChange={(e) =>
                       handleChange("firstname", e.target.value)
                     }
-                    className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                    className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xxxs text-neutral-600 mb-1">
+                  <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                     Nom *
                   </label>
                   <input
@@ -173,32 +173,32 @@ export function AccountProfile({ initialUser }: Props) {
                     onChange={(e) =>
                       handleChange("lastname", e.target.value)
                     }
-                    className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                    className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xxxs text-neutral-600 mb-1">
+                <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                   Adresse e-mail *
                 </label>
                 <input
                   type="email"
                   value={form.email}
                   onChange={(e) => handleChange("email", e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                  className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 />
               </div>
 
               <div>
-                <label className="block text-xxxs text-neutral-600 mb-1">
+                <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                   Téléphone
                 </label>
                 <input
                   type="text"
                   value={form.phone}
                   onChange={(e) => handleChange("phone", e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                  className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 />
               </div>
 

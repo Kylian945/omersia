@@ -44,7 +44,7 @@ export function LoginForm() {
   };
 
   return (
-    <div className="rounded-2xl bg-white border border-black/5 shadow-sm p-5 space-y-4">
+    <div className="rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5 space-y-4">
       {success && (
         <div className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-2 rounded-xl">
           {success}
@@ -61,7 +61,7 @@ export function LoginForm() {
         <div className="space-y-1.5">
           <label
             htmlFor="email"
-            className="block text-xs font-medium text-neutral-800"
+            className="block text-xs font-medium text-[var(--theme-body-color,#374151)]"
           >
             Adresse e-mail
           </label>
@@ -71,7 +71,7 @@ export function LoginForm() {
             type="email"
             required
             autoComplete="email"
-            className="w-full rounded-xl border border-neutral-200 bg-neutral-50/60 px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-black/80 focus:bg-white transition"
+            className="w-full rounded-xl border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-page-bg,#f6f6f7)] px-3 py-2 text-xs text-[var(--theme-heading-color,#111827)] placeholder:text-[var(--theme-muted-color,#6b7280)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)] focus:bg-[var(--theme-card-bg,#ffffff)] transition"
             placeholder="vous@example.com"
           />
         </div>
@@ -80,13 +80,13 @@ export function LoginForm() {
           <div className="flex items-center justify-between">
             <label
               htmlFor="password"
-              className="block text-xs font-medium text-neutral-800"
+              className="block text-xs font-medium text-[var(--theme-body-color,#374151)]"
             >
               Mot de passe
             </label>
             <Link
               href="/password/forgot"
-              className="text-xxxs text-neutral-500 hover:text-neutral-900 transition"
+              className="text-xxxs text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-heading-color,#111827)] transition"
             >
               Mot de passe oublié ?
             </Link>
@@ -97,7 +97,7 @@ export function LoginForm() {
             type="password"
             required
             autoComplete="current-password"
-            className="w-full rounded-xl border border-neutral-200 bg-neutral-50/60 px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-black/80 focus:bg-white transition"
+            className="w-full rounded-xl border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-page-bg,#f6f6f7)] px-3 py-2 text-xs text-[var(--theme-heading-color,#111827)] placeholder:text-[var(--theme-muted-color,#6b7280)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)] focus:bg-[var(--theme-card-bg,#ffffff)] transition"
             placeholder="Votre mot de passe"
           />
         </div>
@@ -108,14 +108,14 @@ export function LoginForm() {
               type="checkbox"
               name="remember"
               defaultChecked
-              className="h-3 w-3 rounded border-neutral-300 text-black focus:ring-black/70"
+              className="h-3 w-3 rounded border-[var(--theme-border-default,#e5e7eb)] text-[var(--theme-heading-color,#111827)] focus:ring-[var(--theme-primary,#111827)]"
             />
-            <span className="text-xxxs text-neutral-600">
+            <span className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">
               Rester connecté
             </span>
           </label>
 
-          <div className="text-xxxs text-neutral-400">
+          <div className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">
             Connexion sécurisée 🔒
           </div>
         </div>
@@ -130,12 +130,12 @@ export function LoginForm() {
         </Button>
       </form>
 
-      <div className="pt-2 border-t border-neutral-100 flex flex-col gap-1">
-        <p className="text-xxxs text-neutral-500">
+      <div className="pt-2 border-t border-[var(--theme-border-default,#e5e7eb)] flex flex-col gap-1">
+        <p className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">
           Nouveau client ?
           <Link
             href="/register"
-            className="ml-1 text-xxxs text-neutral-900 font-medium hover:underline"
+            className="ml-1 text-xxxs text-[var(--theme-heading-color,#111827)] font-medium hover:underline"
           >
             Créer un compte
           </Link>

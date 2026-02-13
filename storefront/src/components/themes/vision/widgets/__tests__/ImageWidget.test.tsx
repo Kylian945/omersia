@@ -9,7 +9,7 @@ describe('ImageWidget', () => {
 
       const placeholder = container.querySelector('div');
       expect(placeholder).toBeTruthy();
-      expect(placeholder?.textContent).toBe('Image');
+      expect(placeholder?.textContent).toBe('Bloc image');
     });
 
     it('renders image with minimal props', () => {
@@ -19,7 +19,10 @@ describe('ImageWidget', () => {
 
       const img = container.querySelector('img');
       expect(img).toBeTruthy();
-      expect(img).toHaveAttribute('src', 'test.jpg');
+      expect(img?.getAttribute('src')).toContain('/_next/image?url=');
+      expect(img?.getAttribute('src')).toContain(
+        encodeURIComponent('http://localhost:8000/test.jpg')
+      );
       expect(img).toHaveAttribute('alt', 'Test');
     });
 
@@ -41,7 +44,7 @@ describe('ImageWidget', () => {
       // Should render placeholder
       const placeholder = container.querySelector('div');
       expect(placeholder).toBeTruthy();
-      expect(placeholder?.textContent).toBe('Image');
+      expect(placeholder?.textContent).toBe('Bloc image');
     });
   });
 
@@ -84,7 +87,10 @@ describe('ImageWidget', () => {
 
       const img = container.querySelector('img');
       expect(img).toBeTruthy();
-      expect(img).toHaveAttribute('src', 'legacy-image.jpg');
+      expect(img?.getAttribute('src')).toContain('/_next/image?url=');
+      expect(img?.getAttribute('src')).toContain(
+        encodeURIComponent('http://localhost:8000/legacy-image.jpg')
+      );
       expect(img).toHaveAttribute('alt', 'Legacy Image');
       // Should use default classes
       expect(img).toHaveClass('h-auto');
@@ -105,9 +111,10 @@ describe('ImageWidget', () => {
 
       const img = container.querySelector('img');
       expect(img).toBeTruthy();
-      // Browser will handle the javascript: protocol, but we verify it's rendered
-      expect(img).toHaveAttribute('src', 'javascript:alert(1)');
-      // Note: In real browser, this would be blocked by CSP or browser security
+      expect(img?.getAttribute('src')).toContain('/_next/image?url=');
+      expect(img?.getAttribute('src')).toContain(
+        encodeURIComponent('http://localhost:8000/javascript:alert(1)')
+      );
     });
 
     it('sanitizes malicious alt text', () => {
@@ -140,31 +147,34 @@ describe('ImageWidget', () => {
 
       const img = container.querySelector('img');
       expect(img).toBeTruthy();
-      expect(img?.getAttribute('src')).toContain('data:image/png');
+      expect(img?.getAttribute('src')).toContain('/_next/image?url=');
+      expect(img?.getAttribute('src')).toContain(
+        encodeURIComponent('http://localhost:8000/data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUA')
+      );
     });
   });
 
   describe('Edge cases', () => {
-    it('handles very long URLs', () => {
+    it('handles very long URLs by showing fallback when host is unsupported', () => {
       const longUrl = 'https://example.com/' + 'a'.repeat(1000) + '.jpg';
       const { container } = render(
         <ImageWidget props={{ url: longUrl }} />
       );
 
       const img = container.querySelector('img');
-      expect(img).toBeTruthy();
-      expect(img).toHaveAttribute('src', longUrl);
+      expect(img).toBeNull();
+      expect(container.textContent).toContain('Bloc image');
     });
 
-    it('handles URLs with special characters', () => {
+    it('handles URLs with special characters by showing fallback when host is unsupported', () => {
       const specialUrl = 'https://example.com/image?size=large&format=jpg&token=abc123';
       const { container } = render(
         <ImageWidget props={{ url: specialUrl }} />
       );
 
       const img = container.querySelector('img');
-      expect(img).toBeTruthy();
-      expect(img).toHaveAttribute('src', specialUrl);
+      expect(img).toBeNull();
+      expect(container.textContent).toContain('Bloc image');
     });
 
     it('handles empty string URL as missing', () => {
@@ -175,7 +185,7 @@ describe('ImageWidget', () => {
       // Should render placeholder
       const placeholder = container.querySelector('div');
       expect(placeholder).toBeTruthy();
-      expect(placeholder?.textContent).toBe('Image');
+      expect(placeholder?.textContent).toBe('Bloc image');
     });
 
     it('handles undefined props gracefully', () => {
@@ -186,7 +196,7 @@ describe('ImageWidget', () => {
       // Should render placeholder
       const placeholder = container.querySelector('div');
       expect(placeholder).toBeTruthy();
-      expect(placeholder?.textContent).toBe('Image');
+      expect(placeholder?.textContent).toBe('Bloc image');
     });
   });
 

@@ -53,7 +53,7 @@ export function pageBuilderNative(config) {
             const section = {
                 id: "section-" + Date.now(),
                 settings: {
-                    background: "#ffffff",
+                    background: "",
                     paddingTop: 40,
                     paddingBottom: 40,
                     fullWidth: false,
@@ -367,107 +367,12 @@ export function pageBuilderNative(config) {
 
             if (!col) return;
 
-            // Appeler la méthode du builder de base pour créer le widget avec les bonnes props
             const id = "w_" + Math.random().toString(36).slice(2, 8);
-            const widget = { id, type, props: {} };
-
-            // Copier la logique de création des props par défaut depuis le builder de base
-            switch (type) {
-                case "heading":
-                    widget.props = { text: "Titre", tag: "h2", align: "left" };
-                    break;
-                case "text":
-                    widget.props = { html: "<p>Texte exemple</p>" };
-                    break;
-                case "image":
-                    widget.props = {
-                        src: "",
-                        alt: "",
-                        width: "100%",
-                        height: "auto",
-                    };
-                    break;
-                case "video":
-                    widget.props = {
-                        type: "youtube",
-                        url: "",
-                        aspectRatio: "16/9",
-                        autoplay: false,
-                        loop: false,
-                        muted: false,
-                    };
-                    break;
-                case "button":
-                    widget.props = {
-                        text: "Cliquez ici",
-                        url: "#",
-                        style: "primary",
-                        align: "left",
-                    };
-                    break;
-                case "accordion":
-                    widget.props = { items: [] };
-                    break;
-                case "spacer":
-                    widget.props = { height: 40 };
-                    break;
-                case "container":
-                    widget.props = {
-                        background: "#ffffff",
-                        paddingTop: 40,
-                        paddingBottom: 40,
-                        columns: [
-                            {
-                                id:
-                                    "col_" +
-                                    Math.random().toString(36).slice(2, 8),
-                                width: 100,
-                                widgets: [],
-                            },
-                        ],
-                    };
-                    break;
-                case "hero_banner":
-                    widget.props = {
-                        title: "Hero Banner",
-                        subtitle: "",
-                        buttonText: "En savoir plus",
-                        buttonUrl: "#",
-                        backgroundImage: "",
-                    };
-                    break;
-                case "features_bar":
-                    widget.props = { features: [] };
-                    break;
-                case "categories_grid":
-                    widget.props = { categories: [], columns: 4 };
-                    break;
-                case "promo_banner":
-                    widget.props = {
-                        title: "Offre spéciale",
-                        description: "",
-                        buttonText: "Profiter",
-                        buttonUrl: "#",
-                        backgroundColor: "#f59e0b",
-                    };
-                    break;
-                case "testimonials":
-                    widget.props = { testimonials: [] };
-                    break;
-                case "newsletter":
-                    widget.props = {
-                        title: "Newsletter",
-                        description: "Inscrivez-vous à notre newsletter",
-                        buttonText: "S'inscrire",
-                    };
-                    break;
-                case "product_slider":
-                    widget.props = { products: [], title: "Nos produits" };
-                    break;
-                case "image_gallery":
-                    widget.props = { images: [], columns: 3 };
-                    break;
-            }
+            const widget = {
+                id,
+                type,
+                props: this.getWidgetDefaultProps(type),
+            };
 
             col.widgets.push(widget);
             this.sync();
@@ -672,102 +577,11 @@ export function pageBuilderNative(config) {
             if (!column) return;
 
             const id = "w_" + Math.random().toString(36).slice(2, 8);
-            const widget = { id, type: widgetType, props: {} };
-
-            // Même logique de props par défaut que dans addWidgetTo()
-            switch (widgetType) {
-                case "heading":
-                    widget.props = { text: "Titre", tag: "h2", align: "left" };
-                    break;
-                case "text":
-                    widget.props = { html: "<p>Texte exemple</p>" };
-                    break;
-                case "image":
-                    widget.props = {
-                        src: "",
-                        alt: "",
-                        width: "100%",
-                        height: "auto",
-                    };
-                    break;
-                case "video":
-                    widget.props = {
-                        type: "youtube",
-                        url: "",
-                        aspectRatio: "16/9",
-                        autoplay: false,
-                        loop: false,
-                        muted: false,
-                    };
-                    break;
-                case "button":
-                    widget.props = {
-                        text: "Cliquez ici",
-                        url: "#",
-                        style: "primary",
-                        align: "left",
-                    };
-                    break;
-                case "accordion":
-                    widget.props = { items: [] };
-                    break;
-                case "spacer":
-                    widget.props = { height: 40 };
-                    break;
-                case "container":
-                    widget.props = {
-                        background: "#ffffff",
-                        paddingTop: 40,
-                        paddingBottom: 40,
-                        columns: [
-                            {
-                                id:
-                                    "col_" +
-                                    Math.random().toString(36).slice(2, 8),
-                                width: 100,
-                                widgets: [],
-                            },
-                        ],
-                    };
-                    break;
-                case "hero_banner":
-                    widget.props = {
-                        title: "Hero Banner",
-                        subtitle: "",
-                        buttonText: "En savoir plus",
-                        buttonUrl: "#",
-                        backgroundImage: "",
-                    };
-                    break;
-                case "features_bar":
-                    widget.props = { features: [] };
-                    break;
-                case "categories_grid":
-                    widget.props = { categories: [], columns: 4 };
-                    break;
-                case "promo_banner":
-                    widget.props = {
-                        title: "Offre spéciale",
-                        description: "",
-                        buttonText: "Profiter",
-                        buttonUrl: "#",
-                        backgroundColor: "#f59e0b",
-                    };
-                    break;
-                case "testimonials":
-                    widget.props = { testimonials: [] };
-                    break;
-                case "newsletter":
-                    widget.props = {
-                        title: "Newsletter",
-                        description: "Inscrivez-vous à notre newsletter",
-                        buttonText: "S'inscrire",
-                    };
-                    break;
-                case "product_slider":
-                    widget.props = { products: [], title: "Nos produits" };
-                    break;
-            }
+            const widget = {
+                id,
+                type: widgetType,
+                props: this.getWidgetDefaultProps(widgetType),
+            };
 
             column.widgets.splice(index, 0, widget);
             this.sync();

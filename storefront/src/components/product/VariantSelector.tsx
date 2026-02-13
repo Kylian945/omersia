@@ -3,7 +3,11 @@
 import { useProductVariant } from "./ProductVariantContext";
 import { AddToCartButton } from "./AddToCartButton";
 
-export function VariantSelector() {
+type VariantSelectorProps = {
+  onAdded?: () => void;
+};
+
+export function VariantSelector({ onAdded }: VariantSelectorProps = {}) {
   const {
     options,
     optionNames,
@@ -129,6 +133,7 @@ export function VariantSelector() {
                 variantLabel={variantLabel || undefined}
                 quantity={qty}
                 disabled={!canAdd}
+                onAdded={onAdded}
               />
             </div>
           </div>

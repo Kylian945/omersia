@@ -2,7 +2,7 @@
 
 import Image, { ImageProps } from "next/image";
 import { useState } from "react";
-import { normalizeImageUrl } from "@/lib/image-loader";
+import { isNextImageCompatible, normalizeImageUrl } from "@/lib/image-loader";
 
 type OptimizedImageProps = Omit<ImageProps, "onError"> & {
   fallback?: React.ReactNode;
@@ -24,18 +24,22 @@ export function OptimizedImage({
   const [hasError, setHasError] = useState(false);
   const [useUnoptimized, setUseUnoptimized] = useState(false);
 
+  const defaultFallback = (
+    <div className="flex items-center justify-center bg-neutral-100 text-neutral-400 text-xs h-full w-full">
+      Image non disponible
+    </div>
+  );
+
   if (hasError) {
-    return fallback ? (
-      <>{fallback}</>
-    ) : (
-      <div className="flex items-center justify-center bg-neutral-100 text-neutral-400 text-xs h-full w-full">
-        Image non disponible
-      </div>
-    );
+    return fallback ? <>{fallback}</> : defaultFallback;
   }
 
   // Normalize the src URL to match Next.js remotePatterns (localhost:8000)
   const normalizedSrc = typeof src === "string" ? normalizeImageUrl(src) : src;
+
+  if (typeof normalizedSrc === "string" && !isNextImageCompatible(normalizedSrc)) {
+    return fallback ? <>{fallback}</> : defaultFallback;
+  }
 
   return (
     <Image

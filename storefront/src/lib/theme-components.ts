@@ -18,6 +18,21 @@ type ComponentModule<TProps extends object> = {
   [key: string]: ComponentType<TProps> | undefined;
 };
 
+function normalizeThemePath(themePath: string | null | undefined): string {
+  const normalizedTheme = themePath?.trim();
+
+  if (
+    !normalizedTheme ||
+    normalizedTheme === "default" ||
+    normalizedTheme === "null" ||
+    normalizedTheme === "undefined"
+  ) {
+    return "vision";
+  }
+
+  return normalizedTheme;
+}
+
 /**
  * Load a theme-specific component dynamically
  *
@@ -29,7 +44,7 @@ export async function getThemeComponent(
   componentPath: string,
   themePath: string | null | undefined
 ): Promise<ComponentType<Record<string, unknown>>> {
-  const theme = themePath || "vision";
+  const theme = normalizeThemePath(themePath);
 
   try {
     // Try to load from the specified theme
@@ -90,7 +105,7 @@ export async function themeHasComponent(
   componentPath: string,
   themePath: string | null | undefined
 ): Promise<boolean> {
-  const theme = themePath || "vision";
+  const theme = normalizeThemePath(themePath);
 
   try {
     await import(`@/components/themes/${theme}/${componentPath}`);

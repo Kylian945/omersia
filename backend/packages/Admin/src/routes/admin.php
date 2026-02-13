@@ -140,6 +140,7 @@ Route::prefix('apparence')
         // Media Library
         Route::get('/media', [MediaLibraryController::class, 'index'])->name('media.index');
         Route::post('/media', [MediaLibraryController::class, 'store'])->name('media.store');
+        Route::post('/media/{item}/optimize', [MediaLibraryController::class, 'optimize'])->name('media.optimize');
         Route::delete('/media/{item}', [MediaLibraryController::class, 'destroy'])->name('media.destroy');
         Route::post('/media/folders', [MediaLibraryController::class, 'createFolder'])->name('media.folders.store');
         Route::delete('/media/folders/{folder}', [MediaLibraryController::class, 'destroyFolder'])->name('media.folders.destroy');

@@ -135,7 +135,7 @@ export function AddressStep() {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-sm font-semibold text-neutral-900">
+      <h2 className="text-sm font-semibold text-[var(--theme-heading-color,#111827)]">
         2. Adresse de livraison
       </h2>
 
@@ -143,7 +143,7 @@ export function AddressStep() {
       {effectiveUser && addresses.length > 0 && (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-xxs text-neutral-600">
+            <span className="text-xxs text-[var(--theme-muted-color,#6b7280)]">
               Utiliser une adresse enregistrée
             </span>
           </div>
@@ -159,8 +159,8 @@ export function AddressStep() {
                     onClick={() => handleSelectAddress(addr.id)}
                     className={`text-left rounded-xl border px-3 py-2 text-xs transition ${
                       isSelected
-                        ? "border-black bg-gray-50"
-                        : "border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-800"
+                        ? "border-[var(--theme-border-hover,#111827)] bg-[var(--theme-page-bg,#f6f6f7)]"
+                        : "border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-card-bg,#ffffff)] hover:bg-[var(--theme-page-bg,#f6f6f7)] text-[var(--theme-body-color,#374151)]"
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2">
@@ -183,7 +183,7 @@ export function AddressStep() {
               <button
                 type="button"
                 onClick={openNewAddressModal}
-                className="text-left rounded-xl border border-dashed border-neutral-300 bg-white hover:bg-neutral-50 text-neutral-700 px-3 py-2 text-xxs transition"
+                className="text-left rounded-xl border border-dashed border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-card-bg,#ffffff)] hover:bg-[var(--theme-page-bg,#f6f6f7)] text-[var(--theme-body-color,#374151)] px-3 py-2 text-xxs transition"
               >
                 + Ajouter une nouvelle adresse
               </button>
@@ -195,7 +195,7 @@ export function AddressStep() {
       {/* Formulaire adresse de livraison */}
       <div className="space-y-2 mt-2">
         <div className="flex items-center justify-between">
-          <span className="text-xxs text-neutral-600">
+          <span className="text-xxs text-[var(--theme-muted-color,#6b7280)]">
             {effectiveUser && addresses.length > 0
               ? "Détails de l'adresse sélectionnée"
               : "Saisissez votre adresse de livraison"}
@@ -203,58 +203,58 @@ export function AddressStep() {
         </div>
 
         <div>
-          <label className="block text-xxxs text-neutral-600 mb-1">
+          <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
             Adresse *
           </label>
           <input
             type="text"
             value={address.line1}
             onChange={(e) => updateAddress({ line1: e.target.value })}
-            className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+            className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
           />
         </div>
         <div>
-          <label className="block text-xxxs text-neutral-600 mb-1">
+          <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
             Complément d&apos;adresse
           </label>
           <input
             type="text"
             value={address.line2}
             onChange={(e) => updateAddress({ line2: e.target.value })}
-            className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+            className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
           />
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
           <div>
-            <label className="block text-xxxs text-neutral-600 mb-1">
+            <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
               Code postal *
             </label>
             <input
               type="text"
               value={address.zip}
               onChange={(e) => updateAddress({ zip: e.target.value })}
-              className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+              className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
             />
           </div>
           <div>
-            <label className="block text-xxxs text-neutral-600 mb-1">
+            <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
               Ville *
             </label>
             <input
               type="text"
               value={address.city}
               onChange={(e) => updateAddress({ city: e.target.value })}
-              className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+              className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
             />
           </div>
           <div>
-            <label className="block text-xxxs text-neutral-600 mb-1">
+            <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
               Pays *
             </label>
             <CountrySelect
               value={address.country}
               onChange={(value) => updateAddress({ country: value })}
-              className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+              className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
             />
           </div>
         </div>
@@ -272,13 +272,13 @@ export function AddressStep() {
       />
 
       {/* Case à cocher pour utiliser la même adresse de facturation */}
-      <div className="mt-4 pt-4 border-t border-neutral-200">
-        <label className="inline-flex items-center gap-2 text-xs text-neutral-700 cursor-pointer">
+      <div className="mt-4 pt-4 border-t border-[var(--theme-border-default,#e5e7eb)]">
+        <label className="inline-flex items-center gap-2 text-xs text-[var(--theme-body-color,#374151)] cursor-pointer">
           <input
             type="checkbox"
             checked={useSameAddressForBilling}
             onChange={(e) => setUseSameAddressForBilling(e.target.checked)}
-            className="rounded border-neutral-300"
+            className="rounded border-[var(--theme-border-default,#e5e7eb)]"
           />
           Utiliser la même adresse de facturation
         </label>
@@ -288,64 +288,64 @@ export function AddressStep() {
       {!useSameAddressForBilling && (
         <div className="space-y-2 mt-4">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-neutral-900">
+            <span className="text-xs font-medium text-[var(--theme-heading-color,#111827)]">
               Adresse de facturation
             </span>
           </div>
 
           <div>
-            <label className="block text-xxxs text-neutral-600 mb-1">
+            <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
               Adresse *
             </label>
             <input
               type="text"
               value={billingAddress.line1}
               onChange={(e) => updateBillingAddress({ line1: e.target.value })}
-              className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+              className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
             />
           </div>
           <div>
-            <label className="block text-xxxs text-neutral-600 mb-1">
+            <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
               Complément d&apos;adresse
             </label>
             <input
               type="text"
               value={billingAddress.line2}
               onChange={(e) => updateBillingAddress({ line2: e.target.value })}
-              className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+              className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
             />
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
             <div>
-              <label className="block text-xxxs text-neutral-600 mb-1">
+              <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                 Code postal *
               </label>
               <input
                 type="text"
                 value={billingAddress.zip}
                 onChange={(e) => updateBillingAddress({ zip: e.target.value })}
-                className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
               />
             </div>
             <div>
-              <label className="block text-xxxs text-neutral-600 mb-1">
+              <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                 Ville *
               </label>
               <input
                 type="text"
                 value={billingAddress.city}
                 onChange={(e) => updateBillingAddress({ city: e.target.value })}
-                className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
               />
             </div>
             <div>
-              <label className="block text-xxxs text-neutral-600 mb-1">
+              <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                 Pays *
               </label>
               <CountrySelect
                 value={billingAddress.country}
                 onChange={(value) => updateBillingAddress({ country: value })}
-                className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
               />
             </div>
           </div>
@@ -355,9 +355,9 @@ export function AddressStep() {
       {/* Modal pour ajouter une nouvelle adresse */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="w-full max-w-md rounded-2xl bg-[var(--theme-card-bg,#ffffff)] p-6 shadow-xl">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-neutral-900">
+              <h3 className="text-lg font-semibold text-[var(--theme-heading-color,#111827)]">
                 Ajouter une nouvelle adresse
               </h3>
             </div>
@@ -368,7 +368,7 @@ export function AddressStep() {
               )}
 
               <div>
-                <label className="block text-xxxs text-neutral-600 mb-1">
+                <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                   Nom de l&apos;adresse *
                 </label>
                 <input
@@ -376,67 +376,67 @@ export function AddressStep() {
                   value={modalLabel}
                   onChange={(e) => setModalLabel(e.target.value)}
                   placeholder="Ex: Domicile, Bureau..."
-                  className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                  className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 />
               </div>
 
               <div>
-                <label className="block text-xxxs text-neutral-600 mb-1">
+                <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                   Adresse *
                 </label>
                 <input
                   type="text"
                   value={modalLine1}
                   onChange={(e) => setModalLine1(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                  className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 />
               </div>
 
               <div>
-                <label className="block text-xxxs text-neutral-600 mb-1">
+                <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                   Complément d&apos;adresse
                 </label>
                 <input
                   type="text"
                   value={modalLine2}
                   onChange={(e) => setModalLine2(e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                  className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xxxs text-neutral-600 mb-1">
+                  <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                     Code postal *
                   </label>
                   <input
                     type="text"
                     value={modalZip}
                     onChange={(e) => setModalZip(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                    className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xxxs text-neutral-600 mb-1">
+                  <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                     Ville *
                   </label>
                   <input
                     type="text"
                     value={modalCity}
                     onChange={(e) => setModalCity(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                    className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xxxs text-neutral-600 mb-1">
+                <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                   Pays *
                 </label>
                 <CountrySelect
                   value={modalCountry}
                   onChange={(value) => setModalCountry(value)}
-                  className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                  className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 />
               </div>
             </div>

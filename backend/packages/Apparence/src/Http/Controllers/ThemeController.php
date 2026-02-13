@@ -6,6 +6,7 @@ namespace Omersia\Apparence\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Omersia\Apparence\Http\Requests\ThemeCustomizationUpdateRequest;
@@ -64,7 +65,7 @@ class ThemeController
             'settings_schema' => $visionConfig['settings_schema'] ?? null,
             'is_active' => true,
             'is_default' => true,
-            'metadata' => [
+            'metadata' => $visionConfig['metadata'] ?? [
                 'technologies' => ['Next.js 14', 'Tailwind CSS', 'TypeScript'],
                 'features' => ['Responsive', 'SEO optimisé', 'Performance élevée', '17 widgets'],
             ],
@@ -160,9 +161,9 @@ class ThemeController
                 throw new \Exception('Le fichier theme.json est invalide');
             }
 
-            // Utiliser le nom du theme.json ou du request
-            $themeName = $request->name ?? $themeData['name'] ?? 'Nouveau thème';
-            $themeDescription = $request->description ?? $themeData['description'] ?? '';
+            // Utiliser uniquement les métadonnées du theme.json
+            $themeName = $themeData['name'] ?? 'Nouveau thème';
+            $themeDescription = $themeData['description'] ?? '';
 
             // Créer le slug
             $slug = Str::slug($themeName);
@@ -171,6 +172,9 @@ class ThemeController
                 $slug = Str::slug($themeName).'-'.$counter;
                 $counter++;
             }
+
+            // Extraire une image de preview depuis le ZIP (si présente)
+            $previewPath = $this->extractPreviewImageFromZip($zip, $themeData, $themeJsonPath, $slug);
 
             // Extraire les composants React si présents dans le ZIP
             $componentPath = null;
@@ -283,12 +287,6 @@ class ThemeController
             // Stocker le fichier ZIP
             $zipPath = $zipFile->store('themes', 'public');
 
-            // Stocker l'image de prévisualisation si fournie
-            $previewPath = null;
-            if ($request->hasFile('preview_image')) {
-                $previewPath = $request->file('preview_image')->store('themes/previews', 'public');
-            }
-
             // Extract widgets configuration from theme.json
             $widgetsConfig = $themeData['widgets'] ?? null;
 
@@ -305,6 +303,7 @@ class ThemeController
                 'component_path' => $componentPath,
                 'pages_config_path' => $pagesConfigPath,
                 'widgets_config' => $widgetsConfig,
+                'settings_schema' => $themeData['settings_schema'] ?? null,
                 'is_active' => false,
                 'is_default' => false,
                 'metadata' => $themeData['metadata'] ?? [],
@@ -338,6 +337,113 @@ class ThemeController
         }
     }
 
+    protected function extractPreviewImageFromZip(ZipArchive $zip, array $themeData, string $themeJsonPath, string $slug): ?string
+    {
+        $previewEntry = $this->findPreviewEntryInZip($zip, $themeData, $themeJsonPath);
+        if ($previewEntry === null) {
+            return null;
+        }
+
+        $previewContent = $zip->getFromName($previewEntry);
+        if ($previewContent === false) {
+            throw new \Exception('Impossible de lire l\'image de prévisualisation dans le ZIP.');
+        }
+
+        $extension = strtolower(pathinfo($previewEntry, PATHINFO_EXTENSION));
+        if (! in_array($extension, ['jpg', 'jpeg', 'png', 'webp'], true)) {
+            throw new \Exception('Format de preview non supporté. Utilisez JPG, PNG ou WebP.');
+        }
+
+        $previewPath = 'themes/previews/'.$slug.'-'.Str::random(8).'.'.$extension;
+
+        if (! Storage::disk('public')->put($previewPath, $previewContent)) {
+            throw new \Exception('Impossible de sauvegarder l\'image de prévisualisation.');
+        }
+
+        return $previewPath;
+    }
+
+    protected function findPreviewEntryInZip(ZipArchive $zip, array $themeData, string $themeJsonPath): ?string
+    {
+        $zipEntries = [];
+        for ($i = 0; $i < $zip->numFiles; $i++) {
+            $name = $zip->getNameIndex($i);
+            if (is_string($name) && ! str_ends_with($name, '/')) {
+                $zipEntries[] = $name;
+            }
+        }
+
+        $entriesByNormalizedPath = [];
+        foreach ($zipEntries as $entry) {
+            $entriesByNormalizedPath[$this->normalizeZipPath($entry)] = $entry;
+        }
+
+        $themeJsonDir = dirname($themeJsonPath);
+        $themeJsonDir = $themeJsonDir === '.' ? '' : $this->normalizeZipPath($themeJsonDir);
+
+        $declaredPreviewCandidates = array_values(array_filter([
+            $themeData['preview'] ?? null,
+            $themeData['preview_image'] ?? null,
+            $themeData['previewImage'] ?? null,
+            $themeData['screenshot'] ?? null,
+            $themeData['thumbnail'] ?? null,
+            $themeData['metadata']['preview'] ?? null,
+            $themeData['metadata']['preview_image'] ?? null,
+            $themeData['metadata']['screenshot'] ?? null,
+            $themeData['metadata']['thumbnail'] ?? null,
+        ], static fn ($value): bool => is_string($value) && trim($value) !== ''));
+
+        foreach ($declaredPreviewCandidates as $candidate) {
+            $normalizedCandidate = $this->normalizeZipPath($candidate);
+
+            if (isset($entriesByNormalizedPath[$normalizedCandidate])) {
+                return $entriesByNormalizedPath[$normalizedCandidate];
+            }
+
+            if ($themeJsonDir !== '') {
+                $relativeCandidate = $this->normalizeZipPath($themeJsonDir.'/'.$normalizedCandidate);
+                if (isset($entriesByNormalizedPath[$relativeCandidate])) {
+                    return $entriesByNormalizedPath[$relativeCandidate];
+                }
+            }
+        }
+
+        $defaultPreviewNames = [
+            'preview.png',
+            'preview.jpg',
+            'preview.jpeg',
+            'preview.webp',
+            'screenshot.png',
+            'screenshot.jpg',
+            'screenshot.jpeg',
+            'screenshot.webp',
+            'thumbnail.png',
+            'thumbnail.jpg',
+            'thumbnail.jpeg',
+            'thumbnail.webp',
+            'cover.png',
+            'cover.jpg',
+            'cover.jpeg',
+            'cover.webp',
+        ];
+
+        foreach ($zipEntries as $entry) {
+            if (in_array(strtolower(basename($entry)), $defaultPreviewNames, true)) {
+                return $entry;
+            }
+        }
+
+        return null;
+    }
+
+    protected function normalizeZipPath(string $path): string
+    {
+        $normalizedPath = str_replace('\\', '/', trim($path));
+        $normalizedPath = preg_replace('#/+#', '/', $normalizedPath) ?? $normalizedPath;
+
+        return strtolower(ltrim($normalizedPath, '/'));
+    }
+
     protected function createThemeSettings(Theme $theme, array $settings): void
     {
         foreach ($settings as $key => $value) {
@@ -364,6 +470,7 @@ class ThemeController
             'card_bg' => 'backgrounds',
             'input_bg' => 'backgrounds',
             'header_bg' => 'backgrounds',
+            'footer_bg' => 'backgrounds',
             'heading_color' => 'texts',
             'body_color' => 'texts',
             'muted_color' => 'texts',
@@ -383,14 +490,50 @@ class ThemeController
             'heading_font' => 'typography',
             'body_font' => 'typography',
             'heading_weight' => 'typography',
+            'h1_size' => 'typography',
+            'h2_size' => 'typography',
+            'h3_size' => 'typography',
+            'h4_size' => 'typography',
+            'h5_size' => 'typography',
+            'h6_size' => 'typography',
             'body_size' => 'typography',
             'border_radius' => 'layout',
             'card_style' => 'layout',
+            'container_max_width' => 'layout',
+            'border_width' => 'layout',
             'header_style' => 'header',
             'header_sticky' => 'header',
+            'header_height' => 'header',
+            'icon_button_style' => 'header',
             'button_style' => 'buttons',
             'button_primary_text' => 'buttons',
             'button_secondary_text' => 'buttons',
+            'cart_type' => 'cart',
+            'qty_control_style' => 'cart',
+            'product_card_style' => 'products',
+            'product_hover_effect' => 'products',
+            'show_product_badges' => 'products',
+            'show_quick_add' => 'products',
+            'product_image_ratio' => 'products',
+            'products_per_row_desktop' => 'products',
+            'products_per_row_tablet' => 'products',
+            'products_per_row_mobile' => 'products',
+            'product_badge_shape' => 'products',
+            'product_title_lines' => 'products',
+            'product_price_size' => 'products',
+            'product_quick_add_style' => 'products',
+            'input_style' => 'forms',
+            'input_border_width' => 'forms',
+            'input_height' => 'forms',
+            'focus_ring_color' => 'forms',
+            'focus_ring_width' => 'forms',
+            'shadow_style' => 'surfaces',
+            'card_padding' => 'surfaces',
+            'panel_style' => 'surfaces',
+            'footer_density' => 'footer',
+            'stepper_style' => 'checkout',
+            'summary_style' => 'checkout',
+            'account_card_style' => 'account',
         ];
 
         return $groupMapping[$key] ?? 'general';
@@ -410,8 +553,35 @@ class ThemeController
             return 'select';
         }
 
-        if (str_contains($key, '_size') || str_contains($key, '_weight')) {
-            return is_numeric($key) ? 'number' : 'select';
+        if (in_array($key, [
+            'cart_type',
+            'product_hover_effect',
+            'show_product_badges',
+            'show_quick_add',
+            'product_image_ratio',
+            'product_title_lines',
+            'product_price_size',
+            'container_max_width',
+            'border_width',
+            'input_border_width',
+            'input_height',
+            'focus_ring_width',
+            'header_height',
+            'footer_density',
+        ], true)) {
+            return 'select';
+        }
+
+        if (str_starts_with($key, 'products_per_row_')) {
+            return 'number';
+        }
+
+        if (str_contains($key, '_size')) {
+            return 'number';
+        }
+
+        if (str_contains($key, '_weight')) {
+            return 'select';
         }
 
         return 'text';
@@ -454,9 +624,15 @@ class ThemeController
             $currentTheme = Theme::where('shop_id', $shop->id)
                 ->where('is_active', true)
                 ->first();
+            $isThemeSwitch = ! $currentTheme || $currentTheme->id !== $theme->id;
+
+            // Save current page media state on the outgoing theme before any cleanup.
+            if ($currentTheme && $isThemeSwitch) {
+                $this->pageConfigService->saveThemePageMediaSnapshot($currentTheme, $shop);
+            }
 
             // If changing theme, clean incompatible widgets
-            if ($currentTheme && $currentTheme->id !== $theme->id) {
+            if ($currentTheme && $isThemeSwitch) {
                 $comparison = $this->widgetService->compareThemeWidgets($currentTheme, $theme);
 
                 if ($comparison['has_incompatibilities']) {
@@ -477,7 +653,12 @@ class ThemeController
             $theme->update(['is_active' => true]);
 
             // Appliquer la configuration des pages du thème
-            $stats = $this->pageConfigService->applyThemePagesConfig($theme, $shop, forceUpdate: true);
+            $stats = $this->pageConfigService->applyThemePagesConfig(
+                $theme,
+                $shop,
+                forceUpdate: true,
+                preserveMediaByTheme: $isThemeSwitch
+            );
 
             // Effacer le cache pour appliquer les paramètres immédiatement
             $this->customizationService->clearThemeCache($theme);
@@ -511,18 +692,131 @@ class ThemeController
                 ->with('error', 'Impossible de supprimer le thème actif. Activez un autre thème d\'abord.');
         }
 
-        // Supprimer les fichiers
-        if ($theme->zip_path && Storage::disk('public')->exists($theme->zip_path)) {
-            Storage::disk('public')->delete($theme->zip_path);
+        DB::beginTransaction();
+
+        try {
+            $this->deleteThemeGeneratedFiles($theme);
+            $theme->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.apparence.theme.index')
+                ->with('success', 'Thème supprimé avec succès.');
+        } catch (\Throwable $e) {
+            DB::rollBack();
+
+            return redirect()->route('admin.apparence.theme.index')
+                ->with('error', 'Erreur lors de la suppression du thème : '.$e->getMessage());
         }
-        if ($theme->preview_image && Storage::disk('public')->exists($theme->preview_image)) {
-            Storage::disk('public')->delete($theme->preview_image);
+    }
+
+    protected function deleteThemeGeneratedFiles(Theme $theme): void
+    {
+        $this->deletePublicFileIfUnreferenced($theme, 'zip_path');
+        $this->deletePublicFileIfUnreferenced($theme, 'preview_image');
+        $this->deletePagesConfigIfUnreferenced($theme);
+        $this->deleteThemeComponentDirectoryIfOwned($theme);
+        $this->deleteThemeBackendViewsDirectory($theme);
+    }
+
+    protected function deletePublicFileIfUnreferenced(Theme $theme, string $column): void
+    {
+        $path = $theme->{$column};
+        if (! is_string($path) || trim($path) === '') {
+            return;
         }
 
-        $theme->delete();
+        if ($this->isPathReferencedByAnotherTheme($theme, $column, $path)) {
+            return;
+        }
 
-        return redirect()->route('admin.apparence.theme.index')
-            ->with('success', 'Thème supprimé avec succès.');
+        if (Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+    }
+
+    protected function deletePagesConfigIfUnreferenced(Theme $theme): void
+    {
+        $path = $theme->pages_config_path;
+        if (! is_string($path) || trim($path) === '') {
+            return;
+        }
+
+        if ($this->isPathReferencedByAnotherTheme($theme, 'pages_config_path', $path)) {
+            return;
+        }
+
+        if (! Storage::exists($path)) {
+            return;
+        }
+
+        Storage::delete($path);
+
+        // pages.json est stocké sous themes/{slug}/pages.json pour les thèmes uploadés.
+        $themeStorageDir = 'themes/'.$theme->slug;
+        if (str_starts_with($path, $themeStorageDir.'/') && Storage::exists($themeStorageDir)) {
+            Storage::deleteDirectory($themeStorageDir);
+        }
+    }
+
+    protected function deleteThemeComponentDirectoryIfOwned(Theme $theme): void
+    {
+        $componentPath = $theme->component_path;
+
+        if (! is_string($componentPath) || trim($componentPath) === '') {
+            return;
+        }
+
+        // Ne supprimer que le dossier généré par CE thème (slug == component_path)
+        if ($componentPath !== $theme->slug) {
+            return;
+        }
+
+        // Si un autre thème référence encore ce component_path, on conserve le dossier.
+        if ($this->isPathReferencedByAnotherTheme($theme, 'component_path', $componentPath)) {
+            return;
+        }
+
+        // Protection supplémentaire contre les paths non sûrs.
+        if ($componentPath !== basename($componentPath)) {
+            return;
+        }
+
+        $themeComponentDir = $this->getFrontendThemesBasePath().'/'.$componentPath;
+        if (File::isDirectory($themeComponentDir)) {
+            File::deleteDirectory($themeComponentDir);
+        }
+    }
+
+    protected function deleteThemeBackendViewsDirectory(Theme $theme): void
+    {
+        if (! is_string($theme->slug) || trim($theme->slug) === '') {
+            return;
+        }
+
+        if ($theme->slug !== basename($theme->slug)) {
+            return;
+        }
+
+        $backendViewsPath = base_path('packages/Apparence/src/resources/views/themes/'.$theme->slug);
+        if (File::isDirectory($backendViewsPath)) {
+            File::deleteDirectory($backendViewsPath);
+        }
+    }
+
+    protected function isPathReferencedByAnotherTheme(Theme $theme, string $column, string $path): bool
+    {
+        return Theme::query()
+            ->where('id', '!=', $theme->id)
+            ->where($column, $path)
+            ->exists();
+    }
+
+    protected function getFrontendThemesBasePath(): string
+    {
+        return is_dir('/var/www/storefront')
+            ? '/var/www/storefront/src/components/themes'
+            : base_path('../storefront/src/components/themes');
     }
 
     /**
@@ -550,14 +844,21 @@ class ThemeController
     public function updateCustomization(ThemeCustomizationUpdateRequest $request, Theme $theme)
     {
         $validated = $request->validated();
+        $activeTab = $this->resolveActiveCustomizationTab($request, $theme);
 
         try {
             $this->customizationService->updateSettings($theme, $validated['settings']);
 
-            return redirect()->route('admin.apparence.theme.customize', $theme)
+            return redirect()->route('admin.apparence.theme.customize', [
+                'theme' => $theme,
+                'tab' => $activeTab,
+            ])
                 ->with('success', 'Personnalisation mise à jour avec succès.');
         } catch (\Exception $e) {
-            return redirect()->route('admin.apparence.theme.customize', $theme)
+            return redirect()->route('admin.apparence.theme.customize', [
+                'theme' => $theme,
+                'tab' => $activeTab,
+            ])
                 ->with('error', 'Erreur lors de la mise à jour : '.$e->getMessage());
         }
     }
@@ -565,8 +866,10 @@ class ThemeController
     /**
      * Reset theme to default settings
      */
-    public function resetCustomization(Theme $theme)
+    public function resetCustomization(Request $request, Theme $theme)
     {
+        $activeTab = $this->resolveActiveCustomizationTab($request, $theme);
+
         try {
             // Delete all current settings
             $theme->settings()->delete();
@@ -574,11 +877,41 @@ class ThemeController
             // Reinitialize with defaults
             $this->customizationService->initializeDefaultSettings($theme);
 
-            return redirect()->route('admin.apparence.theme.customize', $theme)
+            return redirect()->route('admin.apparence.theme.customize', [
+                'theme' => $theme,
+                'tab' => $activeTab,
+            ])
                 ->with('success', 'Paramètres réinitialisés aux valeurs par défaut.');
         } catch (\Exception $e) {
-            return redirect()->route('admin.apparence.theme.customize', $theme)
+            return redirect()->route('admin.apparence.theme.customize', [
+                'theme' => $theme,
+                'tab' => $activeTab,
+            ])
                 ->with('error', 'Erreur lors de la réinitialisation.');
         }
+    }
+
+    /**
+     * Resolve active customization tab safely from request.
+     */
+    protected function resolveActiveCustomizationTab(Request $request, Theme $theme): string
+    {
+        $schema = $this->customizationService->getThemeSettingsSchema($theme);
+        $allowedTabs = array_values(array_filter(
+            array_keys($schema),
+            static fn (string $group): bool => ! in_array($group, ['backgrounds', 'texts', 'borders', 'states'], true)
+        ));
+
+        $requestedTab = trim((string) $request->input('active_tab', $request->query('tab', '')));
+
+        if ($requestedTab !== '' && in_array($requestedTab, $allowedTabs, true)) {
+            return $requestedTab;
+        }
+
+        if (in_array('colors', $allowedTabs, true)) {
+            return 'colors';
+        }
+
+        return $allowedTabs[0] ?? 'colors';
     }
 }

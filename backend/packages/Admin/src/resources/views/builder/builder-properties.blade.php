@@ -32,8 +32,21 @@
                 <div x-show="activeSectionTab === 'content'" class="space-y-3">
                 <label class="block">
                     <span class="text-xs font-medium text-neutral-700 block mb-1.5">Fond</span>
-                    <input type="color" x-model="currentSection().settings.background" @input="sync()"
-                        class="mt-1 h-7 w-14 p-0 border border-neutral-200 rounded-md bg-white">
+                    <div class="flex items-center gap-2 mt-1">
+                        <input type="color"
+                            :value="/^#([0-9A-Fa-f]{3}){1,2}$/.test(currentSection().settings.background || '') ? currentSection().settings.background : '#ffffff'"
+                            @input="currentSection().settings.background = $event.target.value; sync()"
+                            class="h-7 w-14 p-0 border border-neutral-200 rounded-md bg-white">
+                        <button type="button"
+                            @click="currentSection().settings.background = ''; sync()"
+                            class="inline-flex items-center rounded-md border border-neutral-200 bg-white px-2 py-1 text-xxs font-medium text-neutral-700 hover:bg-neutral-50">
+                            Aucun fond
+                        </button>
+                    </div>
+                    <span x-show="!currentSection().settings.background"
+                        class="text-xxs text-neutral-500 mt-1 block">
+                        Fond transparent (valeur vide)
+                    </span>
                 </label>
 
                 {{-- Gap entre colonnes --}}
@@ -142,7 +155,10 @@
         {{-- Widget settings --}}
         <template x-if="typeof selected !== 'undefined' && selected && selected.type === 'widget'">
             <div :key="selected.widgetId">
-                @foreach(\Omersia\Admin\Config\BuilderWidgets::all() as $widget)
+                @php
+                    $builderWidgets = array_values($widgets ?? \Omersia\Admin\Config\BuilderWidgets::all());
+                @endphp
+                @foreach($builderWidgets as $widget)
                     @include(\Omersia\Apparence\Helpers\ThemeViewHelper::getWidgetView($widget['type'], $themeSlug ?? null))
                 @endforeach
             </div>

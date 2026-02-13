@@ -49,3 +49,8 @@ next-env.d.ts
 
 # Playwright test results
 playwright-report
+
+#Themes
+/src/components/themes/*
+!/src/components/themes/vision/
+!/src/components/themes/vision/**

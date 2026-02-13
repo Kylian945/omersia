@@ -5,6 +5,10 @@ RUN apk add --no-cache \
     git \
     curl \
     libpng-dev \
+    libjpeg-turbo-dev \
+    libwebp-dev \
+    libavif-dev \
+    freetype-dev \
     libzip-dev \
     zip \
     unzip \
@@ -14,8 +18,9 @@ RUN apk add --no-cache \
     nodejs \
     npm
 
-# Install PHP extensions
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
+# Install PHP extensions (GD with JPEG/WEBP/AVIF support)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-avif \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

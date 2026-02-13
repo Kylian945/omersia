@@ -17,54 +17,54 @@ export function IdentityStep() {
   // Sinon, afficher le formulaire d'identité
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-semibold text-neutral-900">
+      <h2 className="text-sm font-semibold text-[var(--theme-heading-color,#111827)]">
         1. Informations personnelles
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div>
-          <label className="block text-xxxs text-neutral-600 mb-1">
+          <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
             Prénom *
           </label>
           <input
             type="text"
             value={identity.firstName}
             onChange={(e) => updateIdentity({ firstName: e.target.value })}
-            className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+            className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
           />
         </div>
         <div>
-          <label className="block text-xxxs text-neutral-600 mb-1">
+          <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
             Nom *
           </label>
           <input
             type="text"
             value={identity.lastName}
             onChange={(e) => updateIdentity({ lastName: e.target.value })}
-            className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+            className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
           />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div>
-          <label className="block text-xxxs text-neutral-600 mb-1">
+          <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
             Email *
           </label>
           <input
             type="email"
             value={identity.email}
             onChange={(e) => updateIdentity({ email: e.target.value })}
-            className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+            className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
           />
         </div>
         <div>
-          <label className="block text-xxxs text-neutral-600 mb-1">
+          <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
             Téléphone
           </label>
           <input
             type="tel"
             value={identity.phone}
             onChange={(e) => updateIdentity({ phone: e.target.value })}
-            className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+            className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
           />
         </div>
       </div>

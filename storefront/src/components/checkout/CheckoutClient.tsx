@@ -104,14 +104,14 @@ function CheckoutClientInner() {
 
   return (
     <>
-      <main className="flex-1 py-8 bg-neutral-50">
+      <main className="flex-1 py-8 bg-[var(--theme-page-bg,#f6f6f7)]">
         <Container>
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-2 mb-4">
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+              <h1 className="text-2xl font-semibold tracking-tight text-[var(--theme-heading-color,#111827)]">
                 Finaliser ma commande
               </h1>
-              <p className="text-xs text-neutral-500">
+              <p className="text-xs text-[var(--theme-muted-color,#6b7280)]">
                 {!isHydrated
                   ? "\u00A0"
                   : totalQty > 0
@@ -119,9 +119,9 @@ function CheckoutClientInner() {
                     : "Votre panier est vide."}
               </p>
               {effectiveUser && (
-                <p className="mt-1 text-xxs text-neutral-500">
+                <p className="mt-1 text-xxs text-[var(--theme-muted-color,#6b7280)]">
                   Connecté en tant que{" "}
-                  <span className="font-medium text-neutral-800">
+                  <span className="font-medium text-[var(--theme-body-color,#374151)]">
                     {(effectiveUser.firstname || effectiveUser.lastname
                       ? `${effectiveUser.firstname ?? ""} ${effectiveUser.lastname ?? ""}`.trim()
                       : effectiveUser.email) || effectiveUser.email}
@@ -132,7 +132,7 @@ function CheckoutClientInner() {
             {isHydrated && totalQty === 0 && (
               <Link
                 href="/products"
-                className="inline-flex items-center rounded-full bg-black px-4 py-1.5 text-xs text-white hover:bg-neutral-900"
+                className="inline-flex items-center rounded-full bg-[var(--theme-primary,#111827)] px-4 py-1.5 text-xs text-[var(--theme-button-primary-text,#ffffff)] hover:opacity-90"
               >
                 Continuer mes achats
               </Link>
@@ -140,7 +140,7 @@ function CheckoutClientInner() {
           </div>
 
           {isHydrated && items.length === 0 && (
-            <div className="mt-4 rounded-2xl bg-white border border-neutral-200 p-6 text-xs text-neutral-600">
+            <div className="theme-panel mt-4 rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] p-6 text-xs text-[var(--theme-muted-color,#6b7280)]">
               Votre panier est vide. Ajoutez des produits pour accéder au checkout.
             </div>
           )}
@@ -150,7 +150,7 @@ function CheckoutClientInner() {
               <div className="space-y-4">
                 <CheckoutStepper steps={steps} currentStep={currentStep} />
 
-                <div className="rounded-2xl bg-white border border-neutral-200 p-4 space-y-4">
+                <div className="theme-panel rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] p-4 space-y-4">
                   {currentStep === 1 && <IdentityStep />}
                   {currentStep === 2 && <AddressStep />}
                   {currentStep === 3 && <ShippingStep />}
@@ -163,7 +163,7 @@ function CheckoutClientInner() {
                         type="button"
                         onClick={goPrev}
                         disabled={currentStep === 1}
-                        className="text-xs text-neutral-500 hover:text-neutral-900 disabled:opacity-30 flex items-center gap-1"
+                        className="text-xs text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-heading-color,#111827)] disabled:opacity-30 flex items-center gap-1"
                       >
                         <ArrowLeft className="w-3 h-3" /> Retour
                       </button>
@@ -200,15 +200,15 @@ function CheckoutClientInner() {
       {/* Modal d'erreur générique */}
       {errorModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="theme-panel w-full max-w-md rounded-2xl bg-[var(--theme-card-bg,#ffffff)] p-6 shadow-xl">
             <div className="mb-4">
-              <h3 className="text-lg font-semibold text-neutral-900">
+              <h3 className="text-lg font-semibold text-[var(--theme-heading-color,#111827)]">
                 Attention
               </h3>
             </div>
 
             <div className="mb-6">
-              <p className="text-sm text-neutral-600">
+              <p className="text-sm text-[var(--theme-muted-color,#6b7280)]">
                 {errorModalMessage}
               </p>
             </div>

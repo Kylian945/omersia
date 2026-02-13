@@ -21,6 +21,11 @@
             'buttons' => 'Boutons',
             'cart' => 'Panier',
             'products' => 'Produits',
+            'forms' => 'Formulaires',
+            'surfaces' => 'Surfaces',
+            'footer' => 'Footer',
+            'checkout' => 'Checkout',
+            'account' => 'Compte',
         ];
 
         $groupIcons = [
@@ -35,6 +40,30 @@
             'buttons' => 'M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z',
             'cart' => 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z',
             'products' => 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4',
+            'forms' => 'M7 7h10M7 12h10M7 17h6M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z',
+            'surfaces' => 'M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z',
+            'footer' => 'M4 6h16M4 11h16M4 16h16M4 20h7',
+            'checkout' => 'M3 7h18M3 11h18M5 15h6m2 0h2M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
+            'account' => 'M5.121 17.804A11.955 11.955 0 0112 15c2.21 0 4.287.6 6.121 1.647M15 11a3 3 0 11-6 0 3 3 0 016 0z',
+        ];
+
+        $groupDescriptions = [
+            'colors' => 'Palette de couleurs',
+            'backgrounds' => 'Arrière-plans',
+            'texts' => 'Couleurs de texte',
+            'borders' => 'Bordures et séparations',
+            'states' => 'Badges et états',
+            'typography' => 'Polices et tailles',
+            'layout' => 'Structure et styles',
+            'header' => 'En-tête du site',
+            'buttons' => 'Style des boutons CTA',
+            'cart' => 'Configuration du panier',
+            'products' => 'Affichage des produits',
+            'forms' => 'Champs, focus et saisie',
+            'surfaces' => 'Cartes, panneaux et ombres',
+            'footer' => 'Pied de page',
+            'checkout' => 'Résumé et étapes commande',
+            'account' => 'Cartes espace client',
         ];
 
         // Exclude backgrounds, texts, borders, states as they are sub-sections of colors
@@ -44,9 +73,36 @@
 
         // Default active tab (colors if available, otherwise first group)
         $defaultTab = in_array('colors', $groups) ? 'colors' : reset($groups);
+        $requestedTab = request()->query('tab');
+        $activeTab = in_array($requestedTab, $groups, true) ? $requestedTab : $defaultTab;
+
+        // UX: grouper les onglets pour accélérer la navigation.
+        $groupSections = [
+            'Fondations' => array_values(array_filter($groups, fn($group) => in_array($group, ['colors', 'typography', 'layout'], true))),
+            'UI & Navigation' => array_values(array_filter($groups, fn($group) => in_array($group, ['header', 'buttons', 'forms', 'surfaces', 'footer'], true))),
+            'Parcours client' => array_values(array_filter($groups, fn($group) => in_array($group, ['products', 'cart', 'checkout', 'account'], true))),
+        ];
     @endphp
 
-    <div x-data="{ activeTab: '{{ $defaultTab }}' }">
+    <div
+        x-data="{
+            activeTab: '{{ $activeTab }}',
+            tabSearch: '',
+            tabOrder: @js(array_values($groups)),
+            groupLabels: @js($groupLabels),
+            matchesTab(label) {
+                const query = this.tabSearch.trim().toLowerCase();
+                return query === '' || label.toLowerCase().includes(query);
+            },
+            goToTab(direction) {
+                const index = this.tabOrder.indexOf(this.activeTab);
+                if (index === -1) return;
+                const next = index + direction;
+                if (next < 0 || next >= this.tabOrder.length) return;
+                this.activeTab = this.tabOrder[next];
+            }
+        }"
+    >
         <div class="flex items-center justify-between mb-6">
             <div>
                 <div class="flex items-center gap-2 mb-1">
@@ -62,6 +118,7 @@
                 <form action="{{ route('admin.apparence.theme.customize.reset', $theme) }}" method="POST"
                     onsubmit="return confirm('Êtes-vous sûr de vouloir réinitialiser tous les paramètres ?')">
                     @csrf
+                    <input type="hidden" name="active_tab" x-bind:value="activeTab">
                     <button type="submit"
                         class="px-4 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50">
                         Réinitialiser
@@ -72,51 +129,103 @@
 
         <form action="{{ route('admin.apparence.theme.customize.update', $theme) }}" method="POST">
             @csrf
+            <input type="hidden" name="active_tab" x-bind:value="activeTab">
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {{-- Sidebar avec les onglets (généré dynamiquement) --}}
-                <div class="lg:col-span-1 space-y-2 self-start sticky top-20">
-                    @foreach($groups as $group)
-                        @php
-                            $label = $groupLabels[$group] ?? ucfirst($group);
-                            $icon = $groupIcons[$group] ?? $groupIcons['colors']; // Fallback icon
-                            $description = match($group) {
-                                'colors' => 'Palette de couleurs',
-                                'backgrounds' => 'Arrière-plans',
-                                'texts' => 'Couleurs de texte',
-                                'borders' => 'Bordures et séparations',
-                                'states' => 'Badges et états',
-                                'typography' => 'Polices et tailles',
-                                'layout' => 'Structure et styles',
-                                'header' => 'En-tête du site',
-                                'buttons' => 'Style des boutons CTA',
-                                'cart' => 'Configuration du panier',
-                                'products' => 'Affichage des produits',
-                                default => ''
-                            };
-                        @endphp
-
-                        <button
-                            type="button"
-                            @click="activeTab = '{{ $group }}'"
-                            :class="activeTab === '{{ $group }}' ? 'bg-white border-gray-300 shadow-sm' : 'bg-white border-transparent hover:bg-white'"
-                            class="w-full text-left px-4 py-3 rounded-xl border text-xs font-medium text-gray-900 transition"
+                {{-- Sidebar avec navigation structurée --}}
+                <div class="lg:col-span-1 space-y-3 self-start sticky top-20">
+                    <div class="rounded-xl bg-white border border-black/5 shadow-sm p-3">
+                        <label class="block text-xxs font-medium text-gray-500 uppercase tracking-wide mb-1.5">
+                            Rechercher une section
+                        </label>
+                        <input
+                            type="text"
+                            x-model="tabSearch"
+                            placeholder="Ex: checkout, formulaires..."
+                            class="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900"
                         >
-                            <div class="flex items-center gap-1.5">
-                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon }}" />
-                                </svg>
-                                <span>{{ $label }}</span>
+                    </div>
+
+                    @foreach($groupSections as $sectionName => $sectionGroups)
+                        @if(!empty($sectionGroups))
+                            <div class="rounded-xl bg-white border border-black/5 shadow-sm p-2.5">
+                                <p class="px-1 text-xxs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+                                    {{ $sectionName }}
+                                </p>
+                                <div class="space-y-1">
+                                    @foreach($sectionGroups as $group)
+                                        @php
+                                            $label = $groupLabels[$group] ?? ucfirst($group);
+                                            $icon = $groupIcons[$group] ?? $groupIcons['colors'];
+                                            $description = $groupDescriptions[$group] ?? '';
+                                            $normalizedLabel = strtolower($label);
+                                        @endphp
+
+                                        <button
+                                            type="button"
+                                            x-show='matchesTab(@js($normalizedLabel))'
+                                            @click="activeTab = '{{ $group }}'"
+                                            :class="activeTab === '{{ $group }}' ? 'bg-gray-50 border-gray-300 text-gray-900' : 'bg-white border-transparent text-gray-700 hover:bg-gray-50'"
+                                            class="w-full text-left px-3 py-2.5 rounded-lg border text-xs font-medium transition"
+                                        >
+                                            <div class="flex items-center gap-1.5">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon }}" />
+                                                </svg>
+                                                <span>{{ $label }}</span>
+                                            </div>
+                                            @if($description)
+                                                <p class="text-xxxs text-gray-500 mt-0.5">{{ $description }}</p>
+                                            @endif
+                                        </button>
+                                    @endforeach
+                                </div>
                             </div>
-                            @if($description)
-                                <p class="text-xxxs text-gray-500 mt-0.5">{{ $description }}</p>
-                            @endif
-                        </button>
+                        @endif
                     @endforeach
                 </div>
 
                 {{-- Panneau de personnalisation --}}
-                <div class="lg:col-span-2">
+                <div class="lg:col-span-2 space-y-3">
+                    <div class="rounded-2xl bg-white border border-black/5 shadow-sm p-3">
+                        <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-xxs font-medium uppercase tracking-wide text-gray-500">Section active</p>
+                                <p class="text-sm font-semibold text-gray-900" x-text="groupLabels[activeTab] ?? activeTab"></p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button
+                                    type="button"
+                                    @click="goToTab(-1)"
+                                    class="px-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50"
+                                >
+                                    Précédent
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="goToTab(1)"
+                                    class="px-3 py-1.5 rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50"
+                                >
+                                    Suivant
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 flex flex-wrap gap-1.5">
+                            @foreach($groups as $group)
+                                @php $label = $groupLabels[$group] ?? ucfirst($group); @endphp
+                                <button
+                                    type="button"
+                                    @click="activeTab = '{{ $group }}'"
+                                    :class="activeTab === '{{ $group }}' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'"
+                                    class="px-2.5 py-1.5 rounded-lg border text-xxs font-medium transition"
+                                >
+                                    {{ $label }}
+                                </button>
+                            @endforeach
+                        </div>
+                    </div>
+
                     <div class="rounded-2xl bg-white border border-black/5 shadow-sm p-6">
                         {{-- Colors Section --}}
                         <div x-show="activeTab === 'colors'" class="space-y-6">
@@ -520,6 +629,178 @@
                                             class="mt-1 w-20 h-10 rounded-lg border border-gray-200 cursor-pointer"
                                         >
                                     @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        @endif
+
+                        {{-- Forms Section --}}
+                        @if(isset($config['forms']))
+                        <div x-show="activeTab === 'forms'" class="space-y-4">
+                            <h3 class="text-sm font-semibold text-gray-900 mb-4">Formulaires</h3>
+
+                            @foreach ($config['forms'] as $key => $setting)
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">
+                                        {{ $setting['label'] }}
+                                        @if(isset($setting['description']))
+                                            <span class="text-xs text-gray-500 font-normal block mt-0.5">
+                                                {{ $setting['description'] }}
+                                            </span>
+                                        @endif
+                                    </label>
+
+                                    @if($setting['type'] === 'select')
+                                        <select name="settings[{{ $key }}]"
+                                            class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900">
+                                            @foreach($setting['options'] as $optionKey => $optionLabel)
+                                                @php
+                                                    $value = is_numeric($optionKey) ? $optionLabel : $optionKey;
+                                                    $label = is_numeric($optionKey) ? $optionLabel : $optionLabel;
+                                                    $currentValue = $currentSettings['forms'][$key] ?? $setting['default'];
+                                                @endphp
+                                                <option value="{{ $value }}" {{ $currentValue == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                    @elseif($setting['type'] === 'color')
+                                        <input type="color" name="settings[{{ $key }}]"
+                                            value="{{ $currentSettings['forms'][$key] ?? $setting['default'] }}"
+                                            class="mt-1 w-20 h-10 rounded-lg border border-gray-200 cursor-pointer">
+                                    @elseif($setting['type'] === 'number')
+                                        <input type="number" name="settings[{{ $key }}]"
+                                            value="{{ $currentSettings['forms'][$key] ?? $setting['default'] }}"
+                                            min="{{ $setting['min'] ?? '' }}" max="{{ $setting['max'] ?? '' }}"
+                                            class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900">
+                                    @else
+                                        <input type="text" name="settings[{{ $key }}]"
+                                            value="{{ $currentSettings['forms'][$key] ?? $setting['default'] }}"
+                                            class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900">
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        @endif
+
+                        {{-- Surfaces Section --}}
+                        @if(isset($config['surfaces']))
+                        <div x-show="activeTab === 'surfaces'" class="space-y-4">
+                            <h3 class="text-sm font-semibold text-gray-900 mb-4">Surfaces</h3>
+
+                            @foreach ($config['surfaces'] as $key => $setting)
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">
+                                        {{ $setting['label'] }}
+                                        @if(isset($setting['description']))
+                                            <span class="text-xs text-gray-500 font-normal block mt-0.5">
+                                                {{ $setting['description'] }}
+                                            </span>
+                                        @endif
+                                    </label>
+
+                                    @if($setting['type'] === 'select')
+                                        <select name="settings[{{ $key }}]"
+                                            class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900">
+                                            @foreach($setting['options'] as $optionKey => $optionLabel)
+                                                @php
+                                                    $value = is_numeric($optionKey) ? $optionLabel : $optionKey;
+                                                    $label = is_numeric($optionKey) ? $optionLabel : $optionLabel;
+                                                    $currentValue = $currentSettings['surfaces'][$key] ?? $setting['default'];
+                                                @endphp
+                                                <option value="{{ $value }}" {{ $currentValue == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                    @elseif($setting['type'] === 'color')
+                                        <input type="color" name="settings[{{ $key }}]"
+                                            value="{{ $currentSettings['surfaces'][$key] ?? $setting['default'] }}"
+                                            class="mt-1 w-20 h-10 rounded-lg border border-gray-200 cursor-pointer">
+                                    @elseif($setting['type'] === 'number')
+                                        <input type="number" name="settings[{{ $key }}]"
+                                            value="{{ $currentSettings['surfaces'][$key] ?? $setting['default'] }}"
+                                            min="{{ $setting['min'] ?? '' }}" max="{{ $setting['max'] ?? '' }}"
+                                            class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900">
+                                    @else
+                                        <input type="text" name="settings[{{ $key }}]"
+                                            value="{{ $currentSettings['surfaces'][$key] ?? $setting['default'] }}"
+                                            class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900">
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                        @endif
+
+                        {{-- Footer Section --}}
+                        @if(isset($config['footer']))
+                        <div x-show="activeTab === 'footer'" class="space-y-4">
+                            <h3 class="text-sm font-semibold text-gray-900 mb-4">Footer</h3>
+
+                            @foreach ($config['footer'] as $key => $setting)
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">
+                                        {{ $setting['label'] }}
+                                    </label>
+                                    <select name="settings[{{ $key }}]"
+                                        class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900">
+                                        @foreach($setting['options'] as $optionKey => $optionLabel)
+                                            @php
+                                                $value = is_numeric($optionKey) ? $optionLabel : $optionKey;
+                                                $label = is_numeric($optionKey) ? $optionLabel : $optionLabel;
+                                                $currentValue = $currentSettings['footer'][$key] ?? $setting['default'];
+                                            @endphp
+                                            <option value="{{ $value }}" {{ $currentValue == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endforeach
+                        </div>
+                        @endif
+
+                        {{-- Checkout Section --}}
+                        @if(isset($config['checkout']))
+                        <div x-show="activeTab === 'checkout'" class="space-y-4">
+                            <h3 class="text-sm font-semibold text-gray-900 mb-4">Checkout</h3>
+
+                            @foreach ($config['checkout'] as $key => $setting)
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">
+                                        {{ $setting['label'] }}
+                                    </label>
+                                    <select name="settings[{{ $key }}]"
+                                        class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900">
+                                        @foreach($setting['options'] as $optionKey => $optionLabel)
+                                            @php
+                                                $value = is_numeric($optionKey) ? $optionLabel : $optionKey;
+                                                $label = is_numeric($optionKey) ? $optionLabel : $optionLabel;
+                                                $currentValue = $currentSettings['checkout'][$key] ?? $setting['default'];
+                                            @endphp
+                                            <option value="{{ $value }}" {{ $currentValue == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endforeach
+                        </div>
+                        @endif
+
+                        {{-- Account Section --}}
+                        @if(isset($config['account']))
+                        <div x-show="activeTab === 'account'" class="space-y-4">
+                            <h3 class="text-sm font-semibold text-gray-900 mb-4">Compte</h3>
+
+                            @foreach ($config['account'] as $key => $setting)
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">
+                                        {{ $setting['label'] }}
+                                    </label>
+                                    <select name="settings[{{ $key }}]"
+                                        class="mt-1 w-full rounded-xl border border-gray-200 px-3 py-2 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900">
+                                        @foreach($setting['options'] as $optionKey => $optionLabel)
+                                            @php
+                                                $value = is_numeric($optionKey) ? $optionLabel : $optionKey;
+                                                $label = is_numeric($optionKey) ? $optionLabel : $optionLabel;
+                                                $currentValue = $currentSettings['account'][$key] ?? $setting['default'];
+                                            @endphp
+                                            <option value="{{ $value }}" {{ $currentValue == $value ? 'selected' : '' }}>{{ $label }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                             @endforeach
                         </div>

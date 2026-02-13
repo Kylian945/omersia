@@ -35,11 +35,11 @@ function formatOrderStatus(status: string): { label: string; badgeClass: string 
     case "delivered":
       return { label: "Livrée", badgeClass: "bg-lime-100 text-lime-700" };
     case "refunded":
-      return { label: "Remboursée", badgeClass: "bg-gray-100 text-gray-700" };
+      return { label: "Remboursée", badgeClass: "bg-[var(--theme-input-bg,#ffffff)] text-[var(--theme-body-color,#374151)]" };
     case "cancelled":
-      return { label: "Annulée", badgeClass: "bg-gray-100 text-gray-700" };
+      return { label: "Annulée", badgeClass: "bg-[var(--theme-input-bg,#ffffff)] text-[var(--theme-body-color,#374151)]" };
     default:
-      return { label: status, badgeClass: "bg-neutral-100 text-neutral-700" };
+      return { label: status, badgeClass: "bg-[var(--theme-input-bg,#ffffff)] text-[var(--theme-body-color,#374151)]" };
   }
 }
 
@@ -111,7 +111,7 @@ export function AccountOrdersRealtime({ customerId, initialOrders }: Props) {
 
   if (orders.length === 0) {
     return (
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-[var(--theme-muted-color,#6b7280)]">
         Vous n’avez pas encore passé de commande.
       </p>
     );
@@ -125,13 +125,13 @@ export function AccountOrdersRealtime({ customerId, initialOrders }: Props) {
           <Link
             href={`/account/order/${order.number}`}
             key={order.id}
-            className="border border-black/5 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-white shadow-sm"
+            className="theme-account-card border border-[var(--theme-border-default,#e5e7eb)] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between bg-[var(--theme-card-bg,#ffffff)] shadow-sm"
           >
             <div className="flex flex-col text-xs">
-              <span className="font-semibold text-neutral-900">
+              <span className="font-semibold text-[var(--theme-heading-color,#111827)]">
                 Commande #{order.number}
               </span>
-              <span className="text-neutral-500 text-xs">
+              <span className="text-[var(--theme-muted-color,#6b7280)] text-xs">
                 Passée le{" "}
                 {new Date(order.placed_at).toLocaleDateString("fr-FR")}
               </span>
@@ -149,7 +149,7 @@ export function AccountOrdersRealtime({ customerId, initialOrders }: Props) {
 
             <div className="flex flex-col items-end text-xs sm:w-32 mt-3 sm:mt-0">
               <span className="font-semibold">Total</span>
-              <span className="text-neutral-900">
+              <span className="text-[var(--theme-heading-color,#111827)]">
                 {Number(order.total).toFixed(2)} €
               </span>
             </div>

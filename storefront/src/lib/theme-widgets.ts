@@ -7,17 +7,17 @@ import { logger } from './logger';
  */
 export async function getThemeWidgets() {
   const theme = await getThemeSettings();
-  const themeSlug = theme.theme_slug || 'vision';
+  const themePath = theme.component_path || 'vision';
 
   try {
     // Try to load widgets from the active theme
-    const widgets = await import(`@/components/themes/${themeSlug}/widgets`);
+    const widgets = await import(`@/components/themes/${themePath}/widgets`);
     return widgets;
   } catch (error) {
     // If the active theme doesn't have widgets, fallback to vision
-    if (themeSlug !== 'vision') {
+    if (themePath !== 'vision') {
       logger.warn(
-        `Widgets not found in theme '${themeSlug}', falling back to vision theme`
+        `Widgets not found in theme '${themePath}', falling back to vision theme`
       );
       const widgets = await import('@/components/themes/vision/widgets');
       return widgets;

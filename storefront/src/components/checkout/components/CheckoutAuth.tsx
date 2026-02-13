@@ -152,16 +152,16 @@ export function CheckoutAuth({
   return (
     <div className="space-y-4">
       <div>
-        <h2 className="text-sm font-semibold text-neutral-900">
+        <h2 className="text-sm font-semibold text-[var(--theme-heading-color,#111827)]">
           1. Identité
         </h2>
-        <p className="text-xxxs text-neutral-500 mt-0.5">
+        <p className="text-xxxs text-[var(--theme-muted-color,#6b7280)] mt-0.5">
           Pour continuer, veuillez vous identifier ou créer un compte
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 p-1 bg-neutral-100 rounded-lg">
+      <div className="flex gap-1 p-1 bg-[var(--theme-input-bg,#ffffff)] rounded-lg">
         <button
           type="button"
           onClick={() => {
@@ -169,8 +169,8 @@ export function CheckoutAuth({
             setError(null);
           }}
           className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition ${mode === "login"
-            ? "bg-white text-neutral-900 shadow-sm"
-            : "text-neutral-600 hover:text-neutral-900"
+            ? "bg-[var(--theme-card-bg,#ffffff)] text-[var(--theme-heading-color,#111827)] shadow-sm"
+            : "text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-heading-color,#111827)]"
             }`}
         >
           Connexion
@@ -182,8 +182,8 @@ export function CheckoutAuth({
             setError(null);
           }}
           className={`flex-1 px-3 py-1.5 rounded-md text-xs font-medium transition ${mode === "register"
-            ? "bg-white text-neutral-900 shadow-sm"
-            : "text-neutral-600 hover:text-neutral-900"
+            ? "bg-[var(--theme-card-bg,#ffffff)] text-[var(--theme-heading-color,#111827)] shadow-sm"
+            : "text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-heading-color,#111827)]"
             }`}
         >
           Créer un compte
@@ -206,14 +206,14 @@ export function CheckoutAuth({
       {mode === "login" && (
         <form onSubmit={handleLoginSubmit} className="space-y-3">
           <div>
-            <label className="block text-xxxs text-neutral-600 mb-1">
+            <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
               Email *
             </label>
             <input
               type="email"
               value={loginEmail}
               onChange={(e) => setLoginEmail(e.target.value)}
-              className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+              className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
               placeholder="vous@example.com"
               required
               autoComplete="email"
@@ -221,7 +221,7 @@ export function CheckoutAuth({
           </div>
 
           <div>
-            <label className="block text-xxxs text-neutral-600 mb-1">
+            <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
               Mot de passe *
             </label>
             <div className="relative">
@@ -229,7 +229,7 @@ export function CheckoutAuth({
                 type={showPassword ? "text" : "password"}
                 value={loginPassword}
                 onChange={(e) => setLoginPassword(e.target.value)}
-                className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70 pr-10"
+                className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)] pr-10"
                 placeholder="Votre mot de passe"
                 required
                 autoComplete="current-password"
@@ -237,7 +237,7 @@ export function CheckoutAuth({
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-muted-color,#6b7280)]"
               >
                 {showPassword ? (
                   <EyeOff className="w-4 h-4" />
@@ -260,7 +260,7 @@ export function CheckoutAuth({
             </Button>
           </div>
 
-          <p className="text-xxxs text-neutral-500 text-end">
+          <p className="text-xxxs text-[var(--theme-muted-color,#6b7280)] text-end">
             Votre panier sera conservé après connexion
           </p>
         </form>
@@ -271,28 +271,28 @@ export function CheckoutAuth({
         <form onSubmit={handleRegisterSubmit} className="space-y-3">
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="block text-xxxs text-neutral-600 mb-1">
+              <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                 Prénom *
               </label>
               <input
                 type="text"
                 value={registerFirstName}
                 onChange={(e) => setRegisterFirstName(e.target.value)}
-                className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 placeholder="Prénom"
                 required
                 autoComplete="given-name"
               />
             </div>
             <div>
-              <label className="block text-xxxs text-neutral-600 mb-1">
+              <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                 Nom *
               </label>
               <input
                 type="text"
                 value={registerLastName}
                 onChange={(e) => setRegisterLastName(e.target.value)}
-                className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 placeholder="Nom"
                 required
                 autoComplete="family-name"
@@ -301,14 +301,14 @@ export function CheckoutAuth({
           </div>
 
           <div>
-            <label className="block text-xxxs text-neutral-600 mb-1">
+            <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
               Email *
             </label>
             <input
               type="email"
               value={registerEmail}
               onChange={(e) => setRegisterEmail(e.target.value)}
-              className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+              className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
               placeholder="vous@example.com"
               required
               autoComplete="email"
@@ -316,7 +316,7 @@ export function CheckoutAuth({
           </div>
 
           <div>
-            <label className="block text-xxxs text-neutral-600 mb-1">
+            <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
               Mot de passe * (min. 8 caractères)
             </label>
             <div className="relative">
@@ -324,7 +324,7 @@ export function CheckoutAuth({
                 type={showPassword ? "text" : "password"}
                 value={registerPassword}
                 onChange={(e) => setRegisterPassword(e.target.value)}
-                className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70 pr-10"
+                className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)] pr-10"
                 placeholder="Votre mot de passe"
                 required
                 minLength={8}
@@ -333,7 +333,7 @@ export function CheckoutAuth({
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-muted-color,#6b7280)]"
               >
                 {showPassword ? (
                   <EyeOff className="w-4 h-4" />
@@ -345,14 +345,14 @@ export function CheckoutAuth({
           </div>
 
           <div>
-            <label className="block text-xxxs text-neutral-600 mb-1">
+            <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
               Confirmer le mot de passe *
             </label>
             <input
               type={showPassword ? "text" : "password"}
               value={registerPasswordConfirm}
               onChange={(e) => setRegisterPasswordConfirm(e.target.value)}
-              className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+              className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
               placeholder="Confirmez votre mot de passe"
               required
               minLength={8}
@@ -371,7 +371,7 @@ export function CheckoutAuth({
               {loading ? "Création..." : "Créer mon compte"}
             </Button>
           </div>
-          <p className="text-xxxs text-neutral-500 text-end">
+          <p className="text-xxxs text-[var(--theme-muted-color,#6b7280)] text-end">
             Votre panier sera conservé et associé à votre compte
           </p>
         </form>

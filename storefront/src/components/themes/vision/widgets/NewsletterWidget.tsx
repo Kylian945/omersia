@@ -1,13 +1,16 @@
 "use client";
 
 import { SmartContainer } from "@/components/common/SmartContainer";
-import { useState } from "react";
+import { createElement, useState } from "react";
 import { Button } from "@/components/common/Button";
 import { getPaddingClasses, getMarginClasses } from "@/lib/widget-helpers";
 import { validateSpacingConfig } from "@/lib/css-variable-sanitizer";
+import type { FormEvent } from "react";
+import { sanitizeHTML } from "@/lib/html-sanitizer";
 
 type NewsletterProps = {
   title?: string;
+  titleTag?: string;
   description?: string;
   placeholder?: string;
   buttonText?: string;
@@ -15,29 +18,55 @@ type NewsletterProps = {
   margin?: Record<string, unknown>;
 };
 
+type HeadingTag = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+
+function normalizeHeadingTag(tag: string | undefined, fallback: HeadingTag): HeadingTag {
+  const normalizedTag = tag?.toLowerCase();
+  const validTags: HeadingTag[] = ["h1", "h2", "h3", "h4", "h5", "h6"];
+  return normalizedTag && validTags.includes(normalizedTag as HeadingTag)
+    ? (normalizedTag as HeadingTag)
+    : fallback;
+}
+
+const VISION_UI = {
+  sectionClass: "rounded-2xl",
+  panelClass: "rounded-2xl p-8 md:p-12",
+  layoutClass: "mx-auto max-w-2xl text-center",
+  titleClass: "text-2xl font-bold md:text-3xl",
+  descriptionClass: "mt-3 text-sm md:text-base",
+  formClass: "mt-6",
+  inputClass: "flex-1 rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2",
+  noteClass: "mt-4 text-xs",
+};
+
 export function Newsletter({
-  title = "Restez informé",
-  description = "Inscrivez-vous à notre newsletter pour recevoir nos offres exclusives et nouveautés en avant-première.",
+  title = "Restez informe",
+  titleTag = "h2",
+  description = "Inscrivez-vous a notre newsletter pour recevoir nos offres exclusives et nouveautes en avant-premiere.",
   placeholder = "Votre adresse email",
   buttonText = "S'inscrire",
   padding,
   margin,
 }: NewsletterProps) {
+  const ui = VISION_UI;
+  const normalizedTitleTag = normalizeHeadingTag(titleTag, "h2");
+  const safeDescription = sanitizeHTML(description || "");
+
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
+    "idle"
+  );
   const [message, setMessage] = useState("");
 
-  // Validate and get spacing classes
   const paddingConfig = validateSpacingConfig(padding);
   const marginConfig = validateSpacingConfig(margin);
   const paddingClasses = getPaddingClasses(paddingConfig);
   const marginClasses = getMarginClasses(marginConfig);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setStatus("loading");
 
-    // Placeholder implementation - simulates newsletter subscription
     setTimeout(() => {
       setStatus("success");
       setMessage("Merci pour votre inscription !");
@@ -47,54 +76,52 @@ export function Newsletter({
 
   return (
     <section
-      className={`rounded-2xl ${paddingClasses} ${marginClasses}`.trim()}
-      style={{
-        backgroundColor: "var(--theme-page-bg, #f6f6f7)",
-      }}
+      className={`${ui.sectionClass} ${paddingClasses} ${marginClasses}`.trim()}
+      style={{ backgroundColor: "var(--theme-page-bg, #f6f6f7)" }}
     >
       <SmartContainer>
         <div
-          className="rounded-2xl p-8 md:p-12"
+          className={ui.panelClass}
           style={{
             backgroundColor: "var(--theme-card-bg, #ffffff)",
             borderRadius: "var(--theme-border-radius, 16px)",
+            borderColor: "var(--theme-border-default, #e5e7eb)",
           }}
         >
-          <div className="mx-auto max-w-2xl text-center">
-            <h2
-              className="text-2xl font-bold md:text-3xl"
-              style={{ color: "var(--theme-heading-color, #111827)" }}
-            >
-              {title}
-            </h2>
-            <p
-              className="mt-3 text-sm md:text-base"
-              style={{ color: "var(--theme-body-color, #6b7280)" }}
-            >
-              {description}
-            </p>
+          <div className={ui.layoutClass}>
+            <div>
+              {createElement(
+                normalizedTitleTag,
+                {
+                  className: ui.titleClass,
+                  style: { color: "var(--theme-heading-color, #111827)" },
+                },
+                title
+              )}
+              <p
+                className={ui.descriptionClass}
+                style={{ color: "var(--theme-body-color, #6b7280)" }}
+                dangerouslySetInnerHTML={{ __html: safeDescription }}
+              />
+            </div>
 
-            <form onSubmit={handleSubmit} className="mt-6">
+            <form onSubmit={handleSubmit} className={ui.formClass}>
               <div className="flex flex-col gap-3 sm:flex-row">
                 <input
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(event) => setEmail(event.target.value)}
                   placeholder={placeholder}
                   required
                   disabled={status === "loading" || status === "success"}
-                  className="flex-1 rounded-lg border px-4 py-2 text-sm focus:outline-none focus:ring-2"
+                  className={ui.inputClass}
                   style={{
                     borderColor: "var(--theme-border-default, #e5e7eb)",
                     backgroundColor: "var(--theme-input-bg, #ffffff)",
                     color: "var(--theme-body-color, #111827)",
                   }}
                 />
-                <Button
-                  type="submit"
-                  size="md"
-                  variant="primary"
-                >
+                <Button type="submit" size="md" variant="primary">
                   {status === "loading" ? "Envoi..." : buttonText}
                 </Button>
               </div>
@@ -116,15 +143,15 @@ export function Newsletter({
                   {message}
                 </p>
               )}
-            </form>
 
-            <p
-              className="mt-4 text-xs"
-              style={{ color: "var(--theme-muted-color, #9ca3af)" }}
-            >
-              En vous inscrivant, vous acceptez notre politique de
-              confidentialité. Vous pouvez vous désinscrire à tout moment.
-            </p>
+              <p
+                className={ui.noteClass}
+                style={{ color: "var(--theme-muted-color, #9ca3af)" }}
+              >
+                En vous inscrivant, vous acceptez notre politique de
+                confidentialite. Vous pouvez vous desinscrire a tout moment.
+              </p>
+            </form>
           </div>
         </div>
       </SmartContainer>

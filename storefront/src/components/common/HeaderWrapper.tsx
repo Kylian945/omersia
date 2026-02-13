@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { CSSProperties, useMemo } from "react";
 import { ModuleHooks } from "@/components/modules/ModuleHooks";
 import { useHydrated } from "@/hooks/useHydrated";
 
@@ -32,7 +32,7 @@ export function HeaderWrapper({ children }: HeaderWrapperProps) {
   }, [isHydrated]);
 
   // Base classes
-  let classes = "z-40";
+  let classes = "z-40 text-[var(--theme-body-color,#374151)]";
 
   // Position (sticky ou non)
   if (isSticky) {
@@ -42,23 +42,27 @@ export function HeaderWrapper({ children }: HeaderWrapperProps) {
   }
 
   // Style visuel selon header_style
+  const headerBackground = "var(--theme-header-bg, var(--theme-card-bg, #ffffff))";
+  let headerInlineStyle: CSSProperties | undefined;
+
   switch (headerStyle) {
     case "minimal":
       // Minimal: transparent, sans bordure
-      classes += isSticky ? " bg-white/40" : " bg-transparent";
+      headerInlineStyle = isSticky ? { backgroundColor: headerBackground } : undefined;
       break;
     case "classic":
       // Classic: fond blanc, sans bordure
-      classes += isSticky ? " bg-white/80" : " bg-white";
+      headerInlineStyle = { backgroundColor: headerBackground };
       break;
     case "bordered":
       // Bordered: fond blanc + bordure inférieure
       classes += isSticky
-        ? " bg-white/80 border-b border-black/5"
-        : " bg-white border-b border-black/5";
+        ? " border-b border-[var(--theme-border-default,#e5e7eb)]"
+        : " border-b border-[var(--theme-border-default,#e5e7eb)]";
+      headerInlineStyle = { backgroundColor: headerBackground };
       break;
     default:
-      classes += " bg-white";
+      headerInlineStyle = { backgroundColor: headerBackground };
   }
 
   return (
@@ -68,7 +72,9 @@ export function HeaderWrapper({ children }: HeaderWrapperProps) {
         hookName="header.top"
         context={{}}
       />
-      <header className={classes}>{children}</header>
+      <header className={classes} style={headerInlineStyle}>
+        {children}
+      </header>
     </>
   );
 }

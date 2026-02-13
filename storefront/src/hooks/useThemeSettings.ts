@@ -39,6 +39,10 @@ export interface UseThemeSettingsReturn {
   productBadgesDisplay: 'block' | 'none';
   productQuickAddDisplay: 'block' | 'none';
   productImageRatio: string;
+  productBadgeRadius: string;
+  productTitleLines: number;
+  productPriceSize: string;
+  productQuickAddStyle: 'icon' | 'button' | 'none';
   productsPerRowDesktop: number;
   productsPerRowTablet: number;
   productsPerRowMobile: number;
@@ -97,6 +101,10 @@ export function useThemeSettings(): UseThemeSettingsReturn {
         productBadgesDisplay: 'block',
         productQuickAddDisplay: 'block',
         productImageRatio: '100%',
+        productBadgeRadius: '9999px',
+        productTitleLines: 2,
+        productPriceSize: '0.9375rem',
+        productQuickAddStyle: 'button',
         productsPerRowDesktop: 4,
         productsPerRowTablet: 3,
         productsPerRowMobile: 2,
@@ -145,6 +153,10 @@ export function useThemeSettings(): UseThemeSettingsReturn {
       productBadgesDisplay: getVar('--theme-product-badges-display', 'block') as 'block' | 'none',
       productQuickAddDisplay: getVar('--theme-product-quick-add-display', 'block') as 'block' | 'none',
       productImageRatio: getVar('--theme-product-image-ratio', '100%'),
+      productBadgeRadius: getVar('--theme-product-badge-radius', '9999px'),
+      productTitleLines: parseInt(getVar('--theme-product-title-lines', '2')),
+      productPriceSize: getVar('--theme-product-price-size', '0.9375rem'),
+      productQuickAddStyle: getVar('--theme-product-quick-add-style', 'button') as 'icon' | 'button' | 'none',
       productsPerRowDesktop: parseInt(getVar('--theme-products-per-row-desktop', '4')),
       productsPerRowTablet: parseInt(getVar('--theme-products-per-row-tablet', '3')),
       productsPerRowMobile: parseInt(getVar('--theme-products-per-row-mobile', '2')),

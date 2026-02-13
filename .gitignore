@@ -24,3 +24,7 @@ storefront/.env.*.local
 .claude
 CLAUDE.md
 
+# Themes
+/theme-build
+/theme-zips
+scripts/generate-theme-presets.mjs

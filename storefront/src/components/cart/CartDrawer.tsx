@@ -33,15 +33,15 @@ export function CartDrawer() {
 
       {/* Drawer animé */}
       <div
-        className={`w-full max-w-md h-full bg-white shadow-2xl border-l border-neutral-200 flex flex-col transform transition-transform duration-300 cart-drawer-animate ${isOpen ? "translate-x-0" : "translate-x-full"
+        className={`w-full max-w-md h-full bg-[var(--theme-card-bg,#ffffff)] shadow-2xl border-l border-[var(--theme-border-default,#e5e7eb)] flex flex-col transform transition-transform duration-300 cart-drawer-animate ${isOpen ? "translate-x-0" : "translate-x-full"
           }`}
       >
-        <div className="px-4 py-3 border-b border-neutral-100 flex items-center justify-between">
+        <div className="px-4 py-3 border-b border-[var(--theme-border-default,#e5e7eb)] flex items-center justify-between">
           <div>
-            <div className="text-body-14 font-semibold text-neutral-900">
+            <div className="text-body-14 font-semibold text-[var(--theme-heading-color,#111827)]">
               Votre panier
             </div>
-            <div className="text-xs text-neutral-500">
+            <div className="text-xs text-[var(--theme-muted-color,#6b7280)]">
               {totalQty
                 ? `${totalQty} article${totalQty > 1 ? "s" : ""}`
                 : "Aucun article pour le moment"}
@@ -49,7 +49,7 @@ export function CartDrawer() {
           </div>
           <button
             onClick={closeCart}
-            className="text-body-14 text-neutral-500 hover:text-black"
+            className="text-body-14 text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-heading-color,#111827)]"
           >
             <X className="w-4 h-4" />
           </button>
@@ -61,15 +61,15 @@ export function CartDrawer() {
           <ModuleHooks hookName="cart.drawer.before_items" context={{ cartSubtotal: subtotal }} />
 
           {items.length === 0 && (
-            <div className="text-xs text-neutral-500">
+            <div className="text-xs text-[var(--theme-muted-color,#6b7280)]">
               Ajoutez des produits pour commencer votre commande.
             </div>
           )}
 
           {items.map((item, index) => (
             <div key={index} className="flex items-center gap-2">
-              <div className="flex flex-1 items-center gap-2 py-0.5 border border-neutral-100 px-2 rounded-lg">
-                <div className="relative w-14 h-14 rounded-lg bg-neutral-50 overflow-hidden flex items-center justify-center">
+              <div className="theme-qty-control flex flex-1 items-center gap-2 py-0.5 border border-[var(--theme-border-default,#e5e7eb)] px-2 rounded-lg">
+                <div className="relative w-14 h-14 rounded-lg bg-[var(--theme-page-bg,#f6f6f7)] overflow-hidden flex items-center justify-center">
                   {item.imageUrl ? (
                     <OptimizedImage
                       src={item.imageUrl}
@@ -77,29 +77,29 @@ export function CartDrawer() {
                       fill
                       sizes="56px"
                       className="object-cover"
-                      fallback={<span className="text-xxxs text-neutral-400">Image</span>}
+                      fallback={<span className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">Image</span>}
                     />
                   ) : (
-                    <span className="text-xxxs text-neutral-400">Image</span>
+                    <span className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">Image</span>
                   )}
                 </div>
 
                 <div className="flex-1 flex flex-col gap-0.5">
-                  <div className="text-xs font-medium text-neutral-900 line-clamp-2">
+                  <div className="text-xs font-medium text-[var(--theme-heading-color,#111827)] line-clamp-2">
                     {item.name}
                   </div>
                   {item.variantLabel && (
-                    <div className="text-xxs text-neutral-500">
+                    <div className="text-xxs text-[var(--theme-muted-color,#6b7280)]">
                       {item.variantLabel}
                     </div>
                   )}
-                  <span className="text-xs text-neutral-500">
+                  <span className="text-xs text-[var(--theme-muted-color,#6b7280)]">
                     Qté. {item.qty}
                   </span>
                 </div>
-                <div className="text-xs font-semibold text-neutral-900 pr-2 flex gap-2 items-center">
+                <div className="text-xs font-semibold text-[var(--theme-heading-color,#111827)] pr-2 flex gap-2 items-center">
                   {item.oldPrice && (
-                    <span className="line-through font-normal text-gray-400 text-xs">{(item.oldPrice * item.qty).toFixed(2)} €</span>
+                    <span className="line-through font-normal text-[var(--theme-muted-color,#6b7280)] text-xs">{(item.oldPrice * item.qty).toFixed(2)} €</span>
                   )}
                   <span>{(item.price * item.qty).toFixed(2)} €</span>
 
@@ -108,7 +108,7 @@ export function CartDrawer() {
               <div className="px-1">
                 <button
                   onClick={() => removeItem(index)}
-                  className="text-xs text-neutral-400 hover:text-gray-800 h-6 w-6 flex items-center justify-center border border-gray-200 hover:bg-gray-100 rounded-full"
+                  className="theme-qty-control text-xs text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-heading-color,#111827)] h-6 w-6 flex items-center justify-center border border-[var(--theme-border-default,#e5e7eb)] hover:bg-[var(--theme-input-bg,#ffffff)] rounded-full"
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -121,14 +121,14 @@ export function CartDrawer() {
         <div>
           <ModuleHooks hookName="cart.drawer.after_items" context={{ cartSubtotal: subtotal }} />
 
-          <div className="border-t border-neutral-100 px-4 py-3">
+          <div className="border-t border-[var(--theme-border-default,#e5e7eb)] px-4 py-3">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-neutral-600">Sous-total</span>
-              <span className="font-semibold text-neutral-900 text-body-14">
+              <span className="text-[var(--theme-muted-color,#6b7280)]">Sous-total</span>
+              <span className="font-semibold text-[var(--theme-heading-color,#111827)] text-body-14">
                 {subtotal.toFixed(2)} €
               </span>
             </div>
-            <p className="text-xs text-neutral-400 mt-2 mb-4">
+            <p className="text-xs text-[var(--theme-muted-color,#6b7280)] mt-2 mb-4">
               Les frais de livraison et codes promo seront appliqués à
               l’étape suivante.
             </p>

@@ -18,6 +18,8 @@
                     <option value="h2">H2</option>
                     <option value="h3">H3</option>
                     <option value="h4">H4</option>
+                    <option value="h5">H5</option>
+                    <option value="h6">H6</option>
                 </select>
             </label>
             <label class="block">

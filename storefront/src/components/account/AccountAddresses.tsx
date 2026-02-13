@@ -219,7 +219,7 @@ export function AccountAddresses({ initialAddresses }: Props) {
   return (
     <div className="self-start flex-1 flex flex-col">
       <div className="flex items-center justify-between mb-2">
-        <div className="text-xs text-black font-semibold">Adresses</div>
+        <div className="text-xs text-[var(--theme-heading-color,#111827)] font-semibold">Adresses</div>
         <Button
           type="button"
           onClick={openCreateModal}
@@ -230,9 +230,9 @@ export function AccountAddresses({ initialAddresses }: Props) {
         </Button>
       </div>
 
-      <div className="flex-1 rounded-2xl bg-white border border-black/5 shadow-sm p-5 space-y-3">
+      <div className="theme-account-card flex-1 rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5 space-y-3">
         {addresses.length === 0 ? (
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-[var(--theme-muted-color,#6b7280)]">
             Vous n’avez pas encore enregistré d’adresse.
           </p>
         ) : (
@@ -240,7 +240,7 @@ export function AccountAddresses({ initialAddresses }: Props) {
             {addresses.map((addr) => (
               <div
                 key={addr.id}
-                className="text-xs font-medium text-neutral-900 flex flex-col relative border border-neutral-100 rounded-xl p-3 bg-neutral-50/40"
+                className="text-xs font-medium text-[var(--theme-heading-color,#111827)] flex flex-col relative border border-[var(--theme-border-default,#e5e7eb)] rounded-xl p-3 bg-[var(--theme-page-bg,#f6f6f7)]"
               >
                 <div className="flex items-center justify-between mb-2 gap-2">
                   <span className="truncate">{addr.label || "Adresse"}</span>
@@ -248,14 +248,14 @@ export function AccountAddresses({ initialAddresses }: Props) {
                     <button
                       type="button"
                       onClick={() => openEditModal(addr)}
-                      className="w-5 h-5 flex items-center justify-center rounded-md border border-gray-200 text-black hover:bg-gray-100"
+                      className="w-5 h-5 flex items-center justify-center rounded-md border border-[var(--theme-border-default,#e5e7eb)] text-[var(--theme-heading-color,#111827)] hover:bg-[var(--theme-input-bg,#ffffff)]"
                     >
                       <PenIcon className="w-2 h-2" />
                     </button>
                     <button
                       type="button"
                       onClick={() => openDeleteModal(addr)}
-                      className="w-5 h-5 flex items-center justify-center rounded-md border border-gray-200 text-red-600 hover:bg-red-50"
+                      className="w-5 h-5 flex items-center justify-center rounded-md border border-[var(--theme-border-default,#e5e7eb)] text-red-600 hover:bg-red-50"
                     >
                       <Trash2 className="w-2 h-2" />
                     </button>
@@ -267,18 +267,18 @@ export function AccountAddresses({ initialAddresses }: Props) {
                 <span>
                   {addr.postcode} {addr.city}
                 </span>
-                <span className="uppercase text-neutral-500">
+                <span className="uppercase text-[var(--theme-muted-color,#6b7280)]">
                   {addr.country || "FRANCE"}
                 </span>
 
                 <div className="mt-2 flex flex-wrap gap-1 text-xxxs">
                   {addr.is_default_shipping && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[var(--theme-input-bg,#ffffff)] text-[var(--theme-muted-color,#6b7280)] border border-[var(--theme-border-default,#e5e7eb)]">
                       Livraison par défaut
                     </span>
                   )}
                   {addr.is_default_billing && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[var(--theme-input-bg,#ffffff)] text-[var(--theme-muted-color,#6b7280)] border border-[var(--theme-border-default,#e5e7eb)]">
                       Facturation par défaut
                     </span>
                   )}
@@ -292,9 +292,9 @@ export function AccountAddresses({ initialAddresses }: Props) {
       {/* MODAL CREATE / EDIT */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-4 border border-neutral-200">
+          <div className="theme-account-card bg-[var(--theme-card-bg,#ffffff)] rounded-2xl shadow-xl w-full max-w-md p-4 border border-[var(--theme-border-default,#e5e7eb)]">
             <div className="flex items-center justify-between mb-2">
-              <h2 className="text-sm font-semibold text-neutral-900">
+              <h2 className="text-sm font-semibold text-[var(--theme-heading-color,#111827)]">
                 {modalMode === "create"
                   ? "Ajouter une adresse"
                   : "Modifier l’adresse"}
@@ -302,7 +302,7 @@ export function AccountAddresses({ initialAddresses }: Props) {
               <button
                 type="button"
                 onClick={closeModal}
-                className="text-xs text-neutral-500 hover:text-neutral-900"
+                className="text-xs text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-heading-color,#111827)]"
               >
                 Fermer
               </button>
@@ -310,44 +310,44 @@ export function AccountAddresses({ initialAddresses }: Props) {
 
             <div className="space-y-2 text-xs">
               <div>
-                <label className="block text-xxxs text-neutral-600 mb-1">
+                <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                   Surnom *
                 </label>
                 <input
                   type="text"
                   value={form.label}
                   onChange={(e) => handleChange("label", e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                  className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 />
               </div>
 
               <div>
-                <label className="block text-xxxs text-neutral-600 mb-1">
+                <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                   Adresse *
                 </label>
                 <input
                   type="text"
                   value={form.line1}
                   onChange={(e) => handleChange("line1", e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                  className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 />
               </div>
 
               <div>
-                <label className="block text-xxxs text-neutral-600 mb-1">
+                <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                   Complément d’adresse
                 </label>
                 <input
                   type="text"
                   value={form.line2}
                   onChange={(e) => handleChange("line2", e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                  className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-xxxs text-neutral-600 mb-1">
+                  <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                     Code postal *
                   </label>
                   <input
@@ -356,55 +356,55 @@ export function AccountAddresses({ initialAddresses }: Props) {
                     onChange={(e) =>
                       handleChange("postcode", e.target.value)
                     }
-                    className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                    className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xxxs text-neutral-600 mb-1">
+                  <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                     Ville *
                   </label>
                   <input
                     type="text"
                     value={form.city}
                     onChange={(e) => handleChange("city", e.target.value)}
-                    className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                    className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xxxs text-neutral-600 mb-1">
+                <label className="block text-xxxs text-[var(--theme-muted-color,#6b7280)] mb-1">
                   Pays *
                 </label>
                 <input
                   type="text"
                   value={form.country}
                   onChange={(e) => handleChange("country", e.target.value)}
-                  className="w-full rounded-lg border border-neutral-200 px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
+                  className="w-full rounded-lg border border-[var(--theme-border-default,#e5e7eb)] px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                 />
               </div>
 
               <div className="flex flex-col gap-1 mt-2">
-                <label className="inline-flex items-center gap-2 text-xxxs text-neutral-600">
+                <label className="inline-flex items-center gap-2 text-xxxs text-[var(--theme-muted-color,#6b7280)]">
                   <input
                     type="checkbox"
                     checked={form.is_default_shipping}
                     onChange={(e) =>
                       handleChange("is_default_shipping", e.target.checked)
                     }
-                    className="rounded border-neutral-300"
+                    className="rounded border-[var(--theme-border-default,#e5e7eb)]"
                   />
                   Adresse de livraison par défaut
                 </label>
 
-                <label className="inline-flex items-center gap-2 text-xxxs text-neutral-600">
+                <label className="inline-flex items-center gap-2 text-xxxs text-[var(--theme-muted-color,#6b7280)]">
                   <input
                     type="checkbox"
                     checked={form.is_default_billing}
                     onChange={(e) =>
                       handleChange("is_default_billing", e.target.checked)
                     }
-                    className="rounded border-neutral-300"
+                    className="rounded border-[var(--theme-border-default,#e5e7eb)]"
                   />
                   Adresse de facturation par défaut
                 </label>
@@ -442,11 +442,11 @@ export function AccountAddresses({ initialAddresses }: Props) {
       {/* MODAL DELETE */}
       {isDeleteModalOpen && addressToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-4 border border-neutral-200">
-            <h2 className="text-sm font-semibold text-neutral-900 mb-1">
+          <div className="theme-account-card bg-[var(--theme-card-bg,#ffffff)] rounded-2xl shadow-xl w-full max-w-sm p-4 border border-[var(--theme-border-default,#e5e7eb)]">
+            <h2 className="text-sm font-semibold text-[var(--theme-heading-color,#111827)] mb-1">
               Supprimer cette adresse ?
             </h2>
-            <p className="text-xs text-neutral-600 mb-3">
+            <p className="text-xs text-[var(--theme-muted-color,#6b7280)] mb-3">
               Cette action est définitive. Voulez-vous vraiment supprimer
               l’adresse <span className="font-semibold">
                 {addressToDelete.label || "sans titre"}
@@ -454,7 +454,7 @@ export function AccountAddresses({ initialAddresses }: Props) {
               ?
             </p>
 
-            <div className="text-xxs text-neutral-500 mb-3 space-y-0.5">
+            <div className="text-xxs text-[var(--theme-muted-color,#6b7280)] mb-3 space-y-0.5">
               <div>{addressToDelete.line1}</div>
               {addressToDelete.line2 && <div>{addressToDelete.line2}</div>}
               <div>

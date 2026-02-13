@@ -2,7 +2,7 @@ import { Box, Lock, Undo2 } from "lucide-react";
 
 export function CheckoutReassurance() {
   return (
-    <div className="rounded-2xl bg-white border border-neutral-200 p-3 text-xxs text-neutral-500 space-y-2">
+    <div className="rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] p-3 text-xxs text-[var(--theme-muted-color,#6b7280)] space-y-2">
       <div className="flex items-center gap-2">
         <Lock className="w-4 h-4" />
         Paiement sécurisé par notre prestataire.

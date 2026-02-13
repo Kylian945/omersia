@@ -13,7 +13,7 @@ export function ShippingStep() {
 
   if (shippingLoading) {
     return (
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-[var(--theme-muted-color,#6b7280)]">
         Chargement des modes de livraison…
       </p>
     );
@@ -29,7 +29,7 @@ export function ShippingStep() {
 
   if (!shippingMethods.length) {
     return (
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-[var(--theme-muted-color,#6b7280)]">
         Aucun mode de livraison disponible pour le moment.
       </p>
     );
@@ -37,7 +37,7 @@ export function ShippingStep() {
 
   return (
     <div className="space-y-2">
-      <h2 className="text-sm font-semibold text-neutral-900">
+      <h2 className="text-sm font-semibold text-[var(--theme-heading-color,#111827)]">
         3. Mode de livraison
       </h2>
 
@@ -52,19 +52,19 @@ export function ShippingStep() {
               onClick={() => setShippingMethodId(m.id)}
               className={`w-full flex items-center justify-between rounded-xl border px-3 py-2 text-left text-xs transition ${
                 isSelected
-                  ? "border-black bg-gray-50"
-                  : "border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-800"
+                  ? "border-[var(--theme-border-hover,#111827)] bg-[var(--theme-page-bg,#f6f6f7)]"
+                  : "border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-card-bg,#ffffff)] hover:bg-[var(--theme-page-bg,#f6f6f7)] text-[var(--theme-body-color,#374151)]"
               }`}
             >
               <div>
                 <div className="font-medium">{m.name}</div>
                 {m.description && (
-                  <div className="text-xxs text-neutral-700">
+                  <div className="text-xxs text-[var(--theme-body-color,#374151)]">
                     {m.description}
                   </div>
                 )}
                 {m.delivery_time && (
-                  <div className="text-xxxs text-neutral-500">
+                  <div className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">
                     Délai prévu: {m.delivery_time}
                   </div>
                 )}

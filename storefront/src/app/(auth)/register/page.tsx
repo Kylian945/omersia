@@ -20,23 +20,23 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
   const shopInfo = await getShopInfo();
 
   return (
-    <div className="min-h-screen flex flex-col bg-neutral-50">
+    <div className="min-h-screen flex flex-col bg-[var(--theme-page-bg,#f6f6f7)]">
       <HeaderAuth shopInfo={shopInfo}/>
 
       <main className="flex-1 flex items-center">
         <Container>
           <div className="w-full max-w-md mx-auto">
             <div className="mb-6">
-              <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+              <h1 className="text-2xl font-semibold tracking-tight text-[var(--theme-heading-color,#111827)]">
                 Créer un compte
               </h1>
-              <p className="mt-1 text-xs text-neutral-500">
+              <p className="mt-1 text-xs text-[var(--theme-muted-color,#6b7280)]">
                 Profitez d’un suivi simplifié de vos commandes et d’une
                 expérience personnalisée.
               </p>
             </div>
 
-            <div className="rounded-2xl bg-white border border-black/5 shadow-sm p-5 space-y-4">
+            <div className="rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5 space-y-4">
               {error && (
                 <div className="text-xs text-rose-600 bg-rose-50 border border-rose-100 px-3 py-2 rounded-xl">
                   {error}
@@ -52,7 +52,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                   <div className="space-y-1.5">
                     <label
                       htmlFor="firstname"
-                      className="block text-xs font-medium text-neutral-800"
+                      className="block text-xs font-medium text-[var(--theme-body-color,#374151)]"
                     >
                       Prénom
                     </label>
@@ -61,14 +61,14 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                       name="firstname"
                       type="text"
                       autoComplete="given-name"
-                      className="w-full rounded-xl border border-neutral-200 bg-neutral-50/60 px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-black/80 focus:bg-white transition"
+                      className="w-full rounded-xl border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-page-bg,#f6f6f7)] px-3 py-2 text-xs text-[var(--theme-heading-color,#111827)] placeholder:text-[var(--theme-muted-color,#6b7280)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)] focus:bg-[var(--theme-card-bg,#ffffff)] transition"
                       placeholder="Votre prénom"
                     />
                   </div>
                   <div className="space-y-1.5">
                     <label
                       htmlFor="lastname"
-                      className="block text-xs font-medium text-neutral-800"
+                      className="block text-xs font-medium text-[var(--theme-body-color,#374151)]"
                     >
                       Nom
                     </label>
@@ -77,7 +77,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                       name="lastname"
                       type="text"
                       autoComplete="family-name"
-                      className="w-full rounded-xl border border-neutral-200 bg-neutral-50/60 px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-black/80 focus:bg-white transition"
+                      className="w-full rounded-xl border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-page-bg,#f6f6f7)] px-3 py-2 text-xs text-[var(--theme-heading-color,#111827)] placeholder:text-[var(--theme-muted-color,#6b7280)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)] focus:bg-[var(--theme-card-bg,#ffffff)] transition"
                       placeholder="Votre nom"
                     />
                   </div>
@@ -86,7 +86,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                 <div className="space-y-1.5">
                   <label
                     htmlFor="email"
-                    className="block text-xs font-medium text-neutral-800"
+                    className="block text-xs font-medium text-[var(--theme-body-color,#374151)]"
                   >
                     Adresse e-mail
                   </label>
@@ -96,7 +96,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                     type="email"
                     required
                     autoComplete="email"
-                    className="w-full rounded-xl border border-neutral-200 bg-neutral-50/60 px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-black/80 focus:bg-white transition"
+                    className="w-full rounded-xl border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-page-bg,#f6f6f7)] px-3 py-2 text-xs text-[var(--theme-heading-color,#111827)] placeholder:text-[var(--theme-muted-color,#6b7280)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)] focus:bg-[var(--theme-card-bg,#ffffff)] transition"
                     placeholder="vous@example.com"
                   />
                 </div>
@@ -104,7 +104,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                 <div className="space-y-1.5">
                   <label
                     htmlFor="password"
-                    className="block text-xs font-medium text-neutral-800"
+                    className="block text-xs font-medium text-[var(--theme-body-color,#374151)]"
                   >
                     Mot de passe
                   </label>
@@ -114,7 +114,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                     type="password"
                     required
                     autoComplete="new-password"
-                    className="w-full rounded-xl border border-neutral-200 bg-neutral-50/60 px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-black/80 focus:bg-white transition"
+                    className="w-full rounded-xl border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-page-bg,#f6f6f7)] px-3 py-2 text-xs text-[var(--theme-heading-color,#111827)] placeholder:text-[var(--theme-muted-color,#6b7280)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)] focus:bg-[var(--theme-card-bg,#ffffff)] transition"
                     placeholder="••••••••"
                   />
                 </div>
@@ -122,7 +122,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                 <div className="space-y-1.5">
                   <label
                     htmlFor="password_confirmation"
-                    className="block text-xs font-medium text-neutral-800"
+                    className="block text-xs font-medium text-[var(--theme-body-color,#374151)]"
                   >
                     Confirmer le mot de passe
                   </label>
@@ -132,7 +132,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                     type="password"
                     required
                     autoComplete="new-password"
-                    className="w-full rounded-xl border border-neutral-200 bg-neutral-50/60 px-3 py-2 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-black/80 focus:bg-white transition"
+                    className="w-full rounded-xl border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-page-bg,#f6f6f7)] px-3 py-2 text-xs text-[var(--theme-heading-color,#111827)] placeholder:text-[var(--theme-muted-color,#6b7280)] focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)] focus:bg-[var(--theme-card-bg,#ffffff)] transition"
                     placeholder="••••••••"
                   />
                 </div>
@@ -143,9 +143,9 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                       type="checkbox"
                       name="newsletter"
                       defaultChecked
-                      className="h-3 w-3 rounded border-neutral-300 text-black focus:ring-black/70"
+                      className="h-3 w-3 rounded border-[var(--theme-border-default,#e5e7eb)] text-[var(--theme-heading-color,#111827)] focus:ring-[var(--theme-primary,#111827)]"
                     />
-                    <span className="text-xxxs text-neutral-600">
+                    <span className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">
                       Je souhaite recevoir les offres et nouveautés par e-mail.
                     </span>
                   </label>
@@ -154,21 +154,21 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                     <input
                       type="checkbox"
                       name="accept_terms"
-                      className="mt-0.5 h-3 w-3 rounded border-neutral-300 text-black focus:ring-black/70"
+                      className="mt-0.5 h-3 w-3 rounded border-[var(--theme-border-default,#e5e7eb)] text-[var(--theme-heading-color,#111827)] focus:ring-[var(--theme-primary,#111827)]"
                       required
                     />
-                    <span className="text-xxxs text-neutral-600 leading-snug">
+                    <span className="text-xxxs text-[var(--theme-muted-color,#6b7280)] leading-snug">
                       J’ai lu et j’accepte les{" "}
                       <Link
                         href="/cgv"
-                        className="underline hover:text-neutral-900"
+                        className="underline hover:text-[var(--theme-heading-color,#111827)]"
                       >
                         conditions générales de vente
                       </Link>{" "}
                       et la{" "}
                       <Link
                         href="/privacy"
-                        className="underline hover:text-neutral-900"
+                        className="underline hover:text-[var(--theme-heading-color,#111827)]"
                       >
                         politique de confidentialité
                       </Link>
@@ -185,12 +185,12 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
                 </Button>
               </form>
 
-              <div className="pt-2 border-t border-neutral-100 flex flex-col gap-1">
-                <p className="text-xxxs text-neutral-500">
+              <div className="pt-2 border-t border-[var(--theme-border-default,#e5e7eb)] flex flex-col gap-1">
+                <p className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">
                   Vous avez déjà un compte ?
                   <Link
                     href="/login"
-                    className="ml-1 text-xxxs text-neutral-900 font-medium hover:underline"
+                    className="ml-1 text-xxxs text-[var(--theme-heading-color,#111827)] font-medium hover:underline"
                   >
                     Se connecter
                   </Link>
@@ -198,7 +198,7 @@ export default async function RegisterPage({ searchParams }: RegisterPageProps) 
               </div>
             </div>
 
-            <p className="mt-4 text-xxxs text-neutral-400 text-center">
+            <p className="mt-4 text-xxxs text-[var(--theme-muted-color,#6b7280)] text-center">
               Vos données sont utilisées uniquement pour la gestion de votre
               compte et de vos commandes.
             </p>

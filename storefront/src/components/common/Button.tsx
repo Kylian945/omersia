@@ -36,8 +36,8 @@ export function Button({
       ? "border bg-[var(--theme-primary)] border-[var(--theme-primary)] text-[var(--theme-button-primary-text,#ffffff)] transition-opacity"
       : "border bg-[var(--theme-primary)] border-[var(--theme-primary)] text-[var(--theme-button-primary-text,#ffffff)] hover:opacity-90 transition-opacity",
     secondary: disabled
-      ? "border border-[var(--theme-primary,#000)] bg-white text-[var(--theme-button-secondary-text,var(--theme-primary,#000))] transition-colors"
-      : "border border-[var(--theme-primary,#000)] bg-white text-[var(--theme-button-secondary-text,var(--theme-primary,#000))] hover:bg-gray-100 transition-colors",
+      ? "border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-card-bg,#ffffff)] text-[var(--theme-button-secondary-text,var(--theme-primary,#000))] transition-colors"
+      : "border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-card-bg,#ffffff)] text-[var(--theme-button-secondary-text,var(--theme-primary,#000))] hover:border-[var(--theme-border-hover,#111827)] hover:bg-[var(--theme-input-bg,#ffffff)] transition-colors",
   };
 
   const baseClassName = `inline-flex items-center justify-center font-medium ${sizeClasses[size]} ${variantClasses[variant]} ${disabled ? "opacity-50 cursor-not-allowed" : ""} ${className}`;

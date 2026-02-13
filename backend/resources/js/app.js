@@ -13,8 +13,16 @@ import '../../packages/Admin/src/resources/js/page-builder-native.js';
 async function loadConditionalComponents() {
     const promises = [];
 
+    const hasUploadFormInTemplates = Array.from(document.querySelectorAll('template'))
+        .some((template) => template.innerHTML.includes('uploadForm('));
+
     // Charger upload-form uniquement si utilisé
-    if (document.querySelector('[x-data*="uploadForm"]')) {
+    if (
+        document.querySelector('[x-data*="uploadForm"]') ||
+        hasUploadFormInTemplates ||
+        window.location.pathname.includes('/modules/upload') ||
+        window.location.pathname.includes('/apparence/theme')
+    ) {
         promises.push(import('../../packages/Admin/src/resources/js/modules/upload-form.js'));
     }
 
@@ -28,8 +36,13 @@ async function loadConditionalComponents() {
         promises.push(import('../../packages/Admin/src/resources/js/modules-positions.js'));
     }
 
-    // Charger theme-activation uniquement sur la page des thèmes
-    if (document.querySelector('[x-data*="themeActivation"]')) {
+    // Charger theme-activation sur la page des thèmes
+    // Supporte l'ancien trigger x-data et un fallback robuste par route/DOM.
+    if (
+        document.querySelector('[x-data*="themeActivation"]') ||
+        window.location.pathname.includes('/apparence/theme') ||
+        document.querySelector('.activate-theme-btn')
+    ) {
         promises.push(import('../../packages/Admin/src/resources/js/theme-activation.js'));
     }
 

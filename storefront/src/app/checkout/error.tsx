@@ -20,12 +20,12 @@ export default function CheckoutError({
   }, [error]);
 
   return (
-    <div className="min-h-[60vh] bg-neutral-50 flex items-center justify-center px-4">
+    <div className="min-h-[60vh] bg-[var(--theme-page-bg,#f6f6f7)] flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         <div className="mb-6">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-orange-100 mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 bg-[var(--theme-error-bg,#fee2e2)]">
             <svg
-              className="w-8 h-8 text-orange-600"
+              className="w-8 h-8 text-[var(--theme-error-color,#ef4444)]"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -38,17 +38,17 @@ export default function CheckoutError({
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold text-[var(--theme-heading-color,#111827)] mb-2">
             Erreur lors du paiement
           </h2>
-          <p className="text-gray-600 mb-2">
+          <p className="text-[var(--theme-body-color,#374151)] mb-2">
             Une erreur est survenue. Votre panier est intact et aucun paiement n&apos;a été effectué.
           </p>
-          <p className="text-sm text-gray-500 mb-4">
+          <p className="text-sm text-[var(--theme-muted-color,#6b7280)] mb-4">
             Veuillez réessayer ou retourner à votre panier.
           </p>
           {error.digest && (
-            <p className="text-xs text-gray-400 font-mono">
+            <p className="text-xs text-[var(--theme-muted-color,#6b7280)] font-mono">
               Ref: {error.digest}
             </p>
           )}
@@ -63,7 +63,7 @@ export default function CheckoutError({
           </Button>
         </div>
 
-        <p className="mt-6 text-xs text-gray-400">
+        <p className="mt-6 text-xs text-[var(--theme-muted-color,#6b7280)]">
           Besoin d&apos;aide ? Contactez-nous pour finaliser votre commande.
         </p>
       </div>

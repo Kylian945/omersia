@@ -71,6 +71,17 @@
             <p class="mt-1">Commencez par ajouter des images ou créer des dossiers</p>
         </div>
     @else
+        <div class="mb-3 flex flex-wrap items-center gap-2 text-xxxs text-gray-600">
+            <span class="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-1.5 py-0.5 font-medium text-emerald-700">
+                OK &lt; 100 KB
+            </span>
+            <span class="inline-flex items-center rounded-full border border-amber-200 bg-amber-50 px-1.5 py-0.5 font-medium text-amber-700">
+                Warning 100-300 KB
+            </span>
+            <span class="inline-flex items-center rounded-full border border-red-200 bg-red-50 px-1.5 py-0.5 font-medium text-red-700">
+                A optimiser &gt; 300 KB
+            </span>
+        </div>
         <div class="rounded-2xl bg-white border border-black/5 shadow-sm overflow-hidden p-4">
             <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                 @if($folder && $folder->parent_id)
@@ -101,35 +112,6 @@
                             <x-lucide-trash-2 class="w-3 h-3" />
                         </button>
                     </div>
-
-                    {{-- Modal de confirmation de suppression du dossier --}}
-                    <x-admin::modal name="delete-folder-{{ $subFolder->id }}"
-                        :title="'Supprimer le dossier « ' . $subFolder->name . ' » ?'"
-                        description="Cette action supprimera également tout le contenu du dossier."
-                        size="max-w-md">
-                        <p class="text-xs text-gray-600">
-                            Voulez-vous vraiment supprimer le dossier
-                            <span class="font-semibold">{{ $subFolder->name }}</span> et son contenu ?
-                        </p>
-
-                        <div class="flex justify-end gap-2 pt-3">
-                            <button type="button"
-                                class="px-4 py-2 rounded-lg border border-gray-200 text-xs text-gray-700 hover:bg-gray-50"
-                                @click="open = false">
-                                Annuler
-                            </button>
-
-                            <form action="{{ route('admin.apparence.media.folders.destroy', $subFolder) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                    class="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900">
-                                    <x-lucide-trash-2 class="h-3 w-3" />
-                                    Confirmer la suppression
-                                </button>
-                            </form>
-                        </div>
-                    </x-admin::modal>
                 @endforeach
 
                 @foreach($items as $item)
@@ -145,46 +127,161 @@
                                     <p class="text-xxxs text-gray-400">{{ $item->width }}×{{ $item->height }}</p>
                                 @endif
                             </div>
+                            @php
+                                $sizeBadgeClass = match ($item->size_level) {
+                                    'ok' => 'border-emerald-200 bg-emerald-50 text-emerald-700',
+                                    'warning' => 'border-amber-200 bg-amber-50 text-amber-700',
+                                    default => 'border-red-200 bg-red-50 text-red-700',
+                                };
+                            @endphp
+                            <div class="mt-1.5 flex items-center justify-between">
+                                <span class="inline-flex items-center rounded-full border px-1.5 py-0.5 text-xxxs font-medium {{ $sizeBadgeClass }}">
+                                    {{ $item->size_level_label }}
+                                </span>
+                            </div>
                         </div>
+                        @if($item->is_optimizable)
+                            <button type="button"
+                                    @click="$dispatch('open-modal', { name: 'optimize-media-{{ $item->id }}' })"
+                                    class="absolute top-1.5 left-1.5 opacity-0 group-hover:opacity-100 transition rounded-full border border-gray-100 px-1.5 py-0.5 bg-white/90 backdrop-blur text-xxxs text-gray-600 hover:bg-gray-50">
+                                <x-lucide-settings class="w-3 h-3" />
+                            </button>
+                        @endif
                         <button type="button"
                                 @click="$dispatch('open-modal', { name: 'delete-media-{{ $item->id }}' })"
                                 class="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition rounded-full border border-gray-100 px-1.5 py-0.5 bg-white/90 backdrop-blur text-xxxs text-gray-500 hover:bg-gray-50">
                             <x-lucide-trash-2 class="w-3 h-3" />
                         </button>
                     </div>
-
-                    {{-- Modal de confirmation de suppression de l'image --}}
-                    <x-admin::modal name="delete-media-{{ $item->id }}"
-                        :title="'Supprimer l\'image « ' . $item->name . ' » ?'"
-                        description="Cette action est définitive et ne peut pas être annulée."
-                        size="max-w-md">
-                        <p class="text-xs text-gray-600">
-                            Voulez-vous vraiment supprimer l'image
-                            <span class="font-semibold">{{ $item->name }}</span> ?
-                        </p>
-
-                        <div class="flex justify-end gap-2 pt-3">
-                            <button type="button"
-                                class="px-4 py-2 rounded-lg border border-gray-200 text-xs text-gray-700 hover:bg-gray-50"
-                                @click="open = false">
-                                Annuler
-                            </button>
-
-                            <form action="{{ route('admin.apparence.media.destroy', $item) }}" method="POST">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit"
-                                    class="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900">
-                                    <x-lucide-trash-2 class="h-3 w-3" />
-                                    Confirmer la suppression
-                                </button>
-                            </form>
-                        </div>
-                    </x-admin::modal>
                 @endforeach
             </div>
         </div>
     @endif
+
+    @foreach($folders as $subFolder)
+        {{-- Modal de confirmation de suppression du dossier --}}
+        <x-admin::modal name="delete-folder-{{ $subFolder->id }}"
+            :title="'Supprimer le dossier « ' . $subFolder->name . ' » ?'"
+            description="Cette action supprimera également tout le contenu du dossier."
+            size="max-w-md">
+            <p class="text-xs text-gray-600">
+                Voulez-vous vraiment supprimer le dossier
+                <span class="font-semibold">{{ $subFolder->name }}</span> et son contenu ?
+            </p>
+
+            <div class="flex justify-end gap-2 pt-3">
+                <button type="button"
+                    class="px-4 py-2 rounded-lg border border-gray-200 text-xs text-gray-700 hover:bg-gray-50"
+                    @click="open = false">
+                    Annuler
+                </button>
+
+                <form action="{{ route('admin.apparence.media.folders.destroy', $subFolder) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900">
+                        <x-lucide-trash-2 class="h-3 w-3" />
+                        Confirmer la suppression
+                    </button>
+                </form>
+            </div>
+        </x-admin::modal>
+    @endforeach
+
+    @foreach($items as $item)
+        @if($item->is_optimizable)
+            <x-admin::modal name="optimize-media-{{ $item->id }}"
+                :title="'Optimiser « ' . $item->name . ' »'"
+                description="Compression manuelle avec choix de qualité et formats."
+                size="max-w-md">
+                <form action="{{ route('admin.apparence.media.optimize', $item) }}" method="POST" class="space-y-3">
+                    @csrf
+
+                    <div>
+                        <label for="quality-{{ $item->id }}" class="block text-xs font-medium text-gray-700 mb-1">
+                            Qualité (10-100)
+                        </label>
+                        <input
+                            id="quality-{{ $item->id }}"
+                            type="number"
+                            name="quality"
+                            min="10"
+                            max="100"
+                            step="1"
+                            value="80"
+                            class="w-full rounded-lg border border-slate-200 px-3 py-2 text-xs focus:ring-2 focus:ring-neutral-900/5 focus:border-neutral-400"
+                        >
+                        <p class="mt-1 text-xxxs text-gray-500">
+                            Recommandé: 75-85 pour un bon compromis qualité/performance.
+                        </p>
+                    </div>
+
+                    <div>
+                        <p class="block text-xs font-medium text-gray-700 mb-1">Formats à générer</p>
+                        <label class="inline-flex items-center gap-2 mr-4">
+                            <input type="checkbox" name="format_webp" value="1" checked class="rounded border-slate-300">
+                            <span class="text-xs text-gray-700">WEBP</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2">
+                            <input type="checkbox" name="format_avif" value="1" checked class="rounded border-slate-300">
+                            <span class="text-xs text-gray-700">AVIF</span>
+                        </label>
+                    </div>
+
+                    <label class="inline-flex items-center gap-2">
+                        <input type="checkbox" name="optimize_original" value="1" class="rounded border-slate-300">
+                        <span class="text-xs text-gray-700">Compresser aussi le fichier original</span>
+                    </label>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button"
+                            class="px-4 py-2 rounded-lg border border-gray-200 text-xs text-gray-700 hover:bg-gray-50"
+                            @click="open = false">
+                            Annuler
+                        </button>
+
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900">
+                            <x-lucide-settings class="h-3 w-3" />
+                            Lancer l'optimisation
+                        </button>
+                    </div>
+                </form>
+            </x-admin::modal>
+        @endif
+    @endforeach
+
+    @foreach($items as $item)
+        {{-- Modal de confirmation de suppression de l'image --}}
+        <x-admin::modal name="delete-media-{{ $item->id }}"
+            :title="'Supprimer l\'image « ' . $item->name . ' » ?'"
+            description="Cette action est définitive et ne peut pas être annulée."
+            size="max-w-md">
+            <p class="text-xs text-gray-600">
+                Voulez-vous vraiment supprimer l'image
+                <span class="font-semibold">{{ $item->name }}</span> ?
+            </p>
+
+            <div class="flex justify-end gap-2 pt-3">
+                <button type="button"
+                    class="px-4 py-2 rounded-lg border border-gray-200 text-xs text-gray-700 hover:bg-gray-50"
+                    @click="open = false">
+                    Annuler
+                </button>
+
+                <form action="{{ route('admin.apparence.media.destroy', $item) }}" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900">
+                        <x-lucide-trash-2 class="h-3 w-3" />
+                        Confirmer la suppression
+                    </button>
+                </form>
+            </div>
+        </x-admin::modal>
+    @endforeach
 
     <!-- Modal Create Folder -->
     <div x-show="showCreateFolderModal"

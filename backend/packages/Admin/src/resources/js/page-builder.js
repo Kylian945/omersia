@@ -16,6 +16,136 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
         parsed = { sections: [] };
     }
 
+    const FALLBACK_WIDGET_DEFAULTS = {
+        heading: { text: "Titre", tag: "h2", align: "left" },
+        text: { html: "<p>Texte exemple</p>" },
+        image: { url: "", alt: "" },
+        video: {
+            type: "youtube",
+            url: "",
+            aspectRatio: "16/9",
+            autoplay: false,
+            loop: false,
+            muted: false,
+        },
+        button: { label: "En savoir plus", url: "#" },
+        accordion: {
+            items: [{ title: "Item 1", content: "<p>Texte...</p>" }],
+        },
+        tabs: {
+            items: [
+                { label: "Tab 1", content: "Contenu tab 1" },
+                { label: "Tab 2", content: "Contenu tab 2" },
+            ],
+        },
+        spacer: { size: 32 },
+        container: {
+            background: "#ffffff",
+            paddingTop: 40,
+            paddingBottom: 40,
+            columns: [{ id: "col_default_1", width: 100, widgets: [] }],
+        },
+        hero_banner: {
+            badge: "Nouvelle Collection",
+            title: "Découvrez notre sélection",
+            titleTag: "h1",
+            subtitle: "de produits d'exception",
+            description: "Explorez notre catalogue de produits soigneusement sélectionnés.",
+            primaryCta: { text: "Voir les produits", href: "/products" },
+            secondaryCta: { text: "En savoir plus", href: "/content/a-propos" },
+            image: "",
+        },
+        features_bar: {
+            featureTitleTag: "h3",
+            features: [
+                { icon: "Truck", title: "Livraison gratuite", description: "À partir de 50€ d'achat" },
+                { icon: "ShieldCheck", title: "Paiement sécurisé", description: "Transactions 100% sécurisées" },
+                { icon: "Undo2", title: "Retours faciles", description: "30 jours pour changer d'avis" },
+                { icon: "MessageCircle", title: "Support client", description: "Disponible 7j/7" },
+            ],
+        },
+        categories_grid: {
+            title: "Découvrez nos catégories",
+            categorySlugs: [],
+            subtitle: "",
+            maxCategories: null,
+            displayMode: "grid",
+            slidesPerView: { desktop: 4, mobile: 2 },
+            slidesToScroll: { desktop: 1, mobile: 1 },
+            columns: { desktop: 4, mobile: 2 },
+            showArrows: true,
+            showDots: true,
+            autoplay: false,
+            gap: 16,
+        },
+        promo_banner: {
+            badge: "Offre Limitée",
+            title: "Profitez de -20% sur toute la boutique",
+            titleTag: "h2",
+            description: "Utilisez le code BIENVENUE20 lors de votre commande.",
+            ctaText: "Découvrir les offres",
+            ctaHref: "/products",
+            variant: "gradient",
+        },
+        testimonials: {
+            title: "Ce que disent nos clients",
+            testimonials: [
+                { name: "Marie Dupont", role: "Cliente fidèle", content: "Excellente qualité et livraison rapide.", rating: 5 },
+                { name: "Thomas Martin", role: "Acheteur vérifié", content: "Service client au top.", rating: 5 },
+            ],
+        },
+        newsletter: {
+            title: "Restez informé",
+            titleTag: "h2",
+            description: "Inscrivez-vous à notre newsletter pour recevoir nos offres exclusives.",
+            placeholder: "Votre adresse email",
+            buttonText: "S'inscrire",
+        },
+        product_slider: {
+            title: "Produits mis en avant",
+            mode: "category",
+            categorySlug: "",
+            productIds: [],
+            displayMode: "slider",
+            slidesPerView: { desktop: 4, mobile: 2 },
+            slidesToScroll: { desktop: 1, mobile: 1 },
+            columns: { desktop: 4, mobile: 2 },
+            showArrows: true,
+            showDots: true,
+            autoplay: false,
+            gap: 16,
+        },
+    };
+
+    const deepClone = (value) => {
+        if (value === undefined) return undefined;
+        return JSON.parse(JSON.stringify(value));
+    };
+
+    const normalizeContainerColumns = (columns) => {
+        const baseColumns = Array.isArray(columns) && columns.length > 0
+            ? columns
+            : [{ width: 100, widgets: [] }];
+
+        return baseColumns.map((column, index) => ({
+            ...column,
+            id: `col_${Math.random().toString(36).slice(2, 8)}`,
+            width: typeof column?.width === "number" ? column.width : (100 / baseColumns.length),
+            widgets: Array.isArray(column?.widgets) ? column.widgets : [],
+            order: typeof column?.order === "number" ? column.order : index,
+        }));
+    };
+
+    const normalizeWidgetProps = (type, props) => {
+        const clonedProps = deepClone(props ?? {}) ?? {};
+
+        if (type === "container") {
+            clonedProps.columns = normalizeContainerColumns(clonedProps.columns);
+        }
+
+        return clonedProps;
+    };
+
     return {
         data: parsed,
         widgets: serverWidgets,
@@ -317,6 +447,33 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
             return map[widget.type] || widget.type;
         },
 
+        getWidgetConfig(type) {
+            return this.widgets.find((widget) => widget.type === type) || null;
+        },
+
+        getWidgetDefaultProps(type) {
+            const widgetConfig = this.getWidgetConfig(type);
+
+            if (widgetConfig && widgetConfig.defaultProps) {
+                return normalizeWidgetProps(type, widgetConfig.defaultProps);
+            }
+
+            if (FALLBACK_WIDGET_DEFAULTS[type]) {
+                return normalizeWidgetProps(type, FALLBACK_WIDGET_DEFAULTS[type]);
+            }
+
+            return {};
+        },
+
+        // Heading tag helpers
+        sanitizeHeadingTag(tag, fallback = "h2") {
+            const validTags = ["h1", "h2", "h3", "h4", "h5", "h6"];
+            if (typeof tag !== "string") return fallback;
+
+            const normalizedTag = tag.toLowerCase();
+            return validTags.includes(normalizedTag) ? normalizedTag : fallback;
+        },
+
         // Hero Banner helpers
         initHeroBannerProps() {
             const widget = this.currentWidget();
@@ -331,11 +488,50 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
 
             if (!widget.props.badge) widget.props.badge = "";
             if (!widget.props.title) widget.props.title = "Découvrez notre sélection";
+            widget.props.titleTag = this.sanitizeHeadingTag(widget.props.titleTag, "h1");
             if (!widget.props.subtitle) widget.props.subtitle = "";
             if (!widget.props.description) widget.props.description = "";
             if (!widget.props.primaryCta) widget.props.primaryCta = { text: "Voir les produits", href: "/products" };
             if (!widget.props.secondaryCta) widget.props.secondaryCta = { text: "", href: "" };
             if (!widget.props.image) widget.props.image = "";
+        },
+
+        // Promo Banner helpers
+        initPromoBannerProps() {
+            const widget = this.currentWidget();
+            if (!widget || widget.type !== "promo_banner") return;
+
+            if (Array.isArray(widget.props)) {
+                console.warn("promo_banner: props is an array, converting to object");
+                widget.props = {};
+            }
+            if (!widget.props) widget.props = {};
+
+            if (!widget.props.badge) widget.props.badge = "";
+            if (!widget.props.title) widget.props.title = "Profitez de -20% sur toute la boutique";
+            widget.props.titleTag = this.sanitizeHeadingTag(widget.props.titleTag, "h2");
+            if (!widget.props.description) widget.props.description = "";
+            if (!widget.props.ctaText) widget.props.ctaText = "";
+            if (!widget.props.ctaHref) widget.props.ctaHref = "";
+            if (!widget.props.variant) widget.props.variant = "gradient";
+        },
+
+        // Newsletter helpers
+        initNewsletterProps() {
+            const widget = this.currentWidget();
+            if (!widget || widget.type !== "newsletter") return;
+
+            if (Array.isArray(widget.props)) {
+                console.warn("newsletter: props is an array, converting to object");
+                widget.props = {};
+            }
+            if (!widget.props) widget.props = {};
+
+            if (!widget.props.title) widget.props.title = "Restez informé";
+            widget.props.titleTag = this.sanitizeHeadingTag(widget.props.titleTag, "h2");
+            if (!widget.props.description) widget.props.description = "";
+            if (!widget.props.placeholder) widget.props.placeholder = "Votre adresse email";
+            if (!widget.props.buttonText) widget.props.buttonText = "S'inscrire";
         },
 
         // Categories Grid helpers
@@ -530,6 +726,7 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
                     { icon: 'MessageCircle', title: 'Support client', description: 'Disponible 7j/7' }
                 ];
             }
+            widget.props.featureTitleTag = this.sanitizeHeadingTag(widget.props.featureTitleTag, "h3");
         },
 
         addFeature() {
@@ -588,6 +785,46 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
             this.sync();
         },
 
+        // Accordion helpers
+        initAccordionProps() {
+            const widget = this.currentWidget();
+            if (!widget || widget.type !== "accordion") return;
+
+            if (Array.isArray(widget.props)) {
+                console.warn("accordion: props is an array, converting to object");
+                widget.props = {};
+            }
+            if (!widget.props) widget.props = {};
+
+            if (!widget.props.items || !Array.isArray(widget.props.items)) {
+                widget.props.items = [
+                    { title: "Élément 1", content: "<p>Contenu de l'élément 1</p>" },
+                    { title: "Élément 2", content: "<p>Contenu de l'élément 2</p>" },
+                ];
+            }
+        },
+
+        addAccordionItem() {
+            const widget = this.currentWidget();
+            if (!widget || widget.type !== "accordion") return;
+            this.initAccordionProps();
+
+            const itemNumber = widget.props.items.length + 1;
+            widget.props.items.push({
+                title: `Élément ${itemNumber}`,
+                content: `<p>Contenu de l'élément ${itemNumber}</p>`,
+            });
+            this.sync();
+        },
+
+        removeAccordionItem(index) {
+            const widget = this.currentWidget();
+            if (!widget || widget.type !== "accordion") return;
+            this.initAccordionProps();
+            widget.props.items.splice(index, 1);
+            this.sync();
+        },
+
         availableIcons() {
             return [
                 // E-commerce
@@ -614,7 +851,7 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
             this.data.sections.push({
                 id: "sec_" + Math.random().toString(36).slice(2, 8),
                 settings: {
-                    background: "#ffffff",
+                    background: "",
                     paddingTop: 40,
                     paddingBottom: 40,
                     fullWidth: false,
@@ -773,159 +1010,7 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
             if (!col) return;
 
             const id = "w_" + Math.random().toString(36).slice(2, 8);
-            const widget = { id, type, props: {} };
-
-            switch (type) {
-                case "heading":
-                    widget.props = { text: "Titre", tag: "h2", align: "left" };
-                    break;
-                case "text":
-                    widget.props = { html: "<p>Texte exemple</p>" };
-                    break;
-                case "image":
-                    widget.props = { url: "", alt: "" };
-                    break;
-                case "video":
-                    widget.props = {
-                        type: "youtube",
-                        url: "",
-                        aspectRatio: "16/9",
-                        autoplay: false,
-                        loop: false,
-                        muted: false
-                    };
-                    break;
-                case "button":
-                    widget.props = { label: "En savoir plus", url: "#" };
-                    break;
-                case "accordion":
-                    widget.props = {
-                        items: [{ title: "Item 1", content: "Texte..." }],
-                    };
-                    break;
-                case "spacer":
-                    widget.props = { size: 32 };
-                    break;
-                // E-commerce widgets
-                case "hero_banner":
-                    widget.props = {
-                        badge: "Nouvelle Collection",
-                        title: "Découvrez notre sélection",
-                        subtitle: "de produits d'exception",
-                        description: "Explorez notre catalogue de produits soigneusement sélectionnés.",
-                        primaryCta: { text: "Voir les produits", href: "/products" },
-                        secondaryCta: { text: "En savoir plus", href: "/content/a-propos" },
-                        image: ""
-                    };
-                    break;
-                case "features_bar":
-                    widget.props = {
-                        features: [
-                            { icon: "Truck", title: "Livraison gratuite", description: "À partir de 50€ d'achat" },
-                            { icon: "ShieldCheck", title: "Paiement sécurisé", description: "Transactions 100% sécurisées" },
-                            { icon: "Undo2", title: "Retours faciles", description: "30 jours pour changer d'avis" },
-                            { icon: "MessageCircle", title: "Support client", description: "Disponible 7j/7" },
-                        ]
-                    };
-                    break;
-                case "categories_grid":
-                    widget.props = {
-                        title: "Découvrez nos catégories",
-                        categorySlugs: [],
-                        subtitle: "",
-                        maxCategories: null,
-                        // Display configuration
-                        displayMode: "grid", // 'slider' or 'grid'
-                        // Slider configuration
-                        slidesPerView: {
-                            desktop: 4,
-                            mobile: 2
-                        },
-                        slidesToScroll: {
-                            desktop: 1,
-                            mobile: 1
-                        },
-                        // Grid configuration
-                        columns: {
-                            desktop: 4,
-                            mobile: 2
-                        },
-                        showArrows: true,
-                        showDots: true,
-                        autoplay: false,
-                        gap: 16
-                    };
-                    break;
-                case "promo_banner":
-                    widget.props = {
-                        badge: "Offre Limitée",
-                        title: "Profitez de -20% sur toute la boutique",
-                        description: "Utilisez le code BIENVENUE20 lors de votre commande.",
-                        ctaText: "Découvrir les offres",
-                        ctaHref: "/products",
-                        variant: "gradient"
-                    };
-                    break;
-                case "testimonials":
-                    widget.props = {
-                        title: "Ce que disent nos clients",
-                        testimonials: [
-                            { name: "Marie Dupont", role: "Cliente fidèle", content: "Excellente qualité et livraison rapide.", rating: 5 },
-                            { name: "Thomas Martin", role: "Acheteur vérifié", content: "Service client au top.", rating: 5 },
-                        ]
-                    };
-                    break;
-                case "newsletter":
-                    widget.props = {
-                        title: "Restez informé",
-                        description: "Inscrivez-vous à notre newsletter pour recevoir nos offres exclusives.",
-                        placeholder: "Votre adresse email",
-                        buttonText: "S'inscrire"
-                    };
-                    break;
-                case "product_slider":
-                    widget.props = {
-                        title: "Produits mis en avant",
-                        mode: "category", // 'category' or 'custom'
-                        categorySlug: "",
-                        productIds: [],
-                        // Display configuration
-                        displayMode: "slider", // 'slider' or 'grid'
-                        // Slider configuration
-                        slidesPerView: {
-                            desktop: 4,
-                            mobile: 2
-                        },
-                        slidesToScroll: {
-                            desktop: 1,
-                            mobile: 1
-                        },
-                        // Grid configuration
-                        columns: {
-                            desktop: 4,
-                            mobile: 2
-                        },
-                        showArrows: true,
-                        showDots: true,
-                        autoplay: false,
-                        gap: 16
-                    };
-                    break;
-                case "container":
-                    widget.props = {
-                        background: "#ffffff",
-                        paddingTop: 40,
-                        paddingBottom: 40,
-                        columns: [
-                            {
-                                id: "col_" + Math.random().toString(36).slice(2, 8),
-                                width: 100,
-                                widgets: []
-                            }
-                        ]
-                    };
-                    break;
-            }
+            const widget = { id, type, props: this.getWidgetDefaultProps(type) };
 
             col.widgets.push(widget);
             this.sync();
@@ -1181,29 +1266,11 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
             if (!column) return;
 
             const id = "w_" + Math.random().toString(36).slice(2, 8);
-            const widget = { id, type: widgetType, props: {} };
-
-            // Set default props based on widget type
-            switch (widgetType) {
-                case "heading":
-                    widget.props = { text: "Titre", tag: "h2", align: "left" };
-                    break;
-                case "text":
-                    widget.props = { html: "<p>Texte exemple</p>" };
-                    break;
-                case "image":
-                    widget.props = { url: "", alt: "" };
-                    break;
-                case "button":
-                    widget.props = { label: "En savoir plus", url: "#" };
-                    break;
-                case "accordion":
-                    widget.props = { items: [{ title: "Item 1", content: "Texte..." }] };
-                    break;
-                case "spacer":
-                    widget.props = { size: 32 };
-                    break;
-            }
+            const widget = {
+                id,
+                type: widgetType,
+                props: this.getWidgetDefaultProps(widgetType),
+            };
 
             column.widgets.splice(index, 0, widget);
             this.sync();
@@ -1539,7 +1606,7 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
             }
         },
 
-        async uploadImageDirect(event) {
+        async uploadImageDirect(event, propKey = 'url') {
             const file = event.target.files[0];
             if (!file) return;
 
@@ -1560,8 +1627,11 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
                     const data = await response.json();
                     if (data.success && data.items && data.items.length > 0) {
                         const item = data.items[0];
-                        this.currentWidget().props.url = item.url;
-                        this.sync();
+                        const widget = this.currentWidget();
+                        if (widget?.props) {
+                            widget.props[propKey] = item.optimized_url || item.avif_url || item.webp_url || item.url;
+                            this.sync();
+                        }
                     }
                 } else {
                     const errorData = await response.json().catch(() => ({ message: 'Erreur inconnue' }));

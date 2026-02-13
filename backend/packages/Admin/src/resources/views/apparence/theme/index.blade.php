@@ -4,7 +4,7 @@
 @section('page-title', 'Thème')
 
 @section('content')
-    <div x-data="{}">
+    <div x-data="{ themeActivation: true }">
 
 
         <div class="flex items-center justify-between mb-3">
@@ -233,36 +233,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Modal de confirmation de suppression --}}
-                                    @if (!$theme->is_default)
-                                        <x-admin::modal name="delete-theme-{{ $theme->id }}"
-                                            :title="'Supprimer le thème « ' . $theme->name . ' » ?'"
-                                            description="Cette action est définitive et ne peut pas être annulée."
-                                            size="max-w-md">
-                                            <p class="text-xs text-gray-600">
-                                                Voulez-vous vraiment supprimer le thème
-                                                <span class="font-semibold">{{ $theme->name }}</span> ?
-                                            </p>
-
-                                            <div class="flex justify-end gap-2 pt-3">
-                                                <button type="button"
-                                                    class="px-4 py-2 rounded-lg border border-gray-200 text-xs text-gray-700 hover:bg-gray-50"
-                                                    @click="open = false">
-                                                    Annuler
-                                                </button>
-
-                                                <form action="{{ route('admin.apparence.theme.destroy', $theme) }}" method="POST">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                        class="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900">
-                                                        <x-lucide-trash-2 class="h-3 w-3" />
-                                                        Confirmer la suppression
-                                                    </button>
-                                                </form>
-                                            </div>
-                                        </x-admin::modal>
-                                    @endif
                                 @empty
                                     <div class="col-span-2 text-center py-8 text-xs text-gray-500">
                                         Aucun thème installé. Ajoutez votre premier thème !
@@ -271,6 +241,38 @@
                             </div>
                         </div>
                     </div>
+                    {{-- Modals de suppression (hors grille pour ne pas polluer le listing) --}}
+                    @foreach($themes as $theme)
+                        @if (!$theme->is_default)
+                            <x-admin::modal name="delete-theme-{{ $theme->id }}"
+                                :title="'Supprimer le thème « ' . $theme->name . ' » ?'"
+                                description="Cette action est définitive et ne peut pas être annulée."
+                                size="max-w-md">
+                                <p class="text-xs text-gray-600">
+                                    Voulez-vous vraiment supprimer le thème
+                                    <span class="font-semibold">{{ $theme->name }}</span> ?
+                                </p>
+
+                                <div class="flex justify-end gap-2 pt-3">
+                                    <button type="button"
+                                        class="px-4 py-2 rounded-lg border border-gray-200 text-xs text-gray-700 hover:bg-gray-50"
+                                        @click="open = false">
+                                        Annuler
+                                    </button>
+
+                                    <form action="{{ route('admin.apparence.theme.destroy', $theme) }}" method="POST">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900">
+                                            <x-lucide-trash-2 class="h-3 w-3" />
+                                            Confirmer la suppression
+                                        </button>
+                                    </form>
+                                </div>
+                            </x-admin::modal>
+                        @endif
+                    @endforeach
                 </div>
             </div>
 
@@ -304,72 +306,32 @@
 
         {{-- Modal d'upload de thème --}}
         <x-admin::modal name="upload-theme" title="Ajouter un nouveau thème"
-            description="Uploadez un fichier .zip contenant votre thème Next.js personnalisé" size="max-w-md">
-            <form action="{{ route('admin.apparence.theme.upload') }}" method="POST" enctype="multipart/form-data"
-                class="space-y-3">
+            description="Uploadez un fichier .zip contenant votre thème (métadonnées et preview incluses dans le ZIP)." size="max-w-md">
+            <form x-data="uploadForm()" action="{{ route('admin.apparence.theme.upload') }}" method="POST"
+                enctype="multipart/form-data" class="space-y-3">
                 @csrf
 
-                <div>
-                    <label class="block text-xxxs font-medium text-gray-700 mb-1">
-                        Nom du thème <span class="text-gray-400">(optionnel si dans theme.json)</span>
-                    </label>
-                    <input type="text" name="name"
-                        class="w-full rounded-xl border border-gray-200 px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900"
-                        placeholder="Ex : Mon Thème Premium">
-                </div>
-
-                <div>
-                    <label class="block text-xxxs font-medium text-gray-700 mb-1">
-                        Description
-                    </label>
-                    <textarea name="description" rows="2"
-                        class="w-full rounded-xl border border-gray-200 px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900"
-                        placeholder="Décrivez votre thème..."></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-xxxs font-medium text-gray-700 mb-1">
-                        Auteur
-                    </label>
-                    <input type="text" name="author"
-                        class="w-full rounded-xl border border-gray-200 px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-gray-900"
-                        placeholder="Nom de l'auteur">
-                </div>
-
-                <div>
-                    <label class="block text-xxxs font-medium text-gray-700 mb-1">
-                        Image de prévisualisation
-                    </label>
-                    <input type="file" name="preview_image" accept="image/*"
-                        class="w-full text-xxxs rounded-xl border border-gray-200 px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-gray-900">
-                    <p class="text-xxxs text-gray-500 mt-1">Formats: JPG, PNG, WebP - Max 2MB</p>
-                </div>
-
-                <div>
-                    <label class="block text-xxxs font-medium text-gray-700 mb-1">
-                        Fichier ZIP du thème <span class="text-red-500">*</span>
-                    </label>
-                    <input type="file" name="theme" accept=".zip" required
-                        class="w-full text-xxxs rounded-xl border border-gray-200 px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-gray-900">
-                    <p class="text-xxxs text-gray-500 mt-1">Max 50MB</p>
-                </div>
-
-                <div class="rounded-lg bg-blue-50 border border-blue-200 px-3 py-2">
-                    <p class="text-xxxs text-blue-700 space-y-1">
-                        <strong>Note :</strong> Le ZIP doit contenir un fichier <code class="bg-blue-100 px-1 rounded">theme.json</code> avec les informations du thème et les settings de customisation.<br>
-                        <strong>Exemple de structure :</strong>
-                    </p>
-                    <pre class="text-xxxs bg-blue-100 p-2 rounded mt-1 overflow-x-auto"><code>{
-  "name": "Mon Thème",
-  "description": "Description...",
-  "version": "1.0.0",
-  "settings": {
-    "primary": "#2196F3",
-    "secondary": "#FF4081",
-    ...
-  }
-}</code></pre>
-                </div>
+                <label @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false"
+                    @drop.prevent="handleDrop?.($event)" class="block cursor-pointer rounded-xl border-2 border-dashed"
+                    :class="dragging ? 'border-neutral-400 bg-neutral-50' : 'border-neutral-200 hover:border-neutral-300'">
+                    <div class="flex flex-col items-center justify-center gap-2 px-6 py-10 text-center">
+                        <x-lucide-file-archive class="h-8 w-8 text-neutral-500" />
+                        <div class="text-sm">
+                            <span class="font-medium">Glissez-déposez votre .zip</span>
+                            <span class="text-neutral-500"> ou cliquez pour parcourir</span>
+                        </div>
+                        <div class="text-xs text-neutral-500">Taille max 50 Mo • Formats acceptés : .zip</div>
+                        <input x-ref="file" @change="updateFileName" type="file" name="theme" accept=".zip" required
+                            class="sr-only" />
+                        <template x-if="fileName">
+                            <div
+                                class="mt-2 inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1 text-xs text-neutral-700">
+                                <x-lucide-badge-check class="h-4 w-4 text-emerald-600" />
+                                <span x-text="fileName"></span>
+                            </div>
+                        </template>
+                    </div>
+                </label>
 
                 <div class="pt-2 flex justify-end gap-2">
                     <button type="button"

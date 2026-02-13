@@ -4,13 +4,17 @@
 @section('page-title', $pageTitleHeader ?? 'Builder')
 
 @section('content')
+    @php
+        $builderWidgets = array_values($widgets ?? \Omersia\Admin\Config\BuilderWidgets::all());
+    @endphp
+
     <div x-data='pageBuilderNative({
             initial: @json($contentJson),
             saveUrl: "{{ $saveUrl }}",
             csrf: "{{ csrf_token() }}",
             categoriesUrl: "{{ route('admin.api.categories') }}",
             productsUrl: "{{ route('admin.api.products') }}",
-            serverWidgets: @json(array_values(\Omersia\Admin\Config\BuilderWidgets::all())),
+            serverWidgets: @json($builderWidgets),
             pageType: "{{ $pageType ?? 'category' }}",
         })'
         x-init="init()"
@@ -71,7 +75,7 @@
                 </div>
 
                 <div class="flex-1 overflow-y-auto mt-1 space-y-1 pr-1">
-                    @foreach (\Omersia\Admin\Config\BuilderWidgets::all() as $widget)
+                    @foreach ($builderWidgets as $widget)
                         <button type="button"
                             x-show="!widgetsSearch || '{{ strtolower($widget['label']) }}'.includes(widgetsSearch.toLowerCase())"
                             class="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-800 cursor-move hover:bg-neutral-100 flex items-center justify-between"

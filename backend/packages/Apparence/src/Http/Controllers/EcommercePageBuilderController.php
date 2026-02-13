@@ -30,6 +30,7 @@ class EcommercePageBuilderController extends Controller
         $widgets = $activeTheme && $activeTheme->getWidgets()
             ? $activeTheme->getWidgets()
             : BuilderWidgets::all(); // Fallback to default widgets
+        $widgets = array_values($widgets);
 
         // Group widgets by category
         $widgetCategories = [];
@@ -68,6 +69,7 @@ class EcommercePageBuilderController extends Controller
                 'backUrl' => route('admin.apparence.ecommerce-pages.index'),
                 'widgetCategories' => $widgetCategories,
                 'categoryLabels' => $categoryLabels,
+                'widgets' => $widgets,
                 'themeSlug' => $activeTheme?->slug ?? 'vision',
             ]);
         }
@@ -83,6 +85,7 @@ class EcommercePageBuilderController extends Controller
             'backUrl' => route('admin.apparence.ecommerce-pages.index'),
             'widgetCategories' => $widgetCategories,
             'categoryLabels' => $categoryLabels,
+            'widgets' => $widgets,
             'themeSlug' => $activeTheme?->slug ?? 'vision',
         ]);
     }

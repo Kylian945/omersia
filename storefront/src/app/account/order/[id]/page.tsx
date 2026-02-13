@@ -29,7 +29,7 @@ export default async function OrderDetailPage({ params }: Props) {
   return (
     <>
       <Header />
-      <main className="flex-1 py-10 bg-neutral-50">
+      <main className="flex-1 py-10 bg-[var(--theme-page-bg,#f6f6f7)]">
         <Container>
           <OrderDetailClient order={order} user={user} />
         </Container>

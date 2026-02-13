@@ -226,29 +226,29 @@ function StripeErrorModal({
       />
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          className="bg-white rounded-2xl shadow-2xl max-w-md w-full relative animate-in fade-in zoom-in duration-200"
+          className="bg-[var(--theme-card-bg,#ffffff)] rounded-2xl shadow-2xl max-w-md w-full relative animate-in fade-in zoom-in duration-200"
           onClick={(e) => e.stopPropagation()}
         >
-          <div className="p-5 border-b border-neutral-200 flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-neutral-900">
+          <div className="p-5 border-b border-[var(--theme-border-default,#e5e7eb)] flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-[var(--theme-heading-color,#111827)]">
               Paiement indisponible
             </h2>
             <button
               onClick={onClose}
-              className="text-neutral-500 hover:text-neutral-700 transition-colors"
+              className="text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-body-color,#374151)] transition-colors"
               aria-label="Fermer"
             >
               ×
             </button>
           </div>
           <div className="p-5 space-y-3">
-            <p className="text-xs text-neutral-700">
+            <p className="text-xs text-[var(--theme-body-color,#374151)]">
               {message}
             </p>
             <div className="flex justify-end">
               <button
                 onClick={onClose}
-                className="rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900"
+                className="rounded-lg bg-[var(--theme-primary,#111827)] px-4 py-2 text-xs font-medium text-[var(--theme-button-primary-text,#ffffff)] hover:opacity-90"
               >
                 Compris
               </button>

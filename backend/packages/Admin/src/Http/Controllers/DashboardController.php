@@ -656,9 +656,9 @@ class DashboardController extends Controller
 
             // Statistiques globales
             fputcsv($file, ['Statistiques globales']);
-            fputcsv($file, ['Total des ventes', number_format($periodSales, 2, ',', ' ').' €']);
+            fputcsv($file, ['Total des ventes', number_format((float) ($periodSales ?? 0), 2, ',', ' ').' €']);
             fputcsv($file, ['Nombre de commandes', $periodOrdersCount]);
-            fputcsv($file, ['Panier moyen', number_format($averageOrderValue, 2, ',', ' ').' €']);
+            fputcsv($file, ['Panier moyen', number_format((float) ($averageOrderValue ?? 0), 2, ',', ' ').' €']);
             fputcsv($file, []);
 
             // Détail par jour
@@ -669,7 +669,7 @@ class DashboardController extends Controller
                 fputcsv($file, [
                     Carbon::parse($order->date)->format('d/m/Y'),
                     $order->count,
-                    number_format($order->total, 2, ',', ' ').' €',
+                    number_format((float) ($order->total ?? 0), 2, ',', ' ').' €',
                 ]);
             }
 
@@ -694,9 +694,9 @@ class DashboardController extends Controller
         $content .= "                   STATISTIQUES GLOBALES                       \n";
         $content .= "───────────────────────────────────────────────────────────────\n\n";
 
-        $content .= 'Total des ventes      : '.number_format($periodSales, 2, ',', ' ')." €\n";
+        $content .= 'Total des ventes      : '.number_format((float) ($periodSales ?? 0), 2, ',', ' ')." €\n";
         $content .= "Nombre de commandes   : {$periodOrdersCount}\n";
-        $content .= 'Panier moyen          : '.number_format($averageOrderValue, 2, ',', ' ')." €\n\n";
+        $content .= 'Panier moyen          : '.number_format((float) ($averageOrderValue ?? 0), 2, ',', ' ')." €\n\n";
 
         $content .= "───────────────────────────────────────────────────────────────\n";
         $content .= "                      DÉTAIL PAR JOUR                          \n";
@@ -710,7 +710,7 @@ class DashboardController extends Controller
                 "%-15s %-20s %-20s\n",
                 Carbon::parse($order->date)->format('d/m/Y'),
                 $order->count,
-                number_format($order->total, 2, ',', ' ').' €'
+                number_format((float) ($order->total ?? 0), 2, ',', ' ').' €'
             );
         }
 

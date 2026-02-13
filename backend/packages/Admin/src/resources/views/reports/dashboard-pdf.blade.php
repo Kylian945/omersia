@@ -160,7 +160,7 @@
         <div class="stats-container">
             <div class="stat-card">
                 <div class="stat-label">Total des ventes</div>
-                <div class="stat-value">{{ number_format($periodSales, 2, ',', ' ') }} €</div>
+                <div class="stat-value">{{ number_format((float) ($periodSales ?? 0), 2, ',', ' ') }} €</div>
             </div>
             <div class="stat-card">
                 <div class="stat-label">Commandes</div>
@@ -168,7 +168,7 @@
             </div>
             <div class="stat-card">
                 <div class="stat-label">Panier moyen</div>
-                <div class="stat-value">{{ number_format($averageOrderValue, 2, ',', ' ') }} €</div>
+                <div class="stat-value">{{ number_format((float) ($averageOrderValue ?? 0), 2, ',', ' ') }} €</div>
             </div>
         </div>
     </div>
@@ -188,7 +188,7 @@
                     <tr>
                         <td>{{ \Carbon\Carbon::parse($order->date)->format('d/m/Y') }}</td>
                         <td style="text-align: right;">{{ $order->count }}</td>
-                        <td style="text-align: right;">{{ number_format($order->total, 2, ',', ' ') }} €</td>
+                        <td style="text-align: right;">{{ number_format((float) ($order->total ?? 0), 2, ',', ' ') }} €</td>
                     </tr>
                 @empty
                     <tr>
