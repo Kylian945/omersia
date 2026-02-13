@@ -118,3 +118,38 @@ export function isBackendImage(src: string): boolean {
     src.includes("/api/image-proxy")
   );
 }
+
+/**
+ * Checks if a source can be rendered by next/image with current config.
+ * Mirrors the host rules declared in next.config.ts to prevent runtime crashes.
+ */
+export function isNextImageCompatible(src: string): boolean {
+  if (!src) return false;
+
+  // Local/public paths and API proxy paths are handled by localPatterns.
+  if (src.startsWith("/")) {
+    return true;
+  }
+
+  try {
+    const parsed = new URL(src);
+
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return false;
+    }
+
+    if (parsed.hostname.endsWith(".localhost")) {
+      return true;
+    }
+
+    return [
+      "localhost",
+      "127.0.0.1",
+      "backend",
+      "nginx",
+      "host.docker.internal",
+    ].includes(parsed.hostname);
+  } catch {
+    return false;
+  }
+}

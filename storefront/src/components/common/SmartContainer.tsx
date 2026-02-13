@@ -13,7 +13,7 @@ export function SmartContainer({ children }: PropsWithChildren) {
 
   // Sinon, appliquer le container
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 md:px-6 lg:px-8">
+    <div className="theme-container mx-auto w-full max-w-6xl px-4 md:px-6 lg:px-8">
       {children}
     </div>
   );

@@ -52,11 +52,11 @@ function badgeClass(status: string) {
     case "delivered":
       return "bg-lime-100 text-lime-700";
     case "cancelled":
-      return "bg-gray-100 text-gray-700";
+      return "bg-[var(--theme-input-bg,#ffffff)] text-[var(--theme-body-color,#374151)]";
     case "refunded":
-      return "bg-gray-100 text-gray-700";
+      return "bg-[var(--theme-input-bg,#ffffff)] text-[var(--theme-body-color,#374151)]";
     default:
-      return "bg-neutral-100 text-neutral-700";
+      return "bg-[var(--theme-input-bg,#ffffff)] text-[var(--theme-body-color,#374151)]";
   }
 }
 
@@ -206,10 +206,10 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
       {/* Top bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-neutral-900">
+          <h1 className="text-2xl font-semibold tracking-tight text-[var(--theme-heading-color,#111827)]">
             Commande #{order.number}
           </h1>
-          <p className="mt-1 text-xs text-neutral-500">
+          <p className="mt-1 text-xs text-[var(--theme-muted-color,#6b7280)]">
             Passée le {new Date(order.placed_at).toLocaleDateString("fr-FR")}
           </p>
         </div>
@@ -233,12 +233,12 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
       </div>
 
       {/* Order Status + timeline */}
-      <div className="rounded-2xl bg-white border border-black/5 shadow-sm p-5">
+      <div className="rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5">
         <div className="flex items-center justify-between text-xs">
           <div>
-            <p className="text-black font-semibold">Suivi de commande</p>
+            <p className="text-[var(--theme-heading-color,#111827)] font-semibold">Suivi de commande</p>
             {order.shipping_method && (
-              <p className="text-neutral-500">
+              <p className="text-[var(--theme-muted-color,#6b7280)]">
                 {order.shipping_method.name}
                 {order.shipping_method.delivery_time &&
                   ` · ${order.shipping_method.delivery_time}`}
@@ -261,21 +261,21 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
                   <div className="space-y-1 text-xs">
                    
                     {order.meta.tracking.number && (
-                      <div className="flex items-center gap-1.5 text-neutral-600">
-                        <span className="text-neutral-500">N° de suivi :</span>
+                      <div className="flex items-center gap-1.5 text-[var(--theme-muted-color,#6b7280)]">
+                        <span className="text-[var(--theme-muted-color,#6b7280)]">N° de suivi :</span>
                         {order.meta.tracking.url ? (
                           <a
                             href={order.meta.tracking.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-xs font-medium text-neutral-900 hover:text-neutral-700 underline"
+                            className="text-xs font-medium text-[var(--theme-heading-color,#111827)] hover:text-[var(--theme-body-color,#374151)] underline"
                           >
-                            <span className="font-mono text-neutral-900 select-all">
+                            <span className="font-mono text-[var(--theme-heading-color,#111827)] select-all">
                               {order.meta.tracking.number}
                             </span>
                           </a>
                         ) : (
-                          <span className="font-mono text-neutral-900 select-all">
+                          <span className="font-mono text-[var(--theme-heading-color,#111827)] select-all">
                             {order.meta.tracking.number}
                           </span>
                         )}
@@ -300,14 +300,14 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
 
                   <div className="relative">
                     {s.key === "confirmed" ? (
-                      <div className="w-2 h-2 mt-1 ml-1 rounded-full bg-black text-white flex items-center justify-center shadow-sm" />
+                      <div className="w-2 h-2 mt-1 ml-1 rounded-full bg-[var(--theme-primary,#111827)] text-white flex items-center justify-center shadow-sm" />
                     ) : (
                       <Icon className="w-4 h-4 mt-0.5" />
                     )}
                   </div>
 
                   <div className="flex flex-col">
-                    <span className="text-xs font-semibold text-black">
+                    <span className="text-xs font-semibold text-[var(--theme-heading-color,#111827)]">
                       {s.label}
                     </span>
                     {/* Pour l'instant, pas de date détaillée */}
@@ -320,10 +320,10 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
       </div>
 
       {/* Summary card */}
-      <div className="rounded-2xl bg-white border border-black/5 shadow-sm p-5">
+      <div className="rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
           <div className="text-xs">
-            <div className="text-black font-semibold">Statut</div>
+            <div className="text-[var(--theme-heading-color,#111827)] font-semibold">Statut</div>
             <div
               className={`inline-flex px-2 py-0.5 rounded-full mt-1 text-xs font-medium ${badgeClass(
                 order.status
@@ -333,8 +333,8 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
             </div>
           </div>
           <div className="text-xs">
-            <div className="text-black font-semibold">Paiement</div>
-            <div className="font-medium text-neutral-900">
+            <div className="text-[var(--theme-heading-color,#111827)] font-semibold">Paiement</div>
+            <div className="font-medium text-[var(--theme-heading-color,#111827)]">
               {/* Pour l'instant on n'a pas le détail du moyen de paiement → on se base sur payment_status */}
               {order.payment_status === "paid"
                 ? "Payé"
@@ -348,22 +348,22 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
             </div>
           </div>
           <div className="text-xs">
-            <div className="text-black font-semibold">Livraison</div>
-            <div className="font-medium text-neutral-900">
+            <div className="text-[var(--theme-heading-color,#111827)] font-semibold">Livraison</div>
+            <div className="font-medium text-[var(--theme-heading-color,#111827)]">
               {order.shipping_method?.name ?? "—"}
             </div>
           </div>
           {order.discount_total > 0 && (
             <div className="text-xs">
-              <div className="text-black font-semibold">Réduction</div>
+              <div className="text-[var(--theme-heading-color,#111827)] font-semibold">Réduction</div>
               <div className="font-medium text-green-600">
                 -{fmtEUR(order.discount_total)}
               </div>
             </div>
           )}
           <div className="text-xs">
-            <div className="text-black font-semibold">Total</div>
-            <div className="font-semibold text-neutral-900">
+            <div className="text-[var(--theme-heading-color,#111827)] font-semibold">Total</div>
+            <div className="font-semibold text-[var(--theme-heading-color,#111827)]">
               {fmtEUR(order.total)}
             </div>
           </div>
@@ -373,9 +373,9 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
       {/* Main grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Items */}
-        <div className="lg:col-span-2 rounded-2xl bg-white border border-black/5 shadow-sm p-5">
-          <p className="text-xs text-black font-semibold mb-3">Articles</p>
-          <div className="divide-y divide-neutral-100">
+        <div className="lg:col-span-2 rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5">
+          <p className="text-xs text-[var(--theme-heading-color,#111827)] font-semibold mb-3">Articles</p>
+          <div className="divide-y divide-[var(--theme-border-default,#e5e7eb)]">
             {order.items.map((item) => {
               const imageSrc = resolveOrderItemImage(item.image_url);
 
@@ -393,20 +393,20 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
                           fill
                           sizes="48px"
                           className="object-cover"
-                          fallback={<span className="text-xxxs text-neutral-400">Image</span>}
+                          fallback={<span className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">Image</span>}
                         />
                       </div>
                     ) : (
-                      <span className="text-xxxs text-neutral-400">Image</span>
+                      <span className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">Image</span>
                     )}
                     <div className="flex flex-col">
-                      <span className="font-medium text-neutral-900">
+                      <span className="font-medium text-[var(--theme-heading-color,#111827)]">
                         {item.name}
                       </span>
-                      <span className="text-neutral-500">Qté {item.quantity}</span>
+                      <span className="text-[var(--theme-muted-color,#6b7280)]">Qté {item.quantity}</span>
                     </div>
                   </div>
-                  <div className="text-neutral-900 font-medium">
+                  <div className="text-[var(--theme-heading-color,#111827)] font-medium">
                     {fmtEUR(item.total_price)}
                   </div>
                 </div>
@@ -415,25 +415,25 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
           </div>
 
           {/* Totaux */}
-          <div className="mt-4 border-t border-neutral-100 pt-4 text-xs">
+          <div className="mt-4 border-t border-[var(--theme-border-default,#e5e7eb)] pt-4 text-xs">
             <div className="flex justify-between">
-              <span className="text-neutral-500">Sous-total</span>
-              <span className="font-medium text-neutral-900">
+              <span className="text-[var(--theme-muted-color,#6b7280)]">Sous-total</span>
+              <span className="font-medium text-[var(--theme-heading-color,#111827)]">
                 {fmtEUR(order.subtotal)}
               </span>
             </div>
 
             {order.discount_total > 0 && (
               <div className="flex justify-between">
-                <span className="text-neutral-500">Remise</span>
-                <span className="font-medium text-neutral-900">
+                <span className="text-[var(--theme-muted-color,#6b7280)]">Remise</span>
+                <span className="font-medium text-[var(--theme-heading-color,#111827)]">
                   -{fmtEUR(order.discount_total)}
                 </span>
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-neutral-500">Livraison</span>
-              <span className="font-medium text-neutral-900">
+              <span className="text-[var(--theme-muted-color,#6b7280)]">Livraison</span>
+              <span className="font-medium text-[var(--theme-heading-color,#111827)]">
                 {order.shipping_total === 0
                   ? "Gratuite"
                   : fmtEUR(order.shipping_total)}
@@ -441,19 +441,19 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
             </div>
             {order.tax_total > 0 && (
               <div className="flex justify-between">
-                <span className="text-neutral-500">Taxes</span>
-                <span className="font-medium text-neutral-900">
+                <span className="text-[var(--theme-muted-color,#6b7280)]">Taxes</span>
+                <span className="font-medium text-[var(--theme-heading-color,#111827)]">
                   {fmtEUR(order.tax_total)}
                 </span>
               </div>
             )}
             <div className="flex justify-between mt-2">
-              <span className="font-semibold text-neutral-900">Total</span>
-              <span className="font-semibold text-neutral-900">
+              <span className="font-semibold text-[var(--theme-heading-color,#111827)]">Total</span>
+              <span className="font-semibold text-[var(--theme-heading-color,#111827)]">
                 {fmtEUR(order.total)}
               </span>
             </div>
-            <div className="text-xs text-neutral-500 mt-1">
+            <div className="text-xs text-[var(--theme-muted-color,#6b7280)] mt-1">
               TVA incluse si applicable.
             </div>
           </div>
@@ -461,9 +461,9 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
 
         {/* Addresses + identité */}
         <div className="space-y-4">
-          <div className="rounded-2xl bg-white border border-black/5 shadow-sm p-5">
-            <p className="text-xs text-black font-semibold mb-2">Identité</p>
-            <div className="text-xs text-neutral-900 space-y-0.5">
+          <div className="rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5">
+            <p className="text-xs text-[var(--theme-heading-color,#111827)] font-semibold mb-2">Identité</p>
+            <div className="text-xs text-[var(--theme-heading-color,#111827)] space-y-0.5">
               <div className="font-medium">
                 {(user.firstname || "") + " " + (user.lastname || "")}
               </div>
@@ -471,11 +471,11 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white border border-black/5 shadow-sm p-5">
-            <p className="text-xs text-black font-semibold mb-2">
+          <div className="rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5">
+            <p className="text-xs text-[var(--theme-heading-color,#111827)] font-semibold mb-2">
               Adresse de livraison
             </p>
-            <div className="text-xs text-neutral-900 space-y-0.5">
+            <div className="text-xs text-[var(--theme-heading-color,#111827)] space-y-0.5">
               <div>
                 {order.customer_firstname} {order.customer_lastname}
               </div>
@@ -490,11 +490,11 @@ export function OrderDetailClient({ order: initialOrder, user }: PropsOrder) {
             </div>
           </div>
 
-          <div className="rounded-2xl bg-white border border-black/5 shadow-sm p-5">
-            <p className="text-xs text-black font-semibold mb-2">
+          <div className="rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5">
+            <p className="text-xs text-[var(--theme-heading-color,#111827)] font-semibold mb-2">
               Adresse de facturation
             </p>
-            <div className="text-xs text-neutral-900 space-y-0.5">
+            <div className="text-xs text-[var(--theme-heading-color,#111827)] space-y-0.5">
               <div>{order.billing_address.line1}</div>
               {order.billing_address.line2 && (
                 <div>{order.billing_address.line2}</div>

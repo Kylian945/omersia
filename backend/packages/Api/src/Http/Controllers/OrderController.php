@@ -416,6 +416,7 @@ class OrderController extends Controller
                 'message' => $e->getMessage(),
                 'order_id' => $order->id,
             ]);
+
             return response()->json([
                 'error' => 'validation_error',
                 'message' => 'Les prix soumis ne correspondent pas aux prix réels. Veuillez rafraîchir votre panier.',
@@ -519,7 +520,7 @@ class OrderController extends Controller
 
                 $provider = $this->paymentProviderManager->resolve('stripe');
 
-                if (! $provider instanceof StripePaymentProvider) {
+                if (! ($provider instanceof StripePaymentProvider)) {
                     return response()->json([
                         'message' => 'Provider Stripe indisponible.',
                     ], 500);

@@ -15,7 +15,7 @@ const StripePaymentForm = dynamic(
   () => import("../components/StripePaymentForm").then((mod) => ({ default: mod.StripePaymentForm })),
   {
     loading: () => (
-      <div className="flex items-center gap-2 text-xs text-neutral-500">
+      <div className="flex items-center gap-2 text-xs text-[var(--theme-muted-color,#6b7280)]">
         <Loader2 className="w-3 h-3 animate-spin" />
         Chargement du formulaire de paiement sécurisé…
       </div>
@@ -170,17 +170,17 @@ export function PaymentStep() {
 
   return (
     <div className="space-y-3">
-      <h2 className="text-sm font-semibold text-neutral-900">
+      <h2 className="text-sm font-semibold text-[var(--theme-heading-color,#111827)]">
         4. Paiement sécurisé
       </h2>
-      <p className="text-xs text-neutral-500">
+      <p className="text-xs text-[var(--theme-muted-color,#6b7280)]">
         Sélectionnez votre mode de paiement. Les formulaires se connectent à
         vos providers (Stripe, PayPal, Mollie…).
       </p>
 
       {loading && (
         <div className="flex items-center justify-center py-8">
-          <Loader2 className="w-6 h-6 text-neutral-400 animate-spin" />
+          <Loader2 className="w-6 h-6 text-[var(--theme-muted-color,#6b7280)] animate-spin" />
         </div>
       )}
 
@@ -197,7 +197,7 @@ export function PaymentStep() {
       )}
 
       {!loading && !error && availableMethods.length === 0 && (
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-[var(--theme-muted-color,#6b7280)]">
           Aucun moyen de paiement disponible pour le moment.
         </p>
       )}
@@ -214,8 +214,8 @@ export function PaymentStep() {
                 type="button"
                 onClick={() => setPaymentMethod(methodCode)}
                 className={`w-full px-3 py-2 rounded-xl border text-left transition ${paymentMethod === methodCode
-                    ? "border-black bg-gray-50"
-                    : "border-neutral-200 bg-white hover:bg-neutral-50"
+                    ? "border-[var(--theme-border-hover,#111827)] bg-[var(--theme-page-bg,#f6f6f7)]"
+                    : "border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-card-bg,#ffffff)] hover:bg-[var(--theme-page-bg,#f6f6f7)]"
                   }`}
               >
                 {PAYMENT_METHOD_LABELS[method.code] || method.name}
@@ -241,7 +241,7 @@ export function PaymentStep() {
         {paymentMethod === "card" && (
           <>
             {!orderId && (
-              <p className="text-xs text-neutral-500 flex gap-2 items-center">
+              <p className="text-xs text-[var(--theme-muted-color,#6b7280)] flex gap-2 items-center">
                 <Loader2 className="w-3 h-3 animate-spin" />
                 Initialisation du paiement en cours…
               </p>
@@ -258,7 +258,7 @@ export function PaymentStep() {
         )}
 
         {paymentMethod === "paypal" && (
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-[var(--theme-muted-color,#6b7280)]">
             Intégration PayPal à implémenter ici (module). La commande est déjà
             créée, vous pourrez appeler votre endpoint PayPal avec l&apos;ID de
             commande.
@@ -266,7 +266,7 @@ export function PaymentStep() {
         )}
 
         {paymentMethod === "applepay" && (
-          <p className="text-xs text-neutral-500">
+          <p className="text-xs text-[var(--theme-muted-color,#6b7280)]">
             Intégration Apple Pay / Google Pay (via Stripe ou autre provider)
             à implémenter ici.
           </p>
@@ -275,7 +275,7 @@ export function PaymentStep() {
         {paymentMethod === "test" && (
           <>
             {!orderId && (
-              <p className="text-xs text-neutral-500 flex gap-2 items-center">
+              <p className="text-xs text-[var(--theme-muted-color,#6b7280)] flex gap-2 items-center">
                 <Loader2 className="w-3 h-3 animate-spin" />
                 Initialisation de la commande en cours…
               </p>
@@ -286,7 +286,7 @@ export function PaymentStep() {
                 type="button"
                 onClick={handleTestPayment}
                 disabled={testSubmitting}
-                className="w-full rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900 disabled:opacity-60"
+                className="w-full rounded-lg bg-[var(--theme-primary,#111827)] px-4 py-2 text-xs font-medium text-[var(--theme-button-primary-text,#ffffff)] hover:opacity-90 disabled:opacity-60"
               >
                 {testSubmitting
                   ? "Validation du paiement de test..."

@@ -37,7 +37,8 @@
                           "secondaryCta": {
                             "href": "/about",
                             "text": "En savoir plus"
-                          }
+                          },
+                          "image": ""
                         },
                         "visibility": {
                           "mobile": true,
@@ -528,7 +529,8 @@
                           "secondaryCta": {
                             "href": "/about",
                             "text": "Learn more"
-                          }
+                          },
+                          "image": ""
                         },
                         "visibility": {
                           "mobile": true,

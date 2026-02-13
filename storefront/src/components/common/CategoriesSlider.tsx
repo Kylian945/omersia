@@ -123,7 +123,7 @@ export function CategoriesSlider({
             >
               <Link
                 href={`/categories/${category.slug}`}
-                className="group relative overflow-hidden rounded-xl transition-transform hover:scale-105 border border-gray-100 block"
+                className="group relative overflow-hidden rounded-xl transition-transform hover:scale-105 border border-[var(--theme-border-default,#e5e7eb)] block"
                 style={{
                   backgroundColor: "var(--theme-card-bg, #ffffff)",
                   borderRadius: "var(--theme-border-radius, 12px)",
@@ -138,10 +138,10 @@ export function CategoriesSlider({
                       fill
                       sizes="(max-width: 768px) 50vw, 33vw"
                       className="object-cover transition-transform duration-300 group-hover:scale-110"
-                      fallback={<div className="h-full w-full bg-gray-100" />}
+                      fallback={<div className="h-full w-full bg-[var(--theme-input-bg,#ffffff)]" />}
                     />
                   ) : (
-                    <div className="h-full w-full bg-gray-100" />
+                    <div className="h-full w-full bg-[var(--theme-input-bg,#ffffff)]" />
                   )}
 
                   {/* Overlay on hover */}
@@ -183,8 +183,8 @@ export function CategoriesSlider({
                   onClick={() => scrollTo(index)}
                   className={`h-1.5 rounded-full transition-all ${
                     index === selectedIndex
-                      ? "w-6 bg-neutral-900"
-                      : "w-1.5 bg-neutral-300 hover:bg-neutral-400"
+                      ? "w-6 bg-[var(--theme-primary,#111827)]"
+                      : "w-1.5 bg-[var(--theme-border-default,#e5e7eb)] hover:bg-[var(--theme-muted-color,#6b7280)]"
                   }`}
                   aria-label={`Aller à la slide ${index + 1}`}
                 />
@@ -194,13 +194,13 @@ export function CategoriesSlider({
 
           {/* Arrows */}
           {showArrows && (
-            <div className="flex items-center gap-1.5 text-xxxs text-neutral-500 ml-auto">
+            <div className="flex items-center gap-1.5 text-xxxs text-[var(--theme-muted-color,#6b7280)] ml-auto">
               <span className="hidden sm:inline">Faire défiler</span>
               <div className="flex gap-1">
                 <button
                   type="button"
                   onClick={scrollPrev}
-                  className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-neutral-200 bg-white hover:border-black/60 hover:text-black transition"
+                  className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-card-bg,#ffffff)] hover:border-[var(--theme-border-hover,#111827)] hover:text-[var(--theme-heading-color,#111827)] transition"
                   aria-label="Précédent"
                 >
                   <ChevronLeft className="w-3 h-3" />
@@ -208,7 +208,7 @@ export function CategoriesSlider({
                 <button
                   type="button"
                   onClick={scrollNext}
-                  className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-neutral-200 bg-white hover:border-black/60 hover:text-black transition"
+                  className="inline-flex items-center justify-center h-6 w-6 rounded-full border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-card-bg,#ffffff)] hover:border-[var(--theme-border-hover,#111827)] hover:text-[var(--theme-heading-color,#111827)] transition"
                   aria-label="Suivant"
                 >
                   <ChevronRight className="w-3 h-3" />

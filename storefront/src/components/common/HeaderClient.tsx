@@ -95,19 +95,19 @@ export function HeaderClient({
       />
 
       <Container>
-        <div className="flex h-16 items-center justify-between gap-6">
+        <div className="theme-header-inner flex h-16 items-center justify-between gap-6">
           {searchOpen ? (
             <>
               {/* Barre de recherche */}
               <div className="flex-1 relative">
                 <form onSubmit={handleSearchSubmit} className="flex items-center gap-3">
-                  <Search className="w-5 h-5 text-neutral-400" />
+                  <Search className="w-5 h-5 text-[var(--theme-muted-color,#6b7280)]" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Rechercher des produits..."
-                    className="flex-1 bg-transparent border-none outline-none text-base placeholder:text-neutral-400"
+                    className="flex-1 px-3 bg-transparent border-none outline-none text-base placeholder:text-[var(--theme-muted-color,#6b7280)]"
                     autoFocus
                   />
                   <button
@@ -116,7 +116,7 @@ export function HeaderClient({
                       setSearchOpen(false);
                       setSearchQuery("");
                     }}
-                    className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-neutral-100 transition"
+                    className="theme-header-control inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-[var(--theme-input-bg,#ffffff)] transition"
                     aria-label="Fermer la recherche"
                   >
                     <X className="w-4 h-4" />
@@ -137,7 +137,7 @@ export function HeaderClient({
                 {/* Mobile Menu Button */}
                 <button
                   onClick={() => setMobileMenuOpen(true)}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 hover:border-black/40 transition md:hidden"
+                  className="theme-header-control inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--theme-border-default,#e5e7eb)] hover:border-[var(--theme-border-hover,#111827)] transition md:hidden"
                   aria-label="Menu"
                 >
                   <Menu className="w-4 h-4" />
@@ -154,13 +154,13 @@ export function HeaderClient({
                       className="h-8 w-auto object-contain"
                       priority
                       fallback={
-                        <div className="h-9 w-9 rounded-xl text-xl bg-black text-white flex items-center justify-center font-bold">
+                        <div className="theme-header-control h-9 w-9 rounded-xl text-xl bg-[var(--theme-primary,#111827)] text-[var(--theme-button-primary-text,#ffffff)] flex items-center justify-center font-bold">
                           {shopInfo.display_name?.[0]?.toUpperCase() || "O"}
                         </div>
                       }
                     />
                   ) : (
-                    <div className="h-9 w-9 rounded-xl text-xl bg-black text-white flex items-center justify-center font-bold">
+                    <div className="theme-header-control h-9 w-9 rounded-xl text-xl bg-[var(--theme-primary,#111827)] text-[var(--theme-button-primary-text,#ffffff)] flex items-center justify-center font-bold">
                       {shopInfo.display_name?.[0]?.toUpperCase() || "O"}
                     </div>
                   )}
@@ -171,10 +171,10 @@ export function HeaderClient({
               </div>
 
               {/* Navigation */}
-              <nav className="hidden items-center gap-6 text-sm text-neutral-700 md:flex">
+              <nav className="hidden items-center gap-6 text-sm text-[var(--theme-body-color,#374151)] md:flex">
                 {simpleFallback
                   ? (
-                    <p className="text-xs text-gray-400 px-6 py-2 border border-dashed rounded-md border-gray-300">Menu principal (Ajouter des éléments dans l&apos;administration)
+                    <p className="text-xs text-[var(--theme-muted-color,#6b7280)] px-6 py-2 border border-dashed rounded-md border-[var(--theme-border-default,#e5e7eb)]">Menu principal (Ajouter des éléments dans l&apos;administration)
                     </p>
                   )
                   : navItems.map((item) => {
@@ -199,8 +199,8 @@ export function HeaderClient({
                           <Link
                             href={href}
                             className={
-                              "transition-colors hover:text-black " +
-                              (isActive ? "text-black font-medium" : "")
+                              "transition-colors hover:text-[var(--theme-heading-color,#111827)] " +
+                              (isActive ? "text-[var(--theme-heading-color,#111827)] font-medium" : "")
                             }
                           >
                             {item.label}
@@ -213,8 +213,8 @@ export function HeaderClient({
                                 : closeMegaMenu()
                             }
                             className={
-                              "flex items-center gap-1 transition-colors hover:text-black " +
-                              (isActive ? "text-black font-medium" : "")
+                              "flex items-center gap-1 transition-colors hover:text-[var(--theme-heading-color,#111827)] " +
+                              (isActive ? "text-[var(--theme-heading-color,#111827)] font-medium" : "")
                             }
                           >
                             {item.label}
@@ -245,7 +245,7 @@ export function HeaderClient({
                     closeMegaMenu();
                     setSearchOpen(true);
                   }}
-                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 hover:border-black/40 transition"
+                  className="theme-header-control inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--theme-border-default,#e5e7eb)] hover:border-[var(--theme-border-hover,#111827)] transition"
                   aria-label="Rechercher"
                 >
                   <Search className="w-4 h-4" />
@@ -254,9 +254,9 @@ export function HeaderClient({
                 {isAuthenticated ? (
                   <Link
                     href="/account"
-                    className="rounded-full border border-black/10 inline-flex items-center gap-2 px-3 h-9 text-xs font-medium hover:border-black/40 transition"
+                    className="theme-header-control rounded-full border border-[var(--theme-border-default,#e5e7eb)] inline-flex items-center gap-2 px-3 h-9 text-xs font-medium hover:border-[var(--theme-border-hover,#111827)] transition"
                   >
-                    <div className="flex items-center justify-center h-5 w-5 rounded-full bg-black text-white text-xxxs">
+                    <div className="theme-header-control flex items-center justify-center h-5 w-5 rounded-full bg-[var(--theme-primary,#111827)] text-[var(--theme-button-primary-text,#ffffff)] text-xxxs">
                       {(user?.firstname?.[0] ||
                         user?.email?.[0] ||
                         "U"
@@ -267,7 +267,7 @@ export function HeaderClient({
                 ) : (
                   <Link
                     href="/login"
-                    className="rounded-full border border-black/10 inline-flex h-9 w-9 items-center justify-center text-xs font-medium hover:border-black/40 transition"
+                    className="theme-header-control rounded-full border border-[var(--theme-border-default,#e5e7eb)] inline-flex h-9 w-9 items-center justify-center text-xs font-medium hover:border-[var(--theme-border-hover,#111827)] transition"
                   >
                     <User className="w-4 h-4" />
                   </Link>
@@ -276,22 +276,22 @@ export function HeaderClient({
                 {cartType === 'page' ? (
                   <Link
                     href="/cart"
-                    className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 hover:border-black/40"
+                    className="theme-header-control relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--theme-border-default,#e5e7eb)] hover:border-[var(--theme-border-hover,#111827)]"
                     aria-label="Panier"
                   >
                     <ShoppingBag className="w-4 h-4" />
-                    <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black text-xxxs font-semibold text-white">
+                    <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--theme-primary,#111827)] text-xxxs font-semibold text-[var(--theme-button-primary-text,#ffffff)]">
                       {cartCount}
                     </span>
                   </Link>
                 ) : (
                   <button
                     onClick={openCart}
-                    className="relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/10 hover:border-black/40"
+                    className="theme-header-control relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-[var(--theme-border-default,#e5e7eb)] hover:border-[var(--theme-border-hover,#111827)]"
                     aria-label="Panier"
                   >
                     <ShoppingBag className="w-4 h-4" />
-                    <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black text-xxxs font-semibold text-white">
+                    <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--theme-primary,#111827)] text-xxxs font-semibold text-[var(--theme-button-primary-text,#ffffff)]">
                       {cartCount}
                     </span>
                   </button>
@@ -318,10 +318,10 @@ export function HeaderClient({
           const level2 = activeItem.category?.children ?? [];
 
           return (
-            <div className="left-0 right-0 top-full border-b border-black/5 shadow-sm animate-fade-in">
+            <div className="left-0 right-0 top-full border-b border-[var(--theme-border-default,#e5e7eb)] shadow-sm animate-fade-in">
               <Container>
                 <div className="py-4">
-                  <div className="mb-2 text-xs font-semibold text-neutral-500 uppercase tracking-[.18em]">
+                  <div className="mb-2 text-xs font-semibold text-[var(--theme-muted-color,#6b7280)] uppercase tracking-[.18em]">
                     {activeItem.label}
                   </div>
 
@@ -333,11 +333,11 @@ export function HeaderClient({
                       return (
                         <div
                           key={child.id}
-                          className="group rounded-xl px-3 py-2 hover:bg-neutral-50 transition self-start"
+                          className="group rounded-xl px-3 py-2 hover:bg-[var(--theme-page-bg,#f6f6f7)] transition self-start"
                         >
                           <Link
                             href={getCategoryHref(child)}
-                            className="block text-xs font-semibold text-neutral-900 group-hover:text-black"
+                            className="block text-xs font-semibold text-[var(--theme-heading-color,#111827)] group-hover:text-[var(--theme-heading-color,#111827)]"
                           >
                             {child.name || "Sans nom"}
                           </Link>
@@ -348,7 +348,7 @@ export function HeaderClient({
                                 <Link
                                   key={grandChild.id}
                                   href={getCategoryHref(grandChild)}
-                                  className="text-xs text-neutral-500 hover:text-neutral-900"
+                                  className="text-xs text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-heading-color,#111827)]"
                                 >
                                   {grandChild.name || "Sans nom"}
                                 </Link>

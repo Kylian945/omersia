@@ -113,9 +113,9 @@ export function MobileMenu({
       />
 
       {/* Offcanvas */}
-      <div className="fixed top-0 left-0 bottom-0 w-[85%] max-w-sm bg-white z-101 shadow-xl md:hidden overflow-hidden flex flex-col">
+      <div className="fixed top-0 left-0 bottom-0 w-[85%] max-w-sm bg-[var(--theme-card-bg,#ffffff)] z-101 shadow-xl md:hidden overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 h-16 border-b border-neutral-200">
+        <div className="theme-header-inner flex items-center justify-between px-4 h-16 border-b border-[var(--theme-border-default,#e5e7eb)]">
           {activeLevel.level > 1 ? (
             <button
               onClick={goBack}
@@ -136,13 +136,13 @@ export function MobileMenu({
                   sizes="120px"
                   className="h-8 w-auto object-contain"
                   fallback={
-                    <div className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center font-bold">
+                    <div className="theme-header-control h-6 w-6 rounded-full bg-[var(--theme-primary,#111827)] text-[var(--theme-button-primary-text,#ffffff)] flex items-center justify-center font-bold">
                       {shopInfo.display_name?.[0]?.toUpperCase() || "S"}
                     </div>
                   }
                 />
               ) : (
-                <div className="h-6 w-6 rounded-full bg-black text-white flex items-center justify-center font-bold">
+                <div className="theme-header-control h-6 w-6 rounded-full bg-[var(--theme-primary,#111827)] text-[var(--theme-button-primary-text,#ffffff)] flex items-center justify-center font-bold">
                   {shopInfo.display_name?.[0]?.toUpperCase() || "S"}
                 </div>
               )}
@@ -153,7 +153,7 @@ export function MobileMenu({
           )}
           <button
             onClick={handleClose}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-neutral-100 transition"
+            className="theme-header-control inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-[var(--theme-input-bg,#ffffff)] transition"
             aria-label="Fermer le menu"
           >
             <X className="w-5 h-5" />
@@ -177,18 +177,18 @@ export function MobileMenu({
                     {hasChildren ? (
                       <button
                         onClick={() => handleItemClick(item)}
-                        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-neutral-50 transition"
+                        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--theme-page-bg,#f6f6f7)] transition"
                       >
-                        <span className="font-medium text-neutral-900">
+                        <span className="font-medium text-[var(--theme-heading-color,#111827)]">
                           {item.label}
                         </span>
-                        <ChevronRight className="w-4 h-4 text-neutral-400" />
+                        <ChevronRight className="w-4 h-4 text-[var(--theme-muted-color,#6b7280)]" />
                       </button>
                     ) : (
                       <Link
                         href={href}
                         onClick={handleClose}
-                        className="block px-4 py-3 font-medium text-neutral-900 hover:bg-neutral-50 transition"
+                        className="block px-4 py-3 font-medium text-[var(--theme-heading-color,#111827)] hover:bg-[var(--theme-page-bg,#f6f6f7)] transition"
                       >
                         {item.label}
                       </Link>
@@ -207,7 +207,7 @@ export function MobileMenu({
                 <Link
                   href={getCategoryHref(activeLevel.item.category)}
                   onClick={handleClose}
-                  className="block px-4 py-3 text-sm font-semibold text-black border-b border-neutral-100"
+                  className="block px-4 py-3 text-sm font-semibold text-[var(--theme-heading-color,#111827)] border-b border-[var(--theme-border-default,#e5e7eb)]"
                 >
                   Voir tous les {activeLevel.item.label.toLowerCase()}
                 </Link>
@@ -222,18 +222,18 @@ export function MobileMenu({
                     {hasChildren ? (
                       <button
                         onClick={() => handleLevel2Click(child, activeLevel.parentLabel || "")}
-                        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-neutral-50 transition"
+                        className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-[var(--theme-page-bg,#f6f6f7)] transition"
                       >
-                        <span className="text-neutral-900">
+                        <span className="text-[var(--theme-heading-color,#111827)]">
                           {child.name || "Sans nom"}
                         </span>
-                        <ChevronRight className="w-4 h-4 text-neutral-400" />
+                        <ChevronRight className="w-4 h-4 text-[var(--theme-muted-color,#6b7280)]" />
                       </button>
                     ) : (
                       <Link
                         href={getCategoryHref(child)}
                         onClick={handleClose}
-                        className="block px-4 py-3 text-neutral-900 hover:bg-neutral-50 transition"
+                        className="block px-4 py-3 text-[var(--theme-heading-color,#111827)] hover:bg-[var(--theme-page-bg,#f6f6f7)] transition"
                       >
                         {child.name || "Sans nom"}
                       </Link>
@@ -252,7 +252,7 @@ export function MobileMenu({
                 <Link
                   href={getCategoryHref(activeLevel.item as CategoryNode)}
                   onClick={handleClose}
-                  className="block px-4 py-3 text-sm font-semibold text-black border-b border-neutral-100"
+                  className="block px-4 py-3 text-sm font-semibold text-[var(--theme-heading-color,#111827)] border-b border-[var(--theme-border-default,#e5e7eb)]"
                 >
                   Voir tous les {(activeLevel.item as CategoryNode).name?.toLowerCase()}
                 </Link>
@@ -264,7 +264,7 @@ export function MobileMenu({
                   key={grandChild.id}
                   href={getCategoryHref(grandChild)}
                   onClick={handleClose}
-                  className="block px-4 py-3 text-neutral-900 hover:bg-neutral-50 transition"
+                  className="block px-4 py-3 text-[var(--theme-heading-color,#111827)] hover:bg-[var(--theme-page-bg,#f6f6f7)] transition"
                 >
                   {grandChild.name || "Sans nom"}
                 </Link>

@@ -19,7 +19,7 @@ export default function AccountError({
   }, [error]);
 
   return (
-    <div className="min-h-[60vh] bg-neutral-50 flex items-center justify-center px-4">
+    <div className="min-h-[60vh] bg-[var(--theme-page-bg,#f6f6f7)] flex items-center justify-center px-4">
       <div className="max-w-md w-full text-center">
         <div className="mb-6">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-100 mb-4">
@@ -37,14 +37,14 @@ export default function AccountError({
               />
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 className="text-2xl font-bold text-[var(--theme-heading-color,#111827)] mb-2">
             Erreur de chargement
           </h2>
-          <p className="text-gray-600 mb-4">
+          <p className="text-[var(--theme-muted-color,#6b7280)] mb-4">
             Impossible de charger vos informations. Veuillez réessayer.
           </p>
           {error.digest && (
-            <p className="text-xs text-gray-400 font-mono">
+            <p className="text-xs text-[var(--theme-muted-color,#6b7280)] font-mono">
               Ref: {error.digest}
             </p>
           )}

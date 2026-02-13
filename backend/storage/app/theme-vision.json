@@ -9,97 +9,277 @@
       "type": "heading",
       "label": "Titre",
       "icon": "type",
-      "category": "content"
+      "category": "content",
+      "defaultProps": {
+        "text": "Titre",
+        "tag": "h2",
+        "align": "left"
+      }
     },
     {
       "type": "text",
       "label": "Texte",
       "icon": "align-left",
-      "category": "content"
+      "category": "content",
+      "defaultProps": {
+        "html": "<p>Texte exemple</p>"
+      }
     },
     {
       "type": "image",
       "label": "Image",
       "icon": "image",
-      "category": "content"
+      "category": "content",
+      "defaultProps": {
+        "url": "",
+        "alt": "",
+        "aspectRatio": "auto",
+        "objectFit": "cover"
+      }
     },
     {
       "type": "video",
       "label": "Vidéo",
       "icon": "video",
-      "category": "content"
+      "category": "content",
+      "defaultProps": {
+        "type": "youtube",
+        "url": "",
+        "aspectRatio": "16/9",
+        "autoplay": false,
+        "loop": false,
+        "muted": false
+      }
     },
     {
       "type": "button",
       "label": "Bouton",
       "icon": "square-arrow-out-up-right",
-      "category": "content"
+      "category": "content",
+      "defaultProps": {
+        "label": "En savoir plus",
+        "url": "#"
+      }
     },
     {
       "type": "accordion",
       "label": "Accordéon",
       "icon": "list",
-      "category": "content"
+      "category": "content",
+      "defaultProps": {
+        "items": [
+          {
+            "title": "Question 1",
+            "content": "Réponse 1"
+          },
+          {
+            "title": "Question 2",
+            "content": "Réponse 2"
+          }
+        ]
+      }
     },
     {
       "type": "tabs",
       "label": "Onglets",
       "icon": "columns-3",
-      "category": "content"
+      "category": "content",
+      "defaultProps": {
+        "items": [
+          {
+            "label": "Onglet 1",
+            "content": "Contenu 1"
+          },
+          {
+            "label": "Onglet 2",
+            "content": "Contenu 2"
+          }
+        ]
+      }
     },
     {
       "type": "spacer",
       "label": "Espacement",
       "icon": "move-vertical",
-      "category": "layout"
+      "category": "layout",
+      "defaultProps": {
+        "size": 32
+      }
     },
     {
       "type": "container",
       "label": "Container",
       "icon": "box",
-      "category": "layout"
+      "category": "layout",
+      "defaultProps": {
+        "paddingTop": 40,
+        "paddingBottom": 40,
+        "columns": [
+          {
+            "id": "col_default_1",
+            "width": 100,
+            "widgets": []
+          }
+        ]
+      }
     },
     {
       "type": "hero_banner",
       "label": "Hero Banner",
       "icon": "megaphone",
-      "category": "ecommerce"
+      "category": "ecommerce",
+      "defaultProps": {
+        "badge": "Nouvelle Collection",
+        "title": "Découvrez notre sélection",
+        "subtitle": "de produits d'exception",
+        "description": "Explorez notre catalogue de produits soigneusement sélectionnés.",
+        "primaryCta": {
+          "text": "Voir les produits",
+          "href": "/products"
+        },
+        "secondaryCta": {
+          "text": "En savoir plus",
+          "href": "/content/a-propos"
+        },
+        "image": ""
+      }
     },
     {
       "type": "features_bar",
       "label": "Barre Features",
       "icon": "sparkles",
-      "category": "ecommerce"
+      "category": "ecommerce",
+      "defaultProps": {
+        "features": [
+          {
+            "icon": "Truck",
+            "title": "Livraison gratuite",
+            "description": "À partir de 50€ d'achat"
+          },
+          {
+            "icon": "ShieldCheck",
+            "title": "Paiement sécurisé",
+            "description": "Transactions 100% sécurisées"
+          },
+          {
+            "icon": "Undo2",
+            "title": "Retours faciles",
+            "description": "30 jours pour changer d'avis"
+          },
+          {
+            "icon": "MessageCircle",
+            "title": "Support client",
+            "description": "Disponible 7j/7"
+          }
+        ]
+      }
     },
     {
       "type": "categories_grid",
       "label": "Grille Catégories",
       "icon": "grid-3x3",
-      "category": "ecommerce"
+      "category": "ecommerce",
+      "defaultProps": {
+        "title": "Découvrez nos catégories",
+        "categorySlugs": [],
+        "subtitle": "",
+        "maxCategories": null,
+        "displayMode": "grid",
+        "slidesPerView": {
+          "desktop": 4,
+          "mobile": 2
+        },
+        "slidesToScroll": {
+          "desktop": 1,
+          "mobile": 1
+        },
+        "columns": {
+          "desktop": 4,
+          "mobile": 2
+        },
+        "showArrows": true,
+        "showDots": true,
+        "autoplay": false,
+        "gap": 16
+      }
     },
     {
       "type": "promo_banner",
       "label": "Bannière Promo",
       "icon": "badge-percent",
-      "category": "ecommerce"
+      "category": "ecommerce",
+      "defaultProps": {
+        "badge": "Offre Limitée",
+        "title": "Profitez de -20% sur toute la boutique",
+        "description": "Utilisez le code BIENVENUE20 lors de votre commande.",
+        "ctaText": "Découvrir les offres",
+        "ctaHref": "/products",
+        "variant": "gradient"
+      }
     },
     {
       "type": "testimonials",
       "label": "Témoignages",
       "icon": "message-circle",
-      "category": "ecommerce"
+      "category": "ecommerce",
+      "defaultProps": {
+        "title": "Ce que disent nos clients",
+        "testimonials": [
+          {
+            "name": "Marie Dupont",
+            "role": "Cliente fidèle",
+            "content": "Excellente qualité et livraison rapide.",
+            "rating": 5
+          },
+          {
+            "name": "Thomas Martin",
+            "role": "Acheteur vérifié",
+            "content": "Service client au top.",
+            "rating": 5
+          }
+        ]
+      }
     },
     {
       "type": "newsletter",
       "label": "Newsletter",
       "icon": "mail",
-      "category": "ecommerce"
+      "category": "ecommerce",
+      "defaultProps": {
+        "title": "Restez informé",
+        "description": "Inscrivez-vous à notre newsletter pour recevoir nos offres exclusives.",
+        "placeholder": "Votre adresse email",
+        "buttonText": "S'inscrire"
+      }
     },
     {
       "type": "product_slider",
       "label": "Produits (Slider/Grille)",
       "icon": "shopping-cart",
-      "category": "ecommerce"
+      "category": "ecommerce",
+      "defaultProps": {
+        "title": "Produits mis en avant",
+        "mode": "category",
+        "categorySlug": "",
+        "productIds": [],
+        "displayMode": "slider",
+        "slidesPerView": {
+          "desktop": 4,
+          "mobile": 2
+        },
+        "slidesToScroll": {
+          "desktop": 1,
+          "mobile": 1
+        },
+        "columns": {
+          "desktop": 4,
+          "mobile": 2
+        },
+        "showArrows": true,
+        "showDots": true,
+        "autoplay": false,
+        "gap": 16
+      }
     }
   ],
   "settings_schema": {
@@ -141,6 +321,12 @@
         "type": "color",
         "default": "#ffffff",
         "description": "Barre de navigation"
+      },
+      "footer_bg": {
+        "label": "Fond du footer",
+        "type": "color",
+        "default": "#ffffff",
+        "description": "Zone du pied de page"
       }
     },
     "texts": {
@@ -250,13 +436,25 @@
         "label": "Police des titres",
         "type": "select",
         "default": "Inter",
-        "options": ["Inter", "Poppins", "Montserrat", "Roboto", "Open Sans"]
+        "options": [
+          "Inter",
+          "Poppins",
+          "Montserrat",
+          "Roboto",
+          "Open Sans"
+        ]
       },
       "body_font": {
         "label": "Police du corps",
         "type": "select",
         "default": "Inter",
-        "options": ["Inter", "Poppins", "Montserrat", "Roboto", "Open Sans"]
+        "options": [
+          "Inter",
+          "Poppins",
+          "Montserrat",
+          "Roboto",
+          "Open Sans"
+        ]
       },
       "heading_weight": {
         "label": "Graisse des titres",
@@ -349,6 +547,27 @@
           "shadowed": "Ombre",
           "elevated": "Élevé"
         }
+      },
+      "container_max_width": {
+        "label": "Largeur max du contenu",
+        "type": "select",
+        "default": "72rem",
+        "options": {
+          "64rem": "Étroit",
+          "72rem": "Standard",
+          "80rem": "Large",
+          "90rem": "Très large"
+        }
+      },
+      "border_width": {
+        "label": "Épaisseur des bordures",
+        "type": "select",
+        "default": "1px",
+        "options": {
+          "1px": "Fine",
+          "2px": "Moyenne",
+          "3px": "Marquée"
+        }
       }
     },
     "header": {
@@ -372,6 +591,26 @@
           "no": "Non"
         },
         "description": "Le header reste visible lors du défilement"
+      },
+      "header_height": {
+        "label": "Hauteur du header",
+        "type": "select",
+        "default": "64px",
+        "options": {
+          "56px": "Compact",
+          "64px": "Standard",
+          "72px": "Confort"
+        }
+      },
+      "icon_button_style": {
+        "label": "Style des boutons d'icône",
+        "type": "select",
+        "default": "outline",
+        "options": {
+          "ghost": "Fantôme",
+          "outline": "Contour",
+          "solid": "Plein"
+        }
       }
     },
     "buttons": {
@@ -408,6 +647,15 @@
           "page": "Page panier"
         },
         "description": "Mode d'affichage du panier lors du clic sur l'icône"
+      },
+      "qty_control_style": {
+        "label": "Style du sélecteur de quantité",
+        "type": "select",
+        "default": "boxed",
+        "options": {
+          "minimal": "Minimal",
+          "boxed": "Encadré"
+        }
       }
     },
     "products": {
@@ -489,15 +737,219 @@
         "min": 1,
         "max": 2,
         "description": "Nombre de produits par ligne sur mobile"
+      },
+      "product_badge_shape": {
+        "label": "Forme des badges",
+        "type": "select",
+        "default": "rounded",
+        "options": {
+          "square": "Carré",
+          "rounded": "Arrondi",
+          "pill": "Pilule"
+        }
+      },
+      "product_title_lines": {
+        "label": "Lignes du titre produit",
+        "type": "select",
+        "default": "2",
+        "options": {
+          "1": "Une ligne",
+          "2": "Deux lignes"
+        }
+      },
+      "product_price_size": {
+        "label": "Taille du prix",
+        "type": "select",
+        "default": "md",
+        "options": {
+          "sm": "Petit",
+          "md": "Moyen",
+          "lg": "Grand"
+        }
+      },
+      "product_quick_add_style": {
+        "label": "Style de l'ajout rapide",
+        "type": "select",
+        "default": "button",
+        "options": {
+          "icon": "Icône",
+          "button": "Bouton",
+          "none": "Masqué"
+        }
+      }
+    },
+    "forms": {
+      "input_style": {
+        "label": "Style des champs",
+        "type": "select",
+        "default": "outlined",
+        "options": {
+          "outlined": "Contour",
+          "filled": "Rempli",
+          "minimal": "Minimal"
+        }
+      },
+      "input_border_width": {
+        "label": "Épaisseur de bordure des champs",
+        "type": "select",
+        "default": "1px",
+        "options": {
+          "1px": "Fine",
+          "2px": "Moyenne",
+          "3px": "Marquée"
+        }
+      },
+      "input_height": {
+        "label": "Hauteur des champs",
+        "type": "select",
+        "default": "compact",
+        "options": {
+          "compact": "Compact",
+          "default": "Standard",
+          "comfortable": "Confort"
+        }
+      },
+      "focus_ring_color": {
+        "label": "Couleur du focus",
+        "type": "color",
+        "default": "#111827"
+      },
+      "focus_ring_width": {
+        "label": "Épaisseur du focus",
+        "type": "select",
+        "default": "1px",
+        "options": {
+          "1px": "Fine",
+          "2px": "Moyenne",
+          "3px": "Marquée"
+        }
+      }
+    },
+    "surfaces": {
+      "shadow_style": {
+        "label": "Style des ombres",
+        "type": "select",
+        "default": "soft",
+        "options": {
+          "none": "Aucune",
+          "soft": "Douce",
+          "hard": "Marquée"
+        }
+      },
+      "card_padding": {
+        "label": "Padding des cartes",
+        "type": "select",
+        "default": "normal",
+        "options": {
+          "compact": "Compact",
+          "normal": "Standard",
+          "large": "Aéré"
+        }
+      },
+      "panel_style": {
+        "label": "Style des panneaux",
+        "type": "select",
+        "default": "bordered",
+        "options": {
+          "flat": "Plat",
+          "bordered": "Bordé",
+          "elevated": "Élevé"
+        }
+      }
+    },
+    "footer": {
+      "footer_density": {
+        "label": "Densité du footer",
+        "type": "select",
+        "default": "normal",
+        "options": {
+          "compact": "Compact",
+          "normal": "Standard",
+          "comfortable": "Confort"
+        }
+      }
+    },
+    "checkout": {
+      "stepper_style": {
+        "label": "Style de l'indicateur d'étapes",
+        "type": "select",
+        "default": "line",
+        "options": {
+          "line": "Ligne",
+          "pills": "Pastilles",
+          "minimal": "Minimal"
+        }
+      },
+      "summary_style": {
+        "label": "Style du récapitulatif",
+        "type": "select",
+        "default": "card",
+        "options": {
+          "flat": "Plat",
+          "card": "Carte"
+        }
+      }
+    },
+    "account": {
+      "account_card_style": {
+        "label": "Style des cartes compte",
+        "type": "select",
+        "default": "card",
+        "options": {
+          "flat": "Plat",
+          "card": "Carte",
+          "outlined": "Contour"
+        }
       }
     }
   },
   "settings": {
     "primary": "#2563eb",
-    "secondary": "#7c3aed"
+    "secondary": "#7c3aed",
+    "container_max_width": "72rem",
+    "border_width": "1px",
+    "header_height": "64px",
+    "icon_button_style": "outline",
+    "qty_control_style": "boxed",
+    "product_badge_shape": "rounded",
+    "product_title_lines": "2",
+    "product_price_size": "md",
+    "product_quick_add_style": "button",
+    "input_style": "outlined",
+    "input_border_width": "1px",
+    "input_height": "default",
+    "focus_ring_color": "#111827",
+    "focus_ring_width": "1px",
+    "shadow_style": "soft",
+    "card_padding": "normal",
+    "panel_style": "bordered",
+    "footer_density": "normal",
+    "stepper_style": "line",
+    "summary_style": "card",
+    "account_card_style": "card"
   },
   "metadata": {
-    "technologies": ["Next.js 16", "Tailwind CSS", "TypeScript"],
-    "features": ["Responsive", "SEO optimisé", "Performance élevée", "17 widgets"]
+    "technologies": [
+      "Next.js 16",
+      "Tailwind CSS",
+      "TypeScript"
+    ],
+    "features": [
+      "Responsive",
+      "SEO optimisé",
+      "Performance élevée",
+      "17 widgets"
+    ],
+    "component_config": {
+      "product_card": {
+        "style": "vision",
+        "card_style": "bordered",
+        "hover_effect": "lift",
+        "image_ratio": "square",
+        "show_badges": true,
+        "show_quick_add": true,
+        "border_radius": "12px"
+      }
+    }
   }
 }

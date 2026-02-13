@@ -73,7 +73,7 @@ export default async function RootLayout({
       <head>
         <ThemeProvider />
       </head>
-      <body className="bg-[#f6f6f7] text-[#111827] antialiased" suppressHydrationWarning>
+      <body className="antialiased" suppressHydrationWarning>
         <div className="min-h-screen flex flex-col relative">
           <ModuleSystemInitializer />
           <AuthProvider initialUser={initialUser}>

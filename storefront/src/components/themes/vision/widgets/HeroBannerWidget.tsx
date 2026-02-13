@@ -3,9 +3,12 @@ import { Button } from "@/components/common/Button";
 import { SmartContainer } from "@/components/common/SmartContainer";
 import { getPaddingClasses, getMarginClasses } from "@/lib/widget-helpers";
 import { validateSpacingConfig } from "@/lib/css-variable-sanitizer";
+import { createElement } from "react";
+import { sanitizeHTML } from "@/lib/html-sanitizer";
 
 type HeroBannerProps = {
   title?: string;
+  titleTag?: string;
   subtitle?: string;
   description?: string;
   primaryCta?: {
@@ -22,18 +25,47 @@ type HeroBannerProps = {
   margin?: Record<string, unknown>;
 };
 
+type HeadingTag = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+
+function normalizeHeadingTag(tag: string | undefined, fallback: HeadingTag): HeadingTag {
+  const normalizedTag = tag?.toLowerCase();
+  const validTags: HeadingTag[] = ["h1", "h2", "h3", "h4", "h5", "h6"];
+  return normalizedTag && validTags.includes(normalizedTag as HeadingTag)
+    ? (normalizedTag as HeadingTag)
+    : fallback;
+}
+
+const VISION_UI = {
+  rootClass: "",
+  rootBackground:
+    "linear-gradient(to bottom, var(--theme-page-bg, #ffffff) 0%, var(--theme-card-bg, #f6f6f7) 100%)",
+  layoutClass: "grid gap-8 md:grid-cols-2 md:items-center",
+  contentClass: "space-y-6",
+  badgeClass: "rounded-full",
+  titleClass: "text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl",
+  descriptionClass: "max-w-lg text-base md:text-lg",
+  ctaClass: "flex flex-wrap gap-3",
+  imageClass: "rounded-2xl shadow-2xl",
+  placeholderClass: "rounded-2xl shadow-2xl",
+  subtitleClass: "font-normal",
+};
+
 export function HeroBanner({
   title = "Bienvenue sur notre boutique",
+  titleTag = "h1",
   subtitle,
-  description = "Découvrez nos produits exceptionnels",
-  primaryCta = { text: "Découvrir", href: "/products" },
+  description = "Decouvrez nos produits exceptionnels",
+  primaryCta = { text: "Decouvrir", href: "/products" },
   secondaryCta,
   image,
   badge,
   padding,
   margin,
 }: HeroBannerProps) {
-  // Validate and get spacing classes
+  const ui = VISION_UI;
+  const normalizedTitleTag = normalizeHeadingTag(titleTag, "h1");
+  const safeDescription = sanitizeHTML(description || "");
+
   const paddingConfig = validateSpacingConfig(padding);
   const marginConfig = validateSpacingConfig(margin);
   const paddingClasses = getPaddingClasses(paddingConfig);
@@ -41,18 +73,15 @@ export function HeroBanner({
 
   return (
     <section
-      className={`relative overflow-hidden py-16 md:py-24 ${paddingClasses} ${marginClasses}`.trim()}
-      style={{
-        background:
-          "linear-gradient(to bottom, var(--theme-page-bg, #ffffff) 0%, var(--theme-card-bg, #f6f6f7) 100%)",
-      }}
+      className={`relative overflow-hidden py-16 md:py-24 ${ui.rootClass} ${paddingClasses} ${marginClasses}`.trim()}
+      style={{ background: ui.rootBackground }}
     >
       <SmartContainer>
-        <div className="grid gap-8 md:grid-cols-2 md:items-center">
-          {/* Left Content */}
-          <div className="space-y-6">
+        <div className={ui.layoutClass}>
+          <div className={ui.contentClass}>
             {badge && (
-              <div className="inline-flex items-center gap-2 rounded-full border px-4 py-1.5 text-xs font-medium shadow-sm"
+              <div
+                className={`inline-flex items-center gap-2 border px-4 py-1.5 text-xs font-medium shadow-sm ${ui.badgeClass}`.trim()}
                 style={{
                   borderColor: "var(--theme-border-default, #e5e7eb)",
                   backgroundColor: "var(--theme-card-bg, #ffffff)",
@@ -60,84 +89,73 @@ export function HeroBanner({
                 }}
               >
                 {badge}
-                <span className="h-2 w-2 rounded-full"
+                <span
+                  className="h-2 w-2 rounded-full"
                   style={{ backgroundColor: "var(--theme-success-color, #10b981)" }}
                 />
               </div>
             )}
 
             <div className="space-y-4">
-              <h1
-                className="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl"
-                style={{ color: "var(--theme-heading-color, #111827)" }}
-              >
-                {title}
-                {subtitle && (
-                  <span
-                    className="mt-2 block text-3xl font-normal md:text-4xl"
-                    style={{ color: "var(--theme-muted-color, #6b7280)" }}
-                  >
-                    {subtitle}
-                  </span>
-                )}
-              </h1>
+              {createElement(
+                normalizedTitleTag,
+                {
+                  className: ui.titleClass,
+                  style: { color: "var(--theme-heading-color, #111827)" },
+                },
+                <>
+                  {title}
+                  {subtitle && (
+                    <span
+                      className={`mt-2 block text-3xl md:text-4xl ${ui.subtitleClass}`.trim()}
+                      style={{ color: "var(--theme-muted-color, #6b7280)" }}
+                    >
+                      {subtitle}
+                    </span>
+                  )}
+                </>
+              )}
 
-              <p
-                className="max-w-lg text-base md:text-lg"
+              <div
+                className={ui.descriptionClass}
                 style={{ color: "var(--theme-body-color, #374151)" }}
-              >
-                {description}
-              </p>
+                dangerouslySetInnerHTML={{ __html: safeDescription }}
+              />
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className={ui.ctaClass}>
               <Button href={primaryCta.href} variant="primary" size="md">
                 {primaryCta.text}
               </Button>
               {secondaryCta && (
-                <Button
-                  href={secondaryCta.href}
-                  variant="secondary"
-                  size="md"
-                >
+                <Button href={secondaryCta.href} variant="secondary" size="md">
                   {secondaryCta.text}
                 </Button>
               )}
             </div>
           </div>
 
-          {/* Right Image */}
           <div className="relative">
             {image ? (
-              <div className="relative aspect-square overflow-hidden rounded-2xl shadow-2xl">
+              <div className={`relative aspect-square overflow-hidden ${ui.imageClass}`.trim()}>
                 <OptimizedImage
                   src={image}
-                  alt={title || 'Hero banner'}
+                  alt={title || "Hero banner"}
                   fill
                   priority
                   sizes="(max-width: 768px) 100vw, 50vw"
                   className="object-cover"
-                  fallback={<div className="h-full w-full bg-gray-100" />}
+                  fallback={<div className="h-full w-full bg-[var(--theme-input-bg,#ffffff)]" />}
                 />
               </div>
             ) : (
               <div
-                className="relative aspect-square rounded-2xl p-8 shadow-2xl"
-                style={{ backgroundColor: "var(--theme-card-bg, #ffffff)" }}
-              >
-                {/* Placeholder illustration */}
-                <div className="grid h-full grid-cols-2 gap-4">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div
-                      key={i}
-                      className="rounded-xl bg-gray-100"
-                      // style={{
-                      //   backgroundColor: "var(--theme-page-bg, #f6f6f7)",
-                      // }}
-                    />
-                  ))}
-                </div>
-              </div>
+                className={`relative aspect-square overflow-hidden ${ui.placeholderClass}`.trim()}
+                style={{
+                  backgroundColor: "var(--theme-card-bg, #ffffff)",
+                  border: "1px dashed var(--theme-border-default, #e5e7eb)",
+                }}
+              />
             )}
           </div>
         </div>

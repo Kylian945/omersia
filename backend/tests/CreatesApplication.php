@@ -36,7 +36,7 @@ trait CreatesApplication
     private function ensureSafeTestingDatabase(Application $app): void
     {
         $defaultConnection = (string) $app['config']->get('database.default');
-        $database = (string) $app['config']->get("database.connections.{$defaultConnection}.database");
+        $database = (string) $app['config']->get('database.connections.'.$defaultConnection.'.database');
 
         $isSafeTestingDatabase = $defaultConnection === 'sqlite' && $database === ':memory:';
 
@@ -50,7 +50,7 @@ trait CreatesApplication
                     "Check that phpunit.xml or .env.testing sets:\n".
                     "  DB_CONNECTION=sqlite\n".
                     "  DB_DATABASE=:memory:\n\n".
-                    "Refusing to run tests.",
+                    'Refusing to run tests.',
                     $defaultConnection,
                     $database === '' ? '[empty]' : $database
                 )

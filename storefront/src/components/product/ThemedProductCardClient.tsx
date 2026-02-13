@@ -1,8 +1,8 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { ComponentType, memo } from "react";
+import { ComponentType, memo, useEffect, useState } from "react";
 import type { ListingProduct } from "./ListingProducts";
+import { getThemeComponent } from "@/lib/theme-components";
 
 type Variant = {
   id: number;
@@ -23,35 +23,91 @@ type Props = {
 
 // Loading placeholder component
 const LoadingPlaceholder = () => (
-  <div className="aspect-4/5 bg-neutral-100 animate-pulse rounded-2xl" />
+  <div className="aspect-4/5 bg-[var(--theme-page-bg,#f6f6f7)] animate-pulse rounded-2xl" />
 );
 
 type ProductCardComponent = ComponentType<Props>;
 
-const VisionProductCard = dynamic<Props>(
-  async () =>
-    import("@/components/themes/vision/product/ProductCard").then(
-      (mod) => mod.ProductCard as ProductCardComponent
-    ),
-  {
-    loading: LoadingPlaceholder,
-    ssr: false,
-  }
-);
+const componentCache = new Map<string, ProductCardComponent>();
 
-const productCardByTheme: Record<string, ProductCardComponent> = {
-  vision: VisionProductCard,
-};
+function normalizeThemePath(themePath?: string): string {
+  const normalizedTheme = themePath?.trim();
+
+  if (
+    !normalizedTheme ||
+    normalizedTheme === "default" ||
+    normalizedTheme === "null" ||
+    normalizedTheme === "undefined"
+  ) {
+    return "vision";
+  }
+
+  return normalizedTheme;
+}
+
+async function loadProductCard(themePath?: string): Promise<ProductCardComponent> {
+  const normalizedTheme = normalizeThemePath(themePath);
+
+  if (componentCache.has(normalizedTheme)) {
+    return componentCache.get(normalizedTheme)!;
+  }
+
+  const component = (await getThemeComponent(
+    "product/ProductCard",
+    normalizedTheme
+  )) as ProductCardComponent;
+
+  componentCache.set(normalizedTheme, component);
+
+  return component;
+}
 
 /**
  * Client-side Themed ProductCard - Loads the appropriate ProductCard
  * based on the theme path provided as a prop.
- * Uses component caching to prevent recreation on each render.
+ * Uses lazy loading + cache to avoid re-importing components.
  */
 export const ThemedProductCardClient = memo(function ThemedProductCardClient({
   themePath = "vision",
   ...props
 }: Props) {
-  const ProductCard = productCardByTheme[themePath] ?? VisionProductCard;
+  const normalizedTheme = normalizeThemePath(themePath);
+  const [ProductCard, setProductCard] = useState<ProductCardComponent | null>(
+    () => componentCache.get(normalizedTheme) ?? null
+  );
+
+  useEffect(() => {
+    let isMounted = true;
+
+    loadProductCard(normalizedTheme)
+      .then((component) => {
+        if (isMounted) {
+          setProductCard(() => component);
+        }
+      })
+      .catch(async () => {
+        if (!isMounted) return;
+
+        try {
+          const fallback = await loadProductCard("vision");
+          if (isMounted) {
+            setProductCard(() => fallback);
+          }
+        } catch {
+          if (isMounted) {
+            setProductCard(null);
+          }
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [normalizedTheme]);
+
+  if (!ProductCard) {
+    return <LoadingPlaceholder />;
+  }
+
   return <ProductCard {...props} />;
 });

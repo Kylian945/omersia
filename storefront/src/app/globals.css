@@ -1,39 +1,39 @@
 @import "tailwindcss";
 @import "../styles/components/product-slider.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* Tailwind v4 ignores paths listed in .gitignore by default.
+   Theme/module components are generated in ignored folders, so we force scan them. */
+@source "../components/themes";
+@source "../components/modules";
+@source "../components/themes/**/*.{js,jsx,ts,tsx,mdx}";
+@source "../components/modules/**/*.{js,jsx,ts,tsx,mdx}";
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--theme-page-bg, #f6f6f7);
+  --color-foreground: var(--theme-body-color, #374151);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @theme {
-  --text-xxxs: 9px;
-  --text-xxs: 10px;
-  --text-xs2: 11px;
-  --text-body-13: 13px;
-  --text-body-14: 14px;
-  --text-body-15: 15px;
-  --text-body-16: 16px;
+  --text-xxxs: 0.5625rem;
+  --text-xxs: 0.625rem;
+  --text-xs2: 0.6875rem;
+  --text-body-13: 0.8125rem;
+  --text-body-14: 0.875rem;
+  --text-body-15: 0.9375rem;
+  --text-body-16: 1rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  font-size: var(--theme-body-size, 16px);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--theme-page-bg, #f6f6f7);
+  color: var(--theme-body-color, #374151);
+  font-family: var(--theme-body-font, "Inter"), system-ui, -apple-system, sans-serif;
+  font-size: 1rem;
 }
 
 @keyframes fade-in {

@@ -119,8 +119,8 @@ export const getThemeSettings = cache(async (): Promise<ThemeResponse> => {
       },
       settings_schema: null,
       css_variables: '',
-      component_path: 'default',
-      theme_slug: 'default',
+      component_path: 'vision',
+      theme_slug: 'vision',
     };
   }
 
@@ -176,10 +176,14 @@ export const getThemeSettings = cache(async (): Promise<ThemeResponse> => {
       },
       settings_schema: null,
       css_variables: '',
-      component_path: 'default',
-      theme_slug: 'default',
+      component_path: 'vision',
+      theme_slug: 'vision',
     };
   }
 
-  return data;
+  return {
+    ...data,
+    component_path: data.component_path?.trim() || 'vision',
+    theme_slug: data.theme_slug?.trim() || 'vision',
+  };
 });

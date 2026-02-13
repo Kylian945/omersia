@@ -58,6 +58,12 @@ class ThemeCustomizationService
                     'default' => '#ffffff',
                     'description' => 'Barre de navigation',
                 ],
+                'footer_bg' => [
+                    'label' => 'Fond du footer',
+                    'type' => 'color',
+                    'default' => '#ffffff',
+                    'description' => 'Zone du pied de page',
+                ],
             ],
 
             // Textes
@@ -309,13 +315,46 @@ class ThemeCustomizationService
      */
     public function getThemeSettingsSchema(Theme $theme): array
     {
-        // Use theme-specific schema if available
-        if ($theme->hasSettingsSchema()) {
-            return $theme->getSettingsSchema();
+        $defaultSchema = $this->getDefaultSettings();
+        $themeSchema = $theme->hasSettingsSchema() && is_array($theme->getSettingsSchema())
+            ? $theme->getSettingsSchema()
+            : [];
+
+        $bundledSchema = $this->loadBundledThemeSchema((string) $theme->slug);
+        if ($bundledSchema !== null) {
+            // Le fichier JSON livré avec le thème est la source de vérité.
+            $themeSchema = $this->mergeSettingsSchema($themeSchema, $bundledSchema);
         }
 
-        // Fallback to default settings
-        return $this->getDefaultSettings();
+        if ($themeSchema === []) {
+            return $defaultSchema;
+        }
+
+        // Merge defaults with theme schema to keep backward compatibility
+        // when new settings are introduced after theme creation.
+        return $this->mergeSettingsSchema($defaultSchema, $themeSchema);
+    }
+
+    private function loadBundledThemeSchema(string $slug): ?array
+    {
+        $normalizedSlug = trim($slug);
+        if ($normalizedSlug === '' || $normalizedSlug !== basename($normalizedSlug)) {
+            return null;
+        }
+
+        $configPath = storage_path("app/theme-{$normalizedSlug}.json");
+        if (! is_file($configPath)) {
+            return null;
+        }
+
+        $decoded = json_decode((string) file_get_contents($configPath), true);
+        if (! is_array($decoded)) {
+            return null;
+        }
+
+        $schema = $decoded['settings_schema'] ?? null;
+
+        return is_array($schema) ? $schema : null;
     }
 
     /**
@@ -347,13 +386,31 @@ class ThemeCustomizationService
      */
     public function updateSettings(Theme $theme, array $settings): void
     {
+        $theme->loadMissing('settings');
+        $existingSettings = $theme->settings->keyBy('key');
+        $schemaIndex = $this->buildSettingsSchemaIndex($this->getThemeSettingsSchema($theme));
+
         foreach ($settings as $key => $value) {
-            $setting = $theme->settings()->where('key', $key)->first();
+            $setting = $existingSettings->get($key);
 
             if ($setting) {
                 $setting->setEncodedValue($value);
                 $setting->save();
+
+                continue;
             }
+
+            $schemaMeta = $schemaIndex[$key] ?? null;
+            $newSetting = new ThemeSetting([
+                'theme_id' => $theme->id,
+                'key' => $key,
+                'type' => $schemaMeta['type'] ?? $this->inferSettingType($value),
+                'group' => $schemaMeta['group'] ?? 'general',
+            ]);
+            $newSetting->setEncodedValue($value);
+            $newSetting->save();
+
+            $existingSettings->put($key, $newSetting);
         }
 
         // Clear cache
@@ -375,16 +432,20 @@ class ThemeCustomizationService
                 return $this->getDefaultSettingsValues();
             }
 
-            return $theme->getSettingsArray();
+            $schema = $this->getThemeSettingsSchema($theme);
+            $defaultValues = $this->getDefaultSettingsValues($schema);
+            $currentValues = $theme->getSettingsArray();
+
+            return array_replace_recursive($defaultValues, $currentValues);
         });
     }
 
     /**
      * Get default settings values only (for fallback)
      */
-    private function getDefaultSettingsValues(): array
+    private function getDefaultSettingsValues(?array $schema = null): array
     {
-        $defaults = $this->getDefaultSettings();
+        $defaults = $schema ?? $this->getDefaultSettings();
         $values = [];
 
         foreach ($defaults as $group => $settings) {
@@ -394,6 +455,73 @@ class ThemeCustomizationService
         }
 
         return $values;
+    }
+
+    /**
+     * Merge default schema with theme-specific schema.
+     */
+    private function mergeSettingsSchema(array $defaultSchema, array $themeSchema): array
+    {
+        $merged = $defaultSchema;
+
+        foreach ($themeSchema as $group => $settings) {
+            if (! is_array($settings)) {
+                continue;
+            }
+
+            if (! isset($merged[$group]) || ! is_array($merged[$group])) {
+                $merged[$group] = $settings;
+
+                continue;
+            }
+
+            foreach ($settings as $key => $config) {
+                $merged[$group][$key] = $config;
+            }
+        }
+
+        return $merged;
+    }
+
+    /**
+     * Flatten schema into an index keyed by setting key.
+     *
+     * @return array<string, array{group: string, type: string}>
+     */
+    private function buildSettingsSchemaIndex(array $schema): array
+    {
+        $index = [];
+
+        foreach ($schema as $group => $settings) {
+            if (! is_array($settings)) {
+                continue;
+            }
+
+            foreach ($settings as $key => $config) {
+                $index[$key] = [
+                    'group' => $group,
+                    'type' => is_array($config) && isset($config['type']) ? (string) $config['type'] : 'text',
+                ];
+            }
+        }
+
+        return $index;
+    }
+
+    /**
+     * Best-effort type inference when a setting is not found in schema.
+     */
+    private function inferSettingType(mixed $value): string
+    {
+        if (is_int($value) || is_float($value)) {
+            return 'number';
+        }
+
+        if (is_string($value) && preg_match('/^#([A-Fa-f0-9]{3}){1,2}$/', $value)) {
+            return 'color';
+        }
+
+        return 'text';
     }
 
     /**
@@ -410,6 +538,23 @@ class ThemeCustomizationService
     public function generateCssVariables(array $settings): string
     {
         $css = ":root {\n";
+        $layoutBorderWidth = (string) ($settings['layout']['border_width'] ?? '1px');
+        $formsInputHeight = (string) ($settings['forms']['input_height'] ?? 'default');
+        $formsInputStyle = (string) ($settings['forms']['input_style'] ?? 'outlined');
+        $shadowStyle = (string) ($settings['surfaces']['shadow_style'] ?? 'soft');
+        $panelStyle = (string) ($settings['surfaces']['panel_style'] ?? 'bordered');
+        $cardPadding = (string) ($settings['surfaces']['card_padding'] ?? 'normal');
+        $headerIconButtonStyle = (string) ($settings['header']['icon_button_style'] ?? 'outline');
+        $footerDensity = (string) ($settings['footer']['footer_density'] ?? 'normal');
+        $checkoutStepperStyle = (string) ($settings['checkout']['stepper_style'] ?? 'line');
+        $checkoutSummaryStyle = (string) ($settings['checkout']['summary_style'] ?? 'card');
+        $accountCardStyle = (string) ($settings['account']['account_card_style'] ?? 'card');
+        $qtyControlStyle = (string) ($settings['cart']['qty_control_style'] ?? 'boxed');
+        $productBadgeShape = (string) ($settings['products']['product_badge_shape'] ?? 'rounded');
+        $productTitleLines = (string) ($settings['products']['product_title_lines'] ?? '2');
+        $productPriceSize = (string) ($settings['products']['product_price_size'] ?? 'md');
+        $productQuickAddStyle = (string) ($settings['products']['product_quick_add_style'] ?? 'button');
+        $focusRingWidth = (string) ($settings['forms']['focus_ring_width'] ?? '1px');
 
         // Colors - Couleurs principales
         if (isset($settings['colors'])) {
@@ -510,6 +655,46 @@ class ThemeCustomizationService
             }
         }
 
+        // Forms
+        if (isset($settings['forms'])) {
+            foreach ($settings['forms'] as $key => $value) {
+                $cssKey = str_replace('_', '-', $key);
+                $css .= "  --theme-{$cssKey}: {$value};\n";
+            }
+        }
+
+        // Surfaces
+        if (isset($settings['surfaces'])) {
+            foreach ($settings['surfaces'] as $key => $value) {
+                $cssKey = str_replace('_', '-', $key);
+                $css .= "  --theme-{$cssKey}: {$value};\n";
+            }
+        }
+
+        // Footer
+        if (isset($settings['footer'])) {
+            foreach ($settings['footer'] as $key => $value) {
+                $cssKey = str_replace('_', '-', $key);
+                $css .= "  --theme-{$cssKey}: {$value};\n";
+            }
+        }
+
+        // Checkout
+        if (isset($settings['checkout'])) {
+            foreach ($settings['checkout'] as $key => $value) {
+                $cssKey = str_replace('_', '-', $key);
+                $css .= "  --theme-{$cssKey}: {$value};\n";
+            }
+        }
+
+        // Account
+        if (isset($settings['account'])) {
+            foreach ($settings['account'] as $key => $value) {
+                $cssKey = str_replace('_', '-', $key);
+                $css .= "  --theme-{$cssKey}: {$value};\n";
+            }
+        }
+
         // Products - Product card settings
         if (isset($settings['products'])) {
             // Product card style
@@ -556,6 +741,181 @@ class ThemeCustomizationService
                 $css .= "  --theme-products-per-row-mobile: {$settings['products']['products_per_row_mobile']};\n";
             }
         }
+
+        if (is_numeric($layoutBorderWidth)) {
+            $layoutBorderWidth .= 'px';
+        }
+        $css .= "  --theme-border-width: {$layoutBorderWidth};\n";
+
+        if (is_numeric($focusRingWidth)) {
+            $focusRingWidth .= 'px';
+        }
+        $css .= "  --theme-focus-ring-width: {$focusRingWidth};\n";
+
+        $inputHeightPx = match ($formsInputHeight) {
+            'compact' => '34px',
+            'comfortable' => '44px',
+            default => '38px',
+        };
+        $css .= "  --theme-input-height-px: {$inputHeightPx};\n";
+
+        $inputSurface = match ($formsInputStyle) {
+            'filled' => 'var(--theme-page-bg, #f6f6f7)',
+            'minimal' => 'transparent',
+            default => 'var(--theme-input-bg, #ffffff)',
+        };
+        $inputBorderColor = match ($formsInputStyle) {
+            'filled' => 'transparent',
+            default => 'var(--theme-border-default, #e5e7eb)',
+        };
+        $css .= "  --theme-input-surface: {$inputSurface};\n";
+        $css .= "  --theme-input-border-color: {$inputBorderColor};\n";
+
+        $shadowMap = match ($shadowStyle) {
+            'none' => [
+                'sm' => 'none',
+                'md' => 'none',
+                'lg' => 'none',
+                'xl' => 'none',
+            ],
+            'hard' => [
+                'sm' => '0 2px 0 rgba(17, 24, 39, 0.25)',
+                'md' => '0 6px 0 rgba(17, 24, 39, 0.28)',
+                'lg' => '0 10px 0 rgba(17, 24, 39, 0.30)',
+                'xl' => '0 14px 0 rgba(17, 24, 39, 0.34)',
+            ],
+            default => [
+                'sm' => '0 1px 2px rgba(17, 24, 39, 0.08)',
+                'md' => '0 8px 18px rgba(17, 24, 39, 0.10)',
+                'lg' => '0 14px 30px rgba(17, 24, 39, 0.14)',
+                'xl' => '0 20px 42px rgba(17, 24, 39, 0.18)',
+            ],
+        };
+        $css .= "  --theme-shadow-sm: {$shadowMap['sm']};\n";
+        $css .= "  --theme-shadow-md: {$shadowMap['md']};\n";
+        $css .= "  --theme-shadow-lg: {$shadowMap['lg']};\n";
+        $css .= "  --theme-shadow-xl: {$shadowMap['xl']};\n";
+
+        $panelPadding = match ($cardPadding) {
+            'compact' => '0.75rem',
+            'large' => '1.5rem',
+            default => '1rem',
+        };
+        $css .= "  --theme-panel-padding: {$panelPadding};\n";
+
+        $panelBackground = 'var(--theme-card-bg, #ffffff)';
+        $panelBorderColor = 'var(--theme-border-default, #e5e7eb)';
+        $panelShadow = 'var(--theme-shadow-sm)';
+        if ($panelStyle === 'flat') {
+            $panelBackground = 'var(--theme-page-bg, #f6f6f7)';
+            $panelBorderColor = 'transparent';
+            $panelShadow = 'none';
+        } elseif ($panelStyle === 'elevated') {
+            $panelBorderColor = 'transparent';
+            $panelShadow = 'var(--theme-shadow-lg)';
+        }
+        $css .= "  --theme-panel-background: {$panelBackground};\n";
+        $css .= "  --theme-panel-border-color: {$panelBorderColor};\n";
+        $css .= "  --theme-panel-shadow: {$panelShadow};\n";
+
+        $headerControlBg = 'var(--theme-card-bg, #ffffff)';
+        $headerControlBorder = 'var(--theme-border-default, #e5e7eb)';
+        $headerControlText = 'var(--theme-heading-color, #111827)';
+        if ($headerIconButtonStyle === 'ghost') {
+            $headerControlBg = 'transparent';
+            $headerControlBorder = 'transparent';
+            $headerControlText = 'var(--theme-body-color, #374151)';
+        } elseif ($headerIconButtonStyle === 'solid') {
+            $headerControlBg = 'var(--theme-primary, #111827)';
+            $headerControlBorder = 'var(--theme-primary, #111827)';
+            $headerControlText = 'var(--theme-button-primary-text, #ffffff)';
+        }
+        $css .= "  --theme-header-control-bg: {$headerControlBg};\n";
+        $css .= "  --theme-header-control-border: {$headerControlBorder};\n";
+        $css .= "  --theme-header-control-text: {$headerControlText};\n";
+
+        $footerPadding = match ($footerDensity) {
+            'compact' => '0.875rem',
+            'comfortable' => '2.25rem',
+            default => '1.5rem',
+        };
+        $css .= "  --theme-footer-padding-y: {$footerPadding};\n";
+
+        $stepperRadius = match ($checkoutStepperStyle) {
+            'minimal' => '8px',
+            default => '9999px',
+        };
+        $stepperPanelBg = $checkoutStepperStyle === 'minimal'
+            ? 'transparent'
+            : 'var(--theme-card-bg, #ffffff)';
+        $stepperPanelBorder = $checkoutStepperStyle === 'minimal'
+            ? 'transparent'
+            : 'var(--theme-border-default, #e5e7eb)';
+        $stepperPanelShadow = $checkoutStepperStyle === 'pills'
+            ? 'var(--theme-shadow-sm)'
+            : 'none';
+        $css .= "  --theme-checkout-stepper-node-radius: {$stepperRadius};\n";
+        $css .= "  --theme-checkout-stepper-panel-bg: {$stepperPanelBg};\n";
+        $css .= "  --theme-checkout-stepper-panel-border: {$stepperPanelBorder};\n";
+        $css .= "  --theme-checkout-stepper-panel-shadow: {$stepperPanelShadow};\n";
+
+        $summaryBackground = $checkoutSummaryStyle === 'flat'
+            ? 'var(--theme-page-bg, #f6f6f7)'
+            : 'var(--theme-card-bg, #ffffff)';
+        $summaryBorderColor = $checkoutSummaryStyle === 'flat'
+            ? 'transparent'
+            : 'var(--theme-border-default, #e5e7eb)';
+        $summaryShadow = $checkoutSummaryStyle === 'flat'
+            ? 'none'
+            : 'var(--theme-shadow-sm)';
+        $css .= "  --theme-checkout-summary-bg: {$summaryBackground};\n";
+        $css .= "  --theme-checkout-summary-border: {$summaryBorderColor};\n";
+        $css .= "  --theme-checkout-summary-shadow: {$summaryShadow};\n";
+
+        $accountBackground = $accountCardStyle === 'flat'
+            ? 'var(--theme-page-bg, #f6f6f7)'
+            : 'var(--theme-card-bg, #ffffff)';
+        $accountBorder = $accountCardStyle === 'flat'
+            ? 'transparent'
+            : 'var(--theme-border-default, #e5e7eb)';
+        $accountShadow = $accountCardStyle === 'card'
+            ? 'var(--theme-shadow-sm)'
+            : 'none';
+        if ($accountCardStyle === 'outlined') {
+            $accountBorder = 'var(--theme-border-hover, #111827)';
+        }
+        $css .= "  --theme-account-card-bg: {$accountBackground};\n";
+        $css .= "  --theme-account-card-border: {$accountBorder};\n";
+        $css .= "  --theme-account-card-shadow: {$accountShadow};\n";
+
+        $qtyBackground = $qtyControlStyle === 'minimal'
+            ? 'transparent'
+            : 'var(--theme-card-bg, #ffffff)';
+        $qtyBorder = $qtyControlStyle === 'minimal'
+            ? 'transparent'
+            : 'var(--theme-border-default, #e5e7eb)';
+        $qtyPaddingX = $qtyControlStyle === 'minimal' ? '0rem' : '0.5rem';
+        $css .= "  --theme-qty-bg: {$qtyBackground};\n";
+        $css .= "  --theme-qty-border: {$qtyBorder};\n";
+        $css .= "  --theme-qty-padding-x: {$qtyPaddingX};\n";
+
+        $badgeRadius = match ($productBadgeShape) {
+            'square' => '0px',
+            'pill' => '9999px',
+            default => 'var(--theme-border-radius, 12px)',
+        };
+        $css .= "  --theme-product-badge-radius: {$badgeRadius};\n";
+
+        $titleLines = in_array($productTitleLines, ['1', '2'], true) ? $productTitleLines : '2';
+        $css .= "  --theme-product-title-lines: {$titleLines};\n";
+
+        $priceFontSize = match ($productPriceSize) {
+            'sm' => '0.8125rem',
+            'lg' => '1.0625rem',
+            default => '0.9375rem',
+        };
+        $css .= "  --theme-product-price-size: {$priceFontSize};\n";
+        $css .= "  --theme-product-quick-add-style: {$productQuickAddStyle};\n";
 
         $css .= "}\n";
 

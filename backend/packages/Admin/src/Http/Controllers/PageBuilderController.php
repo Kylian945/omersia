@@ -20,6 +20,7 @@ class PageBuilderController extends Controller
         $translation = $page->translations()->where('locale', $locale)->first();
 
         $content = $translation?->content_json ?? ['sections' => []];
+        $widgets = array_values(BuilderWidgets::all());
 
         return view('admin::builder.builder', [
             'page' => $page,
@@ -29,6 +30,7 @@ class PageBuilderController extends Controller
             'pageTitleHeader' => 'Builder : '.($page->translations->first()->title ?? 'Page'),
             'saveUrl' => route('pages.builder.update', ['page' => $page->id, 'locale' => $locale]),
             'backUrl' => route('pages.index'),
+            'widgets' => $widgets,
             'widgetCategories' => BuilderWidgets::grouped(),
             'categoryLabels' => BuilderWidgets::categoryLabels(),
         ]);

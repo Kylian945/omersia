@@ -1,4 +1,4 @@
-/* eslint-disable @next/next/no-img-element */
+import { OptimizedImage } from '@/components/common/OptimizedImage';
 import { getAspectRatioClass, getObjectFitClass, getObjectPositionClass } from '@/lib/widget-helpers';
 import { validateAspectRatio, validateObjectFit, validateObjectPosition, validateNumericSize } from '@/lib/css-variable-sanitizer';
 
@@ -15,20 +15,22 @@ interface ImageWidgetProps {
 }
 
 export function ImageWidget({ props }: ImageWidgetProps) {
+  const placeholder = (
+    <div
+      className="w-full h-full border border-dashed flex items-center justify-center text-xs"
+      style={{
+        borderRadius: 'var(--theme-border-radius, 12px)',
+        backgroundColor: 'var(--theme-card-bg, #f9fafb)',
+        borderColor: 'var(--theme-border-default, #e5e7eb)',
+        color: 'var(--theme-muted-color, #6b7280)',
+      }}
+    >
+      Bloc image
+    </div>
+  );
+
   if (!props?.url) {
-    return (
-      <div
-        className="w-full h-full border border-dashed flex items-center justify-center text-xs"
-        style={{
-          borderRadius: 'var(--theme-border-radius, 12px)',
-          backgroundColor: 'var(--theme-card-bg, #f9fafb)',
-          borderColor: 'var(--theme-border-default, #e5e7eb)',
-          color: 'var(--theme-muted-color, #6b7280)',
-        }}
-      >
-        Image
-      </div>
-    );
+    return placeholder;
   }
 
   // Validate all props for security
@@ -56,12 +58,33 @@ export function ImageWidget({ props }: ImageWidgetProps) {
     style.width = `${safeWidth}px`;
   }
 
+  const imageClassName = `${objectFitClass} ${objectPositionClass}`;
+
+  // next/image with fill requires a constrained container height.
+  if (safeAspectRatio === 'auto' && !safeHeight) {
+    return (
+      <OptimizedImage
+        src={props.url}
+        alt={props.alt || ''}
+        width={safeWidth || 1200}
+        height={900}
+        className={`w-full h-auto ${imageClassName}`}
+        style={style}
+        fallback={placeholder}
+      />
+    );
+  }
+
   return (
-    <img
-      src={props.url}
-      alt={props.alt || ""}
-      className={`w-full ${aspectRatioClass} ${objectFitClass} ${objectPositionClass}`}
-      style={style}
-    />
+    <div className={`relative w-full overflow-hidden ${aspectRatioClass}`} style={style}>
+      <OptimizedImage
+        src={props.url}
+        alt={props.alt || ''}
+        fill
+        sizes="100vw"
+        className={imageClassName}
+        fallback={placeholder}
+      />
+    </div>
   );
 }

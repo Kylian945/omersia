@@ -13,7 +13,7 @@ type CheckoutStepperProps = {
 
 export function CheckoutStepper({ steps, currentStep }: CheckoutStepperProps) {
   return (
-    <div className="rounded-2xl bg-white border border-neutral-200 px-4 py-3">
+    <div className="theme-checkout-stepper rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] px-4 py-3">
       <div className="flex items-center justify-between">
         {steps.map((step, index) => {
           const isActive = step.id === currentStep;
@@ -30,7 +30,7 @@ export function CheckoutStepper({ steps, currentStep }: CheckoutStepperProps) {
                   <div
                     className={`
                       absolute left-0 right-1/2 h-px
-                      ${step.id <= currentStep ? "bg-neutral-900" : "bg-neutral-200"}
+                      ${step.id <= currentStep ? "bg-[var(--theme-primary,#111827)]" : "bg-[var(--theme-border-default,#e5e7eb)]"}
                     `}
                   />
                 )}
@@ -42,12 +42,13 @@ export function CheckoutStepper({ steps, currentStep }: CheckoutStepperProps) {
                     text-xs border transition
                     ${
                       isActive
-                        ? "bg-black text-white border-black"
+                        ? "bg-[var(--theme-primary,#111827)] text-[var(--theme-button-primary-text,#ffffff)] border-[var(--theme-border-hover,#111827)]"
                         : isDone
-                        ? "bg-neutral-900 text-white border-neutral-900"
-                        : "bg-white text-neutral-400 border-neutral-300"
+                        ? "bg-[var(--theme-primary,#111827)] text-[var(--theme-button-primary-text,#ffffff)] border-[var(--theme-primary,#111827)]"
+                        : "bg-[var(--theme-card-bg,#ffffff)] text-[var(--theme-muted-color,#6b7280)] border-[var(--theme-border-default,#e5e7eb)]"
                     }
                   `}
+                  style={{ borderRadius: "var(--theme-checkout-stepper-node-radius, 9999px)" }}
                 >
                   {isDone ? <Check className="w-3 h-3" /> : step.id}
                 </div>
@@ -57,7 +58,7 @@ export function CheckoutStepper({ steps, currentStep }: CheckoutStepperProps) {
                   <div
                     className={`
                       absolute left-1/2 right-0 h-px
-                      ${step.id < currentStep ? "bg-neutral-900" : "bg-neutral-200"}
+                      ${step.id < currentStep ? "bg-[var(--theme-primary,#111827)]" : "bg-[var(--theme-border-default,#e5e7eb)]"}
                     `}
                   />
                 )}
@@ -69,8 +70,8 @@ export function CheckoutStepper({ steps, currentStep }: CheckoutStepperProps) {
                   mt-1 text-xxxs text-center
                   ${
                     isActive
-                      ? "text-neutral-900 font-medium"
-                      : "text-neutral-500"
+                      ? "text-[var(--theme-heading-color,#111827)] font-medium"
+                      : "text-[var(--theme-muted-color,#6b7280)]"
                   }
                 `}
               >

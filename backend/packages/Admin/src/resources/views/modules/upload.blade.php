@@ -34,7 +34,7 @@
             <div class="px-5 py-8 space-y-5 max-w-3xl mx-auto">
                 {{-- Dropzone --}}
                 <label @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false"
-                    @drop.prevent="handleDrop($event)" class="block cursor-pointer rounded-xl border-2 border-dashed"
+                    @drop.prevent="handleDrop?.($event)" class="block cursor-pointer rounded-xl border-2 border-dashed"
                     :class="dragging ? 'border-neutral-400 bg-neutral-50' : 'border-neutral-200 hover:border-neutral-300'">
                     <div class="flex flex-col items-center justify-center gap-2 px-6 py-10 text-center">
                         <x-lucide-file-archive class="h-8 w-8 text-neutral-500" />

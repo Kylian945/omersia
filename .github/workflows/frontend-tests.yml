@@ -12,6 +12,11 @@ on:
     paths:
       - 'storefront/**'
 
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
 jobs:
   jest:
     name: Jest Unit Tests
@@ -47,7 +52,7 @@ jobs:
           retention-days: 30
 
       - name: Comment coverage on PR
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'
         uses: actions/github-script@v8
         with:
           script: |
@@ -74,12 +79,16 @@ jobs:
             ${total.lines.pct >= 70 ? '✅' : '❌'} Coverage meets threshold requirements
             `;
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
+            try {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              core.warning(`Unable to post coverage comment: ${error.message}`);
+            }
 
   test-report:
     name: Aggregate Test Results
@@ -104,7 +113,7 @@ jobs:
           path: storefront/coverage/
 
       - name: Comment test summary on PR
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'
         uses: actions/github-script@v8
         with:
           script: |
@@ -136,12 +145,16 @@ jobs:
             📊 [View detailed coverage report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
             `;
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: comment
-            });
+            try {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              core.warning(`Unable to post test summary comment: ${error.message}`);
+            }
 
   # Optional: Require all tests to pass for merge
   tests-passed:

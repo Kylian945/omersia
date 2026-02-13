@@ -55,7 +55,7 @@ export default async function OrderSuccessPage({
   return (
     <>
       <HeaderCheckout shopInfo={shopInfo}/>
-      <main className="flex-1 py-12 bg-neutral-50">
+      <main className="flex-1 py-12 bg-[var(--theme-page-bg,#f6f6f7)]">
         <Container>
           <div className="max-w-4xl mx-auto">
             {/* Success message */}
@@ -117,35 +117,35 @@ export default async function OrderSuccessPage({
             </div>
 
             {/* Next steps */}
-            <div className="rounded-2xl bg-white border border-black/5 shadow-sm p-5 mb-6">
-              <h2 className="text-sm font-semibold text-neutral-900 mb-3">
+            <div className="rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5 mb-6">
+              <h2 className="text-sm font-semibold text-[var(--theme-heading-color,#111827)] mb-3">
                 Prochaines étapes
               </h2>
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <div className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold">
+                  <div className="shrink-0 w-6 h-6 rounded-full bg-[var(--theme-primary,#111827)] text-[var(--theme-button-primary-text,#ffffff)] flex items-center justify-center text-xs font-semibold">
                     1
                   </div>
-                  <div className="text-xs text-neutral-600">
-                    <p className="font-medium text-neutral-900">Email de confirmation</p>
+                  <div className="text-xs text-[var(--theme-body-color,#374151)]">
+                    <p className="font-medium text-[var(--theme-heading-color,#111827)]">Email de confirmation</p>
                     <p>Vous allez recevoir un email récapitulatif de votre commande</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold">
+                  <div className="shrink-0 w-6 h-6 rounded-full bg-[var(--theme-primary,#111827)] text-[var(--theme-button-primary-text,#ffffff)] flex items-center justify-center text-xs font-semibold">
                     2
                   </div>
-                  <div className="text-xs text-neutral-600">
-                    <p className="font-medium text-neutral-900">Préparation de votre commande</p>
+                  <div className="text-xs text-[var(--theme-body-color,#374151)]">
+                    <p className="font-medium text-[var(--theme-heading-color,#111827)]">Préparation de votre commande</p>
                     <p>Nous préparons votre colis avec soin</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <div className="shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-semibold">
+                  <div className="shrink-0 w-6 h-6 rounded-full bg-[var(--theme-primary,#111827)] text-[var(--theme-button-primary-text,#ffffff)] flex items-center justify-center text-xs font-semibold">
                     3
                   </div>
-                  <div className="text-xs text-neutral-600">
-                    <p className="font-medium text-neutral-900">Suivi de livraison</p>
+                  <div className="text-xs text-[var(--theme-body-color,#374151)]">
+                    <p className="font-medium text-[var(--theme-heading-color,#111827)]">Suivi de livraison</p>
                     <p>Vous recevrez un email avec le numéro de suivi dès l&apos;expédition</p>
                   </div>
                 </div>
@@ -154,25 +154,25 @@ export default async function OrderSuccessPage({
           </div>
 
           <div className="max-w-4xl mx-auto">
-            <h2 className="text-lg font-semibold tracking-tight text-neutral-900 mb-4">
+            <h2 className="text-lg font-semibold tracking-tight text-[var(--theme-heading-color,#111827)] mb-4">
               Récapitulatif de votre commande
             </h2>
 
           <div className="mt-6 grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_280px] gap-6 items-start">
             {/* Détails commande */}
-            <section className="rounded-2xl bg-white border border-black/5 shadow-sm p-5 space-y-4">
+            <section className="rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5 space-y-4">
               <div className="flex items-center justify-between text-xs">
                 <div>
-                  <p className="font-semibold text-neutral-900">
+                  <p className="font-semibold text-[var(--theme-heading-color,#111827)]">
                     Commande n° {order.number}
                   </p>
-                  <p className="text-neutral-500">
+                  <p className="text-[var(--theme-muted-color,#6b7280)]">
                     Passée le{" "}
                     {new Date(order.placed_at).toLocaleDateString("fr-FR")}
                   </p>
                 </div>
                 {order.shipping_method && (
-                  <div className="text-right text-xxs text-neutral-600">
+                  <div className="text-right text-xxs text-[var(--theme-body-color,#374151)]">
                     <div>{order.shipping_method.name}</div>
                     {order.shipping_method.delivery_time && (
                       <div>{order.shipping_method.delivery_time}</div>
@@ -182,14 +182,14 @@ export default async function OrderSuccessPage({
               </div>
 
               <div>
-                <h2 className="text-xs font-semibold text-neutral-900 mb-2">
+                <h2 className="text-xs font-semibold text-[var(--theme-heading-color,#111827)] mb-2">
                   Articles
                 </h2>
                 <div className="space-y-2 text-xs">
                   {order.items.map((item) => (
                     <div
                       key={item.id}
-                      className="flex items-center justify-between border-b border-neutral-100 pb-2"
+                      className="flex items-center justify-between border-b border-[var(--theme-border-default,#e5e7eb)] pb-2"
                     >
                       <div>
                         <div className="flex items-center gap-1.5">
@@ -203,17 +203,17 @@ export default async function OrderSuccessPage({
                             />
                           </div>
                           <div>
-                            <div className="font-medium text-neutral-900">
+                            <div className="font-medium text-[var(--theme-heading-color,#111827)]">
                               {item.name}
                             </div>
-                            <div className="text-xxs text-neutral-500">
+                            <div className="text-xxs text-[var(--theme-muted-color,#6b7280)]">
                               Qté {item.quantity}
                             </div>
                           </div>
                         </div>
 
                       </div>
-                      <div className="text-xs font-semibold text-neutral-900">
+                      <div className="text-xs font-semibold text-[var(--theme-heading-color,#111827)]">
                         {Number(item.total_price).toFixed(2)} €
                       </div>
                     </div>
@@ -223,10 +223,10 @@ export default async function OrderSuccessPage({
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <h3 className="font-semibold text-neutral-900 mb-1">
+                  <h3 className="font-semibold text-[var(--theme-heading-color,#111827)] mb-1">
                     Adresse de livraison
                   </h3>
-                  <div className="text-neutral-600">
+                  <div className="text-[var(--theme-body-color,#374151)]">
                     {order.customer_firstname} {order.customer_lastname}
                     <br />
                     {order.shipping_address.line1}
@@ -244,10 +244,10 @@ export default async function OrderSuccessPage({
                   </div>
                 </div>
                 <div>
-                  <h3 className="font-semibold text-neutral-900 mb-1">
+                  <h3 className="font-semibold text-[var(--theme-heading-color,#111827)] mb-1">
                     Adresse de facturation
                   </h3>
-                  <div className="text-neutral-600">
+                  <div className="text-[var(--theme-body-color,#374151)]">
                     {order.billing_address.line1}
                     {order.billing_address.line2 && (
                       <>
@@ -266,9 +266,9 @@ export default async function OrderSuccessPage({
             </section>
 
             {/* Récap montant */}
-            <aside className="rounded-2xl bg-white border border-black/5 shadow-sm p-5 text-xs space-y-2">
+            <aside className="rounded-2xl bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] shadow-sm p-5 text-xs space-y-2">
               <div className="flex justify-between">
-                <span className="text-neutral-600">Sous-total</span>
+                <span className="text-[var(--theme-body-color,#374151)]">Sous-total</span>
                 <span className="font-medium">
                   {Number(order.subtotal).toFixed(2)} €
                 </span>
@@ -280,7 +280,7 @@ export default async function OrderSuccessPage({
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-neutral-600">Livraison</span>
+                <span className="text-[var(--theme-body-color,#374151)]">Livraison</span>
                 <span className="font-medium">
                   {order.shipping_total === 0
                     ? "Gratuite"
@@ -289,17 +289,17 @@ export default async function OrderSuccessPage({
               </div>
               {order.tax_total > 0 && (
                 <div className="flex justify-between">
-                  <span className="text-neutral-600">Taxes</span>
+                  <span className="text-[var(--theme-body-color,#374151)]">Taxes</span>
                   <span className="font-medium">
                     {Number(order.tax_total).toFixed(2)} €
                   </span>
                 </div>
               )}
-              <div className="pt-2 mt-2 border-t border-neutral-200 flex justify-between">
-                <span className="font-semibold text-neutral-900">
+              <div className="pt-2 mt-2 border-t border-[var(--theme-border-default,#e5e7eb)] flex justify-between">
+                <span className="font-semibold text-[var(--theme-heading-color,#111827)]">
                   Total TTC
                 </span>
-                <span className="font-semibold text-neutral-900">
+                <span className="font-semibold text-[var(--theme-heading-color,#111827)]">
                   {Number(order.total).toFixed(2)} €
                 </span>
               </div>
@@ -310,13 +310,13 @@ export default async function OrderSuccessPage({
           <div className="max-w-4xl mx-auto mt-8 flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               href="/account"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-neutral-900 text-white text-sm font-medium hover:bg-black transition"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-lg bg-[var(--theme-primary,#111827)] text-[var(--theme-button-primary-text,#ffffff)] text-sm font-medium hover:opacity-90 transition"
             >
               Voir mes commandes
             </Link>
             <Link
               href="/"
-              className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-neutral-200 bg-white text-neutral-900 text-sm font-medium hover:bg-neutral-50 transition"
+              className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-[var(--theme-border-default,#e5e7eb)] bg-[var(--theme-card-bg,#ffffff)] text-[var(--theme-heading-color,#111827)] text-sm font-medium hover:bg-[var(--theme-page-bg,#f6f6f7)] transition"
             >
               Continuer mes achats
             </Link>

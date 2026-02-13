@@ -189,7 +189,7 @@ export function PageBuilder({
     <div className="mt-4">
       {layout.sections.map((section) => {
         const s = section.settings || {};
-        const bg = s.background || "#ffffff";
+        const bg = typeof s.background === "string" ? s.background.trim() : "";
         const visibilityClasses = getVisibilityClasses(section.visibility);
 
         // Validate and get gap/alignment classes
@@ -297,7 +297,7 @@ export function PageBuilder({
             key={section.id}
             className={`${visibilityClasses} ${paddingClasses} ${marginClasses}`.trim()}
             style={{
-              backgroundColor: bg,
+              ...(bg ? { backgroundColor: bg } : {}),
               ...legacyPaddingStyle,
             }}
           >

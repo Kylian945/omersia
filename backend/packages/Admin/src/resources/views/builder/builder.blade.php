@@ -4,13 +4,19 @@
 @section('page-title', $pageTitleHeader ?? 'Builder')
 
 @section('content')
+    @php
+        $builderWidgets = array_values($widgets ?? \Omersia\Admin\Config\BuilderWidgets::all());
+        $builderWidgetCategories = $widgetCategories ?? \Omersia\Admin\Config\BuilderWidgets::grouped();
+        $builderCategoryLabels = $categoryLabels ?? \Omersia\Admin\Config\BuilderWidgets::categoryLabels();
+    @endphp
+
     <div x-data='pageBuilder({
             initial: @json($contentJson),
             saveUrl: "{{ $saveUrl }}",
             csrf: "{{ csrf_token() }}",
             categoriesUrl: "{{ route('admin.api.categories') }}",
             productsUrl: "{{ route('admin.api.products') }}",
-            serverWidgets: @json(array_values(\Omersia\Admin\Config\BuilderWidgets::all())),
+            serverWidgets: @json($builderWidgets),
         })'
         x-init="init()"
         class="h-[calc(100vh-6rem)] flex flex-col gap-3"
@@ -69,7 +75,7 @@
                     {{-- Mode recherche : afficher tous les widgets à plat --}}
                     <template x-if="widgetsSearch">
                         <div class="space-y-1">
-                            @foreach (\Omersia\Admin\Config\BuilderWidgets::all() as $widget)
+                            @foreach ($builderWidgets as $widget)
                                 <button type="button"
                                     x-show="'{{ strtolower($widget['label']) }}'.includes(widgetsSearch.toLowerCase()) || '{{ strtolower($widget['type']) }}'.includes(widgetsSearch.toLowerCase())"
                                     class="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-800 cursor-move hover:bg-neutral-100 flex items-center justify-between"
@@ -89,14 +95,14 @@
                     {{-- Mode normal : afficher par catégories --}}
                     <template x-if="!widgetsSearch">
                         <div class="space-y-2">
-                            @foreach (\Omersia\Admin\Config\BuilderWidgets::grouped() as $category => $widgets)
+                            @foreach ($builderWidgetCategories as $category => $categoryWidgets)
                                 <details class="group" open>
                                     <summary class="cursor-pointer list-none flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-neutral-50 text-xs font-semibold text-neutral-700">
-                                        <span>{{ \Omersia\Admin\Config\BuilderWidgets::categoryLabels()[$category] ?? $category }}</span>
+                                        <span>{{ $builderCategoryLabels[$category] ?? $category }}</span>
                                         <span class="text-neutral-400 group-open:rotate-90 transition-transform text-sm">›</span>
                                     </summary>
                                     <div class="mt-1 space-y-1 pl-1">
-                                        @foreach ($widgets as $widget)
+                                        @foreach ($categoryWidgets as $widget)
                                             <button type="button"
                                                 class="w-full px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-50 text-xs text-neutral-800 cursor-move hover:bg-neutral-100 flex items-center justify-between"
                                                 draggable="true" @dragstart="onWidgetDragStart($event, '{{ $widget['type'] }}')">

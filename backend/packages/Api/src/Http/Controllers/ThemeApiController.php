@@ -78,11 +78,9 @@ class ThemeApiController
 
             $cssVariables = $this->customizationService->generateCssVariables($settings);
 
-            // Get theme settings schema if available
-            $settingsSchema = null;
-            if ($activeTheme && $activeTheme->hasSettingsSchema()) {
-                $settingsSchema = $activeTheme->getSettingsSchema();
-            }
+            $settingsSchema = $activeTheme
+                ? $this->customizationService->getThemeSettingsSchema($activeTheme)
+                : $this->customizationService->getDefaultSettings();
 
             return response()->json([
                 'settings' => $settings,

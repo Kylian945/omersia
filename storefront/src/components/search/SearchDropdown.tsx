@@ -90,24 +90,24 @@ export function SearchDropdown({
 
   return (
     <>
-      <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-neutral-200 rounded-xl shadow-lg z-50 overflow-hidden">
+      <div className="absolute left-0 right-0 top-full mt-2 bg-[var(--theme-card-bg,#ffffff)] border border-[var(--theme-border-default,#e5e7eb)] rounded-xl shadow-lg z-50 overflow-hidden">
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="w-6 h-6 animate-spin text-neutral-400" />
+            <Loader2 className="w-6 h-6 animate-spin text-[var(--theme-muted-color,#6b7280)]" />
           </div>
         ) : results ? (
           <div className="grid grid-cols-1 md:grid-cols-[250px_minmax(0,1fr)] max-h-[600px]">
             {/* Sidebar filtres */}
-            <div className="border-r border-neutral-100 overflow-y-auto max-h-[600px] hidden md:block">
-              <div className="flex items-center justify-between mb-4 bg-neutral-50 border-b border-neutral-100 p-4">
+            <div className="border-r border-[var(--theme-border-default,#e5e7eb)] overflow-y-auto max-h-[600px] hidden md:block">
+              <div className="flex items-center justify-between mb-4 bg-[var(--theme-page-bg,#f6f6f7)] border-b border-[var(--theme-border-default,#e5e7eb)] p-4">
                 <div className="flex items-center gap-2 ">
 
-                  <h3 className="text-sm font-semibold text-neutral-900">Filtres</h3>
+                  <h3 className="text-sm font-semibold text-[var(--theme-heading-color,#111827)]">Filtres</h3>
                 </div>
                 {hasActiveFilters && (
                   <button
                     onClick={clearFilters}
-                    className="text-xs text-neutral-600 hover:text-black transition"
+                    className="text-xs text-[var(--theme-muted-color,#6b7280)] hover:text-[var(--theme-heading-color,#111827)] transition"
                   >
                     Réinitialiser
                   </button>
@@ -117,7 +117,7 @@ export function SearchDropdown({
               {/* Catégories */}
               {results.facets.categories.length > 0 && (
                 <div className="mb-6 px-4">
-                  <div className="text-xs font-medium text-neutral-700 mb-2">
+                  <div className="text-xs font-medium text-[var(--theme-body-color,#374151)] mb-2">
                     Catégories
                   </div>
                   <div className="space-y-1">
@@ -130,12 +130,12 @@ export function SearchDropdown({
                           type="checkbox"
                           checked={selectedCategories.includes(category.id)}
                           onChange={() => toggleCategory(category.id)}
-                          className="w-4 h-4 rounded border-neutral-300 text-black focus:ring-black focus:ring-offset-0 checked:bg-black checked:border-black"
+                          className="w-4 h-4 rounded border-[var(--theme-border-default,#e5e7eb)] text-[var(--theme-primary,#111827)] focus:ring-[var(--theme-primary,#111827)] focus:ring-offset-0 checked:bg-[var(--theme-primary,#111827)] checked:border-[var(--theme-primary,#111827)]"
                         />
-                        <span className="text-xs text-neutral-700 group-hover:text-black transition flex-1">
+                        <span className="text-xs text-[var(--theme-body-color,#374151)] group-hover:text-[var(--theme-heading-color,#111827)] transition flex-1">
                           {category.name}
                         </span>
-                        <span className="text-xxxs text-neutral-400">
+                        <span className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">
                           ({category.count})
                         </span>
                       </label>
@@ -147,7 +147,7 @@ export function SearchDropdown({
               {/* Prix */}
               {results.facets.price_range.max > 0 && (
                 <div className="mb-6 px-4">
-                  <div className="text-xs font-medium text-neutral-700 mb-2">
+                  <div className="text-xs font-medium text-[var(--theme-body-color,#374151)] mb-2">
                     Prix
                   </div>
                   <div className="space-y-2">
@@ -157,22 +157,22 @@ export function SearchDropdown({
                         placeholder="Min"
                         value={minPrice}
                         onChange={(e) => setMinPrice(e.target.value)}
-                        className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-black"
+                        className="w-full px-2 py-1.5 text-xs border border-[var(--theme-border-default,#e5e7eb)] rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                         min={0}
                         max={results.facets.price_range.max}
                       />
-                      <span className="text-xs text-neutral-400">-</span>
+                      <span className="text-xs text-[var(--theme-muted-color,#6b7280)]">-</span>
                       <input
                         type="number"
                         placeholder="Max"
                         value={maxPrice}
                         onChange={(e) => setMaxPrice(e.target.value)}
-                        className="w-full px-2 py-1.5 text-xs border border-neutral-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-black"
+                        className="w-full px-2 py-1.5 text-xs border border-[var(--theme-border-default,#e5e7eb)] rounded-lg focus:outline-none focus:ring-1 focus:ring-[var(--theme-primary,#111827)]"
                         min={0}
                         max={results.facets.price_range.max}
                       />
                     </div>
-                    <div className="text-xxxs text-neutral-500">
+                    <div className="text-xxxs text-[var(--theme-muted-color,#6b7280)]">
                       De {results.facets.price_range.min}€ à{" "}
                       {results.facets.price_range.max}€
                     </div>
@@ -182,7 +182,7 @@ export function SearchDropdown({
 
               {/* Stock */}
               <div className="mb-4 px-4">
-                <div className="text-xs font-medium text-neutral-700 mb-2">
+                <div className="text-xs font-medium text-[var(--theme-body-color,#374151)] mb-2">
                   Disponibilité
                 </div>
                 <label className="flex items-center gap-2 py-1 cursor-pointer group">
@@ -190,9 +190,9 @@ export function SearchDropdown({
                     type="checkbox"
                     checked={inStockOnly}
                     onChange={(e) => setInStockOnly(e.target.checked)}
-                    className="w-4 h-4 rounded border-neutral-300 text-black focus:ring-black focus:ring-offset-0 checked:bg-black checked:border-black"
+                    className="w-4 h-4 rounded border-[var(--theme-border-default,#e5e7eb)] text-[var(--theme-primary,#111827)] focus:ring-[var(--theme-primary,#111827)] focus:ring-offset-0 checked:bg-[var(--theme-primary,#111827)] checked:border-[var(--theme-primary,#111827)]"
                   />
-                  <span className="text-xs text-neutral-700 group-hover:text-black transition">
+                  <span className="text-xs text-[var(--theme-body-color,#374151)] group-hover:text-[var(--theme-heading-color,#111827)] transition">
                     En stock uniquement
                   </span>
                 </label>
@@ -203,7 +203,7 @@ export function SearchDropdown({
             <div className="overflow-y-auto max-h-[600px]">
               {results.products.length > 0 ? (
                 <div className="p-4">
-                  <div className="text-xs font-medium text-neutral-500 mb-3">
+                  <div className="text-xs font-medium text-[var(--theme-muted-color,#6b7280)] mb-3">
                     {results.total} résultat{results.total > 1 ? "s" : ""} trouvé
                     {results.total > 1 ? "s" : ""}
                   </div>
@@ -223,7 +223,7 @@ export function SearchDropdown({
                           key={product.id}
                           href={`/products/${productSlug}`}
                           onClick={onClose}
-                          className="flex items-center gap-4 p-3 rounded-lg hover:bg-neutral-50 transition"
+                          className="flex items-center gap-4 p-3 rounded-lg hover:bg-[var(--theme-page-bg,#f6f6f7)] transition"
                         >
                           {image ? (
                             <OptimizedImage
@@ -234,35 +234,35 @@ export function SearchDropdown({
                               sizes="64px"
                               className="w-16 h-16 object-cover rounded-md shrink-0"
                               fallback={
-                                <div className="w-16 h-16 bg-neutral-100 rounded-md flex items-center justify-center shrink-0">
-                                  <Search className="w-6 h-6 text-neutral-300" />
+                                <div className="w-16 h-16 bg-[var(--theme-input-bg,#ffffff)] rounded-md flex items-center justify-center shrink-0">
+                                  <Search className="w-6 h-6 text-[var(--theme-muted-color,#6b7280)]" />
                                 </div>
                               }
                             />
                           ) : (
-                            <div className="w-16 h-16 bg-neutral-100 rounded-md flex items-center justify-center shrink-0">
-                              <Search className="w-6 h-6 text-neutral-300" />
+                            <div className="w-16 h-16 bg-[var(--theme-input-bg,#ffffff)] rounded-md flex items-center justify-center shrink-0">
+                              <Search className="w-6 h-6 text-[var(--theme-muted-color,#6b7280)]" />
                             </div>
                           )}
                           <div className="flex-1 min-w-0 flex justify-between">
                             <div>
-                              <div className="font-medium text-sm text-neutral-900 truncate">
+                              <div className="font-medium text-sm text-[var(--theme-heading-color,#111827)] truncate">
                                 {productName}
                               </div>
                               <div className="flex items-center gap-2 mt-1">
-                                <span className="text-sm font-semibold text-neutral-900">
+                                <span className="text-sm font-semibold text-[var(--theme-heading-color,#111827)]">
                                   {product.has_variants && "À partir de "}
                                   {displayPrice?.toFixed(2)} €
                                 </span>
                                 {product.compare_at_price &&
                                   product.compare_at_price > (displayPrice || 0) && (
-                                    <span className="text-xs text-neutral-400 line-through">
+                                    <span className="text-xs text-[var(--theme-muted-color,#6b7280)] line-through">
                                       {product.compare_at_price.toFixed(2)} €
                                     </span>
                                   )}
                               </div>
                             </div>
-                            <div className="text-xs text-neutral-500 mt-0.5">
+                            <div className="text-xs text-[var(--theme-muted-color,#6b7280)] mt-0.5">
                               {product.stock_qty > 0 ? (
                                 <div className="flex items-center gap-2">
                                   <div className="h-2 w-2 bg-emerald-500 rounded-full"></div>
@@ -285,7 +285,7 @@ export function SearchDropdown({
                     <Link
                       href={`/search?q=${encodeURIComponent(query)}`}
                       onClick={onClose}
-                      className="block mt-4 pt-4 border-t border-neutral-100 text-center text-sm font-medium text-neutral-700 hover:text-black transition"
+                      className="block mt-4 pt-4 border-t border-[var(--theme-border-default,#e5e7eb)] text-center text-sm font-medium text-[var(--theme-body-color,#374151)] hover:text-[var(--theme-heading-color,#111827)] transition"
                     >
                       Voir tous les résultats ({results.total})
                     </Link>
@@ -293,17 +293,17 @@ export function SearchDropdown({
                 </div>
               ) : (
                 <div className="p-8 text-center">
-                  <Search className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
-                  <div className="text-sm font-medium text-neutral-900 mb-1">
+                  <Search className="w-12 h-12 text-[var(--theme-muted-color,#6b7280)] mx-auto mb-3" />
+                  <div className="text-sm font-medium text-[var(--theme-heading-color,#111827)] mb-1">
                     Aucun résultat trouvé
                   </div>
-                  <div className="text-xs text-neutral-500 mb-3">
+                  <div className="text-xs text-[var(--theme-muted-color,#6b7280)] mb-3">
                     Essayez de modifier vos filtres ou vos mots-clés
                   </div>
                   {hasActiveFilters && (
                     <button
                       onClick={clearFilters}
-                      className="text-xs text-black hover:underline"
+                      className="text-xs text-[var(--theme-heading-color,#111827)] hover:underline"
                     >
                       Réinitialiser les filtres
                     </button>

@@ -26,7 +26,10 @@ export async function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-black/5 bg-white py-6 text-xs text-neutral-500">
+    <footer
+      className="theme-footer-surface border-t border-[var(--theme-border-default,#e5e7eb)] py-6 text-xs text-[var(--theme-muted-color,#6b7280)]"
+      style={{ backgroundColor: "var(--theme-footer-bg, var(--theme-card-bg, #ffffff))" }}
+    >
       <Container>
         {/* Hook: footer.content.extra - Permet d'ajouter du contenu supplémentaire dans le footer */}
         <ModuleHooks
@@ -39,7 +42,11 @@ export async function Footer() {
           <div className="flex gap-4">
             {hasFooterMenu && (
               footerItems.map((item) => (
-                <Link key={item.id} href={getItemHref(item)}>
+                <Link
+                  key={item.id}
+                  href={getItemHref(item)}
+                  className="hover:text-[var(--theme-heading-color,#111827)] transition-colors"
+                >
                   {item.label}
                 </Link>
               ))

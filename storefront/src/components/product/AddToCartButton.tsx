@@ -13,6 +13,7 @@ type Props = {
   quantity?: number;
   variantId?: number;
   variantLabel?: string;
+  onAdded?: () => void;
 };
 
 export function AddToCartButton({
@@ -25,6 +26,7 @@ export function AddToCartButton({
   quantity = 1,
   variantId,
   variantLabel,
+  onAdded,
 }: Props) {
   const { addItem, openCart } = useCart();
 
@@ -41,6 +43,7 @@ export function AddToCartButton({
       variantLabel,
     });
     openCart();
+    onAdded?.();
   };
 
   return (

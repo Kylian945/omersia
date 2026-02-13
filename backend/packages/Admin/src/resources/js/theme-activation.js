@@ -3,9 +3,14 @@
  * Handles theme activation with widget compatibility checking
  */
 
-document.addEventListener('DOMContentLoaded', function() {
+function initThemeActivation() {
     // Handle theme activation
     document.querySelectorAll('.activate-theme-btn').forEach(button => {
+        if (button.dataset.themeActivationBound === 'true') {
+            return;
+        }
+        button.dataset.themeActivationBound = 'true';
+
         button.addEventListener('click', async function() {
             const themeId = this.dataset.themeId;
 
@@ -47,17 +52,42 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initThemeActivation);
+} else {
+    initThemeActivation();
+}
 
 /**
  * Submit theme activation form
  */
 function submitActivation(themeId) {
+    const action = `/admin/apparence/theme/${themeId}/activate`;
+
+    // Prefer the existing form rendered by Blade (@csrf already present)
+    const existingForm = document.getElementById('theme-activation-form');
+    if (existingForm) {
+        existingForm.action = action;
+        existingForm.submit();
+        return;
+    }
+
+    // Fallback: build a form dynamically if modal form is not available
+    const csrfToken =
+        document.querySelector('meta[name="csrf-token"]')?.content ||
+        document.querySelector('input[name="_token"]')?.value;
+
+    if (!csrfToken) {
+        console.error('Theme activation failed: CSRF token not found.');
+        return;
+    }
+
     const form = document.createElement('form');
     form.method = 'POST';
-    form.action = `/admin/apparence/theme/${themeId}/activate`;
+    form.action = action;
 
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
     const csrfInput = document.createElement('input');
     csrfInput.type = 'hidden';
     csrfInput.name = '_token';
