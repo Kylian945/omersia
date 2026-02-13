@@ -24,7 +24,7 @@ describe('Button', () => {
   it('applies secondary variant when specified', () => {
     render(<Button variant="secondary">Secondary Button</Button>)
     const button = screen.getByRole('button', { name: /secondary button/i })
-    expect(button).toHaveClass('bg-white')
+    expect(button).toHaveClass('bg-[var(--theme-card-bg,#ffffff)]')
   })
 
   it('applies different sizes correctly', () => {

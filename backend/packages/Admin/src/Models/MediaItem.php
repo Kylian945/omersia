@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\Storage;
 class MediaItem extends Model
 {
     private const SIZE_OK_LIMIT_BYTES = 102400; // 100 KB
+
     private const SIZE_WARNING_LIMIT_BYTES = 307200; // 300 KB
 
     private const OPTIMIZABLE_MIME_TYPES = [

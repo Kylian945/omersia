@@ -45,6 +45,7 @@ class AuthServiceProvider extends ServiceProvider
             if (! method_exists($user, 'roles')) {
                 return false;
             }
+
             return $user->roles()->exists();
         });
 
@@ -57,6 +58,7 @@ class AuthServiceProvider extends ServiceProvider
                         if (! method_exists($user, 'hasPermission')) {
                             return false;
                         }
+
                         return $user->hasPermission($permission);
                     });
                 }

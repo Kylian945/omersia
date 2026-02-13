@@ -125,8 +125,7 @@ class ThemePageConfigService
         bool $forceUpdate = false,
         bool $useDemo = false,
         bool $preserveMediaByTheme = false
-    ): array
-    {
+    ): array {
         $pagesConfig = $this->getThemePagesConfig($theme, $useDemo);
 
         if (! $pagesConfig || ! isset($pagesConfig['pages'])) {
@@ -187,8 +186,7 @@ class ThemePageConfigService
         bool $forceUpdate,
         array $snapshotContentByLocale = [],
         bool $preserveMediaByTheme = false
-    ): string
-    {
+    ): string {
         $type = $pageConfig['type'] ?? null;
         $slug = $pageConfig['slug'] ?? null;
         $translations = $pageConfig['translations'] ?? [];
@@ -686,6 +684,7 @@ class ThemePageConfigService
                 } elseif (is_array($existingValue) && ! empty($existingValue)) {
                     $value = $existingValue;
                 }
+
                 continue;
             }
 

@@ -223,6 +223,7 @@ class MediaLibraryController extends Controller
                     if (! $optimizeOriginal) {
                         $failedFormats[] = strtoupper($format);
                     }
+
                     continue;
                 }
 

@@ -396,6 +396,7 @@ class ThemeCustomizationService
             if ($setting) {
                 $setting->setEncodedValue($value);
                 $setting->save();
+
                 continue;
             }
 
@@ -470,6 +471,7 @@ class ThemeCustomizationService
 
             if (! isset($merged[$group]) || ! is_array($merged[$group])) {
                 $merged[$group] = $settings;
+
                 continue;
             }
 
