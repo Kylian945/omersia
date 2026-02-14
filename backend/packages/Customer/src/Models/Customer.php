@@ -70,11 +70,17 @@ class Customer extends Authenticatable
         'is_active' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<Shop, $this>
+     */
     public function shop(): BelongsTo
     {
         return $this->belongsTo(Shop::class);
     }
 
+    /**
+     * @return BelongsToMany<CustomerGroup, $this>
+     */
     public function groups(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -95,6 +101,9 @@ class Customer extends Authenticatable
         return $full !== '' ? $full : $this->email;
     }
 
+    /**
+     * @return HasMany<Order, $this>
+     */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class, 'customer_id')->where('status', '!=', 'draft');
@@ -105,31 +114,49 @@ class Customer extends Authenticatable
         return (float) $this->orders()->sum('total');
     }
 
+    /**
+     * @return HasMany<Address, $this>
+     */
     public function addresses(): HasMany
     {
         return $this->hasMany(Address::class, 'customer_id');
     }
 
+    /**
+     * @return HasOne<Address, $this>
+     */
     public function defaultBillingAddress(): HasOne
     {
         return $this->hasOne(Address::class, 'customer_id')->where('is_default_billing', true);
     }
 
+    /**
+     * @return HasOne<Address, $this>
+     */
     public function defaultShippingAddress(): HasOne
     {
         return $this->hasOne(Address::class, 'customer_id')->where('is_default_shipping', true);
     }
 
+    /**
+     * @return HasMany<\Omersia\Catalog\Models\Cart, $this>
+     */
     public function carts(): HasMany
     {
         return $this->hasMany(\Omersia\Catalog\Models\Cart::class, 'customer_id');
     }
 
+    /**
+     * @return HasMany<CookieConsent, $this>
+     */
     public function cookieConsents(): HasMany
     {
         return $this->hasMany(CookieConsent::class, 'customer_id');
     }
 
+    /**
+     * @return HasMany<DataRequest, $this>
+     */
     public function dataRequests(): HasMany
     {
         return $this->hasMany(DataRequest::class, 'customer_id');

@@ -6,9 +6,9 @@ namespace Omersia\Admin\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class PermissionController extends Controller
 {
@@ -21,7 +21,7 @@ class PermissionController extends Controller
 
     public function create(): View
     {
-        return view('admin::settings.permissions.create');
+        return view()->make('admin::settings.permissions.create');
     }
 
     public function store(Request $request): RedirectResponse

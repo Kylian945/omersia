@@ -134,10 +134,7 @@ class DataDeletionService
             'password' => bcrypt(str()->random(32)), // Mot de passe aléatoire
         ]);
 
-        // Soft delete si le modèle le supporte
-        if (method_exists($customer, 'delete')) {
-            $customer->delete();
-        }
+        $customer->delete();
     }
 
     /**

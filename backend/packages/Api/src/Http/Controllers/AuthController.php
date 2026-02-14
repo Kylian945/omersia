@@ -380,7 +380,7 @@ class AuthController extends Controller
         );
 
         // Construire l'URL de réinitialisation pour le front
-        $frontUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'));
+        $frontUrl = (string) config('storefront.frontend_url', 'http://localhost:3000');
         $resetUrl = $frontUrl.'/password/reset?token='.$token.'&email='.urlencode($validated['email']);
 
         // Envoyer l'email

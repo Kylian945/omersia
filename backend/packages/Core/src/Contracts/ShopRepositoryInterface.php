@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Omersia\Core\Models\Shop;
 use Omersia\Shared\Contracts\RepositoryInterface;
 
+/** @extends RepositoryInterface<Shop> */
 interface ShopRepositoryInterface extends RepositoryInterface
 {
     public function findByCode(string $code): ?Shop;

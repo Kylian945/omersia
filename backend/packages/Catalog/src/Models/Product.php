@@ -21,7 +21,7 @@ use Laravel\Scout\Searchable;
  * @property bool $manage_stock
  * @property mixed $stock_qty
  * @property float $price
- * @property float $compare_at_price
+ * @property float|null $compare_at_price
  * @property string|null $main_image_url
  * @property-read \Omersia\Core\Models\Shop|null $shop
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductTranslation> $translations
@@ -61,16 +61,25 @@ class Product extends Model
         'compare_at_price' => 'float',
     ];
 
+    /**
+     * @return BelongsTo<\Omersia\Core\Models\Shop, $this>
+     */
     public function shop(): BelongsTo
     {
         return $this->belongsTo(\Omersia\Core\Models\Shop::class);
     }
 
+    /**
+     * @return HasMany<ProductTranslation, $this>
+     */
     public function translations(): HasMany
     {
         return $this->hasMany(ProductTranslation::class);
     }
 
+    /**
+     * @return BelongsToMany<Category, $this>
+     */
     public function categories(): BelongsToMany
     {
         return $this->belongsToMany(Category::class, 'product_categories');
@@ -86,11 +95,17 @@ class Product extends Model
     }
 
     // images
+    /**
+     * @return HasMany<ProductImage, $this>
+     */
     public function images(): HasMany
     {
         return $this->hasMany(ProductImage::class)->orderBy('position');
     }
 
+    /**
+     * @return HasOne<ProductImage, $this>
+     */
     public function mainImage(): HasOne
     {
         return $this->hasOne(ProductImage::class)->where('is_main', true);
@@ -108,6 +123,9 @@ class Product extends Model
     }
 
     // related products
+    /**
+     * @return BelongsToMany<Product, $this>
+     */
     public function relatedProducts(): BelongsToMany
     {
         return $this->belongsToMany(
@@ -119,11 +137,17 @@ class Product extends Model
     }
 
     // variants
+    /**
+     * @return HasMany<ProductOption, $this>
+     */
     public function options(): HasMany
     {
         return $this->hasMany(ProductOption::class)->orderBy('position');
     }
 
+    /**
+     * @return HasMany<ProductVariant, $this>
+     */
     public function variants(): HasMany
     {
         return $this->hasMany(ProductVariant::class);
@@ -162,10 +186,10 @@ class Product extends Model
         return [
             'id' => $this->id,
             'sku' => $this->sku,
-            'name' => $translation?->name ?? '',
-            'description' => $translation?->description ?? '',
-            'short_description' => $translation?->short_description ?? '',
-            'slug' => $translation?->slug ?? '',
+            'name' => $translation ? ($translation->name ?? '') : '',
+            'description' => $translation ? ($translation->description ?? '') : '',
+            'short_description' => $translation ? ($translation->short_description ?? '') : '',
+            'slug' => $translation ? ($translation->slug ?? '') : '',
             'price' => $this->price,
             'compare_at_price' => $this->compare_at_price,
             'is_active' => $this->is_active,

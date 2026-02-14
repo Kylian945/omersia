@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Omersia\Apparence\Models\EcommercePage;
 use Omersia\Shared\Contracts\RepositoryInterface;
 
+/** @extends RepositoryInterface<EcommercePage> */
 interface EcommercePageRepositoryInterface extends RepositoryInterface
 {
     public function getByShopId(int $shopId): Collection;

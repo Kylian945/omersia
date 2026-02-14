@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Omersia\Core\Models\ShopDomain;
 use Omersia\Shared\Contracts\RepositoryInterface;
 
+/** @extends RepositoryInterface<ShopDomain> */
 interface ShopDomainRepositoryInterface extends RepositoryInterface
 {
     public function findByDomain(string $domain): ?ShopDomain;

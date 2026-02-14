@@ -9,6 +9,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Omersia\Catalog\Models\Product;
 use Omersia\Shared\Contracts\RepositoryInterface;
 
+/** @extends RepositoryInterface<Product> */
 interface ProductRepositoryInterface extends RepositoryInterface
 {
     public function findBySku(string $sku, ?int $shopId = null): ?Product;

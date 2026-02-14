@@ -30,7 +30,7 @@ class ManualTestPaymentProvider implements PaymentProvider
             'provider_code' => 'manual_test',
         ]);
 
-        if (! is_string($payment->provider_payment_id) || trim($payment->provider_payment_id) === '') {
+        if (trim((string) $payment->provider_payment_id) === '') {
             $payment->provider_payment_id = $providerPaymentId;
         }
 

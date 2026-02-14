@@ -845,8 +845,7 @@ TS;
 
     protected function generateApiRouteContent(string $backendEndpoint, string $method, string $moduleSlug): string
     {
-        $backendUrl = env('BACKEND_URL', 'http://backend');
-        $apiKey = env('FRONT_API_KEY', '');
+        $backendUrl = (string) config('storefront.backend_url', 'http://backend');
 
         // Determine if we need to include request body (POST, PUT, PATCH)
         $includeBody = in_array($method, ['POST', 'PUT', 'PATCH']);
@@ -868,6 +867,14 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function {$method}(request: NextRequest) {
   try {
+    const apiKey = process.env.FRONT_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json(
+        { error: 'FRONT_API_KEY is not configured' },
+        { status: 500 }
+      );
+    }
+
     // Extract query parameters
     const { searchParams } = new URL(request.url);
     const queryString = searchParams.toString();
@@ -880,7 +887,7 @@ export async function {$method}(request: NextRequest) {
     const response = await fetch(url, {
       method: '{$method}',
       headers: {
-        'X-API-KEY': process.env.FRONT_API_KEY || '{$apiKey}',
+        'X-API-KEY': apiKey,
         'Content-Type': 'application/json',
         'Accept': 'application/json',
       }{$bodyParam}

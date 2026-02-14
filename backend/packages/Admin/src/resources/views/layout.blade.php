@@ -340,7 +340,7 @@
                         @foreach ($activeShops as $shop)
                             @php
                                 $primaryDomain = $shop->domains->firstWhere('is_primary', true);
-                                $shopUrl = $primaryDomain ? 'https://' . $primaryDomain->domain : env('FRONTEND_URL');
+                                $shopUrl = $primaryDomain ? 'https://' . $primaryDomain->domain : config('storefront.frontend_url');
                             @endphp
                             <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-slate-100 mb-1">
                                 <span class="h-1.5 w-1.5 rounded-full bg-[#008060]"></span>
@@ -355,11 +355,11 @@
                                 @endif
                             </div>
                         @endforeach
-                    @elseif (env('FRONTEND_URL'))
+                    @elseif (config('storefront.frontend_url'))
                         <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-slate-100">
                             <span class="h-1.5 w-1.5 rounded-full bg-[#008060]"></span>
                             <span class="text-xs text-slate-700">Storefront headless connecté</span>
-                            <a href="{{ env('FRONTEND_URL') }}" target="_blank"
+                            <a href="{{ config('storefront.frontend_url') }}" target="_blank"
                                 class="ml-auto text-xs text-slate-500 hover:text-slate-900">
                                 <x-lucide-eye class="w-4 h-4" />
                             </a>

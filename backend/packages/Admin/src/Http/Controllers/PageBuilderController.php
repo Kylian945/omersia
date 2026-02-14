@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Omersia\Admin\Config\BuilderWidgets;
 use Omersia\CMS\Models\Page;
+use Omersia\CMS\Models\PageTranslation;
 
 class PageBuilderController extends Controller
 {
@@ -17,9 +18,12 @@ class PageBuilderController extends Controller
 
         $locale = $request->get('locale', 'fr');
 
+        /** @var PageTranslation|null $translation */
         $translation = $page->translations()->where('locale', $locale)->first();
 
-        $content = $translation?->content_json ?? ['sections' => []];
+        $content = ($translation instanceof PageTranslation && is_array($translation->content_json))
+            ? $translation->content_json
+            : ['sections' => []];
         $widgets = array_values(BuilderWidgets::all());
 
         return view('admin::builder.builder', [

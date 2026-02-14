@@ -6,6 +6,7 @@ namespace Omersia\Api\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Omersia\Apparence\Models\Theme;
 use Omersia\Apparence\Services\ThemeCustomizationService;
 use Omersia\Core\Models\Shop;
 use OpenApi\Annotations as OA;
@@ -72,6 +73,7 @@ class ThemeApiController
                 ], 404);
             }
 
+            /** @var Theme|null $activeTheme */
             $activeTheme = $shop->themes()->where('is_active', true)->first();
 
             $settings = $this->customizationService->getActiveThemeSettings($shop->id);
@@ -86,8 +88,8 @@ class ThemeApiController
                 'settings' => $settings,
                 'settings_schema' => $settingsSchema,
                 'css_variables' => $cssVariables,
-                'component_path' => $activeTheme?->component_path ?? 'vision',
-                'theme_slug' => $activeTheme?->slug ?? 'vision',
+                'component_path' => $activeTheme ? $activeTheme->component_path : 'vision',
+                'theme_slug' => $activeTheme ? $activeTheme->slug : 'vision',
             ]);
         } catch (\Throwable $e) {
             Log::error('Error in ThemeApiController@settings', [

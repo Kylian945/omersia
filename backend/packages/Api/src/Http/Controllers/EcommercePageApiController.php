@@ -116,13 +116,17 @@ class EcommercePageApiController extends Controller
         }
 
         $translation = $page->translations->first();
+        $title = $translation ? $translation->title : '';
+        $content = ($translation && is_array($translation->content_json))
+            ? $translation->content_json
+            : ['sections' => []];
 
         return response()->json([
             'id' => $page->id,
             'type' => $page->type,
             'slug' => $page->slug,
-            'title' => $translation?->title ?? '',
-            'content' => $translation?->content_json ?? ['sections' => []],
+            'title' => $title,
+            'content' => $content,
         ]);
     }
 
@@ -224,13 +228,17 @@ class EcommercePageApiController extends Controller
         }
 
         $translation = $page->translations->first();
+        $title = $translation ? $translation->title : '';
+        $content = ($translation && is_array($translation->content_json))
+            ? $translation->content_json
+            : ['sections' => []];
 
         return response()->json([
             'id' => $page->id,
             'type' => $page->type,
             'slug' => $page->slug,
-            'title' => $translation?->title ?? '',
-            'content' => $translation?->content_json ?? ['sections' => []],
+            'title' => $title,
+            'content' => $content,
         ]);
     }
 }

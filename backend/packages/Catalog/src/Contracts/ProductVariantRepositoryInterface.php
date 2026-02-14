@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Omersia\Catalog\Models\ProductVariant;
 use Omersia\Shared\Contracts\RepositoryInterface;
 
+/** @extends RepositoryInterface<ProductVariant> */
 interface ProductVariantRepositoryInterface extends RepositoryInterface
 {
     public function getByProductId(int $productId): Collection;

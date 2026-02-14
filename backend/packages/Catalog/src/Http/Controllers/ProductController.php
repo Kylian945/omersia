@@ -220,11 +220,17 @@ class ProductController extends Controller
         $products = $paginator->getCollection()->map(function ($product) {
             $translation = $product->translations->first();
             $mainImage = $product->images->first();
+            $name = ($translation && is_string($translation->name) && $translation->name !== '')
+                ? $translation->name
+                : 'Sans nom';
+            $slug = ($translation && is_string($translation->slug))
+                ? $translation->slug
+                : '';
 
             return [
                 'id' => $product->id,
-                'name' => $translation?->name ?? 'Sans nom',
-                'slug' => $translation?->slug ?? '',
+                'name' => $name,
+                'slug' => $slug,
                 'price' => $product->price,
                 'image' => $mainImage ? asset('storage/'.$mainImage->path) : null,
             ];

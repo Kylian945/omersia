@@ -41,11 +41,17 @@ final class CategoryDetailResource extends JsonResource
     private function mapCategory(Category $category, string $locale, bool $includeRelations): array
     {
         $translation = $this->resolveTranslation($category, $locale);
+        $name = ($translation && is_string($translation->name) && $translation->name !== '')
+            ? $translation->name
+            : 'Sans nom';
+        $slug = ($translation && is_string($translation->slug))
+            ? $translation->slug
+            : '';
 
         $data = [
             'id' => $category->id,
-            'name' => $translation?->name ?? 'Sans nom',
-            'slug' => $translation?->slug ?? '',
+            'name' => $name,
+            'slug' => $slug,
             'description' => $translation?->description,
             'image' => $category->image_url,
             'image_url' => $category->image_url,

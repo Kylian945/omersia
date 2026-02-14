@@ -58,21 +58,33 @@ class Category extends Model
         return asset('storage/'.$this->image_path);
     }
 
+    /**
+     * @return BelongsTo<Category, $this>
+     */
     public function parent(): BelongsTo
     {
         return $this->belongsTo(Category::class, 'parent_id');
     }
 
+    /**
+     * @return HasMany<Category, $this>
+     */
     public function children(): HasMany
     {
         return $this->hasMany(Category::class, 'parent_id');
     }
 
+    /**
+     * @return HasMany<CategoryTranslation, $this>
+     */
     public function translations(): HasMany
     {
         return $this->hasMany(CategoryTranslation::class);
     }
 
+    /**
+     * @return BelongsToMany<Product, $this>
+     */
     public function products(): BelongsToMany
     {
         return $this->belongsToMany(Product::class, 'product_categories');

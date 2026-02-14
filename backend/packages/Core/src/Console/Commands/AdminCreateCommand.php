@@ -219,7 +219,7 @@ class AdminCreateCommand extends Command
     {
         $parts = explode(' ', trim($name));
 
-        return $parts[0] ?? 'Admin';
+        return $parts[0];
     }
 
     protected function extractLastname(string $name): string

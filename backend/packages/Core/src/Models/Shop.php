@@ -47,11 +47,17 @@ class Shop extends Model
         'is_default' => 'boolean',
     ];
 
+    /**
+     * @return HasMany<ShopDomain, $this>
+     */
     public function domains(): HasMany
     {
         return $this->hasMany(ShopDomain::class);
     }
 
+    /**
+     * @return HasMany<Theme, $this>
+     */
     public function themes(): HasMany
     {
         return $this->hasMany(Theme::class);

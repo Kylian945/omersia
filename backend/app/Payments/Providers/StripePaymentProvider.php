@@ -322,7 +322,7 @@ class StripePaymentProvider implements PaymentProvider
         try {
             $customer = $order->customer;
             if ($customer) {
-                $frontUrl = config('app.frontend_url', env('FRONTEND_URL', 'http://localhost:3000'));
+                $frontUrl = (string) config('storefront.frontend_url', 'http://localhost:3000');
                 $retryUrl = $frontUrl.'/checkout/'.$order->id;
 
                 Mail::to($customer->email)->send(new PaymentFailedMail($order, $failureReason, $retryUrl));

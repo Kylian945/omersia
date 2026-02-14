@@ -384,7 +384,7 @@ class MediaLibraryController extends Controller
     }
 
     /**
-     * @return \GdImage|resource|null
+     * @return \GdImage|null
      */
     private function createImageResource(string $absolutePath, string $mimeType)
     {
