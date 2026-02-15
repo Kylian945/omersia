@@ -19,8 +19,19 @@
 
                 <div class="space-y-2">
                     <label class="block text-xs font-medium text-gray-700">Titre</label>
-                    <input type="text" name="title"
-                        class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs" required>
+                    <div class="flex items-stretch rounded-lg border border-gray-200 bg-white overflow-hidden">
+                        <input type="text" name="title"
+                            class="flex-1 border-0 px-3 py-1.5 text-xs focus:ring-0" required>
+                        <button type="button" data-ai-content-open-modal
+                            data-ai-content-context="cms_page"
+                            data-ai-content-target="title"
+                            data-ai-content-target-label="Titre de page"
+                            data-ai-content-generate-url="{{ route('admin.ai.generate-content') }}"
+                            class="inline-flex items-center justify-center border-l border-gray-200 px-3 text-gray-600 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                            aria-label="Générer le titre avec l'IA">
+                            <x-lucide-wand-sparkles class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                 </div>
 
                 <div class="space-y-2">
@@ -61,14 +72,36 @@
 
                 <div class="space-y-2">
                     <label class="block text-xs font-medium text-gray-700">Meta title</label>
-                    <input type="text" name="meta_title"
-                        class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs">
+                    <div class="flex items-stretch rounded-lg border border-gray-200 bg-white overflow-hidden">
+                        <input type="text" name="meta_title"
+                            class="flex-1 border-0 px-3 py-1.5 text-xs focus:ring-0">
+                        <button type="button" data-ai-content-open-modal
+                            data-ai-content-context="cms_page"
+                            data-ai-content-target="meta_title"
+                            data-ai-content-target-label="Meta title"
+                            data-ai-content-generate-url="{{ route('admin.ai.generate-content') }}"
+                            class="inline-flex items-center justify-center border-l border-gray-200 px-3 text-gray-600 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                            aria-label="Générer le meta title avec l'IA">
+                            <x-lucide-wand-sparkles class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-xs font-medium text-gray-700">Meta description</label>
-                    <textarea name="meta_description"
-                        class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs h-20 resize-none"></textarea>
+                    <div class="flex items-stretch rounded-lg border border-gray-200 bg-white overflow-hidden">
+                        <textarea name="meta_description"
+                            class="flex-1 border-0 px-3 py-1.5 text-xs h-20 resize-none focus:ring-0"></textarea>
+                        <button type="button" data-ai-content-open-modal
+                            data-ai-content-context="cms_page"
+                            data-ai-content-target="meta_description"
+                            data-ai-content-target-label="Meta description"
+                            data-ai-content-generate-url="{{ route('admin.ai.generate-content') }}"
+                            class="inline-flex items-center justify-center border-l border-gray-200 px-3 text-gray-600 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                            aria-label="Générer la meta description avec l'IA">
+                            <x-lucide-wand-sparkles class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                 </div>
 
                 <div class="flex items-center gap-2">
@@ -108,5 +141,7 @@
                 </a>
             </div>
         </div>
+
+        @include('admin::components.ai-content-modal')
     </form>
 @endsection

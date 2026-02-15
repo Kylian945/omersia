@@ -12,6 +12,7 @@ import type { ProductWithVariants } from "@/lib/types/product-types";
 import { getMainImage } from "@/lib/image-utils";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
 import { useHydrated } from "@/hooks/useHydrated";
+import { sanitizePlainText } from "@/lib/html-sanitizer";
 
 type VariantValue = {
   id: number;
@@ -145,6 +146,7 @@ export function ProductCard({
   const [variantError, setVariantError] = useState<string | null>(null);
 
   const t = product.translations?.[0];
+  const shortDescription = sanitizePlainText(t?.short_description);
   const slug = t?.slug;
   const locale =
     (t as { locale?: string } | undefined)?.locale ||
@@ -540,11 +542,11 @@ export function ProductCard({
             {t?.name || "Produit sans nom"}
           </div>
 
-          {t?.short_description && (
+          {shortDescription && (
             <div
               className={`line-clamp-2 min-h-[30px] text-xs text-[var(--theme-muted-color,#6b7280)] ${ui.descTone}`.trim()}
             >
-              {t.short_description}
+              {shortDescription}
             </div>
           )}
 

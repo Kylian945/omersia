@@ -6,6 +6,7 @@ import type { ListingProduct } from "./ListingProducts";
 import { getMainImage } from "@/lib/image-utils";
 import { useThemeSettings } from "@/hooks/useThemeSettings";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { sanitizePlainText } from "@/lib/html-sanitizer";
 
 // On décrit ce que renvoie ton backend pour une variante
 type Variant = {
@@ -37,6 +38,7 @@ export const ProductCard = memo(function ProductCard({ product, hrefBase = "/pro
   } = useThemeSettings();
 
   const t = product.translations?.[0];
+  const shortDescription = sanitizePlainText(t?.short_description);
   const slug = t?.slug;
   const href = slug ? `${hrefBase}/${slug}` : "#";
   const image = getMainImage(product);
@@ -226,9 +228,9 @@ export const ProductCard = memo(function ProductCard({ product, hrefBase = "/pro
           {t?.name || "Produit sans nom"}
         </div>
 
-        {t?.short_description && (
+        {shortDescription && (
           <div className="text-xs text-neutral-500 line-clamp-2 min-h-[30px]">
-            {t.short_description}
+            {shortDescription}
           </div>
         )}
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from '@jest/globals';
-import { sanitizeHTML } from '../html-sanitizer';
+import { sanitizeHTML, sanitizePlainText } from '../html-sanitizer';
 
 describe('html-sanitizer', () => {
   // Mock DOMPurify for client-side tests
@@ -314,6 +314,26 @@ describe('html-sanitizer', () => {
       // Data attributes should be removed based on ALLOW_DATA_ATTR: false
       // But server-side sanitization might handle differently
       expect(result).toContain('Content');
+    });
+  });
+
+  describe('sanitizePlainText', () => {
+    it('should strip HTML tags and keep text content', () => {
+      const html = '<p>Produit <strong>premium</strong><br>Edition 2026</p>';
+      const result = sanitizePlainText(html);
+      expect(result).toBe('Produit premium Edition 2026');
+    });
+
+    it('should return empty string for nullish input', () => {
+      expect(sanitizePlainText(null)).toBe('');
+      expect(sanitizePlainText(undefined)).toBe('');
+    });
+
+    it('should remove malicious script content from plain text output', () => {
+      const html = '<p>safe</p><script>alert(1)</script>';
+      const result = sanitizePlainText(html);
+      expect(result).toBe('safe');
+      expect(result).not.toContain('alert');
     });
   });
 });

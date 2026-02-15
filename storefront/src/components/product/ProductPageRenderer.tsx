@@ -53,6 +53,8 @@ export function ProductPageRenderer({
   const { content } = pageData;
 
   const t = product.translations?.[0] as ProductTranslation | undefined;
+  const safeShortDescription = sanitizeHTML(t?.short_description);
+  const safeDescription = sanitizeHTML(t?.description);
   const categories = product.categories || [];
 
   // Normalize images
@@ -257,10 +259,13 @@ export function ProductPageRenderer({
                   </div>
                 )}
 
-                {t?.short_description && (
-                  <p className="text-xs text-neutral-600">
-                    {t.short_description}
-                  </p>
+                {safeShortDescription && (
+                  <div
+                    className="prose prose-sm max-w-none text-xs text-neutral-600"
+                    dangerouslySetInnerHTML={{
+                      __html: safeShortDescription,
+                    }}
+                  />
                 )}
 
                 {/* Hook: product.detail.badges - Permet d'ajouter des badges personnalisés au produit */}
@@ -325,7 +330,7 @@ export function ProductPageRenderer({
                 </div>
               </div>
 
-              {t?.description && (
+              {safeDescription && (
                 <div className="mt-4 rounded-2xl bg-white border border-black/5 shadow-sm p-4">
                   <h2 className="text-sm font-semibold text-neutral-900 mb-1.5">
                     Description détaillée
@@ -333,7 +338,7 @@ export function ProductPageRenderer({
                   <div className="prose prose-sm max-w-none text-xs text-neutral-700">
                     <div
                       dangerouslySetInnerHTML={{
-                        __html: sanitizeHTML(t.description),
+                        __html: safeDescription,
                       }}
                     />
                   </div>

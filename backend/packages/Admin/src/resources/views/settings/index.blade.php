@@ -93,6 +93,40 @@
             </div>
         </a>
 
+        {{-- IA --}}
+        <a href="{{ route('admin.settings.ai.index') }}"
+            class="group rounded-2xl bg-white border border-black/5 shadow-sm hover:shadow-md transition-all duration-150 p-4 flex flex-col justify-between">
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <div
+                            class="h-6 w-6 rounded-lg bg-neutral-900 flex items-center justify-center text-white text-xs font-semibold">
+                            <x-lucide-cpu class="w-3 h-3" />
+                        </div>
+                        <div class="text-xs font-semibold text-gray-800">IA</div>
+                    </div>
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        class="h-3.5 w-3.5 text-gray-400 group-hover:text-gray-700 transition" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+                <div class="text-xxxs text-gray-500 leading-snug">
+                    Configurez vos providers IA (OpenAI, Claude, Cursor, etc.), le modèle et le contexte SEO.
+                </div>
+                <div class="mt-3 pt-3 border-t border-gray-100 space-y-1">
+                    <div class="flex items-center justify-between text-xxxs">
+                        <span class="text-gray-600">Providers actifs</span>
+                        <span class="font-semibold text-gray-900">{{ $configData['ai_providers_enabled'] }} / {{ $configData['ai_providers_count'] }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-xxxs">
+                        <span class="text-gray-600">Provider par défaut</span>
+                        <span class="font-semibold text-gray-900">{{ $configData['ai_default_provider'] }}</span>
+                    </div>
+                </div>
+            </div>
+        </a>
+
         {{-- Taxes --}}
         <a href="{{ route('admin.settings.taxes.index') }}"
             class="group rounded-2xl bg-white border border-black/5 shadow-sm hover:shadow-md transition-all duration-150 p-4 flex flex-col justify-between">

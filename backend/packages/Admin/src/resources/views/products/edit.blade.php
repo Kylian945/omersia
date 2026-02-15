@@ -71,6 +71,7 @@
         options: @js($initialOptions),
         variants: @js($initialVariants),
     })"
+        data-product-id="{{ $product->id }}"
         class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         @csrf
@@ -89,8 +90,16 @@
 
                 <div class="space-y-2">
                     <label class="block text-xs font-medium text-gray-700">Nom</label>
-                    <input type="text" name="name" value="{{ old('name', $t?->name) }}"
-                        class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs" required>
+                    <div class="flex items-stretch rounded-lg border border-gray-200 bg-white overflow-hidden">
+                        <input type="text" name="name" value="{{ old('name', $t?->name) }}"
+                            class="flex-1 border-0 px-3 py-1.5 text-xs focus:ring-0" required>
+                        <button type="button" data-ai-open-modal data-ai-target="name" data-ai-target-label="Nom du produit"
+                            data-ai-generate-url="{{ route('products.ai.generate') }}"
+                            class="inline-flex items-center justify-center border-l border-gray-200 px-3 text-gray-600 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                            aria-label="Générer le nom du produit avec l'IA">
+                            <x-lucide-wand-sparkles class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                 </div>
 
                 <div class="space-y-2">
@@ -101,13 +110,38 @@
 
                 <div class="space-y-2">
                     <label class="block text-xs font-medium text-gray-700">Description courte</label>
-                    <textarea name="short_description"
-                        class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs h-16 resize-none">{{ old('short_description', $t?->short_description) }}</textarea>
+                    <div class="product-wysiwyg-group flex items-stretch rounded-lg border border-gray-200 bg-white overflow-hidden">
+                        <div class="min-w-0 flex-1">
+                            <textarea name="short_description" class="hidden">{{ old('short_description', $t?->short_description) }}</textarea>
+                            <div data-product-wysiwyg="short_description"
+                                data-product-wysiwyg-placeholder="Résumé produit (bénéfices, usage, matière...)"
+                                data-product-wysiwyg-min-height="90"></div>
+                        </div>
+                        <button type="button" data-ai-open-modal data-ai-target="short_description"
+                            data-ai-target-label="Description courte" data-ai-generate-url="{{ route('products.ai.generate') }}"
+                            class="inline-flex w-10 shrink-0 items-start justify-center border-l border-gray-200 pt-2 text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            aria-label="Générer la description courte avec l'IA">
+                            <x-lucide-wand-sparkles class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-xs font-medium text-gray-700">Description</label>
-                    <textarea name="description" class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs h-32 resize-y">{{ old('description', $t?->description) }}</textarea>
+                    <div class="product-wysiwyg-group flex items-stretch rounded-lg border border-gray-200 bg-white overflow-hidden">
+                        <div class="min-w-0 flex-1">
+                            <textarea name="description" class="hidden">{{ old('description', $t?->description) }}</textarea>
+                            <div data-product-wysiwyg="description"
+                                data-product-wysiwyg-placeholder="Description complète du produit (détails, arguments, entretien...)"
+                                data-product-wysiwyg-min-height="200"></div>
+                        </div>
+                        <button type="button" data-ai-open-modal data-ai-target="description"
+                            data-ai-target-label="Description produit" data-ai-generate-url="{{ route('products.ai.generate') }}"
+                            class="inline-flex w-10 shrink-0 items-start justify-center border-l border-gray-200 pt-2 text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                            aria-label="Générer la description produit avec l'IA">
+                            <x-lucide-wand-sparkles class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -120,7 +154,18 @@
                             Gérez les images existantes, ajoutez-en de nouvelles et choisissez l’image principale.
                         </div>
                     </div>
+                    <button type="button" data-ai-image-generate-button
+                        data-ai-image-generate-url="{{ route('products.ai.generate-image') }}"
+                        class="inline-flex items-center gap-1 rounded-lg border border-gray-200 px-2 py-1 text-xxxs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        aria-label="Générer une image produit avec l'IA">
+                        <x-lucide-wand-sparkles class="h-3.5 w-3.5" />
+                        <span>Générer via IA</span>
+                    </button>
                 </div>
+
+                @php
+                    $oldAiImages = old('ai_generated_images', []);
+                @endphp
 
                 {{-- Images existantes --}}
                 @if ($product->images->count())
@@ -129,24 +174,69 @@
                             @php
                                 $value = 'existing-' . $image->id;
                                 $isChecked = old('main_image') ? old('main_image') === $value : $image->is_main;
+                                $isAiImage = $image->isAiGenerated();
                             @endphp
 
-                            <label class="relative border rounded-xl overflow-hidden cursor-pointer group">
+                            <div class="relative border rounded-xl overflow-hidden group"
+                                data-product-existing-image-id="{{ $image->id }}"
+                                data-product-existing-image-url="{{ $image->url }}">
                                 <img src="{{ $image->url }}" alt=""
                                     class="w-full h-52 object-cover group-hover:opacity-95">
 
-                                <div
+                                @if ($isAiImage)
+                                    <span
+                                        class="absolute left-1 top-1 z-10 inline-flex items-center rounded-md bg-black/90 px-1.5 py-0.5 text-xxxs font-semibold uppercase tracking-wide text-white shadow-sm">
+                                        IA
+                                    </span>
+                                @endif
+
+                                <button type="button"
+                                    title="Supprimer l'image"
+                                    aria-label="Supprimer l'image"
+                                    class="absolute right-1 top-1 z-10 inline-flex h-7 w-7 items-center justify-center rounded-md bg-white/90 text-gray-600 shadow-sm hover:bg-white"
+                                    @click="$dispatch('open-modal', { name: 'delete-product-image-{{ $image->id }}' })">
+                                    <x-lucide-trash-2 class="h-3.5 w-3.5" />
+                                </button>
+
+                                <label
                                     class="absolute bottom-1 left-1 right-1 flex items-center justify-center gap-1
-                                            bg-black/60 text-white text-xxxs px-1.5 py-0.5 rounded-full">
+                                            bg-black/60 text-white text-xxxs px-1.5 py-0.5 rounded-full cursor-pointer">
                                     <input type="radio" name="main_image" value="{{ $value }}" class="h-2 w-2"
                                         {{ $isChecked ? 'checked' : '' }}>
                                     <span>
                                         {{ $image->is_main ? 'Image principale actuelle' : 'Définir comme principale' }}
                                     </span>
-                                </div>
-                            </label>
+                                </label>
+                            </div>
                         @endforeach
                     </div>
+
+                    @foreach ($product->images as $image)
+                        <x-admin::modal name="delete-product-image-{{ $image->id }}"
+                            :title="'Supprimer cette image ?'" description="Cette action est définitive." size="max-w-md">
+                            <p class="text-xs text-gray-600">
+                                Confirmer la suppression de l’image produit.
+                            </p>
+
+                            <div class="flex justify-end gap-2 pt-3">
+                                <button type="button"
+                                    class="px-4 py-2 rounded-lg border border-gray-200 text-xs text-gray-700 hover:bg-gray-50"
+                                    @click="open = false">
+                                    Annuler
+                                </button>
+
+                                <form action="{{ route('products.images.destroy', [$product, $image]) }}" method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="inline-flex items-center gap-2 rounded-lg bg-black px-4 py-2 text-xs font-medium text-white hover:bg-neutral-900">
+                                        <x-lucide-trash-2 class="h-3 w-3" />
+                                        Confirmer
+                                    </button>
+                                </form>
+                            </div>
+                        </x-admin::modal>
+                    @endforeach
                 @else
                     <div class="text-xxxs text-gray-500">
                         Aucune image pour le moment. Ajoutez-en ci-dessous.
@@ -169,24 +259,97 @@
                     <div id="new-images-preview" class="mt-2 grid grid-cols-3 gap-2"></div>
                 </div>
 
+                <div class="mt-3 space-y-2">
+                    <div class="text-xs font-medium text-gray-700">Images IA générées</div>
+                    <p class="text-xxxs text-gray-400">
+                        La modal permet de choisir une image de référence (optionnel) et d’ajouter un prompt.
+                    </p>
+
+                    <div id="ai-generated-images-preview" class="grid grid-cols-3 gap-2">
+                        @if (is_array($oldAiImages))
+                            @foreach ($oldAiImages as $index => $oldAiImage)
+                                @if (is_string($oldAiImage) && str_starts_with($oldAiImage, 'data:image/'))
+                                    <label class="relative border rounded-xl overflow-hidden cursor-pointer group">
+                                        <img src="{{ $oldAiImage }}" alt="Image IA générée"
+                                            class="w-full h-52 object-cover group-hover:opacity-95">
+                                        <span
+                                            class="absolute left-1 top-1 z-10 inline-flex items-center rounded-md bg-emerald-600/90 px-1.5 py-0.5 text-xxxs font-semibold uppercase tracking-wide text-white shadow-sm">
+                                            IA
+                                        </span>
+                                        <div
+                                            class="absolute bottom-1 left-1 right-1 flex items-center justify-center gap-1 bg-black/60 text-white text-xxxs px-1.5 py-0.5 rounded-full">
+                                            <input type="radio" name="main_image" value="ai-{{ $index }}"
+                                                class="h-2 w-2"
+                                                {{ old('main_image') === 'ai-' . $index ? 'checked' : '' }}>
+                                            <span>
+                                                {{ old('main_image') === 'ai-' . $index ? 'Image principale' : 'Définir comme principale' }}
+                                            </span>
+                                        </div>
+                                    </label>
+                                @endif
+                            @endforeach
+                        @endif
+                    </div>
+
+                    @error('ai_generated_images')
+                        <p class="text-xxs text-red-600">{{ $message }}</p>
+                    @enderror
+                    @error('ai_generated_images.*')
+                        <p class="text-xxs text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div id="ai-generated-images-inputs" class="hidden">
+                    @if (is_array($oldAiImages))
+                        @foreach ($oldAiImages as $index => $oldAiImage)
+                            @if (is_string($oldAiImage) && str_starts_with($oldAiImage, 'data:image/'))
+                                <input type="hidden" name="ai_generated_images[{{ $index }}]"
+                                    value="{{ $oldAiImage }}" data-ai-generated-input
+                                    data-ai-generated-index="{{ $index }}">
+                            @endif
+                        @endforeach
+                    @endif
+                </div>
+
                 <input type="hidden" id="main_image_input" name="main_image"
                     value="{{ old('main_image', $currentMain ? 'existing-' . $currentMain->id : '') }}">
             </div>
 
             {{-- SEO --}}
             <div class="rounded-2xl bg-white border border-black/5 shadow-sm p-4 space-y-3">
-                <div class="text-xs font-semibold text-gray-800">Référencement</div>
+                <div>
+                    <div class="text-xs font-semibold text-gray-800">Référencement</div>
+                    <p class="text-xxxs text-gray-500">
+                        Génération manuelle uniquement, puis validation éditoriale avant enregistrement.
+                    </p>
+                </div>
 
                 <div class="space-y-2">
                     <label class="block text-xs font-medium text-gray-700">Meta title</label>
-                    <input type="text" name="meta_title" value="{{ old('meta_title', $t?->meta_title) }}"
-                        class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs">
+                    <div class="flex items-stretch rounded-lg border border-gray-200 bg-white overflow-hidden">
+                        <input type="text" name="meta_title" value="{{ old('meta_title', $t?->meta_title) }}"
+                            class="flex-1 border-0 px-3 py-1.5 text-xs focus:ring-0">
+                        <button type="button" data-ai-open-modal data-ai-target="meta_title"
+                            data-ai-target-label="Meta title" data-ai-generate-url="{{ route('products.ai.generate') }}"
+                            class="inline-flex items-center justify-center border-l border-gray-200 px-3 text-gray-600 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                            aria-label="Générer le meta title avec l'IA">
+                            <x-lucide-wand-sparkles class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                 </div>
 
                 <div class="space-y-2">
                     <label class="block text-xs font-medium text-gray-700">Meta description</label>
-                    <textarea name="meta_description"
-                        class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs h-20 resize-none">{{ old('meta_description', $t?->meta_description) }}</textarea>
+                    <div class="flex items-stretch rounded-lg border border-gray-200 bg-white overflow-hidden">
+                        <textarea name="meta_description"
+                            class="flex-1 border-0 px-3 py-1.5 text-xs h-20 resize-none focus:ring-0">{{ old('meta_description', $t?->meta_description) }}</textarea>
+                        <button type="button" data-ai-open-modal data-ai-target="meta_description"
+                            data-ai-target-label="Meta description" data-ai-generate-url="{{ route('products.ai.generate') }}"
+                            class="inline-flex items-center justify-center border-l border-gray-200 px-3 text-gray-600 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                            aria-label="Générer la meta description avec l'IA">
+                            <x-lucide-wand-sparkles class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -285,7 +448,7 @@
                             <div class="flex items-center gap-2">
                                 <input type="text" class="w-32 rounded-lg border border-gray-200 px-2 py-1 text-xxxs"
                                     placeholder="Nom de l’option (ex : Taille)" x-model="opt.name">
-                                <button type="button" class="text-xxxs text-red-500 ml-auto"
+                                <button type="button" class="text-xxxs text-gray-500 ml-auto"
                                     @click="removeOption(index)">
                                     Supprimer
                                 </button>
@@ -542,6 +705,106 @@
                     <button type="submit"
                         class="px-4 py-1.5 rounded-lg bg-[#111827] text-xs font-semibold text-white hover:bg-black">
                         Enregistrer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="product-ai-prompt-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm px-4">
+            <div class="w-full max-w-lg rounded-2xl border border-black/5 bg-white p-4 shadow-xl">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <div class="text-xs font-semibold text-gray-900">Génération IA du produit</div>
+                        <div class="text-xxxs text-gray-500">
+                            Décris le résultat attendu (angle marketing, mots-clés SEO, ton, contraintes).
+                        </div>
+                    </div>
+                    <button type="button" id="product-ai-modal-close-button"
+                        class="text-xs text-gray-400 hover:text-gray-700" aria-label="Fermer la modal IA">
+                        ✕
+                    </button>
+                </div>
+
+                <div class="mt-3 space-y-2">
+                    <p class="text-xxxs text-gray-500">
+                        Champ ciblé: <span id="product-ai-target-label" class="font-semibold text-gray-700">-</span>
+                    </p>
+                    <label for="product-ai-prompt-input" class="block text-xs font-medium text-gray-700">
+                        Prompt de génération
+                    </label>
+                    <textarea id="product-ai-prompt-input" rows="5" maxlength="2000"
+                        class="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs resize-y"
+                        placeholder="Ex: Rédige un titre orienté conversion et une description premium, en mettant en avant la durabilité du produit."></textarea>
+                    <p class="text-xxxs text-gray-500">
+                        Ce prompt est combiné avec les settings IA globaux et les données actuelles du produit.
+                    </p>
+                    <p id="product-ai-modal-error" class="hidden text-xxs text-red-600"></p>
+                </div>
+
+                <div class="mt-3 flex items-center justify-end gap-2">
+                    <button type="button" id="product-ai-modal-cancel-button"
+                        class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50">
+                        Annuler
+                    </button>
+                    <button type="button" id="product-ai-modal-submit-button"
+                        class="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black disabled:opacity-60 disabled:cursor-not-allowed">
+                        Lancer la génération
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="product-ai-image-prompt-modal"
+            class="fixed inset-0 z-50 hidden items-center justify-center bg-black/30 backdrop-blur-sm px-4">
+            <div class="w-full max-w-lg rounded-2xl border border-black/5 bg-white p-4 shadow-xl">
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <div class="text-xs font-semibold text-gray-900">Génération d’image IA</div>
+                        <div class="text-xxxs text-gray-500">
+                            Si des images existent, sélectionne une référence, puis saisis un prompt précis.
+                        </div>
+                    </div>
+                    <button type="button" id="product-ai-image-modal-close-button"
+                        class="text-xs text-gray-400 hover:text-gray-700" aria-label="Fermer la modal image IA">
+                        ✕
+                    </button>
+                </div>
+
+                <div class="mt-3 space-y-2">
+                    <label class="block text-xs font-medium text-gray-700">
+                        Image de référence
+                    </label>
+                    <div id="product-ai-image-reference-options" class="grid grid-cols-2 gap-2 sm:grid-cols-3"></div>
+                    <p id="product-ai-image-reference-empty" class="hidden text-xxxs text-gray-500">
+                        Aucune image existante pour ce produit.
+                    </p>
+                </div>
+
+                <div class="mt-3 space-y-2">
+                    <label for="product-ai-image-prompt-input" class="block text-xs font-medium text-gray-700">
+                        Prompt de génération image
+                    </label>
+                    <textarea id="product-ai-image-prompt-input" rows="5" maxlength="1500"
+                        class="w-full rounded-lg border border-gray-200 px-3 py-2 text-xs resize-y"
+                        placeholder="Ex: Photo produit premium sur fond neutre, éclairage studio, angle 3/4, rendu réaliste."></textarea>
+                    <p class="text-xxxs text-gray-500">
+                        Seul ce prompt est utilisé pour la génération.
+                    </p>
+                    <p id="product-ai-image-modal-error" class="hidden text-xxs text-red-600"></p>
+                    <div id="product-ai-image-loading" class="hidden items-center gap-1.5 text-xxxs text-gray-600">
+                        <span class="inline-block h-3.5 w-3.5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700"></span>
+                        <span>Génération d'image en cours...</span>
+                    </div>
+                </div>
+
+                <div class="mt-3 flex items-center justify-end gap-2">
+                    <button type="button" id="product-ai-image-modal-cancel-button"
+                        class="rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50">
+                        Annuler
+                    </button>
+                    <button type="button" id="product-ai-image-modal-submit-button"
+                        class="rounded-lg bg-neutral-900 px-3 py-1.5 text-xs font-semibold text-white hover:bg-black disabled:opacity-60 disabled:cursor-not-allowed">
+                        Générer l’image
                     </button>
                 </div>
             </div>

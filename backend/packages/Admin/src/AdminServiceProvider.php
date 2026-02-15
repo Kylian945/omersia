@@ -6,9 +6,11 @@ namespace Omersia\Admin;
 
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Omersia\Admin\Support\Modules\ModuleManager;
+use Omersia\Ai\Models\AiProvider;
 use Omersia\Core\Repositories\ShopRepository;
 
 class AdminServiceProvider extends ServiceProvider
@@ -48,7 +50,18 @@ class AdminServiceProvider extends ServiceProvider
         View::composer('admin::layout', function ($view) {
             $shopRepository = app(ShopRepository::class);
             $shops = $shopRepository->getActiveShops();
+            $hasConfiguredAiProvider = false;
+
+            if (Schema::hasTable('ai_providers')) {
+                $hasConfiguredAiProvider = AiProvider::query()
+                    ->where('is_enabled', true)
+                    ->get()
+                    ->contains(static fn (AiProvider $provider): bool => $provider->hasApiKey());
+            }
+
             $view->with('activeShops', $shops);
+            $view->with('hasConfiguredAiProvider', $hasConfiguredAiProvider);
+            $view->with('aiProviderSettingsUrl', route('admin.settings.ai.index'));
         });
 
         // Migrations

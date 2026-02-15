@@ -155,20 +155,23 @@ return [
     |
     */
 
-    'providers' => ServiceProvider::defaultProviders()->merge([
-        /*
-         * Package Service Providers...
-         */
+    'providers' => ServiceProvider::defaultProviders()->merge(
+        array_values(array_filter([
+            /*
+             * Package Service Providers...
+             */
+            class_exists(\Omersia\Ai\AiServiceProvider::class) ? \Omersia\Ai\AiServiceProvider::class : null,
 
-        /*
-         * Application Service Providers...
-         */
-        App\Providers\AppServiceProvider::class,
-        App\Providers\AuthServiceProvider::class,
-        App\Providers\BroadcastServiceProvider::class,
-        App\Providers\EventServiceProvider::class,
-        App\Providers\RouteServiceProvider::class,
-    ])->toArray(),
+            /*
+             * Application Service Providers...
+             */
+            App\Providers\AppServiceProvider::class,
+            App\Providers\AuthServiceProvider::class,
+            App\Providers\BroadcastServiceProvider::class,
+            App\Providers\EventServiceProvider::class,
+            App\Providers\RouteServiceProvider::class,
+        ]))
+    )->toArray(),
 
     /*
     |--------------------------------------------------------------------------

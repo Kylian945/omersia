@@ -1,6 +1,15 @@
 #!/bin/sh
 set -e
 
+echo "Configuring PHP upload limits..."
+cat > /usr/local/etc/php/conf.d/99-uploads.ini <<'EOF'
+post_max_size=64M
+upload_max_filesize=64M
+memory_limit=512M
+max_file_uploads=50
+max_input_vars=5000
+EOF
+
 if [ -f composer.lock ]; then
     echo "Running composer install..."
     composer install --no-interaction

@@ -31,6 +31,26 @@ export function sanitizeHTML(html: string | undefined | null): string {
 }
 
 /**
+ * Sanitizes rich HTML input and returns a plain-text string.
+ * Useful for metadata, snippets, and card previews.
+ */
+export function sanitizePlainText(html: string | undefined | null): string {
+  const sanitized = sanitizeHTML(html);
+
+  if (!sanitized) {
+    return '';
+  }
+
+  return sanitized
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\/(p|div|li|h[1-6])>/gi, ' ')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/**
  * Basic server-side HTML sanitization
  * Escapes dangerous characters and removes script tags
  */

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Omersia\Catalog\Services;
 
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Omersia\Catalog\Models\Product;
 use Omersia\Catalog\Models\ProductImage;
 
@@ -105,12 +107,91 @@ class ProductImageService
             if ($image) {
                 $image->update(['is_main' => true]);
             }
-        } elseif (str_starts_with($mainImageKey, 'new-') && isset($newImages[$mainImageKey])) {
+        } elseif (isset($newImages[$mainImageKey])) {
             $newImages[$mainImageKey]->update(['is_main' => true]);
         }
 
         // Garantir qu'une image principale existe
         $this->ensureMainImageExists($product);
+    }
+
+    /**
+     * Persist des images base64 générées par IA.
+     *
+     * @param  array<int|string, mixed>  $encodedImages
+     * @return array<string, ProductImage>
+     */
+    public function uploadGeneratedImages(Product $product, array $encodedImages): array
+    {
+        $createdImages = [];
+        $position = (int) ($product->images()->max('position') ?? 0);
+
+        foreach ($encodedImages as $index => $encodedImage) {
+            if (! is_string($encodedImage) || trim($encodedImage) === '') {
+                continue;
+            }
+
+            $decoded = $this->decodeBase64Image($encodedImage);
+            if ($decoded === null) {
+                continue;
+            }
+
+            $path = sprintf('products/ai/%d/%s.%s', $product->id, (string) Str::ulid(), $decoded['extension']);
+            Storage::disk('public')->put($path, $decoded['binary']);
+
+            $image = ProductImage::create([
+                'product_id' => $product->id,
+                'path' => $path,
+                'position' => ++$position,
+                'is_main' => false,
+            ]);
+
+            $createdImages['ai-'.(string) $index] = $image;
+        }
+
+        return $createdImages;
+    }
+
+    /**
+     * @return array{binary: string, extension: string}|null
+     */
+    private function decodeBase64Image(string $encodedImage): ?array
+    {
+        if (! preg_match('/^data:image\/(png|jpeg|jpg|webp);base64,([A-Za-z0-9+\/=\r\n]+)$/', $encodedImage, $matches)) {
+            return null;
+        }
+
+        $base64 = preg_replace('/\s+/', '', $matches[2]);
+        if (! is_string($base64) || $base64 === '') {
+            return null;
+        }
+
+        $binary = base64_decode($base64, true);
+        if (! is_string($binary) || $binary === '') {
+            return null;
+        }
+
+        if (strlen($binary) > 5 * 1024 * 1024) {
+            return null;
+        }
+
+        $mime = (new \finfo(FILEINFO_MIME_TYPE))->buffer($binary);
+        $mime = is_string($mime) ? strtolower($mime) : '';
+        $extension = match ($mime) {
+            'image/png' => 'png',
+            'image/webp' => 'webp',
+            'image/jpeg' => 'jpg',
+            default => null,
+        };
+
+        if (! is_string($extension)) {
+            return null;
+        }
+
+        return [
+            'binary' => $binary,
+            'extension' => $extension,
+        ];
     }
 
     /**
@@ -142,5 +223,31 @@ class ProductImageService
 
         // Définir la nouvelle image principale
         $image->update(['is_main' => true]);
+    }
+
+    /**
+     * Supprimer une image d'un produit.
+     */
+    public function deleteImage(Product $product, ProductImage $image): void
+    {
+        if ($image->product_id !== $product->id) {
+            throw new \InvalidArgumentException('Image does not belong to this product');
+        }
+
+        $path = (string) $image->path;
+        $image->delete();
+
+        if (
+            $path !== '' &&
+            ! str_starts_with($path, 'http://') &&
+            ! str_starts_with($path, 'https://')
+        ) {
+            $disk = Storage::disk('public');
+            if ($disk->exists($path)) {
+                $disk->delete($path);
+            }
+        }
+
+        $this->ensureMainImageExists($product);
     }
 }

@@ -56,6 +56,8 @@ final class ProductUpdateRequest extends FormRequest
             'images' => ['nullable', 'array'],
             'images.*' => ['image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
             'main_image' => ['nullable', 'string'],
+            'ai_generated_images' => ['nullable', 'array', 'max:4'],
+            'ai_generated_images.*' => ['string', 'max:8000000', 'regex:/^data:image\/(?:png|jpeg|jpg|webp);base64,[A-Za-z0-9+\/=\r\n]+$/'],
         ];
 
         if ($type === 'simple') {
@@ -144,6 +146,10 @@ final class ProductUpdateRequest extends FormRequest
             'images.*.image' => 'Chaque fichier doit être une image.',
             'images.*.mimes' => 'Les images doivent être au format JPEG, JPG, PNG ou WEBP.',
             'images.*.max' => 'Chaque image ne peut pas dépasser 5 Mo.',
+            'ai_generated_images.array' => 'Les images IA doivent être un tableau.',
+            'ai_generated_images.max' => 'Vous pouvez ajouter au maximum 4 images IA.',
+            'ai_generated_images.*.regex' => 'Le format des images IA est invalide.',
+            'ai_generated_images.*.max' => 'Une image IA est trop volumineuse.',
 
             // Messages pour les variantes
             'options.required' => 'Au moins une option est requise pour un produit à variantes.',

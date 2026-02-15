@@ -6,6 +6,7 @@ namespace Omersia\Catalog\Http\Controllers;
 
 use App\Events\Realtime\ProductStockUpdated;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Omersia\Catalog\DTO\ProductCreateDTO;
 use Omersia\Catalog\DTO\ProductUpdateDTO;
@@ -181,6 +182,19 @@ class ProductController extends Controller
             $this->productImageService->changeMainImage($product, $image);
 
             return back()->with('success', 'Image principale mise à jour');
+        } catch (\InvalidArgumentException $e) {
+            abort(404);
+        }
+    }
+
+    public function destroyImage(Product $product, ProductImage $image): RedirectResponse
+    {
+        $this->authorize('products.update');
+
+        try {
+            $this->productImageService->deleteImage($product, $image);
+
+            return back()->with('success', 'Image supprimée avec succès.');
         } catch (\InvalidArgumentException $e) {
             abort(404);
         }
