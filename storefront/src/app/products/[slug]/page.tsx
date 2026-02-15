@@ -13,6 +13,7 @@ import { SimpleAddToCart } from "@/components/product/SimpleAddToCart";
 import { ProductVariantProvider } from "@/components/product/ProductVariantContext";
 import { ThemedProductCard } from "@/components/product/ThemedProductCard";
 import { buildImageUrl } from "@/lib/image-utils";
+import { sanitizeHTML, sanitizePlainText } from "@/lib/html-sanitizer";
 
 // Force dynamic rendering - no cache for Page Builder content
 export const dynamic = 'force-dynamic';
@@ -74,7 +75,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: t?.meta_title || t?.name || "",
-    description: t?.meta_description || t?.short_description || "",
+    description: sanitizePlainText(
+      t?.meta_description || t?.short_description || ""
+    ),
   };
 }
 
@@ -113,6 +116,8 @@ export default async function ProductPage({ params }: Props) {
   }
 
   const t = product.translations?.[0];
+  const safeShortDescription = sanitizeHTML(t?.short_description);
+  const safeDescription = sanitizeHTML(t?.description);
 
   // Fetch related products
   const rawRelated: unknown[] =
@@ -351,10 +356,13 @@ export default async function ProductPage({ params }: Props) {
                 </div>
               )}
 
-              {t?.short_description && (
-                <p className="text-xs text-neutral-600">
-                  {t.short_description}
-                </p>
+              {safeShortDescription && (
+                <div
+                  className="prose prose-sm max-w-none text-xs text-neutral-600"
+                  dangerouslySetInnerHTML={{
+                    __html: safeShortDescription,
+                  }}
+                />
               )}
 
               {/* CTA (toujours décoratif ici) */}
@@ -399,7 +407,7 @@ export default async function ProductPage({ params }: Props) {
               </div>
             </div>
 
-            {t?.description && (
+            {safeDescription && (
               <div className="mt-4 rounded-2xl bg-white border border-black/5 shadow-sm p-4">
                 <h2 className="text-sm font-semibold text-neutral-900 mb-1.5">
                   Description détaillée
@@ -407,7 +415,7 @@ export default async function ProductPage({ params }: Props) {
                 <div className="prose prose-sm max-w-none text-xs text-neutral-700">
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: t.description,
+                      __html: safeDescription,
                     }}
                   />
                 </div>

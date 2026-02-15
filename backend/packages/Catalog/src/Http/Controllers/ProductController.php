@@ -6,6 +6,7 @@ namespace Omersia\Catalog\Http\Controllers;
 
 use App\Events\Realtime\ProductStockUpdated;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Omersia\Catalog\DTO\ProductCreateDTO;
 use Omersia\Catalog\DTO\ProductUpdateDTO;
@@ -186,6 +187,19 @@ class ProductController extends Controller
         }
     }
 
+    public function destroyImage(Product $product, ProductImage $image): RedirectResponse
+    {
+        $this->authorize('products.update');
+
+        try {
+            $this->productImageService->deleteImage($product, $image);
+
+            return back()->with('success', 'Image supprimée avec succès.');
+        } catch (\InvalidArgumentException $e) {
+            abort(404);
+        }
+    }
+
     /**
      * API endpoint for products list (for builder)
      * DCA-004: Ajout pagination pour éviter chargement illimité
@@ -220,11 +234,17 @@ class ProductController extends Controller
         $products = $paginator->getCollection()->map(function ($product) {
             $translation = $product->translations->first();
             $mainImage = $product->images->first();
+            $name = ($translation && is_string($translation->name) && $translation->name !== '')
+                ? $translation->name
+                : 'Sans nom';
+            $slug = ($translation && is_string($translation->slug))
+                ? $translation->slug
+                : '';
 
             return [
                 'id' => $product->id,
-                'name' => $translation?->name ?? 'Sans nom',
-                'slug' => $translation?->slug ?? '',
+                'name' => $name,
+                'slug' => $slug,
                 'price' => $product->price,
                 'image' => $mainImage ? asset('storage/'.$mainImage->path) : null,
             ];

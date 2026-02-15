@@ -33,11 +33,17 @@ class ShippingZone extends Model
         'is_active' => 'boolean',
     ];
 
+    /**
+     * @return BelongsTo<ShippingMethod, $this>
+     */
     public function shippingMethod(): BelongsTo
     {
         return $this->belongsTo(ShippingMethod::class);
     }
 
+    /**
+     * @return HasMany<ShippingRate, $this>
+     */
     public function rates(): HasMany
     {
         return $this->hasMany(ShippingRate::class);

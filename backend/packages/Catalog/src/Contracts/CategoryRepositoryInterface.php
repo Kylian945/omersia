@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Omersia\Catalog\Models\Category;
 use Omersia\Shared\Contracts\RepositoryInterface;
 
+/** @extends RepositoryInterface<Category> */
 interface CategoryRepositoryInterface extends RepositoryInterface
 {
     public function getByShopId(int $shopId): Collection;

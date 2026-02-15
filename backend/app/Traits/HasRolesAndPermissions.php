@@ -10,6 +10,9 @@ use Illuminate\Support\Facades\Cache;
 
 trait HasRolesAndPermissions
 {
+    /**
+     * @return BelongsToMany<Role, $this>
+     */
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_roles');
@@ -39,7 +42,7 @@ trait HasRolesAndPermissions
             fn () => $this->roles()
                 ->with('permissions')
                 ->get()
-                ->flatMap(fn ($role) => $role->permissions->pluck('name'))
+                ->flatMap(fn (Role $role) => $role->permissions->pluck('name'))
                 ->unique()
                 ->values()
                 ->toArray()

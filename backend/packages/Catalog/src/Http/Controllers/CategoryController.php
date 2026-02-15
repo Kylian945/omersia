@@ -148,11 +148,17 @@ class CategoryController extends Controller
             ->get()
             ->map(function ($category) {
                 $translation = $category->translations->first();
+                $name = ($translation && is_string($translation->name) && $translation->name !== '')
+                    ? $translation->name
+                    : 'Sans nom';
+                $slug = ($translation && is_string($translation->slug))
+                    ? $translation->slug
+                    : '';
 
                 return [
                     'id' => $category->id,
-                    'name' => $translation?->name ?? 'Sans nom',
-                    'slug' => $translation?->slug ?? '',
+                    'name' => $name,
+                    'slug' => $slug,
                 ];
             });
 

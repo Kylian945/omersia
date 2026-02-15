@@ -23,11 +23,17 @@ final class CategoryListResource extends JsonResource
         $category = $this->resource;
         $locale = $this->resolveLocale($request);
         $translation = $this->resolveTranslation($category, $locale);
+        $name = ($translation && is_string($translation->name) && $translation->name !== '')
+            ? $translation->name
+            : 'Sans nom';
+        $slug = ($translation && is_string($translation->slug))
+            ? $translation->slug
+            : '';
 
         return [
             'id' => $category->id,
-            'name' => $translation?->name ?? 'Sans nom',
-            'slug' => $translation?->slug ?? '',
+            'name' => $name,
+            'slug' => $slug,
             'description' => $translation?->description,
             'image' => $category->image_url,
             'count' => $category->products_count ?? 0,

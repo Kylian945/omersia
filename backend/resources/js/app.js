@@ -6,6 +6,8 @@ window.Alpine = Alpine;
 
 // Importer les composants globaux (toujours chargés)
 import '../../packages/Admin/src/resources/js/products.js';
+import '../../packages/Admin/src/resources/js/ai-content-assistant.js';
+import '../../packages/Admin/src/resources/js/backoffice-ai-assistant.js';
 import '../../packages/Admin/src/resources/js/page-builder.js';
 import '../../packages/Admin/src/resources/js/page-builder-native.js';
 

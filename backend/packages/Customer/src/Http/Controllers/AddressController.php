@@ -21,7 +21,7 @@ class AddressController extends Controller
             ->orderBy('label')
             ->get();
 
-        return view('admin::customers.addresses.index', compact('customer', 'addresses'));
+        return view()->make('admin::customers.addresses.index', compact('customer', 'addresses'));
     }
 
     public function create(Customer $customer)

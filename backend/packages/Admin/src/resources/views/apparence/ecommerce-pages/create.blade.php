@@ -19,9 +19,20 @@
 
                 <div class="space-y-2">
                     <label class="block text-xs font-medium text-gray-700">Titre de la page</label>
-                    <input type="text" name="title" required
-                        class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs"
-                        placeholder="Ex: Page d'accueil">
+                    <div class="flex items-stretch rounded-lg border border-gray-200 bg-white overflow-hidden">
+                        <input type="text" name="title" required
+                            class="flex-1 border-0 px-3 py-1.5 text-xs focus:ring-0"
+                            placeholder="Ex: Page d'accueil">
+                        <button type="button" data-ai-content-open-modal
+                            data-ai-content-context="ecommerce_page"
+                            data-ai-content-target="title"
+                            data-ai-content-target-label="Titre de page e-commerce"
+                            data-ai-content-generate-url="{{ route('admin.ai.generate-content') }}"
+                            class="inline-flex items-center justify-center border-l border-gray-200 px-3 text-gray-600 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                            aria-label="Générer le titre de page avec l'IA">
+                            <x-lucide-wand-sparkles class="h-3.5 w-3.5" />
+                        </button>
+                    </div>
                     @error('title')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -143,6 +154,8 @@
                 </a>
             </div>
         </div>
+
+        @include('admin::components.ai-content-modal')
     </form>
 @endsection
 

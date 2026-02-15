@@ -31,6 +31,9 @@ class Page extends Model
         'is_home' => 'bool',
     ];
 
+    /**
+     * @return HasMany<PageTranslation, $this>
+     */
     public function translations(): HasMany
     {
         return $this->hasMany(PageTranslation::class, 'page_id');

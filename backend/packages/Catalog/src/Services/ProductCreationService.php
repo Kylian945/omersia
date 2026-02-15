@@ -36,13 +36,35 @@ class ProductCreationService
             $translation = $product->translations()->create($dto->toTranslationArray());
 
             // 3. Gérer les images
+            $createdImages = [];
+
             if ($request->hasFile('images')) {
-                $mainImageIndex = $request->input('main_image');
-                $this->imageService->uploadImages(
+                $uploadedImages = $this->imageService->uploadImages(
                     $product,
                     $request->file('images'),
-                    $mainImageIndex
+                    null
                 );
+
+                foreach ($uploadedImages as $index => $image) {
+                    $createdImages['new-'.(string) $index] = $image;
+                }
+            }
+
+            if (is_array($request->input('ai_generated_images'))) {
+                $generatedImages = $this->imageService->uploadGeneratedImages(
+                    $product,
+                    $request->input('ai_generated_images', [])
+                );
+
+                $createdImages = [...$createdImages, ...$generatedImages];
+            }
+
+            $mainImageKey = $this->normalizeMainImageKey(
+                $request->input('main_image')
+            );
+
+            if (! empty($createdImages) || $mainImageKey !== null) {
+                $this->imageService->setMainImage($product, $mainImageKey, $createdImages);
             }
 
             // 4. Synchroniser les catégories
@@ -88,8 +110,19 @@ class ProductCreationService
                 );
             }
 
+            if (is_array($request->input('ai_generated_images'))) {
+                $generatedImages = $this->imageService->uploadGeneratedImages(
+                    $product,
+                    $request->input('ai_generated_images', [])
+                );
+
+                $createdImages = [...$createdImages, ...$generatedImages];
+            }
+
             // 4. Gérer l'image principale
-            $mainImageKey = $request->input('main_image');
+            $mainImageKey = $this->normalizeMainImageKey(
+                $request->input('main_image')
+            );
             $this->imageService->setMainImage($product, $mainImageKey, $createdImages);
 
             // 5. Synchroniser les catégories
@@ -105,5 +138,23 @@ class ProductCreationService
 
             return $product;
         });
+    }
+
+    private function normalizeMainImageKey(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        if (ctype_digit($trimmed)) {
+            return 'new-'.$trimmed;
+        }
+
+        return $trimmed;
     }
 }

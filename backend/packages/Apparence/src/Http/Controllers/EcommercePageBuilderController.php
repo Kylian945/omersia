@@ -10,6 +10,7 @@ use Omersia\Admin\Config\BuilderWidgets;
 use Omersia\Apparence\Contracts\ThemeRepositoryInterface;
 use Omersia\Apparence\Http\Requests\PageBuilderUpdateRequest;
 use Omersia\Apparence\Models\EcommercePage;
+use Omersia\Apparence\Models\EcommercePageTranslation;
 
 class EcommercePageBuilderController extends Controller
 {
@@ -21,9 +22,12 @@ class EcommercePageBuilderController extends Controller
     {
         $locale = $request->get('locale', 'fr');
 
+        /** @var EcommercePageTranslation|null $translation */
         $translation = $page->translations()->where('locale', $locale)->first();
 
-        $content = $translation?->content_json ?? ['sections' => []];
+        $content = ($translation instanceof EcommercePageTranslation && is_array($translation->content_json))
+            ? $translation->content_json
+            : ['sections' => []];
 
         // Get active theme widgets
         $activeTheme = $this->themeRepository->getActiveTheme($page->shop_id);
@@ -58,19 +62,21 @@ class EcommercePageBuilderController extends Controller
 
         // Utiliser le builder approprié
         if ($isNativeType) {
+            $pageTitleHeader = 'Builder : '.($translation ? $translation->title : $page->type);
+
             return view('admin::builder.builder-with-native', [
                 'page' => $page,
                 'locale' => $locale,
                 'pageType' => $page->type,  // 'category' ou 'product'
                 'contentJson' => $content,
                 'pageTitle' => 'Builder E-commerce - '.ucfirst($page->type),
-                'pageTitleHeader' => 'Builder : '.($translation?->title ?? $page->type),
+                'pageTitleHeader' => $pageTitleHeader,
                 'saveUrl' => route('admin.apparence.ecommerce-pages.builder.update', ['page' => $page->id, 'locale' => $locale]),
                 'backUrl' => route('admin.apparence.ecommerce-pages.index'),
                 'widgetCategories' => $widgetCategories,
                 'categoryLabels' => $categoryLabels,
                 'widgets' => $widgets,
-                'themeSlug' => $activeTheme?->slug ?? 'vision',
+                'themeSlug' => $activeTheme ? $activeTheme->slug : 'vision',
             ]);
         }
 
@@ -86,7 +92,7 @@ class EcommercePageBuilderController extends Controller
             'widgetCategories' => $widgetCategories,
             'categoryLabels' => $categoryLabels,
             'widgets' => $widgets,
-            'themeSlug' => $activeTheme?->slug ?? 'vision',
+            'themeSlug' => $activeTheme ? $activeTheme->slug : 'vision',
         ]);
     }
 

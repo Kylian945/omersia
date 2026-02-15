@@ -22,7 +22,7 @@ class CookieConsentController extends Controller
     {
         if ($token = $request->bearerToken()) {
             $accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($token);
-            if ($accessToken && $accessToken->tokenable_id !== null) {
+            if ($accessToken) {
                 return $accessToken->tokenable;
             }
         }

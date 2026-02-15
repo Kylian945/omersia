@@ -54,16 +54,25 @@ class ShippingMethod extends Model
         'price' => 'float',
     ];
 
+    /**
+     * @return HasMany<Order, $this>
+     */
     public function orders(): HasMany
     {
         return $this->hasMany(Order::class);
     }
 
+    /**
+     * @return HasMany<ShippingZone, $this>
+     */
     public function zones(): HasMany
     {
         return $this->hasMany(ShippingZone::class);
     }
 
+    /**
+     * @return HasMany<ShippingRate, $this>
+     */
     public function rates(): HasMany
     {
         return $this->hasMany(ShippingRate::class);
@@ -143,7 +152,7 @@ class ShippingMethod extends Model
             $zone = $this->zones()
                 ->where('is_active', true)
                 ->get()
-                ->first(function ($z) use ($countryCode, $postalCode) {
+                ->first(function (ShippingZone $z) use ($countryCode, $postalCode) {
                     $matchesCountry = ! $countryCode || $z->matchesCountry($countryCode);
                     $matchesPostal = ! $postalCode || $z->matchesPostalCode($postalCode);
 
@@ -152,7 +161,8 @@ class ShippingMethod extends Model
         }
 
         // Trouver le tarif applicable
-        $rate = $this->rates()
+        $rate = ShippingRate::query()
+            ->where('shipping_method_id', $this->id)
             ->forWeightAndZone($weight, $zone?->id)
             ->first();
 

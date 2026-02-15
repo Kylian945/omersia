@@ -294,7 +294,8 @@ class OrderController extends Controller
         }
 
         $order->items->transform(function ($item) {
-            $item->image_url = $item->product?->mainImage?->path ?? null;
+            $mainImage = $item->product ? $item->product->mainImage : null;
+            $item->image_url = $mainImage ? $mainImage->path : null;
 
             return $item;
         });

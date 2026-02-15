@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>@yield('title', 'Admin') • Omersia</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Breeze / Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -33,10 +34,49 @@
         [x-cloak] {
             display: none !important;
         }
+
+        .bo-ai-assistant-message {
+            display: flex;
+            margin-bottom: 0.75rem;
+        }
+
+        .bo-ai-assistant-message--user {
+            justify-content: flex-end;
+        }
+
+        .bo-ai-assistant-message--assistant {
+            justify-content: flex-start;
+        }
+
+        .bo-ai-assistant-bubble {
+            max-width: 90%;
+            white-space: pre-wrap;
+            word-break: break-word;
+            border-radius: 0.75rem;
+            border: 1px solid rgba(226, 232, 240, 1);
+            padding: 0.625rem 0.75rem;
+            font-size: 0.75rem;
+            line-height: 1.2rem;
+            color: #0f172a;
+            background: #f8fafc;
+        }
+
+        .bo-ai-assistant-message--user .bo-ai-assistant-bubble {
+            color: #ffffff;
+            border-color: rgb(71, 71, 71);
+            background: #000000;
+        }
     </style>
 </head>
 
-<body class="bg-[#f6f6f7] text-[#111827] antialiased">
+@php
+    $hasConfiguredAiProvider = (bool) ($hasConfiguredAiProvider ?? false);
+    $aiProviderSettingsUrl = (string) ($aiProviderSettingsUrl ?? route('admin.settings.ai.index'));
+@endphp
+
+<body class="bg-[#f6f6f7] text-[#111827] antialiased"
+    data-ai-provider-ready="{{ $hasConfiguredAiProvider ? '1' : '0' }}"
+    data-ai-provider-settings-url="{{ $aiProviderSettingsUrl }}">
 
     <div class="min-h-screen flex">
 
@@ -340,7 +380,7 @@
                         @foreach ($activeShops as $shop)
                             @php
                                 $primaryDomain = $shop->domains->firstWhere('is_primary', true);
-                                $shopUrl = $primaryDomain ? 'https://' . $primaryDomain->domain : env('FRONTEND_URL');
+                                $shopUrl = $primaryDomain ? 'https://' . $primaryDomain->domain : config('storefront.frontend_url');
                             @endphp
                             <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-slate-100 mb-1">
                                 <span class="h-1.5 w-1.5 rounded-full bg-[#008060]"></span>
@@ -355,11 +395,11 @@
                                 @endif
                             </div>
                         @endforeach
-                    @elseif (env('FRONTEND_URL'))
+                    @elseif (config('storefront.frontend_url'))
                         <div class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-slate-100">
                             <span class="h-1.5 w-1.5 rounded-full bg-[#008060]"></span>
                             <span class="text-xs text-slate-700">Storefront headless connecté</span>
-                            <a href="{{ env('FRONTEND_URL') }}" target="_blank"
+                            <a href="{{ config('storefront.frontend_url') }}" target="_blank"
                                 class="ml-auto text-xs text-slate-500 hover:text-slate-900">
                                 <x-lucide-eye class="w-4 h-4" />
                             </a>
@@ -437,10 +477,32 @@
                     <div class="hidden md:flex items-center gap-3">
                         <div class="relative">
                             <x-lucide-search class="w-4 h-4 absolute left-2.5 top-2 text-gray-500" />
-                            <input type="search" placeholder="Rechercher un produit..."
-                                class="h-8 w-64 rounded-lg border border-gray-200 bg-[#f9fafb] pl-8 pr-3 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500/40" />
-                            <span class="pointer-events-none absolute right-2 top-2 text-xs text-gray-400">⌘K</span>
+                            <input type="search"
+                                placeholder="{{ $hasConfiguredAiProvider ? 'Posez une question sur votre boutique...' : 'Configurez un provider IA dans Paramètres > IA' }}"
+                                data-ai-assistant-search-input
+                                class="h-8 w-72 rounded-lg border border-gray-200 bg-[#f9fafb] pl-8 pr-2 text-xs focus:outline-none focus:ring-2 focus:ring-gray-500/40 focus:border-gray-500/40" />
+                            
                         </div>
+
+                        <button type="button" data-ai-assistant-toggle
+                            class="h-8 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 text-xs font-medium text-gray-700 hover:bg-gray-100 transition">
+                            <x-lucide-wand-sparkles class="w-3.5 h-3.5" />
+                            {{ $hasConfiguredAiProvider ? 'Assistant IA' : 'Assistant IA (à configurer)' }}
+                        </button>
+                        @if (!$hasConfiguredAiProvider)
+                            <a href="{{ $aiProviderSettingsUrl }}"
+                                class="text-xxs text-amber-700 hover:text-amber-800 underline decoration-amber-400/70">
+                                Configurer un provider IA
+                            </a>
+                        @endif
+                    </div>
+
+                    <div class="md:hidden">
+                        <button type="button" data-ai-assistant-toggle
+                            class="h-8 inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-3 text-xs font-medium text-gray-700 hover:bg-gray-100 transition">
+                            <x-lucide-wand-sparkles class="w-3.5 h-3.5" />
+                            {{ $hasConfiguredAiProvider ? 'IA' : 'IA à configurer' }}
+                        </button>
                     </div>
                 </div>
             </header>
@@ -485,6 +547,90 @@
                 @yield('content')
             </main>
         </div>
+    </div>
+
+    <div id="bo-ai-assistant" aria-hidden="true" data-endpoint="{{ route('admin.ai.assistant.chat') }}"
+        data-provider-ready="{{ $hasConfiguredAiProvider ? '1' : '0' }}"
+        data-settings-url="{{ $aiProviderSettingsUrl }}"
+        class="fixed inset-0 z-[70] pointer-events-none">
+        <div data-ai-assistant-backdrop class="absolute inset-0 bg-slate-900/30 opacity-0 transition-opacity duration-200">
+        </div>
+
+        <aside data-ai-assistant-drawer
+            class="absolute right-0 top-0 h-full w-full max-w-xl bg-white border-l border-slate-200 shadow-2xl translate-x-full transition-transform duration-200 flex flex-col">
+            <div class="h-14 px-4 border-b border-slate-200 flex items-center gap-2">
+                <div class="h-8 w-8 rounded-lg bg-gray-50 border border-gray-100 flex items-center justify-center text-gray-600">
+                    <x-lucide-wand-sparkles class="w-4 h-4" />
+                </div>
+
+                <div class="min-w-0">
+                    <p class="text-xs font-semibold text-slate-800">Assistant IA Backoffice</p>
+                    <p class="text-[11px] text-slate-500">Analyse ventes, panier moyen, codes promo, etc.</p>
+                </div>
+
+                <div class="ml-auto flex items-center gap-2">
+                    <button type="button" data-ai-assistant-reset
+                        class="text-[11px] rounded-md border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50 transition">
+                        Réinitialiser
+                    </button>
+                    <button type="button" data-ai-assistant-close
+                        class="h-8 w-8 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-800 transition flex items-center justify-center">
+                        <x-lucide-x class="w-4 h-4" />
+                    </button>
+                </div>
+            </div>
+
+            <div data-ai-assistant-provider-hint
+                class="{{ $hasConfiguredAiProvider ? 'hidden' : '' }} border-b border-amber-200 bg-amber-50 px-4 py-2 text-[11px] text-amber-800">
+                Aucun provider IA actif. Configurez-en un dans
+                <a href="{{ $aiProviderSettingsUrl }}" class="font-semibold underline decoration-amber-500/70">
+                    Paramètres > IA
+                </a>.
+            </div>
+
+            <div data-ai-assistant-messages class="flex-1 overflow-y-auto p-4 bg-slate-50/40">
+            </div>
+
+            <div data-ai-assistant-empty class="px-4 pb-3">
+                <div class="rounded-xl border border-dashed border-slate-300 bg-white px-3 py-3 text-xs text-slate-600">
+                    Posez une question métier, par exemple:
+                    <div class="mt-3 grid gap-2">
+                        <button type="button" data-ai-assistant-quick-question="Quel produit est le plus vendu cette année ?"
+                            class="text-left rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-[11px] text-slate-700 hover:bg-slate-100 transition">
+                            Quel produit est le plus vendu cette année ?
+                        </button>
+                        <button type="button"
+                            data-ai-assistant-quick-question="Donne moi le montant du panier moyen sur les 2 derniers mois."
+                            class="text-left rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-[11px] text-slate-700 hover:bg-slate-100 transition">
+                            Donne moi le montant du panier moyen sur les 2 derniers mois.
+                        </button>
+                        <button type="button" data-ai-assistant-quick-question="Est ce que les clients utilisent les code promo ?"
+                            class="text-left rounded-md border border-slate-200 bg-slate-50 px-2.5 py-2 text-[11px] text-slate-700 hover:bg-slate-100 transition">
+                            Est ce que les clients utilisent les code promo ?
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-200 bg-white p-4">
+                <form data-ai-assistant-form class="space-y-3">
+                    <label for="bo-ai-assistant-input" class="sr-only">Question IA</label>
+                    <textarea id="bo-ai-assistant-input" data-ai-assistant-input rows="3"
+                        placeholder="{{ $hasConfiguredAiProvider ? 'Ex: Quel est le panier moyen des 2 derniers mois ?' : 'Configurez un provider IA dans Paramètres > IA pour utiliser l’assistant.' }}"
+                        class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs leading-5 text-slate-800 focus:outline-none focus:ring-2 focus:ring-gray-500/30 focus:border-gray-300 resize-none"></textarea>
+
+                    <div class="flex items-center justify-between gap-3">
+                        <p data-ai-assistant-status class="hidden text-xs"></p>
+
+                        <button type="submit" data-ai-assistant-send
+                            {{ $hasConfiguredAiProvider ? '' : 'disabled' }}
+                            class="ml-auto inline-flex items-center justify-center rounded-lg bg-black px-3 py-2 text-xs font-semibold text-white hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                            {{ $hasConfiguredAiProvider ? 'Envoyer' : 'Configurer IA' }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </aside>
     </div>
 
     @php

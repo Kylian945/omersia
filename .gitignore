@@ -28,3 +28,6 @@ CLAUDE.md
 /theme-build
 /theme-zips
 scripts/generate-theme-presets.mjs
+
+# Results tests
+storefront/test-results

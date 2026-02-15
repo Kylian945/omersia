@@ -1,6 +1,18 @@
 import { defineConfig, devices } from '@playwright/test';
 
 const isCI = !!process.env.CI;
+const chromiumExecutablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH;
+
+const chromeProjectUse = {
+  ...devices['Desktop Chrome'],
+  ...(chromiumExecutablePath
+    ? {
+        launchOptions: {
+          executablePath: chromiumExecutablePath,
+        },
+      }
+    : {}),
+};
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -26,18 +38,18 @@ export default defineConfig({
     {
       name: 'security',
       testMatch: /.*xss.*\.spec\.ts/,
-      use: { ...devices['Desktop Chrome'] },
+      use: chromeProjectUse,
     },
     {
       name: 'theme',
       testMatch: /.*theme.*\.spec\.ts/,
       testIgnore: /.*xss.*\.spec\.ts/,
-      use: { ...devices['Desktop Chrome'] },
+      use: chromeProjectUse,
     },
     {
       name: 'all-browsers',
       testIgnore: [/.*xss.*\.spec\.ts/, /.*theme.*\.spec\.ts/],
-      use: { ...devices['Desktop Chrome'] },
+      use: chromeProjectUse,
     },
     // Additional browsers for comprehensive CI testing
     ...(isCI ? [

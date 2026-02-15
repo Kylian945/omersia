@@ -71,6 +71,12 @@
                                 'match' => 'admin.settings.payments.*',
                             ],
                             [
+                                'label' => 'IA',
+                                'route' => 'admin.settings.ai.index',
+                                'icon' => 'cpu',
+                                'match' => 'admin.settings.ai.*',
+                            ],
+                            [
                                 'label' => 'Taxes / TVA',
                                 'route' => 'admin.settings.taxes.index',
                                 'icon' => 'percent',

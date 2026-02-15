@@ -1,0 +1,22 @@
+{
+  "name": "omersia/ai",
+  "description": "AI configuration and generation domain package for Omersia",
+  "type": "library",
+  "require": {
+    "php": "^8.2",
+    "illuminate/support": "^10.0 || ^11.0 || ^12.0",
+    "laravel/ai": "^0.1.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "Omersia\\Ai\\": "src/"
+    }
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Omersia\\Ai\\AiServiceProvider"
+      ]
+    }
+  }
+}

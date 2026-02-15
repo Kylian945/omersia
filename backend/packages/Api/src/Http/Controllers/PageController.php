@@ -120,6 +120,7 @@ class PageController extends Controller
             ->firstOrFail();
 
         $t = $page->translations->first();
+        $layout = ($t && is_array($t->content_json)) ? $t->content_json : ['sections' => []];
 
         return response()->json([
             'id' => $page->id,
@@ -128,7 +129,7 @@ class PageController extends Controller
             'meta_title' => $t?->meta_title,
             'meta_description' => $t?->meta_description,
             // 👇 le builder admin sauve la structure complète ici
-            'layout' => $t?->content_json ?? ['sections' => []],
+            'layout' => $layout,
         ]);
     }
 }

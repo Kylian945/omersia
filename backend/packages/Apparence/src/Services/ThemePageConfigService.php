@@ -384,17 +384,11 @@ class ThemePageConfigService
         }
 
         $snapshotKey = $this->buildPageSnapshotKey($type, $slug);
-        $pageSnapshot = $snapshotPages[$snapshotKey] ?? null;
-        if (! is_array($pageSnapshot)) {
+        if (! isset($snapshotPages[$snapshotKey])) {
             return [];
         }
 
-        $translations = $pageSnapshot['translations'] ?? null;
-        if (! is_array($translations)) {
-            return [];
-        }
-
-        return $translations;
+        return $snapshotPages[$snapshotKey]['translations'];
     }
 
     protected function buildPageSnapshotKey(string $type, ?string $slug): string
@@ -426,7 +420,7 @@ class ThemePageConfigService
     /**
      * Merge new theme translations while preserving media from locale content map.
      *
-     * @param  array<string, array<string, mixed>>  $translations
+     * @param  array<string, mixed>  $translations
      * @param  array<string, array<string, mixed>>  $existingContentByLocale
      * @return array<string, array<string, mixed>>
      */
@@ -464,7 +458,9 @@ class ThemePageConfigService
      */
     protected function mergeContentPreservingMedia(array $newContent, array $existingContent): array
     {
+        /** @var array<string, array<int, array<string, mixed>>> $existingWidgetsByType */
         $existingWidgetsByType = [];
+        /** @var array<string, array{widget: array<string, mixed>, type: string, index: int}> $existingWidgetsById */
         $existingWidgetsById = [];
         if (isset($existingContent['sections']) && is_array($existingContent['sections'])) {
             foreach ($existingContent['sections'] as $section) {
@@ -511,10 +507,6 @@ class ThemePageConfigService
     protected function collectWidgetsByTypeFromColumns(array $columns, array &$widgetsByType, array &$widgetsById): void
     {
         foreach ($columns as $column) {
-            if (! is_array($column)) {
-                continue;
-            }
-
             if (isset($column['widgets']) && is_array($column['widgets'])) {
                 foreach ($column['widgets'] as $widget) {
                     if (! is_array($widget)) {
@@ -523,12 +515,14 @@ class ThemePageConfigService
 
                     $type = $widget['type'] ?? null;
                     if (is_string($type) && $type !== '') {
-                        $widgetsByType[$type][] = $widget;
+                        /** @var array<string, mixed> $typedWidget */
+                        $typedWidget = $widget;
+                        $widgetsByType[$type][] = $typedWidget;
 
                         $widgetId = $widget['id'] ?? null;
                         if (is_string($widgetId) && $widgetId !== '') {
                             $widgetsById[$widgetId] = [
-                                'widget' => $widget,
+                                'widget' => $typedWidget,
                                 'type' => $type,
                                 'index' => count($widgetsByType[$type]) - 1,
                             ];
@@ -570,10 +564,6 @@ class ThemePageConfigService
         array &$consumedWidgetIds
     ): void {
         foreach ($columns as &$column) {
-            if (! is_array($column)) {
-                continue;
-            }
-
             if (isset($column['widgets']) && is_array($column['widgets'])) {
                 foreach ($column['widgets'] as &$widget) {
                     if (! is_array($widget)) {
@@ -628,8 +618,6 @@ class ThemePageConfigService
 
                     if (
                         ($widget['type'] ?? null) === 'container'
-                        && isset($widget['props'])
-                        && is_array($widget['props'])
                         && isset($widget['props']['columns'])
                         && is_array($widget['props']['columns'])
                     ) {

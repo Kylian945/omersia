@@ -102,3 +102,19 @@
 .ql-editor::-webkit-scrollbar-thumb:hover {
     background: #a3a3a3;
 }
+
+/* Product form: embed Quill inside input-group layout with AI button */
+.product-wysiwyg-group .ql-toolbar.ql-snow {
+    border: 0;
+    border-bottom: 1px solid #e5e5e5;
+    border-radius: 0;
+}
+
+.product-wysiwyg-group .ql-container.ql-snow {
+    border: 0;
+    border-radius: 0;
+}
+
+.product-wysiwyg-group .ql-editor {
+    max-height: 420px;
+}

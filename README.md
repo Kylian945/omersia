@@ -1,9 +1,9 @@
 # Omersia
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Laravel](https://img.shields.io/badge/Laravel-10.x-FF2D20?logo=laravel)](https://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-12.x-FF2D20?logo=laravel)](https://laravel.com)
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
-[![PHP](https://img.shields.io/badge/PHP-8.1+-777BB4?logo=php)](https://php.net)
+[![PHP](https://img.shields.io/badge/PHP-8.4+-777BB4?logo=php)](https://php.net)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript)](https://typescriptlang.org)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
@@ -30,7 +30,7 @@
 
 ### Prérequis
 
-- PHP 8.2+
+- PHP 8.4+
 - Node.js 20+
 - Composer 2.x
 - Docker & Docker Compose
@@ -152,8 +152,8 @@ omersia/
 
 ### Backend
 
-- Framework : Laravel 11
-- PHP : 8.2+
+- Framework : Laravel 12
+- PHP : 8.4+
 - Base de données : MySQL 8.0
 - Recherche : MeiliSearch
 - Paiements : Stripe

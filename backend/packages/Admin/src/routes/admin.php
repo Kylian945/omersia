@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
 // Admin Controllers
+use Omersia\Admin\Http\Controllers\AiSettingsController;
+use Omersia\Admin\Http\Controllers\BackofficeAssistantController;
+use Omersia\Admin\Http\Controllers\ContentAiController;
 use Omersia\Admin\Http\Controllers\DashboardController;
 use Omersia\Admin\Http\Controllers\GdprController;
 use Omersia\Admin\Http\Controllers\MediaLibraryController;
 use Omersia\Admin\Http\Controllers\MeilisearchController;
 use Omersia\Admin\Http\Controllers\PageBuilderController;
 use Omersia\Admin\Http\Controllers\PageController;
+use Omersia\Admin\Http\Controllers\ProductAiController;
 use Omersia\Admin\Http\Controllers\SettingsController;
 // Customer Package Controllers
 use Omersia\Apparence\Http\Controllers\EcommercePageBuilderController;
@@ -59,7 +63,19 @@ Route::get('/notifications/payment-success-audio', function () {
 })->name('admin.notifications.payment-success-audio');
 
 // Resources
+Route::post('ai/generate-content', [ContentAiController::class, 'generate'])
+    ->name('admin.ai.generate-content')
+    ->middleware('throttle:30,1');
+Route::post('ai/assistant/chat', [BackofficeAssistantController::class, 'chat'])
+    ->name('admin.ai.assistant.chat')
+    ->middleware('throttle:40,1');
 Route::resource('products', ProductController::class);
+Route::post('products/ai/generate', [ProductAiController::class, 'generate'])
+    ->name('products.ai.generate')
+    ->middleware('throttle:20,1');
+Route::post('products/ai/generate-image', [ProductAiController::class, 'generateImage'])
+    ->name('products.ai.generate-image')
+    ->middleware('throttle:10,1');
 Route::resource('categories', CategoryController::class);
 Route::resource('pages', PageController::class);
 Route::resource('discounts', DiscountController::class);
@@ -97,6 +113,8 @@ Route::get('/orders/{id}/invoice', [OrderController::class, 'downloadInvoice'])-
 
 Route::post('products/{product}/images/{image}/main', [ProductController::class, 'setMainImage'])
     ->name('products.images.main');
+Route::delete('products/{product}/images/{image}', [ProductController::class, 'destroyImage'])
+    ->name('products.images.destroy');
 
 // Shops
 Route::get('/shops/create', [ShopController::class, 'create'])->name('admin.shops.create');
@@ -152,6 +170,14 @@ Route::prefix('apparence')
 // Settings
 Route::prefix('settings')->name('admin.settings.')->group(function () {
     Route::get('/', [SettingsController::class, 'index'])->name('index');
+
+    // AI Settings
+    Route::prefix('ai')
+        ->name('ai.')
+        ->group(function () {
+            Route::get('/', [AiSettingsController::class, 'index'])->name('index');
+            Route::put('/', [AiSettingsController::class, 'update'])->name('update');
+        });
 
     // API Keys
     Route::resource('api-keys', ApiKeyController::class)->except(['show']);

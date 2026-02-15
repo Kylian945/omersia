@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property bool $manage_stock
  * @property mixed $stock_qty
  * @property float $price
- * @property float $compare_at_price
+ * @property float|null $compare_at_price
  * @property-read Product|null $product
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductOptionValue> $values
  */
@@ -41,11 +41,17 @@ class ProductVariant extends Model
         'compare_at_price' => 'float',
     ];
 
+    /**
+     * @return BelongsTo<Product, $this>
+     */
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
+    /**
+     * @return BelongsToMany<ProductOptionValue, $this>
+     */
     public function values(): BelongsToMany
     {
         return $this->belongsToMany(

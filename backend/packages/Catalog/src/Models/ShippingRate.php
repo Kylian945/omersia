@@ -36,11 +36,17 @@ class ShippingRate extends Model
         'priority' => 'integer',
     ];
 
+    /**
+     * @return BelongsTo<ShippingMethod, $this>
+     */
     public function shippingMethod(): BelongsTo
     {
         return $this->belongsTo(ShippingMethod::class);
     }
 
+    /**
+     * @return BelongsTo<ShippingZone, $this>
+     */
     public function shippingZone(): BelongsTo
     {
         return $this->belongsTo(ShippingZone::class);

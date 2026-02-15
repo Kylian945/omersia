@@ -7,8 +7,8 @@ namespace Omersia\Admin\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 use Omersia\Admin\Http\Requests\AssignRoleRequest;
 use Omersia\Admin\Http\Requests\UserRolesUpdateRequest;
 
@@ -27,7 +27,7 @@ class UserManagementController extends Controller
         $user->load('roles');
         $roles = Role::all();
 
-        return view('admin::settings.users.edit', compact('user', 'roles'));
+        return view()->make('admin::settings.users.edit', compact('user', 'roles'));
     }
 
     public function updateRoles(UserRolesUpdateRequest $request, User $user): RedirectResponse

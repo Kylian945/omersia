@@ -42,4 +42,18 @@ class ProductImage extends Model
 
         return asset('storage/'.$this->path);
     }
+
+    public function isAiGenerated(): bool
+    {
+        $path = ltrim((string) $this->path, '/');
+        if ($path === '') {
+            return false;
+        }
+
+        if (str_starts_with($path, 'products/ai/')) {
+            return true;
+        }
+
+        return str_contains($path, '/products/ai/');
+    }
 }

@@ -65,11 +65,17 @@ class Theme extends Model
         'settings_schema' => 'array',
     ];
 
+    /**
+     * @return BelongsTo<Shop, $this>
+     */
     public function shop(): BelongsTo
     {
         return $this->belongsTo(Shop::class);
     }
 
+    /**
+     * @return HasMany<ThemeSetting, $this>
+     */
     public function settings(): HasMany
     {
         return $this->hasMany(ThemeSetting::class);
@@ -95,6 +101,7 @@ class Theme extends Model
      */
     public function getSetting(string $key, $default = null)
     {
+        /** @var ThemeSetting|null $setting */
         $setting = $this->settings()->where('key', $key)->first();
 
         return $setting ? $setting->getDecodedValue() : $default;

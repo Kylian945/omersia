@@ -4,12 +4,17 @@ declare(strict_types=1);
 
 namespace Omersia\Shared\Repositories;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Omersia\Shared\Contracts\RepositoryInterface;
 
-/** @template TModel of Model */
+/**
+ * @template TModel of Model
+ *
+ * @implements RepositoryInterface<TModel>
+ */
 abstract class BaseRepository implements RepositoryInterface
 {
     /** @var TModel */
@@ -39,6 +44,7 @@ abstract class BaseRepository implements RepositoryInterface
      */
     public function all(): Collection
     {
+        /** @var Collection<int, TModel> $result */
         $result = $this->query->get();
         $this->resetQuery();
 
@@ -102,11 +108,11 @@ abstract class BaseRepository implements RepositoryInterface
     }
 
     /**
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<TModel>
+     * @return LengthAwarePaginator<int, TModel>
      */
     public function paginate(int $perPage = 15)
     {
-        /** @var \Illuminate\Contracts\Pagination\LengthAwarePaginator<TModel> $result */
+        /** @var LengthAwarePaginator<int, TModel> $result */
         $result = $this->query->paginate($perPage);
         $this->resetQuery();
 

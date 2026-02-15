@@ -125,10 +125,16 @@ final class ProductSearchService
                     $catId = $category->id;
                     if (! isset($categories[$catId])) {
                         $translation = $category->translations->first();
+                        $categoryName = ($translation && is_string($translation->name) && $translation->name !== '')
+                            ? $translation->name
+                            : 'Catégorie';
+                        $categorySlug = ($translation && is_string($translation->slug))
+                            ? $translation->slug
+                            : '';
                         $categories[$catId] = [
                             'id' => $catId,
-                            'name' => $translation?->name ?? 'Catégorie',
-                            'slug' => $translation?->slug ?? '',
+                            'name' => $categoryName,
+                            'slug' => $categorySlug,
                             'count' => 0,
                         ];
                     }

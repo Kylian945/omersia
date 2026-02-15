@@ -7,8 +7,8 @@ namespace Omersia\Admin\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Models\Permission;
 use App\Models\Role;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
 use Omersia\Admin\Http\Requests\RoleStoreRequest;
 use Omersia\Admin\Http\Requests\RoleUpdateRequest;
 
@@ -26,7 +26,7 @@ class RoleController extends Controller
     {
         $permissions = Permission::all()->groupBy('group');
 
-        return view('admin::settings.roles.create', compact('permissions'));
+        return view()->make('admin::settings.roles.create', compact('permissions'));
     }
 
     public function store(RoleStoreRequest $request): RedirectResponse

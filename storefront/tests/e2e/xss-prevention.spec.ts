@@ -270,11 +270,14 @@ test.describe('XSS Prevention in Page Builder', () => {
 
     await page.waitForTimeout(500);
 
-    // Try to click the element (if it exists)
-    const clickableElements = await page.$$('div');
-    if (clickableElements.length > 0) {
-      await clickableElements[0].click();
-    }
+    // Trigger clicks only on elements that still contain malicious handler.
+    // If sanitization works, this selector returns nothing.
+    await page.evaluate(() => {
+      const maliciousElements = document.querySelectorAll<HTMLElement>(
+        '[onclick*="onMaliciousClick"]'
+      );
+      maliciousElements.forEach((element) => element.click());
+    });
 
     // onclick should not have triggered
     expect(clickTriggered).toBe(false);

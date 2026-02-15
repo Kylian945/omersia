@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Omersia\Apparence\Models\Theme;
 use Omersia\Shared\Contracts\RepositoryInterface;
 
+/** @extends RepositoryInterface<Theme> */
 interface ThemeRepositoryInterface extends RepositoryInterface
 {
     public function getByShopId(int $shopId): Collection;
