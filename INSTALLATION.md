@@ -1,6 +1,6 @@
 # Omersia Installation Guide
 
-Complete installation infrastructure for the Omersia e-commerce platform (Laravel 10 + Next.js 16).
+Complete installation infrastructure for the Omersia e-commerce platform (Laravel 12 + Next.js 16).
 
 ## Quick Start
 
@@ -20,7 +20,7 @@ That's it! The installation script will guide you through the setup process.
 
 The `make install` command runs a comprehensive installation script that:
 
-1. **Checks Prerequisites** - Verifies Docker, PHP, Composer, Node.js, and npm
+1. **Checks Prerequisites** - Verifies Docker, Docker Compose, and Docker daemon status
 2. **Sets Up Environment** - Copies `.env.example` files and generates APP_KEY
 3. **Installs Dependencies** - Runs `composer install` and `npm ci` in parallel
 4. **Starts Docker Services** - Launches MySQL, MeiliSearch, and Mailpit
@@ -64,17 +64,16 @@ Environment variables:
 
 ### Required Software
 
-- **Docker** 20.10+ and Docker Compose
-- **PHP** 8.2+ with extensions:
-  - pdo_mysql
-  - mbstring
-  - zip
-  - exif
-  - pcntl
-  - bcmath
-  - gd
+- **Docker** 20.10+ (Docker Desktop on macOS/Windows)
+- **Docker Compose** V2 (`docker compose`) required
+
+### Optional Local Tools (outside Docker)
+
+Use these only if you run parts of the stack directly on your machine:
+
+- **PHP** 8.4+ (required by `laravel/ai`)
 - **Composer** 2.x
-- **Node.js** 18+ (20+ recommended)
+- **Node.js** 20+
 - **npm** 9+
 
 ### System Requirements
@@ -118,6 +117,7 @@ The installation sets up these services:
 make help        # Show all available commands
 make install     # Complete installation (recommended)
 make dev         # Restart development environment
+make update-app  # Pull latest code + incremental migrations (no DB wipe)
 make test        # Run all tests (backend + frontend)
 make lint        # Run linters (Pint + ESLint)
 make clean       # Clean caches and generated files
@@ -427,7 +427,7 @@ If you encounter issues:
 
 1. Check the [Troubleshooting](#troubleshooting) section
 2. Review logs: `make docker-logs`
-3. Verify prerequisites are met
+3. Verify Docker prerequisites are met
 4. Try a clean reinstall (see [Reset Everything](#reset-everything))
 
 ## Related Documentation
