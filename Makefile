@@ -30,8 +30,8 @@ ICON_KEY      = 🔑
 ICON_LOCK     = 🔒
 ICON_DOCKER   = 🐳
 
-# === Docker Compose Detection (V2 preferred, fallback to V1) ===
-DOCKER_COMPOSE := $(shell docker compose version > /dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
+# === Docker Compose (V2 required) ===
+DOCKER_COMPOSE := docker compose
 
 # === Docker exec shortcuts (uses service names, not container names) ===
 EXEC_BACKEND  = $(DOCKER_COMPOSE) exec -T backend
@@ -39,13 +39,26 @@ EXEC_STOREFRONT = $(DOCKER_COMPOSE) exec -T storefront
 EXEC_BACKEND_IT = $(DOCKER_COMPOSE) exec backend
 EXEC_MYSQL_IT = $(DOCKER_COMPOSE) exec mysql
 
-.PHONY: help install setup-env setup-db apikey admin dev test lint clean build check-docker audit update update-composer update-npm guard-wipe db\:delete
+.PHONY: help install setup-env setup-db apikey admin dev test lint clean build check-docker-compose check-docker check-git-clean audit update update-app update-composer update-npm guard-wipe db\:delete
 
 # Docker container check - used as dependency for commands that need running containers
-check-docker:
+check-docker-compose:
+	@docker compose version >/dev/null 2>&1 || \
+		(printf "$(RED)$(ICON_DOCKER) Docker Compose V2 is required.$(RESET)\n" && \
+		 printf "$(YELLOW)   Install/enable the 'docker compose' plugin (Compose V1 is not supported).$(RESET)\n" && exit 1)
+
+check-docker: check-docker-compose
 	@$(DOCKER_COMPOSE) ps --status running --format '{{.Service}}' 2>/dev/null | grep -q backend || \
 		(printf "$(RED)$(ICON_DOCKER) Docker containers are not running.$(RESET)\n" && \
 		 printf "$(YELLOW)   Run $(CYAN)make dev$(YELLOW) or $(CYAN)make install$(YELLOW) first.$(RESET)\n" && exit 1)
+
+# Git cleanliness check for update workflows
+check-git-clean:
+	@if ! git diff --quiet || ! git diff --cached --quiet; then \
+		printf "$(RED)$(ICON_PACKAGE) Git working tree has local changes.$(RESET)\n"; \
+		printf "$(YELLOW)   Commit or stash your changes before running $(CYAN)make update-app$(YELLOW).$(RESET)\n"; \
+		exit 1; \
+	fi
 
 # Safety check for destructive database operations
 guard-wipe:
@@ -85,6 +98,7 @@ help:
 	@printf "$(CYAN)│$(RESET)  $(ICON_TEST)  $(CYAN)%-18s$(RESET) %s\n" "make test" "Run all tests"
 	@printf "$(CYAN)│$(RESET)  $(ICON_LINT)  $(CYAN)%-18s$(RESET) %s\n" "make lint" "Run linters (check code style)"
 	@printf "$(CYAN)│$(RESET)  $(ICON_LINT)  $(CYAN)%-18s$(RESET) %s\n" "make lint-fix" "Fix linting issues automatically"
+	@printf "$(CYAN)│$(RESET)  $(ICON_ROCKET)  $(CYAN)%-18s$(RESET) %s\n" "make update-app" "Pull latest code + migrate (no wipe)"
 	@printf "$(CYAN)│$(RESET)  $(ICON_PACKAGE)  $(CYAN)%-18s$(RESET) %s\n" "make update" "Update all dependencies"
 	@printf "$(CYAN)│$(RESET)  $(ICON_PACKAGE)  $(CYAN)%-18s$(RESET) %s\n" "make update-composer" "Update Composer packages only"
 	@printf "$(CYAN)│$(RESET)  $(ICON_PACKAGE)  $(CYAN)%-18s$(RESET) %s\n" "make update-npm" "Update npm packages only"
@@ -156,7 +170,7 @@ admin: check-docker
 	@$(EXEC_BACKEND_IT) php artisan admin:create
 
 # Start/restart development
-dev:
+dev: check-docker-compose
 	@echo ""
 	@printf "$(BRIGHT_CYAN)$(ICON_DEV) Starting development environment...$(RESET)\n"
 	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
@@ -305,6 +319,34 @@ update: check-docker
 	@printf "$(BRIGHT_GREEN)✅ All dependencies updated!$(RESET)\n"
 	@echo ""
 
+update-app: check-docker check-git-clean
+	@echo ""
+	@printf "$(BRIGHT_CYAN)$(ICON_ROCKET) Updating application from GitHub...$(RESET)\n"
+	@printf "$(CYAN)━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$(RESET)\n"
+	@echo ""
+	@printf "$(BLUE)➜ Pulling latest code (fast-forward only)...$(RESET)\n"
+	@branch=$$(git rev-parse --abbrev-ref HEAD); \
+	if [ "$$branch" = "HEAD" ]; then \
+		printf "$(RED)Detached HEAD detected. Checkout a branch before running update-app.$(RESET)\n"; \
+		exit 1; \
+	fi; \
+	git pull --ff-only
+	@echo ""
+	@printf "$(BLUE)➜ Installing backend dependencies (composer install)...$(RESET)\n"
+	@$(EXEC_BACKEND) composer install --no-interaction --prefer-dist
+	@echo ""
+	@printf "$(BLUE)➜ Installing frontend dependencies (npm ci)...$(RESET)\n"
+	@$(EXEC_STOREFRONT) npm ci
+	@echo ""
+	@printf "$(BLUE)➜ Clearing Laravel caches...$(RESET)\n"
+	@$(EXEC_BACKEND) php artisan optimize:clear
+	@echo ""
+	@printf "$(BLUE)➜ Running incremental migrations (no wipe)...$(RESET)\n"
+	@$(EXEC_BACKEND) php artisan migrate --force
+	@echo ""
+	@printf "$(BRIGHT_GREEN)✅ Application updated successfully!$(RESET)\n"
+	@echo ""
+
 update-composer: check-docker
 	@printf "$(BLUE)➜ Updating Composer packages...$(RESET)\n"
 	@$(EXEC_BACKEND) composer update
@@ -314,16 +356,16 @@ update-npm: check-docker
 	@$(EXEC_STOREFRONT) npm update
 
 # Docker
-docker-up:
+docker-up: check-docker-compose
 	@$(DOCKER_COMPOSE) up -d
 
-docker-down:
+docker-down: check-docker-compose
 	@$(DOCKER_COMPOSE) down
 
-docker-logs:
+docker-logs: check-docker-compose
 	@$(DOCKER_COMPOSE) logs -f
 
-docker-rebuild:
+docker-rebuild: check-docker-compose
 	@$(DOCKER_COMPOSE) down
 	@$(DOCKER_COMPOSE) build --no-cache
 	@$(DOCKER_COMPOSE) up -d

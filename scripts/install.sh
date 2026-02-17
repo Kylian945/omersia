@@ -94,15 +94,12 @@ if ! command -v docker &> /dev/null; then
 fi
 print_success "Docker found: $(docker --version | head -n1)"
 
-# Check Docker Compose (V2 preferred, fallback to V1)
+# Check Docker Compose (V2 required)
 if docker compose version &> /dev/null; then
     DOCKER_COMPOSE="docker compose"
     print_success "Docker Compose V2 found"
-elif command -v docker-compose &> /dev/null; then
-    DOCKER_COMPOSE="docker-compose"
-    print_success "Docker Compose V1 found"
 else
-    error_exit "Docker Compose is not installed. Please install Docker Compose first."
+    error_exit "Docker Compose V2 is required. Compose V1 (docker-compose) is not supported."
 fi
 
 # Check if Docker daemon is running

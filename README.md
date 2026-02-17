@@ -17,11 +17,11 @@
 
 - 🎨 **Page Builder** – Constructeur de pages drag-and-drop avec 28+ widgets
 - 🛍️ **Catalogue Produits** – Gestion complète des produits, variantes et catégories
-- 🎭 **Thèmes personnalisables** – Système de thèmes avec 22 variables CSS
+- 🤖 **Assistant IA Backoffice** – Assistant conversationnel pour rédiger et analyser les données de la boutique
+- 🎭 **Thèmes personnalisables** – Système de thèmes avec variables CSS configurables
 - 💳 **Paiements Stripe** – Intégration complète Stripe avec webhooks
 - 🔍 **Recherche rapide** – Recherche instantanée avec MeiliSearch
 - 📱 **Responsive** – Interface mobile-first avec Tailwind CSS
-- 🌍 **Multi-langues** – Support i18n avec traductions
 - 📦 **Architecture modulaire** – 10 packages Laravel indépendants
 
 ---
@@ -33,7 +33,7 @@
 - PHP 8.4+
 - Node.js 20+
 - Composer 2.x
-- Docker & Docker Compose
+- Docker & Docker Compose V2 (`docker compose`)
 
 ---
 
@@ -65,6 +65,8 @@ Pour relancer plus tard (après un `make docker-down`), utilisez :
 make dev
 ```
 
+En mode développement, le hot reload est activé (Storefront Next.js + assets backend via Vite).
+
 L'application sera disponible sur :
 
 | Service | URL |
@@ -78,23 +80,55 @@ L'application sera disponible sur :
 
 ## 🧰 Commandes disponibles
 
+### Démarrage & installation
+
 ```bash
+make help         # Afficher toutes les commandes
 make install      # Installation complète
-make dev          # Relancer l'environnement
+make dev          # Relancer l'environnement (hot reload actif)
+make setup-env    # Créer les fichiers .env uniquement
+make setup-db     # Migrations + seeders
+make admin        # Créer un nouvel admin (interactif)
+make apikey       # Générer une nouvelle clé API
+```
+
+### Mise à jour application & dépendances
+
+```bash
+make update-app       # Pull Git + install + migrations incrémentales (sans wipe DB)
+make update           # Mettre à jour toutes les dépendances (composer update + npm update)
+make update-composer  # Mettre à jour Composer uniquement
+make update-npm       # Mettre à jour npm uniquement
+```
+
+### Qualité & build
+
+```bash
 make test         # Lancer les tests
 make lint         # Vérifier le code
 make lint-fix     # Corriger le code
 make clean        # Nettoyer les caches
 make build        # Build production
+make refresh-styles # Regénérer les styles frontend (restart storefront)
 ```
 
-### Commandes avancées
+### Base de données & debug
 
 ```bash
-make setup-env    # Créer les fichiers .env uniquement
-make setup-db     # Migrations + seeders
-make apikey       # Générer une nouvelle clé API
-make admin        # Créer un nouvel admin
+make migrate                               # Exécuter les migrations uniquement
+make migrate-fresh CONFIRM_WIPE=yes        # Recréer la DB + seed (destructif)
+make db:delete CONFIRM_WIPE=yes            # Supprimer toutes les tables (destructif)
+make db                                    # Ouvrir le client MySQL du conteneur
+make tinker                                # Ouvrir Laravel Tinker
+```
+
+### Docker
+
+```bash
+make docker-up      # Démarrer les conteneurs
+make docker-down    # Arrêter les conteneurs
+make docker-logs    # Suivre les logs
+make docker-rebuild # Rebuild complet des conteneurs
 ```
 
 ---
