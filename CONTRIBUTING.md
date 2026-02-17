@@ -52,15 +52,13 @@ git checkout -b fix/correction-bug
 ### 4. Tester
 
 ```bash
-# Backend
-cd backend
-php artisan test
-./vendor/bin/pint --test
+# Lancer les checks principaux
+make lint
+make test
 
-# Frontend
-cd storefront
-npm run lint
-npm run test
+# Optionnel: tester/corriger localement un sous-ensemble
+docker compose exec -T backend php artisan test --filter=ProductTest
+docker compose exec -T storefront npm run test -- ProductCard.test.tsx
 ```
 
 ### 5. Commit et Push
@@ -111,7 +109,7 @@ Avant de signaler un bug :
 
 - [ ] Tests ajoutés / mis à jour
 - [ ] Documentation mise à jour si nécessaire
-- [ ] Code formaté (`pint` pour PHP, `eslint`/`prettier` pour JS/TS)
+- [ ] Code formaté (`make lint` / `make lint-fix`)
 - [ ] Commits suivent les **conventional commits**
 - [ ] Branche à jour avec `main`
 - [ ] PR liée à une issue si applicable
@@ -152,13 +150,17 @@ Fixes #123
 #### Vérifier le style
 
 ```bash
-./vendor/bin/pint --test
+make lint
+# Ou backend uniquement :
+docker compose exec -T backend ./vendor/bin/pint --test
 ```
 
 #### Corriger automatiquement
 
 ```bash
-./vendor/bin/pint
+make lint-fix
+# Ou backend uniquement :
+docker compose exec -T backend ./vendor/bin/pint
 ```
 
 #### Conventions PHP
@@ -192,13 +194,17 @@ class ExampleClass
 #### Vérifier
 
 ```bash
-npm run lint
+make lint
+# Ou storefront uniquement :
+docker compose exec -T storefront npm run lint
 ```
 
 #### Corriger
 
 ```bash
-npm run lint:fix
+make lint-fix
+# Ou storefront uniquement :
+docker compose exec -T storefront npm run lint:fix
 ```
 
 #### Conventions TypeScript
@@ -225,15 +231,19 @@ interface Product {
 #### Backend
 
 ```bash
-php artisan test
-php artisan test --coverage
+make test
+# Ou backend uniquement :
+docker compose exec -T backend php artisan test
+docker compose exec -T backend php artisan test --coverage
 ```
 
 #### Frontend
 
 ```bash
-npm run test
-npm run test:coverage
+make test
+# Ou storefront uniquement :
+docker compose exec -T storefront npm run test
+docker compose exec -T storefront npm run test:coverage
 ```
 
 ---

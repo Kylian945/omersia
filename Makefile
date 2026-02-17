@@ -75,7 +75,7 @@ help:
 	@printf "$(CYAN)╭─ Quick Start ──────────────────────────────────────────╮$(RESET)\n"
 	@printf "$(CYAN)│$(RESET)\n"
 	@printf "$(CYAN)│$(RESET)  $(ICON_ROCKET)  $(CYAN)%-18s$(RESET) %s\n" "make install" "Complete installation (recommended)"
-	@printf "$(CYAN)│$(RESET)  $(ICON_DEV)  $(CYAN)%-18s$(RESET) %s\n" "make dev" "Start development environment"
+	@printf "$(CYAN)│$(RESET)  $(ICON_DEV)  $(CYAN)%-18s$(RESET) %s\n" "make dev" "Restart development environment"
 	@printf "$(CYAN)│$(RESET)\n"
 	@printf "$(CYAN)╰────────────────────────────────────────────────────────╯$(RESET)\n"
 	@echo ""
@@ -155,7 +155,7 @@ apikey: check-docker
 admin: check-docker
 	@$(EXEC_BACKEND_IT) php artisan admin:create
 
-# Start development
+# Start/restart development
 dev:
 	@echo ""
 	@printf "$(BRIGHT_CYAN)$(ICON_DEV) Starting development environment...$(RESET)\n"
