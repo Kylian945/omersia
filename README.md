@@ -41,7 +41,7 @@
 
 ```bash
 # Cloner le repository
-git clone https://github.com/votre-username/omersia.git
+git clone https://github.com/Kylian945/omersia.git
 cd omersia
 
 # Installation complète
