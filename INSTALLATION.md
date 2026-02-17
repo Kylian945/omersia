@@ -11,12 +11,10 @@ cd omersia
 
 # Run the installation
 make install
-
-# Start development
-make dev
 ```
 
 That's it! The installation script will guide you through the setup process.
+`make install` also starts the environment.
 
 ## What Gets Installed
 
@@ -53,7 +51,7 @@ INTERACTIVE=false \
 ADMIN_EMAIL=admin@example.com \
 ADMIN_PASSWORD=SecurePass123! \
 DEMO_DATA=false \
-./scripts/install.sh
+make install
 ```
 
 Environment variables:
@@ -92,11 +90,11 @@ The installation sets up these services:
 | Service | Container Name | Ports | Purpose |
 |---------|---------------|-------|---------|
 | MySQL | omersia-mysql | 3306 | Database |
-| MeiliSearch | omersia_meilisearch_local | 7700 | Search engine |
-| Mailpit | omersia_mailpit_local | 1025 (SMTP), 8025 (Web UI) | Email testing |
-| Backend | omersia_backend_local | 5173 (Vite) | Laravel API |
-| Storefront | omersia_storefront_local | 3000 | Next.js frontend |
-| Nginx | omersia_nginx_local | 8000 | Reverse proxy |
+| MeiliSearch | omersia-meilisearch | 7700 | Search engine |
+| Mailpit | omersia-mailpit | 1025 (SMTP), 8025 (Web UI) | Email testing |
+| Backend | omersia-backend | 5173 (Vite), 8080 (Reverb) | Laravel API |
+| Storefront | omersia-storefront | 3000 (internal) | Next.js frontend |
+| Nginx | omersia-nginx | 8000 | Reverse proxy |
 
 ### Network Configuration
 
@@ -119,7 +117,7 @@ The installation sets up these services:
 ```bash
 make help        # Show all available commands
 make install     # Complete installation (recommended)
-make dev         # Start development environment
+make dev         # Restart development environment
 make test        # Run all tests (backend + frontend)
 make lint        # Run linters (Pint + ESLint)
 make clean       # Clean caches and generated files
@@ -134,7 +132,8 @@ make setup-db    # Run migrations + seed roles
 make apikey      # Generate new API key
 make admin       # Create admin user interactively
 make migrate     # Run migrations only
-make migrate-fresh  # Fresh migration with seeds
+make migrate-fresh CONFIRM_WIPE=yes  # Fresh migration with seeds
+make db:delete CONFIRM_WIPE=yes      # Drop all tables
 ```
 
 ### Docker Commands
@@ -151,33 +150,20 @@ make docker-rebuild  # Rebuild containers from scratch
 If you prefer to run each step manually:
 
 ```bash
-# 1. Setup environment files
+# 1. Start Docker services
+make docker-up
+
+# 2. Setup environment files
 make setup-env
 
-# 2. Install dependencies
-cd backend && composer install
-cd storefront && npm ci
-
-# 3. Start Docker services
-docker-compose up -d mysql meilisearch mailpit
-
-# 4. Wait for MySQL
-until docker exec omersia-mysql mysqladmin ping -h localhost --silent; do
-    echo "Waiting for MySQL..."
-    sleep 2
-done
-
-# 5. Setup database
+# 3. Setup database
 make setup-db
 
-# 6. Create admin user
+# 4. Create admin user
 make admin
 
-# 7. Generate API key
+# 5. Generate API key
 make apikey
-
-# 8. Start all services
-make dev
 ```
 
 ## Environment Configuration
@@ -227,16 +213,18 @@ The installation script will display:
 
 ### Next Steps
 
-1. **Start development:**
+1. **Environment status:**
    ```bash
-   make dev
+   make docker-logs
    ```
+   The environment is already running after `make install`.
+   Use `make dev` only if you stopped containers and need to restart them.
 
 2. **View logs:**
    ```bash
-   docker-compose logs -f
+   make docker-logs
    # Or specific service:
-   docker-compose logs -f backend
+   docker compose logs -f backend
    ```
 
 3. **Run tests:**
@@ -246,9 +234,8 @@ The installation script will display:
 
 4. **Index products in MeiliSearch:**
    ```bash
-   cd backend
-   php artisan products:configure-index
-   php artisan products:index
+   docker compose exec -T backend php artisan products:meili-config
+   docker compose exec -T backend php artisan products:index
    ```
 
 ## Troubleshooting
@@ -257,13 +244,13 @@ The installation script will display:
 
 ```bash
 # Check if MySQL is running
-docker ps | grep mysql
+docker compose ps mysql
 
 # Check MySQL logs
-docker logs omersia-mysql
+docker compose logs mysql
 
 # Restart MySQL
-docker-compose restart mysql
+docker compose restart mysql
 ```
 
 ### Port Already in Use
@@ -312,7 +299,8 @@ npm ci
 
 ```bash
 # Stop and remove all containers
-docker-compose down -v
+make docker-down
+docker compose down -v
 
 # Remove generated files
 rm -rf backend/vendor backend/.env
@@ -330,12 +318,8 @@ make install
 # Start services
 make dev
 
-# In separate terminals:
-cd backend && php artisan serve     # Optional: Laravel dev server
-cd storefront && npm run dev        # Optional: Next.js dev server
-
 # View logs
-docker-compose logs -f backend
+make docker-logs
 ```
 
 ### Code Quality
@@ -351,25 +335,24 @@ make lint-fix
 make test
 
 # Run specific tests
-cd backend && php artisan test --filter=ProductTest
-cd storefront && npm run test -- ProductCard.test.tsx
+docker compose exec -T backend php artisan test --filter=ProductTest
+docker compose exec -T storefront npm run test -- ProductCard.test.tsx
 ```
 
 ### Database Management
 
 ```bash
 # Create new migration
-cd backend
-php artisan make:migration create_something_table
+docker compose exec backend php artisan make:migration create_something_table
 
 # Run migrations
-php artisan migrate
+make migrate
 
 # Rollback last migration
-php artisan migrate:rollback
+docker compose exec -T backend php artisan migrate:rollback
 
 # Fresh install with seeds
-make migrate-fresh
+make migrate-fresh CONFIRM_WIPE=yes
 ```
 
 ## CI/CD Integration
@@ -391,7 +374,7 @@ jobs:
           ADMIN_EMAIL=admin@test.com \
           ADMIN_PASSWORD=TestPass123! \
           DEMO_DATA=false \
-          ./scripts/install.sh
+          make install
 
       - name: Run tests
         run: make test
@@ -405,7 +388,7 @@ install:
     - export INTERACTIVE=false
     - export ADMIN_EMAIL=admin@test.com
     - export DEMO_DATA=false
-    - ./scripts/install.sh
+    - make install
     - make test
 ```
 
@@ -443,7 +426,7 @@ Both backend and storefront support hot reload by default:
 If you encounter issues:
 
 1. Check the [Troubleshooting](#troubleshooting) section
-2. Review logs: `docker-compose logs -f`
+2. Review logs: `make docker-logs`
 3. Verify prerequisites are met
 4. Try a clean reinstall (see [Reset Everything](#reset-everything))
 

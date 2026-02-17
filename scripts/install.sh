@@ -426,7 +426,7 @@ while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
     ATTEMPT=$((ATTEMPT + 1))
     if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
         stop_spinner $SPINNER_PID "error" "Installation failed"
-        error_exit "Backend dependencies failed to install after $MAX_ATTEMPTS attempts. Check logs: docker-compose logs backend"
+        error_exit "Backend dependencies failed to install after $MAX_ATTEMPTS attempts. Check logs: make docker-logs (or docker compose logs backend)"
     fi
     sleep 3
 done
@@ -527,7 +527,7 @@ stop_spinner $SPINNER_PID "success" "API key generated and synced"
 # Extract API key from output (64 character alphanumeric string)
 API_KEY=$(echo "$API_KEY_OUTPUT" | grep -oE 'Key:[[:space:]]+[a-zA-Z0-9]+' | awk '{print $2}')
 
-# Update root .env for docker-compose
+# Update root .env for Docker Compose
 cd "$PROJECT_ROOT"
 if [ -n "$API_KEY" ]; then
     if [ -f ".env" ]; then
@@ -618,10 +618,10 @@ printf "${BRIGHT_CYAN}╰──────────────────�
 echo ""
 printf "${CYAN}╭─ 💡 Useful Commands ───────────────────────────────────╮${RESET}\n"
 printf "${CYAN}│${RESET}\n"
-printf "${CYAN}│${RESET}  ${BRIGHT_CYAN}make dev${RESET}              Start development environment\n"
+printf "${CYAN}│${RESET}  ${BRIGHT_CYAN}make dev${RESET}              Restart environment\n"
 printf "${CYAN}│${RESET}  ${BRIGHT_CYAN}make test${RESET}             Run tests\n"
 printf "${CYAN}│${RESET}  ${BRIGHT_CYAN}make lint${RESET}             Run linters\n"
-printf "${CYAN}│${RESET}  ${BRIGHT_CYAN}docker-compose logs -f${RESET}  View logs\n"
+printf "${CYAN}│${RESET}  ${BRIGHT_CYAN}make docker-logs${RESET}      View logs\n"
 printf "${CYAN}│${RESET}\n"
 printf "${CYAN}╰────────────────────────────────────────────────────────╯${RESET}\n"
 

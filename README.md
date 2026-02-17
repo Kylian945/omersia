@@ -57,7 +57,9 @@ Le script d'installation va :
 6. Créer un utilisateur admin (email/password)
 7. Générer et synchroniser la clé API
 
-Une fois terminé, lancez :
+`make install` démarre déjà l'environnement.
+
+Pour relancer plus tard (après un `make docker-down`), utilisez :
 
 ```bash
 make dev
@@ -78,7 +80,7 @@ L'application sera disponible sur :
 
 ```bash
 make install      # Installation complète
-make dev          # Démarrer l'environnement
+make dev          # Relancer l'environnement
 make test         # Lancer les tests
 make lint         # Vérifier le code
 make lint-fix     # Corriger le code
