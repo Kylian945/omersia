@@ -1,4 +1,4 @@
-import { subscribeToPrivateEvent } from "./realtime-client";
+import { subscribeToPrivateEvent } from "../core/realtime-client";
 
 const DEFAULT_SOUND_URL = "/admin/notifications/payment-success-audio";
 const FALLBACK_SOUND_URL = "/notifications/notif_payment_success.mp3";

@@ -653,14 +653,14 @@
         };
     </script>
 
-    @vite(['packages/Admin/src/resources/js/toast.js'])
+    @vite(['packages/Admin/src/resources/js/core/toast.js'])
     @can('orders.view')
         <script>
             window.omersiaOrderSoundConfig = {
                 paymentSuccessUrl: @json('/admin/notifications/payment-success-audio'),
             };
         </script>
-        @vite(['packages/Admin/src/resources/js/order-paid-sound-notification.js'])
+        @vite(['packages/Admin/src/resources/js/orders/paid-sound-notification.js'])
     @endcan
     @stack('scripts')
 

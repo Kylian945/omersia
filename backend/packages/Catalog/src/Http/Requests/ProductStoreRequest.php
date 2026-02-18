@@ -68,12 +68,14 @@ final class ProductStoreRequest extends FormRequest
 
             // Variantes
             $rules['variants'] = ['required', 'array', 'min:1'];
+            $rules['variants.*.id'] = ['nullable', 'integer'];
             $rules['variants.*.sku'] = ['required', 'string', 'max:255', 'distinct'];
             $rules['variants.*.label'] = ['required', 'string', 'max:255'];
             $rules['variants.*.is_active'] = ['nullable', 'boolean'];
             $rules['variants.*.stock_qty'] = ['nullable', 'integer', 'min:0'];
             $rules['variants.*.price'] = ['required', 'numeric', 'min:0'];
             $rules['variants.*.compare_at_price'] = ['nullable', 'numeric', 'min:0'];
+            $rules['variants.*.image_key'] = ['nullable', 'string', 'max:50'];
             $rules['variants.*.values'] = ['required', 'array', 'min:1'];
         }
 
@@ -160,6 +162,7 @@ final class ProductStoreRequest extends FormRequest
             'variants.required' => 'Au moins une variante est requise.',
             'variants.array' => 'Les variantes doivent être un tableau.',
             'variants.min' => 'Au moins une variante est requise.',
+            'variants.*.id.integer' => 'L\'identifiant de variante est invalide.',
             'variants.*.sku.required' => 'Le SKU de la variante est obligatoire.',
             'variants.*.sku.string' => 'Le SKU de la variante doit être une chaîne de caractères.',
             'variants.*.sku.max' => 'Le SKU de la variante ne peut pas dépasser 255 caractères.',
@@ -174,6 +177,8 @@ final class ProductStoreRequest extends FormRequest
             'variants.*.price.min' => 'Le prix de la variante ne peut pas être négatif.',
             'variants.*.compare_at_price.numeric' => 'Le prix comparatif de la variante doit être un nombre.',
             'variants.*.compare_at_price.min' => 'Le prix comparatif de la variante ne peut pas être négatif.',
+            'variants.*.image_key.string' => 'La clé d\'image de la variante est invalide.',
+            'variants.*.image_key.max' => 'La clé d\'image de la variante est trop longue.',
             'variants.*.values.required' => 'Les valeurs de la variante sont obligatoires.',
             'variants.*.values.array' => 'Les valeurs de la variante doivent être un tableau.',
             'variants.*.values.min' => 'Au moins une valeur est requise pour la variante.',

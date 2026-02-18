@@ -1,4 +1,4 @@
-import { subscribeToPrivateEvent } from "./realtime-client";
+import { subscribeToPrivateEvent } from "../../core/realtime-client";
 
 document.addEventListener("DOMContentLoaded", () => {
     const config = window.omersiaGdprRealtimeConfig ?? {};

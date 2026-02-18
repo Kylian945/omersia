@@ -1,426 +1,29 @@
-import "./quill-editor.js";
-
-// Exposé global pour Alpine : x-data="productCreateForm('simple')"
-window.productCreateForm = function (config = {}) {
-    return {
-        productType: config.type || "simple",
-        options: Array.isArray(config.options) ? config.options : [],
-        variants: Array.isArray(config.variants) ? config.variants : [],
-
-        onTypeChange() {
-            if (this.productType === "simple") {
-                this.variants = [];
-            }
-        },
-
-        addOption() {
-            this.options.push({
-                name: "",
-                valuesText: "",
-            });
-        },
-
-        removeOption(index) {
-            this.options.splice(index, 1);
-            this.generateVariants();
-        },
-
-        splitValues(text) {
-            return (text || "")
-                .split(",")
-                .map((v) => v.trim())
-                .filter((v) => v.length > 0);
-        },
-
-        cartesian(arrays) {
-            return arrays.reduce(
-                (a, b) => {
-                    const res = [];
-                    a.forEach((x) => {
-                        b.forEach((y) => {
-                            res.push([].concat(x, y));
-                        });
-                    });
-                    return res;
-                },
-                [[]]
-            );
-        },
-
-        generateVariants() {
-            const normalizedOptions = this.options
-                .map((o) => ({
-                    name: (o.name || "").trim(),
-                    values: this.splitValues(o.valuesText),
-                }))
-                .filter((o) => o.name && o.values.length);
-
-            if (!normalizedOptions.length) {
-                this.variants = [];
-                return;
-            }
-
-            const combos = this.cartesian(
-                normalizedOptions.map((o) => o.values)
-            );
-
-            this.variants = combos.map((combo) => {
-                const values = combo.map((val, idx) => {
-                    const optName = normalizedOptions[idx].name;
-                    return optName + ":" + val;
-                });
-
-                const label = values
-                    .map((v) => v.split(":")[1])
-                    .join(" / ");
-
-                const existing = this.variants.find((vExisting) => {
-                    if (
-                        !vExisting.values ||
-                        vExisting.values.length !== values.length
-                    ) {
-                        return false;
-                    }
-                    return values.every((v) =>
-                        vExisting.values.includes(v)
-                    );
-                });
-
-                return (
-                    existing || {
-                        label,
-                        sku: "",
-                        is_active: true,
-                        stock_qty: 0,
-                        price: "",
-                        compare_at_price: "",
-                        values,
-                    }
-                );
-            });
-        },
-
-        init() {
-            // Si on est en variant et qu'il n'y a rien, on pré-ajoute une option
-            if (
-                this.productType === "variant" &&
-                (!this.options || this.options.length === 0)
-            ) {
-                this.addOption();
-            }
-        },
-    };
-};
-
-
-document.addEventListener("DOMContentLoaded", () => {
-    const productWysiwygEditors = new Map();
-
-    const isLikelyHtml = (value) =>
-        /<[a-z][\s\S]*>/i.test(value || "");
-
-    const normalizeWysiwygValue = (value) => {
-        if (typeof value !== "string") {
-            return "";
-        }
-
-        const normalized = value.trim();
-        if (
-            normalized === "" ||
-            normalized === "<p><br></p>" ||
-            normalized === "<div><br></div>"
-        ) {
-            return "";
-        }
-
-        return normalized;
-    };
-
-    const syncWysiwygField = (fieldName) => {
-        const editorState = productWysiwygEditors.get(fieldName);
-        if (!editorState) {
-            return;
-        }
-
-        editorState.input.value = normalizeWysiwygValue(
-            editorState.quill.root.innerHTML
-        );
-    };
-
-    const syncWysiwygEditors = () => {
-        productWysiwygEditors.forEach((_state, fieldName) => {
-            syncWysiwygField(fieldName);
-        });
-    };
-
-    const setFormFieldValue = (fieldName, nextValue) => {
-        const safeValue = typeof nextValue === "string" ? nextValue : "";
-        const editorState = productWysiwygEditors.get(fieldName);
-
-        if (editorState) {
-            if (safeValue.trim() === "") {
-                editorState.quill.setText("");
-            } else if (isLikelyHtml(safeValue)) {
-                editorState.quill.clipboard.dangerouslyPasteHTML(safeValue);
-            } else {
-                editorState.quill.setText(safeValue);
-            }
-
-            syncWysiwygField(fieldName);
-            return true;
-        }
-
-        const field = document.querySelector(`[name="${fieldName}"]`);
-        if (!field || !("value" in field)) {
-            return false;
-        }
-
-        field.value = safeValue;
-        return true;
-    };
-
-    const initProductWysiwyg = () => {
-        const editorContainers = Array.from(
-            document.querySelectorAll("[data-product-wysiwyg]")
-        );
-
-        if (editorContainers.length === 0) {
-            return;
-        }
-
-        if (typeof window.Quill !== "function") {
-            editorContainers.forEach((container) => {
-                container.classList.add("hidden");
-                const fieldName = container.dataset.productWysiwyg || "";
-                if (!fieldName) {
-                    return;
-                }
-
-                const fallbackInput = document.querySelector(
-                    `textarea[name="${fieldName}"]`
-                );
-                if (!fallbackInput) {
-                    return;
-                }
-
-                fallbackInput.classList.remove("hidden");
-                fallbackInput.style.width = "100%";
-                fallbackInput.style.border = "0";
-                fallbackInput.style.padding = "0.5rem 0.75rem";
-                fallbackInput.style.fontSize = "0.75rem";
-                fallbackInput.style.resize = "vertical";
-                fallbackInput.style.outline = "none";
-
-                const minHeight = Number.parseInt(
-                    container.dataset.productWysiwygMinHeight || "120",
-                    10
-                );
-                if (Number.isFinite(minHeight) && minHeight > 0) {
-                    fallbackInput.style.minHeight = `${minHeight}px`;
-                }
-            });
-
-            return;
-        }
-
-        const toolbar = [
-            [{ header: [2, 3, false] }],
-            ["bold", "italic", "underline"],
-            [{ list: "ordered" }, { list: "bullet" }],
-            ["link", "clean"],
-        ];
-
-        editorContainers.forEach((container) => {
-            const fieldName = container.dataset.productWysiwyg || "";
-            if (!fieldName) {
-                return;
-            }
-
-            const input = document.querySelector(
-                `textarea[name="${fieldName}"]`
-            );
-            if (!input) {
-                return;
-            }
-
-            const quill = new window.Quill(container, {
-                theme: "snow",
-                modules: {
-                    toolbar,
-                },
-                placeholder:
-                    container.dataset.productWysiwygPlaceholder || "",
-            });
-
-            const initialValue = (input.value || "").trim();
-            if (initialValue !== "") {
-                if (isLikelyHtml(initialValue)) {
-                    quill.clipboard.dangerouslyPasteHTML(initialValue);
-                } else {
-                    quill.setText(initialValue);
-                }
-            }
-
-            const minHeight = Number.parseInt(
-                container.dataset.productWysiwygMinHeight || "",
-                10
-            );
-            const quillEditor = container.querySelector(".ql-editor");
-            if (
-                quillEditor &&
-                Number.isFinite(minHeight) &&
-                minHeight > 0
-            ) {
-                quillEditor.style.minHeight = `${minHeight}px`;
-            }
-
-            productWysiwygEditors.set(fieldName, {
-                quill,
-                input,
-            });
-
-            quill.on("text-change", () => {
-                syncWysiwygField(fieldName);
-            });
-
-            syncWysiwygField(fieldName);
-        });
-    };
-
-    initProductWysiwyg();
-
-    document.querySelectorAll("form").forEach((form) => {
-        if (form.querySelector("[data-product-wysiwyg]")) {
-            form.addEventListener("submit", () => {
-                syncWysiwygEditors();
-            });
-        }
-    });
-
-    /**
-     * Gestion des previews d'images pour la création
-     */
-    const createInput = document.querySelector('input[name="images[]"]');
-    const createPreview = document.getElementById("image-preview-container");
-    const mainInputCreate = document.getElementById("main_image_input");
-    const mainImageInput = document.getElementById("main_image_input");
-
-    if (createInput && createPreview && mainInputCreate) {
-        createInput.addEventListener("change", () => {
-            createPreview.innerHTML = "";
-            Array.from(createInput.files).forEach((file, index) => {
-                const url = URL.createObjectURL(file);
-
-                const wrapper = document.createElement("button");
-                wrapper.type = "button";
-                wrapper.className =
-                    "relative border rounded-xl overflow-hidden group focus:outline-none";
-                wrapper.addEventListener("click", () => {
-                    if (mainImageInput) {
-                        mainImageInput.value = String(index);
-                    }
-                    [
-                        ...createPreview.querySelectorAll("[data-main]"),
-                    ].forEach((el) => {
-                        el.textContent = "";
-                    });
-                    label.textContent = "Image principale";
-                });
-
-                const img = document.createElement("img");
-                img.src = url;
-                img.className = "w-full h-52 object-cover";
-
-                const label = document.createElement("div");
-                label.className =
-                    "absolute bottom-1 left-1 right-1 text-xxxs px-1 py-0.5 rounded bg-black/60 text-white text-center";
-                label.dataset.main = "0";
-                if (index === 0) {
-                    label.textContent = "Image principale";
-                }
-
-                wrapper.appendChild(img);
-                wrapper.appendChild(label);
-                createPreview.appendChild(wrapper);
-            });
-        });
-    }
-
-    /**
-     * Gestion des nouvelles images sur "edit"
-     */
-    const newImagesInput = document.getElementById("new-images-input");
-    const newImagesContainer =
-        document.getElementById("new-images-preview");
-    const mainInputEdit = document.getElementById("main_image_input");
-
-    if (newImagesInput && newImagesContainer && mainInputEdit) {
-        newImagesInput.addEventListener("change", () => {
-            newImagesContainer.innerHTML = "";
-            Array.from(newImagesInput.files).forEach((file, index) => {
-                const url = URL.createObjectURL(file);
-
-                const wrapper = document.createElement("label");
-                wrapper.className =
-                    "relative border rounded-xl overflow-hidden cursor-pointer group";
-
-                const img = document.createElement("img");
-                img.src = url;
-                img.className =
-                    "w-full h-52 object-cover group-hover:opacity-95";
-
-                const bar = document.createElement("div");
-                bar.className =
-                    "absolute bottom-1 left-1 right-1 flex items-center justify-center gap-1 bg-black/60 text-white text-xxxs px-1.5 py-0.5 rounded-full";
-
-                const radio = document.createElement("input");
-                radio.type = "radio";
-                radio.name = "main_image";
-                radio.value = "new-" + index;
-                radio.className = "h-2 w-2";
-
-                radio.addEventListener("change", () => {
-                    if (mainImageInput) {
-                        mainImageInput.value = radio.value;
-                    }
-                });
-
-                const text = document.createElement("span");
-                text.textContent = "Définir comme principale";
-
-                bar.appendChild(radio);
-                bar.appendChild(text);
-                wrapper.appendChild(img);
-                wrapper.appendChild(bar);
-                newImagesContainer.appendChild(wrapper);
-            });
-        });
-    }
-
-    // Sync radio -> main_image sur edit
-    document
-        .querySelectorAll('input[type="radio"][name="main_image"]')
-        .forEach((radio) => {
-            radio.addEventListener("change", () => {
-                if (mainImageInput) {
-                    mainImageInput.value = radio.value;
-                }
-            });
-        });
-
-    /**
-     * Génération IA manuelle pour les champs produit + SEO
-     */
+export const initProductAiAssistant = ({
+    syncWysiwygEditors,
+    setFormFieldValue,
+    mainImageInput,
+    createInput,
+    syncVariantImageChoices,
+    aiGeneratedPreviewContainer,
+    aiGeneratedInputsContainer,
+}) => {
     const aiOpenModalButtons = Array.from(
         document.querySelectorAll("[data-ai-open-modal]")
     );
     const aiPromptModal = document.getElementById("product-ai-prompt-modal");
-    const aiModalCloseButton = document.getElementById("product-ai-modal-close-button");
-    const aiModalCancelButton = document.getElementById("product-ai-modal-cancel-button");
-    const aiModalSubmitButton = document.getElementById("product-ai-modal-submit-button");
+    const aiModalCloseButton = document.getElementById(
+        "product-ai-modal-close-button"
+    );
+    const aiModalCancelButton = document.getElementById(
+        "product-ai-modal-cancel-button"
+    );
+    const aiModalSubmitButton = document.getElementById(
+        "product-ai-modal-submit-button"
+    );
     const aiPromptInput = document.getElementById("product-ai-prompt-input");
     const aiModalError = document.getElementById("product-ai-modal-error");
     const aiTargetLabel = document.getElementById("product-ai-target-label");
+
     const aiImageGenerateButtons = Array.from(
         document.querySelectorAll("[data-ai-image-generate-button]")
     );
@@ -448,20 +51,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const aiImageReferenceEmpty = document.getElementById(
         "product-ai-image-reference-empty"
     );
-    const aiImageLoadingState = document.getElementById(
-        "product-ai-image-loading"
-    );
-    const aiGeneratedPreviewContainer = document.getElementById(
-        "ai-generated-images-preview"
-    );
-    const aiGeneratedInputsContainer = document.getElementById(
-        "ai-generated-images-inputs"
-    );
+    const aiImageLoadingState = document.getElementById("product-ai-image-loading");
+
+    const resolvedPreviewContainer =
+        aiGeneratedPreviewContainer ??
+        document.getElementById("ai-generated-images-preview");
+    const resolvedInputsContainer =
+        aiGeneratedInputsContainer ??
+        document.getElementById("ai-generated-images-inputs");
+
     const productForm = document.querySelector("form[data-product-id]");
     const productIdRaw = (productForm?.dataset.productId || "").trim();
     const productId = /^\d+$/.test(productIdRaw)
         ? Number.parseInt(productIdRaw, 10)
         : null;
+
     let activeAiField = null;
     let activeAiFieldLabel = "";
     let activeAiEndpoint = "";
@@ -473,6 +77,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const getAiProviderHintMessage = () =>
         "Aucun provider IA actif. Configurez-en un dans Paramètres > IA.";
+
+    const setAiStatus = (message, type = "info") => {
+        if (typeof window.showToast === "function") {
+            window.showToast(message, type);
+        }
+    };
 
     const ensureAiProviderConfigured = () => {
         if (aiProviderReady) {
@@ -493,15 +103,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    const setAiStatus = (message, type = "info") => {
-        if (typeof window.showToast === "function") {
-            window.showToast(message, type);
-            return;
-        }
-    };
-
     const setAiModalError = (message = "") => {
-        if (!aiModalError) {
+        if (!(aiModalError instanceof HTMLElement)) {
             return;
         }
 
@@ -515,43 +118,8 @@ document.addEventListener("DOMContentLoaded", () => {
         aiModalError.textContent = message;
     };
 
-    const toggleAiControls = (isDisabled) => {
-        aiOpenModalButtons.forEach((button) => {
-            button.disabled = isDisabled;
-        });
-        aiImageGenerateButtons.forEach((button) => {
-            button.disabled = isDisabled;
-        });
-        if (aiModalSubmitButton) {
-            aiModalSubmitButton.disabled = isDisabled;
-        }
-        if (aiImageModalSubmitButton) {
-            aiImageModalSubmitButton.disabled = isDisabled;
-        }
-    };
-
-    const showAiPromptModal = () => {
-        if (!aiPromptModal) {
-            return;
-        }
-
-        aiPromptModal.classList.remove("hidden");
-        aiPromptModal.classList.add("flex");
-        document.body.classList.add("overflow-hidden");
-    };
-
-    const hideAiPromptModal = () => {
-        if (!aiPromptModal) {
-            return;
-        }
-
-        aiPromptModal.classList.add("hidden");
-        aiPromptModal.classList.remove("flex");
-        document.body.classList.remove("overflow-hidden");
-    };
-
     const setAiImageModalError = (message = "") => {
-        if (!aiImageModalError) {
+        if (!(aiImageModalError instanceof HTMLElement)) {
             return;
         }
 
@@ -565,10 +133,46 @@ document.addEventListener("DOMContentLoaded", () => {
         aiImageModalError.textContent = message;
     };
 
+    const toggleAiControls = (isDisabled) => {
+        aiOpenModalButtons.forEach((button) => {
+            button.disabled = isDisabled;
+        });
+        aiImageGenerateButtons.forEach((button) => {
+            button.disabled = isDisabled;
+        });
+
+        if (aiModalSubmitButton instanceof HTMLButtonElement) {
+            aiModalSubmitButton.disabled = isDisabled;
+        }
+        if (aiImageModalSubmitButton instanceof HTMLButtonElement) {
+            aiImageModalSubmitButton.disabled = isDisabled;
+        }
+    };
+
+    const showAiPromptModal = () => {
+        if (!(aiPromptModal instanceof HTMLElement)) {
+            return;
+        }
+
+        aiPromptModal.classList.remove("hidden");
+        aiPromptModal.classList.add("flex");
+        document.body.classList.add("overflow-hidden");
+    };
+
+    const hideAiPromptModal = () => {
+        if (!(aiPromptModal instanceof HTMLElement)) {
+            return;
+        }
+
+        aiPromptModal.classList.add("hidden");
+        aiPromptModal.classList.remove("flex");
+        document.body.classList.remove("overflow-hidden");
+    };
+
     const setAiImageLoading = (isLoading) => {
         aiImageIsGenerating = isLoading;
 
-        if (aiImageLoadingState) {
+        if (aiImageLoadingState instanceof HTMLElement) {
             if (isLoading) {
                 aiImageLoadingState.classList.remove("hidden");
                 aiImageLoadingState.classList.add("flex");
@@ -578,11 +182,11 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        if (aiImagePromptInput) {
+        if (aiImagePromptInput instanceof HTMLTextAreaElement) {
             aiImagePromptInput.disabled = isLoading;
         }
 
-        if (aiImageReferenceOptions) {
+        if (aiImageReferenceOptions instanceof HTMLElement) {
             aiImageReferenceOptions
                 .querySelectorAll('input[name="product_ai_image_reference"]')
                 .forEach((input) => {
@@ -590,15 +194,15 @@ document.addEventListener("DOMContentLoaded", () => {
                 });
         }
 
-        if (aiImageModalCloseButton) {
+        if (aiImageModalCloseButton instanceof HTMLButtonElement) {
             aiImageModalCloseButton.disabled = isLoading;
         }
 
-        if (aiImageModalCancelButton) {
+        if (aiImageModalCancelButton instanceof HTMLButtonElement) {
             aiImageModalCancelButton.disabled = isLoading;
         }
 
-        if (aiImageModalSubmitButton) {
+        if (aiImageModalSubmitButton instanceof HTMLButtonElement) {
             if (!aiImageModalSubmitButton.dataset.defaultLabel) {
                 aiImageModalSubmitButton.dataset.defaultLabel =
                     aiImageModalSubmitButton.textContent?.trim() || "Générer l’image";
@@ -611,7 +215,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const showAiImagePromptModal = () => {
-        if (!aiImagePromptModal) {
+        if (!(aiImagePromptModal instanceof HTMLElement)) {
             return;
         }
 
@@ -621,7 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const hideAiImagePromptModal = () => {
-        if (!aiImagePromptModal) {
+        if (!(aiImagePromptModal instanceof HTMLElement)) {
             return;
         }
 
@@ -635,9 +239,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const collectReferenceImages = () =>
-        Array.from(
-            document.querySelectorAll("[data-product-existing-image-id]")
-        )
+        Array.from(document.querySelectorAll("[data-product-existing-image-id]"))
             .map((element) => {
                 const rawId = element.dataset.productExistingImageId || "";
                 const id = /^\d+$/.test(rawId)
@@ -646,9 +248,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const imageElement = element.querySelector("img");
                 const rawUrl =
                     element.dataset.productExistingImageUrl ||
-                    (imageElement instanceof HTMLImageElement
-                        ? imageElement.src
-                        : "");
+                    (imageElement instanceof HTMLImageElement ? imageElement.src : "");
                 const imageUrl = typeof rawUrl === "string" ? rawUrl.trim() : "";
 
                 if (!Number.isInteger(id) || imageUrl === "") {
@@ -682,7 +282,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const renderAiImageReferenceOptions = (referenceImages) => {
-        if (!aiImageReferenceOptions) {
+        if (!(aiImageReferenceOptions instanceof HTMLElement)) {
             return;
         }
 
@@ -725,9 +325,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         badge.textContent = "Référence";
                     });
 
-                const state = option.querySelector(
-                    "[data-ai-image-reference-state]"
-                );
+                const state = option.querySelector("[data-ai-image-reference-state]");
                 if (state instanceof HTMLElement) {
                     state.textContent = "Sélectionnée";
                 }
@@ -787,7 +385,7 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        if (aiImageReferenceEmpty) {
+        if (aiImageReferenceEmpty instanceof HTMLElement) {
             if (referenceImages.length === 0) {
                 aiImageReferenceEmpty.classList.remove("hidden");
             } else {
@@ -800,14 +398,12 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const getNextAiGeneratedIndex = () => {
-        if (!aiGeneratedInputsContainer) {
+        if (!(resolvedInputsContainer instanceof HTMLElement)) {
             return 0;
         }
 
         const indices = Array.from(
-            aiGeneratedInputsContainer.querySelectorAll(
-                "input[data-ai-generated-index]"
-            )
+            resolvedInputsContainer.querySelectorAll("input[data-ai-generated-index]")
         )
             .map((input) => {
                 const raw = input.dataset.aiGeneratedIndex || "";
@@ -823,7 +419,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const appendGeneratedImagePreview = (dataUrl) => {
-        if (!aiGeneratedInputsContainer || !aiGeneratedPreviewContainer) {
+        if (
+            !(resolvedInputsContainer instanceof HTMLElement) ||
+            !(resolvedPreviewContainer instanceof HTMLElement)
+        ) {
             return;
         }
 
@@ -836,7 +435,7 @@ document.addEventListener("DOMContentLoaded", () => {
         hiddenInput.value = dataUrl;
         hiddenInput.dataset.aiGeneratedInput = "1";
         hiddenInput.dataset.aiGeneratedIndex = String(index);
-        aiGeneratedInputsContainer.appendChild(hiddenInput);
+        resolvedInputsContainer.appendChild(hiddenInput);
 
         const wrapper = document.createElement("label");
         wrapper.className =
@@ -862,7 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
         radio.value = key;
         radio.className = "h-2 w-2";
         radio.addEventListener("change", () => {
-            if (mainImageInput) {
+            if (mainImageInput instanceof HTMLInputElement) {
                 mainImageInput.value = radio.value;
             }
         });
@@ -875,12 +474,15 @@ document.addEventListener("DOMContentLoaded", () => {
         wrapper.appendChild(image);
         wrapper.appendChild(badge);
         wrapper.appendChild(bar);
-        aiGeneratedPreviewContainer.appendChild(wrapper);
+        resolvedPreviewContainer.appendChild(wrapper);
 
         const hasMainSelected = Array.from(
             document.querySelectorAll('input[type="radio"][name="main_image"]')
         ).some((input) => input.checked);
-        const currentMainValue = mainImageInput?.value?.trim() ?? "";
+        const currentMainValue =
+            mainImageInput instanceof HTMLInputElement
+                ? mainImageInput.value?.trim() ?? ""
+                : "";
         const hasIndexedUploadSelection =
             /^\d+$/.test(currentMainValue) &&
             createInput instanceof HTMLInputElement &&
@@ -890,10 +492,18 @@ document.addEventListener("DOMContentLoaded", () => {
             currentMainValue !== "" &&
             (currentMainValue !== "0" || hasIndexedUploadSelection);
 
-        if (!hasMainSelected && !hasExplicitMainSelection && mainImageInput) {
+        if (
+            !hasMainSelected &&
+            !hasExplicitMainSelection &&
+            mainImageInput instanceof HTMLInputElement
+        ) {
             radio.checked = true;
             mainImageInput.value = key;
             text.textContent = "Image principale";
+        }
+
+        if (typeof syncVariantImageChoices === "function") {
+            syncVariantImageChoices();
         }
     };
 
@@ -906,7 +516,7 @@ document.addEventListener("DOMContentLoaded", () => {
         activeAiImageEndpoint = endpoint;
         const references = collectReferenceImages();
         renderAiImageReferenceOptions(references);
-        if (aiImagePromptInput) {
+        if (aiImagePromptInput instanceof HTMLTextAreaElement) {
             aiImagePromptInput.value = "";
         }
         setAiImageLoading(false);
@@ -916,17 +526,13 @@ document.addEventListener("DOMContentLoaded", () => {
         window.setTimeout(() => {
             aiImagePromptInput?.focus();
             const inputLength = aiImagePromptInput?.value?.length ?? 0;
-            if (aiImagePromptInput && inputLength > 0) {
+            if (aiImagePromptInput instanceof HTMLTextAreaElement && inputLength > 0) {
                 aiImagePromptInput.setSelectionRange(inputLength, inputLength);
             }
         }, 40);
     };
 
-    const openAiPromptModal = ({
-        targetField,
-        targetLabel,
-        endpoint,
-    }) => {
+    const openAiPromptModal = ({ targetField, targetLabel, endpoint }) => {
         if (!ensureAiProviderConfigured()) {
             return;
         }
@@ -936,7 +542,7 @@ document.addEventListener("DOMContentLoaded", () => {
         activeAiFieldLabel = targetLabel;
         activeAiEndpoint = endpoint;
 
-        if (aiTargetLabel) {
+        if (aiTargetLabel instanceof HTMLElement) {
             aiTargetLabel.textContent = targetLabel;
         }
 
@@ -945,7 +551,7 @@ document.addEventListener("DOMContentLoaded", () => {
         window.setTimeout(() => {
             aiPromptInput?.focus();
             const inputLength = aiPromptInput?.value?.length ?? 0;
-            if (aiPromptInput && inputLength > 0) {
+            if (aiPromptInput instanceof HTMLTextAreaElement && inputLength > 0) {
                 aiPromptInput.setSelectionRange(inputLength, inputLength);
             }
         }, 40);
@@ -968,10 +574,16 @@ document.addEventListener("DOMContentLoaded", () => {
         syncWysiwygEditors();
 
         const nameField = document.querySelector('input[name="name"]');
-        const shortDescriptionField = document.querySelector('textarea[name="short_description"]');
-        const descriptionField = document.querySelector('textarea[name="description"]');
+        const shortDescriptionField = document.querySelector(
+            'textarea[name="short_description"]'
+        );
+        const descriptionField = document.querySelector(
+            'textarea[name="description"]'
+        );
         const metaTitleField = document.querySelector('input[name="meta_title"]');
-        const metaDescriptionField = document.querySelector('textarea[name="meta_description"]');
+        const metaDescriptionField = document.querySelector(
+            'textarea[name="meta_description"]'
+        );
 
         const categories = Array.from(
             document.querySelectorAll('input[name="categories[]"]:checked')
@@ -1014,7 +626,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await response.json().catch(() => ({}));
             if (!response.ok) {
                 throw new Error(
-                    result.message || "La génération IA a échoué. Vérifie ta configuration et réessaie."
+                    result.message ||
+                        "La génération IA a échoué. Vérifie ta configuration et réessaie."
                 );
             }
 
@@ -1029,18 +642,17 @@ document.addEventListener("DOMContentLoaded", () => {
                 "success"
             );
         } catch (error) {
-            const message = error instanceof Error ? error.message : "Erreur inconnue pendant la génération IA.";
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Erreur inconnue pendant la génération IA.";
             setAiStatus(message, "error");
         } finally {
             toggleAiControls(false);
         }
     };
 
-    const runAiImageGeneration = async ({
-        prompt,
-        sourceImageIds,
-        endpoint,
-    }) => {
+    const runAiImageGeneration = async ({ prompt, sourceImageIds, endpoint }) => {
         if (!ensureAiProviderConfigured()) {
             return false;
         }
@@ -1087,7 +699,7 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!response.ok) {
                 throw new Error(
                     result.message ||
-                    "La génération d’image IA a échoué. Vérifie ta configuration et réessaie."
+                        "La génération d’image IA a échoué. Vérifie ta configuration et réessaie."
                 );
             }
 
@@ -1103,9 +715,10 @@ document.addEventListener("DOMContentLoaded", () => {
             );
             return true;
         } catch (error) {
-            const message = error instanceof Error
-                ? error.message
-                : "Erreur inconnue pendant la génération d’image IA.";
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Erreur inconnue pendant la génération d’image IA.";
             setAiStatus(message, "error");
             return false;
         } finally {
@@ -1114,7 +727,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    if (aiOpenModalButtons.length > 0 && aiModalSubmitButton && aiPromptInput) {
+    if (
+        aiOpenModalButtons.length > 0 &&
+        aiModalSubmitButton instanceof HTMLButtonElement &&
+        aiPromptInput instanceof HTMLTextAreaElement
+    ) {
         aiOpenModalButtons.forEach((button) => {
             button.addEventListener("click", () => {
                 openAiPromptModal({
@@ -1155,19 +772,19 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        if (aiModalCloseButton) {
+        if (aiModalCloseButton instanceof HTMLButtonElement) {
             aiModalCloseButton.addEventListener("click", () => {
                 hideAiPromptModal();
             });
         }
 
-        if (aiModalCancelButton) {
+        if (aiModalCancelButton instanceof HTMLButtonElement) {
             aiModalCancelButton.addEventListener("click", () => {
                 hideAiPromptModal();
             });
         }
 
-        if (aiPromptModal) {
+        if (aiPromptModal instanceof HTMLElement) {
             aiPromptModal.addEventListener("click", (event) => {
                 if (event.target === aiPromptModal) {
                     hideAiPromptModal();
@@ -1176,7 +793,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape" && aiPromptModal && !aiPromptModal.classList.contains("hidden")) {
+            if (
+                event.key === "Escape" &&
+                aiPromptModal instanceof HTMLElement &&
+                !aiPromptModal.classList.contains("hidden")
+            ) {
                 hideAiPromptModal();
             }
         });
@@ -1192,7 +813,10 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         });
 
-        if (aiImageModalSubmitButton && aiImagePromptInput) {
+        if (
+            aiImageModalSubmitButton instanceof HTMLButtonElement &&
+            aiImagePromptInput instanceof HTMLTextAreaElement
+        ) {
             aiImageModalSubmitButton.addEventListener("click", async () => {
                 if (!ensureAiProviderConfigured()) {
                     return;
@@ -1207,10 +831,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     setAiImageModalError("Endpoint image IA introuvable.");
                     return;
                 }
-                if (
-                    aiImageRequireReference &&
-                    !Number.isInteger(activeAiImageReferenceId)
-                ) {
+                if (aiImageRequireReference && !Number.isInteger(activeAiImageReferenceId)) {
                     setAiImageModalError("Sélectionne une image de référence.");
                     return;
                 }
@@ -1233,19 +854,19 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        if (aiImageModalCloseButton) {
+        if (aiImageModalCloseButton instanceof HTMLButtonElement) {
             aiImageModalCloseButton.addEventListener("click", () => {
                 hideAiImagePromptModal();
             });
         }
 
-        if (aiImageModalCancelButton) {
+        if (aiImageModalCancelButton instanceof HTMLButtonElement) {
             aiImageModalCancelButton.addEventListener("click", () => {
                 hideAiImagePromptModal();
             });
         }
 
-        if (aiImagePromptModal) {
+        if (aiImagePromptModal instanceof HTMLElement) {
             aiImagePromptModal.addEventListener("click", (event) => {
                 if (event.target === aiImagePromptModal) {
                     hideAiImagePromptModal();
@@ -1256,39 +877,11 @@ document.addEventListener("DOMContentLoaded", () => {
         document.addEventListener("keydown", (event) => {
             if (
                 event.key === "Escape" &&
-                aiImagePromptModal &&
+                aiImagePromptModal instanceof HTMLElement &&
                 !aiImagePromptModal.classList.contains("hidden")
             ) {
                 hideAiImagePromptModal();
             }
         });
     }
-
-    /**
-     * Barre sticky CTA visible seulement quand le bloc principal est hors écran
-     */
-    const primaryActions = document.querySelector(
-        "#product-primary-actions, #product-edit-primary-actions"
-    );
-    const stickyActions = document.querySelector(
-        "#product-sticky-actions, #product-edit-sticky-actions"
-    );
-
-    if (primaryActions && stickyActions && "IntersectionObserver" in window) {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                const entry = entries[0];
-                if (entry.isIntersecting) {
-                    stickyActions.classList.add("hidden");
-                } else {
-                    stickyActions.classList.remove("hidden");
-                }
-            },
-            {
-                threshold: 0.2,
-            }
-        );
-
-        observer.observe(primaryActions);
-    }
-});
+};

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createPortal } from "react-dom";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { useCart } from "@/components/cart/CartContext";
-import { ProductVariantProvider } from "@/components/product/ProductVariantContext";
+import { ProductVariantProvider } from "@/components/product/ProductVariantProvider";
 import { VariantSelector } from "@/components/product/VariantSelector";
 import type { ListingProduct } from "@/components/product/ListingProducts";
 import type { ProductWithVariants } from "@/lib/types/product-types";

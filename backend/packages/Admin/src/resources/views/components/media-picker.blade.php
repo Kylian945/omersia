@@ -179,4 +179,4 @@ window.mediaPickerConfig = {
     csrfToken: '{{ csrf_token() }}'
 };
 </script>
-@vite(['packages/Admin/src/resources/js/media-picker.js'])
+@vite(['packages/Admin/src/resources/js/media/picker.js'])

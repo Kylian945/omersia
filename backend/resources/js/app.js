@@ -5,11 +5,11 @@ import Alpine from "alpinejs";
 window.Alpine = Alpine;
 
 // Importer les composants globaux (toujours chargés)
-import '../../packages/Admin/src/resources/js/products.js';
-import '../../packages/Admin/src/resources/js/ai-content-assistant.js';
-import '../../packages/Admin/src/resources/js/backoffice-ai-assistant.js';
-import '../../packages/Admin/src/resources/js/page-builder.js';
-import '../../packages/Admin/src/resources/js/page-builder-native.js';
+import '../../packages/Admin/src/resources/js/products/index.js';
+import '../../packages/Admin/src/resources/js/ai/content-assistant.js';
+import '../../packages/Admin/src/resources/js/ai/backoffice-assistant.js';
+import '../../packages/Admin/src/resources/js/builder/page-builder.js';
+import '../../packages/Admin/src/resources/js/builder/page-builder-native.js';
 
 // Fonction d'initialisation conditionnelle des composants
 async function loadConditionalComponents() {
@@ -35,7 +35,7 @@ async function loadConditionalComponents() {
 
     // Charger modules-positions uniquement si utilisé
     if (document.querySelector('[x-data*="modulesPositions"]') || document.querySelector('[x-data*="modulePosition"]')) {
-        promises.push(import('../../packages/Admin/src/resources/js/modules-positions.js'));
+        promises.push(import('../../packages/Admin/src/resources/js/modules/positions.js'));
     }
 
     // Charger theme-activation sur la page des thèmes
@@ -45,12 +45,12 @@ async function loadConditionalComponents() {
         window.location.pathname.includes('/apparence/theme') ||
         document.querySelector('.activate-theme-btn')
     ) {
-        promises.push(import('../../packages/Admin/src/resources/js/theme-activation.js'));
+        promises.push(import('../../packages/Admin/src/resources/js/apparence/theme-activation.js'));
     }
 
     // Charger api-key uniquement sur la page des clés API
     if (document.querySelector('[x-data*="apiKey"]')) {
-        promises.push(import('../../packages/Admin/src/resources/js/api-key.js'));
+        promises.push(import('../../packages/Admin/src/resources/js/settings/api-key.js'));
     }
 
     // Charger modal-manager + permissions uniquement sur la page des permissions
@@ -100,7 +100,7 @@ async function loadConditionalComponents() {
 
     // Charger shipping-methods uniquement sur les pages de méthodes de livraison
     if (document.querySelector('[x-data*="shippingMethod"]') || window.location.pathname.includes('/settings/shipping-methods')) {
-        promises.push(import('../../packages/Admin/src/resources/js/shipping-methods.js'));
+        promises.push(import('../../packages/Admin/src/resources/js/settings/shipping-methods.js'));
     }
 
     // Attendre que tous les imports soient terminés

@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Omersia\Catalog\DTO\ProductCreateDTO;
 use Omersia\Catalog\DTO\ProductUpdateDTO;
 use Omersia\Catalog\Models\Product;
+use Omersia\Catalog\Models\ProductImage;
 
 /**
  * Service pour la création et mise à jour de produits
@@ -77,7 +78,8 @@ class ProductCreationService
 
             // 6. Gérer les variantes si produit de type "variant"
             if ($dto->type === 'variant') {
-                $this->variantService->syncOptionsAndVariants($product, $request);
+                $imageIdByKey = $this->buildVariantImageKeyMap($product, $createdImages);
+                $this->variantService->syncOptionsAndVariants($product, $request, $imageIdByKey);
             }
 
             return $product;
@@ -133,7 +135,8 @@ class ProductCreationService
 
             // 7. Gérer les variantes si produit de type "variant"
             if ($dto->type === 'variant') {
-                $this->variantService->syncOptionsAndVariants($product, $request);
+                $imageIdByKey = $this->buildVariantImageKeyMap($product, $createdImages);
+                $this->variantService->syncOptionsAndVariants($product, $request, $imageIdByKey);
             }
 
             return $product;
@@ -156,5 +159,46 @@ class ProductCreationService
         }
 
         return $trimmed;
+    }
+
+    /**
+     * @param  array<string, ProductImage>  $createdImages
+     * @return array<string, int>
+     */
+    private function buildVariantImageKeyMap(Product $product, array $createdImages): array
+    {
+        $map = [];
+
+        foreach ($product->images()->pluck('id') as $id) {
+            $imageId = (int) $id;
+            if ($imageId <= 0) {
+                continue;
+            }
+
+            $map['existing-'.$imageId] = $imageId;
+            $map[(string) $imageId] = $imageId;
+        }
+
+        foreach ($createdImages as $key => $image) {
+            if (! is_string($key) || ! $image instanceof ProductImage) {
+                continue;
+            }
+
+            $imageId = (int) $image->id;
+            if ($imageId <= 0) {
+                continue;
+            }
+
+            $map[$key] = $imageId;
+
+            if (str_starts_with($key, 'new-')) {
+                $newIndex = substr($key, 4);
+                if ($newIndex !== '' && ctype_digit($newIndex)) {
+                    $map[$newIndex] = $imageId;
+                }
+            }
+        }
+
+        return $map;
     }
 }

@@ -308,5 +308,5 @@
             latestOrdersRoute: "{{ route('admin.metrics.latest-orders') }}"
         };
     </script>
-    @vite(['packages/Admin/src/resources/js/dashboard-chart.js', 'packages/Admin/src/resources/js/dashboard.js'])
+    @vite(['packages/Admin/src/resources/js/dashboard/chart.js', 'packages/Admin/src/resources/js/dashboard/realtime.js'])
 @endsection

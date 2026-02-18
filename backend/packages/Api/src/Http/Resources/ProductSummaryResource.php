@@ -221,6 +221,8 @@ final class ProductSummaryResource extends JsonResource
                 'compare_at_price' => $variant->compare_at_price !== null
                     ? (float) $variant->compare_at_price
                     : null,
+                'product_image_id' => $variant->product_image_id !== null ? (int) $variant->product_image_id : null,
+                'image_url' => $variant->relationLoaded('image') ? $variant->image?->url : null,
             ];
         })->values()->toArray();
     }

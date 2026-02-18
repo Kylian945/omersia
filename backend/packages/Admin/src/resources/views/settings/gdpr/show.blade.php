@@ -308,5 +308,5 @@
             requestId: @json($request->id),
         };
     </script>
-    @vite(['packages/Admin/src/resources/js/gdpr-realtime.js'])
+    @vite(['packages/Admin/src/resources/js/settings/gdpr/realtime.js'])
 @endpush

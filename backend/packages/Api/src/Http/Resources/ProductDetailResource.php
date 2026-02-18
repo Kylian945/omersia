@@ -133,6 +133,8 @@ final class ProductDetailResource extends JsonResource
                 'stock_qty' => $variant->stock_qty,
                 'price' => $price,
                 'compare_at_price' => $compareAt,
+                'product_image_id' => $variant->product_image_id !== null ? (int) $variant->product_image_id : null,
+                'image_url' => $this->variantImageUrl($variant),
                 'on_sale' => $onSale,
                 'values' => $variant->relationLoaded('values')
                     ? $variant->values->map(function ($value) {
@@ -151,5 +153,14 @@ final class ProductDetailResource extends JsonResource
                 'option_values' => $optionValues,
             ];
         })->values()->toArray();
+    }
+
+    private function variantImageUrl(ProductVariant $variant): ?string
+    {
+        if (! $variant->relationLoaded('image')) {
+            return null;
+        }
+
+        return $variant->image?->url;
     }
 }

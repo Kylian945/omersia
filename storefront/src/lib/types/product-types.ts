@@ -40,7 +40,8 @@ export type Variant = {
   price?: number | null;
   compare_at_price?: number | null;
   values?: VariantValue[];
-  image_url?: string;
+  product_image_id?: number | null;
+  image_url?: string | null;
 };
 
 export type ProductCategory = {

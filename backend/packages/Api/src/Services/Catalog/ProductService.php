@@ -35,7 +35,8 @@ final class ProductService
                 },
             ])
             ->with(['variants' => function ($q) {
-                $q->where('is_active', true);
+                $q->where('is_active', true)
+                    ->with('image');
             }]);
 
         return $query->paginate($limit);
@@ -67,6 +68,7 @@ final class ProductService
                 'relatedProducts.variants',
                 'options.values',
                 'variants.values.option',
+                'variants.image',
             ])
             ->firstOrFail();
     }
@@ -84,7 +86,8 @@ final class ProductService
                     $q->where('locale', $locale);
                 },
                 'variants' => function ($q) {
-                    $q->where('is_active', true);
+                    $q->where('is_active', true)
+                        ->with('image');
                 },
             ])
             ->paginate($perPage);

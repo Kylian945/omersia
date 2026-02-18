@@ -555,5 +555,5 @@
 @endsection
 
 @push('scripts')
-    @vite(['packages/Admin/src/resources/js/preview-modal.js'])
+    @vite(['packages/Admin/src/resources/js/builder/preview-modal.js'])
 @endpush

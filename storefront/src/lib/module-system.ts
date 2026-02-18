@@ -120,14 +120,14 @@ export async function initializeModuleSystem(): Promise<void> {
 
 /**
  * Load all module configurations
- * Loads from /module-hooks.json which is synced by the backend
+ * Loads from /api/module-hooks (reads storefront/public/module-hooks.json)
  */
 async function loadModuleConfigs(): Promise<ModuleConfig[]> {
   try {
-    // Fetch module hooks configuration from backend-synced file
-    const response = await fetch('/module-hooks.json');
+    // Fetch module hooks configuration via API route (always returns JSON)
+    const response = await fetch('/api/module-hooks', { cache: 'no-store' });
     if (!response.ok) {
-      logger.warn('[Module System] module-hooks.json not found, no modules registered');
+      logger.warn('[Module System] Module hooks endpoint unavailable, no modules registered');
       return [];
     }
 
