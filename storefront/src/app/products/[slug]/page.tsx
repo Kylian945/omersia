@@ -10,7 +10,7 @@ import { StickyAddToCartBar } from "@/components/product/StickyAddToCartBar";
 import Link from "next/link";
 import { VariantSelector } from "@/components/product/VariantSelector";
 import { SimpleAddToCart } from "@/components/product/SimpleAddToCart";
-import { ProductVariantProvider } from "@/components/product/ProductVariantContext";
+import { ProductVariantProvider } from "@/components/product/ProductVariantProvider";
 import { ThemedProductCard } from "@/components/product/ThemedProductCard";
 import { buildImageUrl } from "@/lib/image-utils";
 import { sanitizeHTML, sanitizePlainText } from "@/lib/html-sanitizer";

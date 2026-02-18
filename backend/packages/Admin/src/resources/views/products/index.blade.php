@@ -220,5 +220,5 @@
 @endsection
 
 @push('scripts')
-    @vite(['packages/Admin/src/resources/js/products-stock-realtime.js'])
+    @vite(['packages/Admin/src/resources/js/products/stock-realtime.js'])
 @endpush

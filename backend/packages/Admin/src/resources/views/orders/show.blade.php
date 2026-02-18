@@ -336,5 +336,5 @@
             orderId: @json($order->id),
         };
     </script>
-    @vite(['packages/Admin/src/resources/js/orders-realtime.js'])
+    @vite(['packages/Admin/src/resources/js/orders/realtime.js'])
 @endpush

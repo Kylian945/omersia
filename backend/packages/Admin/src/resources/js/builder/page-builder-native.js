@@ -1,5 +1,5 @@
 // Import Quill editor et le builder de base
-import "./quill-editor.js";
+import "../core/quill-editor.js";
 import { pageBuilder } from "./page-builder.js";
 
 // Page Builder avec support du contenu natif (beforeNative / afterNative)

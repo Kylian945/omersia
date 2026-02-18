@@ -1,5 +1,5 @@
 // Import Quill editor
-import './quill-editor.js';
+import '../core/quill-editor.js';
 
 // Unified Page Builder - Works with both CMS Pages and E-commerce Pages
 export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl, serverWidgets = [] }) {

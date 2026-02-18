@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
+import { useOptionalProductVariant } from "./ProductVariantContext";
 
 type NormalizedImage = {
   id: number;
@@ -17,17 +18,74 @@ type Props = {
 };
 
 export function ProductGallery({ images, mainImage, alt }: Props) {
-  const [selected, setSelected] = useState<NormalizedImage | null>(
-    mainImage || images[0] || null
+  const variantContext = useOptionalProductVariant();
+  const matchingVariantId = variantContext?.matchingVariant?.id || null;
+  const matchingVariantImageId = variantContext?.matchingVariantImageId || null;
+  const variantImageUrl = variantContext?.variantImageUrl || null;
+
+  const fallbackMainImage = mainImage || images[0] || null;
+  const imagesById = useMemo(
+    () => new Map(images.map((image) => [image.id, image])),
+    [images]
   );
 
-  const hasImages = images && images.length > 0;
+  const [selected, setSelected] = useState<NormalizedImage | null>(
+    fallbackMainImage
+  );
+
+  useEffect(() => {
+    if (!variantContext) {
+      setSelected((current) => current || fallbackMainImage);
+      return;
+    }
+
+    if (
+      matchingVariantImageId !== null &&
+      imagesById.has(matchingVariantImageId)
+    ) {
+      setSelected(imagesById.get(matchingVariantImageId) || null);
+      return;
+    }
+
+    if (variantImageUrl) {
+      const imageFromList = images.find((image) => image.url === variantImageUrl);
+      if (imageFromList) {
+        setSelected(imageFromList);
+        return;
+      }
+
+      // Defensive fallback: display the variant image even if not present in gallery list.
+      setSelected({
+        id: -1,
+        url: variantImageUrl,
+      });
+      return;
+    }
+
+    if (matchingVariantId !== null) {
+      setSelected(fallbackMainImage);
+      return;
+    }
+
+    setSelected(fallbackMainImage);
+  }, [
+    variantContext,
+    matchingVariantId,
+    matchingVariantImageId,
+    variantImageUrl,
+    imagesById,
+    images,
+    fallbackMainImage,
+  ]);
+
+  const hasImages = images.length > 0;
+  const canDisplayImage = typeof selected?.url === "string" && selected.url !== "";
 
   return (
     <section className="space-y-3">
       {/* Image principale */}
       <div className="aspect-square w-full rounded-2xl border border-neutral-200 bg-white flex items-center justify-center overflow-hidden relative">
-        {hasImages && selected?.url ? (
+        {canDisplayImage ? (
           <OptimizedImage
             src={selected.url}
             alt={alt}
@@ -54,7 +112,11 @@ export function ProductGallery({ images, mainImage, alt }: Props) {
       {hasImages && images.length > 1 && (
         <div className="grid grid-flow-col auto-cols-[72px] gap-2 overflow-x-auto p-1">
           {images.map((img) => {
-            const isActive = selected && img.id === selected.id;
+            const isActive = selected
+              ? selected.id > 0
+                ? img.id === selected.id
+                : img.url === selected.url
+              : false;
             return (
               <button
                 key={img.id}

@@ -152,7 +152,22 @@ class ProductController extends Controller
             ->limit(200)
             ->get();
 
-        return view('admin::products.edit', compact('product', 'categories', 'relatedProducts'));
+        $previousProduct = Product::query()
+            ->select('id')
+            ->where('id', '<', $product->id)
+            ->orderByDesc('id')
+            ->first();
+
+        $nextProduct = Product::query()
+            ->select('id')
+            ->where('id', '>', $product->id)
+            ->orderBy('id')
+            ->first();
+
+        return view(
+            'admin::products.edit',
+            compact('product', 'categories', 'relatedProducts', 'previousProduct', 'nextProduct')
+        );
     }
 
     public function update(ProductUpdateRequest $request, Product $product)

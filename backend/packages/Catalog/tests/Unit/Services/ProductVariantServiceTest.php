@@ -199,4 +199,108 @@ class ProductVariantServiceTest extends TestCase
         $this->assertEquals(120.00, $variant->compare_at_price);
         $this->assertTrue($variant->manage_stock);
     }
+
+    public function it_updates_existing_variant_when_id_is_provided(): void
+    {
+        $product = Product::factory()->create(['type' => 'variant']);
+
+        $option = $product->options()->create([
+            'name' => 'Taille',
+            'position' => 0,
+        ]);
+        $valueM = $option->values()->create([
+            'value' => 'M',
+            'position' => 0,
+        ]);
+        $valueL = $option->values()->create([
+            'value' => 'L',
+            'position' => 1,
+        ]);
+
+        $variant = $product->variants()->create([
+            'sku' => 'OLD-SKU',
+            'name' => 'Ancienne variante',
+            'is_active' => true,
+            'manage_stock' => true,
+            'stock_qty' => 10,
+            'price' => 20.00,
+        ]);
+        $variant->values()->sync([$valueM->id]);
+
+        $request = Request::create('/test', 'POST', [
+            'options' => [
+                [
+                    'name' => 'Taille',
+                    'values' => ['M', 'L'],
+                ],
+            ],
+            'variants' => [
+                [
+                    'id' => $variant->id,
+                    'sku' => 'NEW-SKU',
+                    'label' => 'Taille L',
+                    'is_active' => true,
+                    'stock_qty' => 4,
+                    'price' => 25.00,
+                    'compare_at_price' => 30.00,
+                    'values' => ['Taille:L'],
+                ],
+            ],
+        ]);
+
+        $this->service->syncOptionsAndVariants($product, $request);
+
+        $product->refresh();
+        $this->assertCount(1, $product->variants);
+
+        $updated = $product->variants()->with('values')->first();
+        $this->assertNotNull($updated);
+        $this->assertEquals($variant->id, $updated->id);
+        $this->assertEquals('NEW-SKU', $updated->sku);
+        $this->assertEquals(25.00, $updated->price);
+        $this->assertEquals(30.00, $updated->compare_at_price);
+        $this->assertEquals(4, $updated->stock_qty);
+        $this->assertEquals('L', $updated->values->first()?->value);
+    }
+
+    public function it_assigns_variant_image_from_image_key_mapping(): void
+    {
+        $product = Product::factory()->create(['type' => 'variant']);
+
+        $image = $product->images()->create([
+            'path' => 'products/test-variant-image.jpg',
+            'position' => 0,
+            'is_main' => true,
+        ]);
+
+        $request = Request::create('/test', 'POST', [
+            'options' => [
+                [
+                    'name' => 'Taille',
+                    'values' => ['M'],
+                ],
+            ],
+            'variants' => [
+                [
+                    'sku' => 'SKU-M',
+                    'label' => 'Taille M',
+                    'is_active' => true,
+                    'stock_qty' => 5,
+                    'price' => 29.00,
+                    'image_key' => 'existing-'.$image->id,
+                    'values' => ['Taille:M'],
+                ],
+            ],
+        ]);
+
+        $this->service->syncOptionsAndVariants(
+            $product,
+            $request,
+            ['existing-'.$image->id => $image->id]
+        );
+
+        $variant = $product->variants()->first();
+        $this->assertNotNull($variant);
+        $this->assertEquals($image->id, $variant->product_image_id);
+    }
 }

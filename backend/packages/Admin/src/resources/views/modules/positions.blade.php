@@ -269,5 +269,5 @@
         </div> --}}
     @endif
 
-    @vite(['packages/Admin/src/resources/js/modules-positions.js'])
+    @vite(['packages/Admin/src/resources/js/modules/positions.js'])
 @endsection

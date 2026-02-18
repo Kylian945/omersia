@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 /**
  * @property int $id
  * @property mixed $product_id
+ * @property mixed $product_image_id
  * @property mixed $sku
  * @property mixed $name
  * @property bool $is_active
@@ -19,12 +20,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  * @property float $price
  * @property float|null $compare_at_price
  * @property-read Product|null $product
+ * @property-read ProductImage|null $image
  * @property-read \Illuminate\Database\Eloquent\Collection<int, ProductOptionValue> $values
  */
 class ProductVariant extends Model
 {
     protected $fillable = [
         'product_id',
+        'product_image_id',
         'sku',
         'name',
         'is_active',
@@ -47,6 +50,14 @@ class ProductVariant extends Model
     public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
+    }
+
+    /**
+     * @return BelongsTo<ProductImage, $this>
+     */
+    public function image(): BelongsTo
+    {
+        return $this->belongsTo(ProductImage::class, 'product_image_id');
     }
 
     /**

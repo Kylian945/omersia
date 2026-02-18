@@ -1,4 +1,4 @@
-import { subscribeToPrivateEvent } from "./realtime-client";
+import { subscribeToPrivateEvent } from "../core/realtime-client";
 
 function updateProductStockNode(payload) {
     const product = payload?.product;
@@ -13,7 +13,9 @@ function updateProductStockNode(payload) {
         return;
     }
 
-    const isVariant = String(product?.type ?? "") === "variant" || Number(product?.variants_count ?? 0) > 0;
+    const isVariant =
+        String(product?.type ?? "") === "variant" ||
+        Number(product?.variants_count ?? 0) > 0;
     const manageStock = isVariant ? true : Boolean(product?.manage_stock);
     const stockQty = Number(product?.stock_qty ?? 0);
 
@@ -54,4 +56,3 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
-
