@@ -35,7 +35,6 @@ class ProductVariantService
     }
 
     /**
-     * @param  mixed  $optionsInput
      * @return array<string, int>
      */
     private function syncOptions(Product $product, mixed $optionsInput): array
@@ -163,7 +162,6 @@ class ProductVariantService
     }
 
     /**
-     * @param  mixed  $variantsInput
      * @param  array<string, int>  $optionIdByKey
      * @param  array<string, int>  $imageIdByKey
      */
@@ -263,7 +261,6 @@ class ProductVariantService
     }
 
     /**
-     * @param  mixed  $valuesInput
      * @return array<int, string>
      */
     private function normalizeVariantValues(mixed $valuesInput): array
