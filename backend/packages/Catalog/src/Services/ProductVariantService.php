@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Omersia\Catalog\Services;
 
 use Illuminate\Http\Request;
-use Omersia\Catalog\Models\ProductOption;
 use Omersia\Catalog\Models\Product;
+use Omersia\Catalog\Models\ProductOption;
 use Omersia\Catalog\Models\ProductVariant;
 
 /**
