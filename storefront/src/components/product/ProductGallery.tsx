@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { OptimizedImage } from "@/components/common/OptimizedImage";
 import { useOptionalProductVariant } from "./ProductVariantContext";
 
@@ -29,50 +29,46 @@ export function ProductGallery({ images, mainImage, alt }: Props) {
     [images]
   );
 
-  const [selected, setSelected] = useState<NormalizedImage | null>(
-    fallbackMainImage
-  );
+  const [manualSelection, setManualSelection] = useState<{
+    imageId: number;
+    variantId: number | null;
+  } | null>(null);
 
-  useEffect(() => {
-    if (!variantContext) {
-      setSelected((current) => current || fallbackMainImage);
-      return;
-    }
-
+  const selected = useMemo(() => {
     if (
       matchingVariantImageId !== null &&
       imagesById.has(matchingVariantImageId)
     ) {
-      setSelected(imagesById.get(matchingVariantImageId) || null);
-      return;
+      return imagesById.get(matchingVariantImageId) || null;
     }
 
     if (variantImageUrl) {
       const imageFromList = images.find((image) => image.url === variantImageUrl);
       if (imageFromList) {
-        setSelected(imageFromList);
-        return;
+        return imageFromList;
       }
 
       // Defensive fallback: display the variant image even if not present in gallery list.
-      setSelected({
+      return {
         id: -1,
         url: variantImageUrl,
-      });
-      return;
+      };
     }
 
-    if (matchingVariantId !== null) {
-      setSelected(fallbackMainImage);
-      return;
+    if (
+      manualSelection !== null &&
+      manualSelection.variantId === matchingVariantId &&
+      imagesById.has(manualSelection.imageId)
+    ) {
+      return imagesById.get(manualSelection.imageId) || null;
     }
 
-    setSelected(fallbackMainImage);
+    return fallbackMainImage;
   }, [
-    variantContext,
     matchingVariantId,
     matchingVariantImageId,
     variantImageUrl,
+    manualSelection,
     imagesById,
     images,
     fallbackMainImage,
@@ -121,7 +117,12 @@ export function ProductGallery({ images, mainImage, alt }: Props) {
               <button
                 key={img.id}
                 type="button"
-                onClick={() => setSelected(img)}
+                onClick={() =>
+                  setManualSelection({
+                    imageId: img.id,
+                    variantId: matchingVariantId,
+                  })
+                }
                 className={`relative h-18 w-18 min-w-[72px] aspect-square rounded-xl border overflow-hidden transition
                   ${
                     isActive

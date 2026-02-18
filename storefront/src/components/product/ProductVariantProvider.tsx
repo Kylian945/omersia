@@ -155,7 +155,7 @@ export function ProductVariantProvider({
       ? matchingVariant.product_image_id
       : null;
 
-  const variantImageUrl = useMemo(() => {
+  const variantImageUrl = (() => {
     if (
       typeof matchingVariant?.image_url === "string" &&
       matchingVariant.image_url.trim() !== ""
@@ -172,7 +172,7 @@ export function ProductVariantProvider({
     }
 
     return null;
-  }, [matchingVariant?.image_url, matchingVariantImageId, productImageById]);
+  })();
 
   const imageUrl = variantImageUrl || mainImageUrl;
 
