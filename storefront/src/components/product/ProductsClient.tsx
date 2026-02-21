@@ -26,6 +26,17 @@ function isSortOption(value: string): value is SortOption {
 }
 
 export function ProductsClient({ products, themePath = "vision" }: Props) {
+  const variantOptions: Array<{
+    key: string;
+    label: string;
+    values: Array<{
+      key: string;
+      label: string;
+    }>;
+  }> = [];
+
+  const [selectedVariantValues, setSelectedVariantValues] = useState<Record<string, string[]>>({});
+
   // Bornes prix globales
   const priceBounds = useMemo(() => {
     const prices = products
@@ -171,6 +182,9 @@ export function ProductsClient({ products, themePath = "vision" }: Props) {
             bounds={priceBounds}
             inStockOnly={inStockOnly}
             setInStockOnly={setInStockOnly}
+            variantOptions={variantOptions}
+            selectedVariantValues={selectedVariantValues}
+            setSelectedVariantValues={setSelectedVariantValues}
           />
         </aside>
 
@@ -216,6 +230,9 @@ export function ProductsClient({ products, themePath = "vision" }: Props) {
               bounds={priceBounds}
               inStockOnly={inStockOnly}
               setInStockOnly={setInStockOnly}
+              variantOptions={variantOptions}
+              selectedVariantValues={selectedVariantValues}
+              setSelectedVariantValues={setSelectedVariantValues}
             />
 
             <Button

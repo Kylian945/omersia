@@ -15,6 +15,33 @@ type ProductImage = {
   position?: number | null;
 };
 
+type ProductVariantValue = {
+  id: number;
+  value?: string | null;
+  option?: {
+    id?: number | null;
+    name?: string | null;
+  } | null;
+};
+
+type ProductVariant = {
+  id: number;
+  sku?: string | null;
+  name?: string | null;
+  is_active?: boolean;
+  manage_stock?: boolean;
+  stock_qty?: number | null;
+  price?: number | null;
+  compare_at_price?: number | null;
+  product_image_id?: number | null;
+  image_url?: string | null;
+  values?: ProductVariantValue[];
+  option_values?: Array<{
+    option?: string | null;
+    value?: string | null;
+  }>;
+};
+
 export type ListingProduct = {
   id: number;
   sku?: string | null;
@@ -23,7 +50,7 @@ export type ListingProduct = {
   stock_qty?: number | null;
   images?: ProductImage[];
   translations?: ProductTranslation[];
-  variants?: ListingProduct[];
+  variants?: ProductVariant[];
   type?: string;
   name?: string;
   has_variants?: boolean;
