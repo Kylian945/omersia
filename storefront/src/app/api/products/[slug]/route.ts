@@ -5,9 +5,9 @@ const BACKEND_URL = process.env.API_INTERNAL_URL;
 const API_KEY = process.env.FRONT_API_KEY;
 
 type RouteContext = {
-  params: {
+  params: Promise<{
     slug: string;
-  };
+  }>;
 };
 
 export async function GET(request: NextRequest, { params }: RouteContext) {
@@ -18,7 +18,7 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     );
   }
 
-  const slug = params.slug;
+  const { slug } = await params;
   if (!slug) {
     return NextResponse.json(
       { error: "Missing product slug" },
@@ -57,4 +57,3 @@ export async function GET(request: NextRequest, { params }: RouteContext) {
     );
   }
 }
-

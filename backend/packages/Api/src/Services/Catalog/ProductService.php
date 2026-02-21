@@ -36,7 +36,10 @@ final class ProductService
             ])
             ->with(['variants' => function ($q) {
                 $q->where('is_active', true)
-                    ->with('image');
+                    ->with([
+                        'image',
+                        'values.option',
+                    ]);
             }]);
 
         return $query->paginate($limit);
@@ -87,7 +90,10 @@ final class ProductService
                 },
                 'variants' => function ($q) {
                     $q->where('is_active', true)
-                        ->with('image');
+                        ->with([
+                            'image',
+                            'values.option',
+                        ]);
                 },
             ])
             ->paginate($perPage);

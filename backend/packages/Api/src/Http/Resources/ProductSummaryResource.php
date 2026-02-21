@@ -7,6 +7,7 @@ namespace Omersia\Api\Http\Resources;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Omersia\Catalog\Models\Category;
 use Omersia\Catalog\Models\Product;
+use Omersia\Catalog\Models\ProductOptionValue;
 use Omersia\Catalog\Models\ProductTranslation;
 use Omersia\Catalog\Models\ProductVariant;
 
@@ -210,6 +211,23 @@ final class ProductSummaryResource extends JsonResource
         }
 
         return $product->variants->map(function (ProductVariant $variant) {
+            $optionValues = [];
+            if ($variant->relationLoaded('values')) {
+                $optionValues = $variant->values->map(function (ProductOptionValue $value) {
+                    $optionName = $value->relationLoaded('option')
+                        ? $value->option?->name
+                        : null;
+
+                    return [
+                        'option' => $optionName,
+                        'value' => $value->value,
+                    ];
+                })
+                    ->filter(fn (array $item) => $item['option'] && $item['value'])
+                    ->values()
+                    ->toArray();
+            }
+
             return [
                 'id' => $variant->id,
                 'sku' => $variant->sku,
@@ -223,6 +241,21 @@ final class ProductSummaryResource extends JsonResource
                     : null,
                 'product_image_id' => $variant->product_image_id !== null ? (int) $variant->product_image_id : null,
                 'image_url' => $variant->relationLoaded('image') ? $variant->image?->url : null,
+                'values' => $variant->relationLoaded('values')
+                    ? $variant->values->map(function (ProductOptionValue $value) {
+                        return [
+                            'id' => $value->id,
+                            'value' => $value->value,
+                            'option' => $value->relationLoaded('option')
+                                ? [
+                                    'id' => $value->option?->id,
+                                    'name' => $value->option?->name,
+                                ]
+                                : null,
+                        ];
+                    })->values()->toArray()
+                    : [],
+                'option_values' => $optionValues,
             ];
         })->values()->toArray();
     }

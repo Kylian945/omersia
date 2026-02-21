@@ -11,6 +11,16 @@ type FilterPanelProps = {
     bounds: { min: number; max: number };
     inStockOnly: boolean;
     setInStockOnly: (v: boolean) => void;
+    variantOptions: Array<{
+        key: string;
+        label: string;
+        values: Array<{
+            key: string;
+            label: string;
+        }>;
+    }>;
+    selectedVariantValues: Record<string, string[]>;
+    setSelectedVariantValues: (v: Record<string, string[]>) => void;
 };
 
 export function FilterPanel({
@@ -23,6 +33,9 @@ export function FilterPanel({
     bounds,
     inStockOnly,
     setInStockOnly,
+    variantOptions,
+    selectedVariantValues,
+    setSelectedVariantValues,
 }: FilterPanelProps) {
     const { min, max } = bounds;
 
@@ -45,6 +58,29 @@ export function FilterPanel({
     // Pour le background du double range (barre remplie entre min & max)
     const rangePercentMin = ((priceMin - min) / (max - min || 1)) * 100;
     const rangePercentMax = ((priceMax - min) / (max - min || 1)) * 100;
+
+    const toggleVariantValue = (
+        optionKey: string,
+        valueKey: string,
+        checked: boolean
+    ) => {
+        const next = { ...selectedVariantValues };
+        const current = new Set(next[optionKey] || []);
+
+        if (checked) {
+            current.add(valueKey);
+        } else {
+            current.delete(valueKey);
+        }
+
+        if (current.size === 0) {
+            delete next[optionKey];
+        } else {
+            next[optionKey] = Array.from(current);
+        }
+
+        setSelectedVariantValues(next);
+    };
 
     return (
         <div className="space-y-3 text-xxxs">
@@ -127,6 +163,53 @@ export function FilterPanel({
                 </div>
             </div>
 
+            {/* Options de variantes */}
+            {variantOptions.length > 0 && (
+                <div className="space-y-1.5">
+                    <div className="text-xxxs font-medium text-neutral-700">
+                        Variantes
+                    </div>
+
+                    <div className="max-h-56 space-y-2 overflow-y-auto pr-1">
+                        {variantOptions.map((option) => (
+                            <div key={option.key} className="space-y-1">
+                                <div className="text-[10px] uppercase tracking-[.14em] text-neutral-500">
+                                    {option.label}
+                                </div>
+                                <div className="space-y-1">
+                                    {option.values.map((value) => {
+                                        const checked = (selectedVariantValues[
+                                            option.key
+                                        ] || []).includes(value.key);
+
+                                        return (
+                                            <label
+                                                key={`${option.key}:${value.key}`}
+                                                className="inline-flex items-center gap-1.5 text-xxxs text-neutral-700"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={checked}
+                                                    onChange={(e) =>
+                                                        toggleVariantValue(
+                                                            option.key,
+                                                            value.key,
+                                                            e.target.checked
+                                                        )
+                                                    }
+                                                    className="h-3 w-3 rounded border-neutral-300"
+                                                />
+                                                <span>{value.label}</span>
+                                            </label>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Stock */}
             <div className="space-y-1">
                 <div className="text-xxxs font-medium text-neutral-700">
@@ -151,6 +234,7 @@ export function FilterPanel({
                     setPriceMin(min);
                     setPriceMax(max);
                     setInStockOnly(false);
+                    setSelectedVariantValues({});
                 }}
                 className="mt-1 text-xxxs text-neutral-500 hover:text-black hover:underline underline-offset-2"
             >

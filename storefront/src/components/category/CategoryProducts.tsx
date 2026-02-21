@@ -12,9 +12,148 @@ type Props = {
   themePath?: string;
 };
 
+type VariantFilterOption = {
+  key: string;
+  label: string;
+  values: Array<{
+    key: string;
+    label: string;
+  }>;
+};
+
 function getEffectivePrice(p: ListingProduct): number {
   // Pour un produit à variantes, l'API met déjà price = prix min
   return typeof p.price === "number" ? p.price : 0;
+}
+
+function normalizeFacetToken(value: string): string {
+  return value.trim().toLocaleLowerCase();
+}
+
+function getVariantFilterOptions(products: ListingProduct[]): VariantFilterOption[] {
+  const options = new Map<string, { label: string; values: Map<string, string> }>();
+
+  for (const product of products) {
+    if (!Array.isArray(product.variants)) continue;
+
+    for (const variant of product.variants) {
+      if (!variant || variant.is_active === false || !Array.isArray(variant.values)) {
+        continue;
+      }
+
+      for (const variantValue of variant.values) {
+        const optionLabel =
+          typeof variantValue?.option?.name === "string"
+            ? variantValue.option.name.trim()
+            : "";
+        const valueLabel =
+          typeof variantValue?.value === "string"
+            ? variantValue.value.trim()
+            : "";
+
+        if (!optionLabel || !valueLabel) continue;
+
+        const optionKey = normalizeFacetToken(optionLabel);
+        const valueKey = normalizeFacetToken(valueLabel);
+
+        if (!optionKey || !valueKey) continue;
+
+        if (!options.has(optionKey)) {
+          options.set(optionKey, {
+            label: optionLabel,
+            values: new Map<string, string>(),
+          });
+        }
+
+        options.get(optionKey)!.values.set(valueKey, valueLabel);
+      }
+    }
+  }
+
+  return Array.from(options.entries())
+    .map(([key, option]) => ({
+      key,
+      label: option.label,
+      values: Array.from(option.values.entries())
+        .map(([valueKey, valueLabel]) => ({
+          key: valueKey,
+          label: valueLabel,
+        }))
+        .sort((a, b) => a.label.localeCompare(b.label, "fr")),
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label, "fr"));
+}
+
+function hasAnyStock(product: ListingProduct): boolean {
+  if (!Array.isArray(product.variants) || product.variants.length === 0) {
+    return (product.stock_qty ?? 0) > 0;
+  }
+
+  return product.variants.some((variant) => {
+    if (!variant || variant.is_active === false) return false;
+    if (variant.manage_stock === false) return true;
+    if (typeof variant.stock_qty === "number") return variant.stock_qty > 0;
+
+    return true;
+  });
+}
+
+function matchesVariantFilters(
+  product: ListingProduct,
+  selectedVariantValues: Record<string, string[]>
+): boolean {
+  const activeFilters = Object.entries(selectedVariantValues).filter(
+    ([, values]) => Array.isArray(values) && values.length > 0
+  );
+
+  if (activeFilters.length === 0) {
+    return true;
+  }
+
+  if (!Array.isArray(product.variants) || product.variants.length === 0) {
+    return false;
+  }
+
+  return product.variants.some((variant) => {
+    if (!variant || variant.is_active === false || !Array.isArray(variant.values)) {
+      return false;
+    }
+
+    const variantValueIndex = new Map<string, Set<string>>();
+
+    for (const variantValue of variant.values) {
+      const optionLabel =
+        typeof variantValue?.option?.name === "string"
+          ? variantValue.option.name.trim()
+          : "";
+      const valueLabel =
+        typeof variantValue?.value === "string"
+          ? variantValue.value.trim()
+          : "";
+
+      if (!optionLabel || !valueLabel) continue;
+
+      const optionKey = normalizeFacetToken(optionLabel);
+      const valueKey = normalizeFacetToken(valueLabel);
+
+      if (!optionKey || !valueKey) continue;
+
+      if (!variantValueIndex.has(optionKey)) {
+        variantValueIndex.set(optionKey, new Set<string>());
+      }
+
+      variantValueIndex.get(optionKey)!.add(valueKey);
+    }
+
+    return activeFilters.every(([optionKey, selectedValues]) => {
+      const valuesForOption = variantValueIndex.get(optionKey);
+      if (!valuesForOption) return false;
+
+      return selectedValues.some((selectedValue) =>
+        valuesForOption.has(selectedValue)
+      );
+    });
+  });
 }
 
 export function CategoryProducts({ products, themePath = "vision" }: Props) {
@@ -37,12 +176,15 @@ export function CategoryProducts({ products, themePath = "vision" }: Props) {
     return { min, max };
   }, [products]);
 
+  const variantOptions = useMemo(() => getVariantFilterOptions(products), [products]);
+
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [priceMin, setPriceMin] = useState<number>(priceBounds.min);
   const [priceMax, setPriceMax] = useState<number>(priceBounds.max);
   const [inStockOnly, setInStockOnly] = useState(false);
-  const [sort, setSort] = useState<"featured" | "price-asc" | "price-desc" | "name-asc" | "newest">(
+  const [selectedVariantValues, setSelectedVariantValues] = useState<Record<string, string[]>>({});
+  const [sort, setSort] = useState<"featured" | "price-asc" | "price-desc" | "name-asc">(
     "featured"
   );
 
@@ -59,12 +201,10 @@ export function CategoryProducts({ products, themePath = "vision" }: Props) {
       if (priceMin && price < priceMin) return false;
       if (priceMax && price > priceMax) return false;
 
+      if (!matchesVariantFilters(p, selectedVariantValues)) return false;
+
       if (inStockOnly) {
-        // Pour un produit à variantes : on ne le filtre pas sur stock_qty,
-        // on considère qu'il a potentiellement du stock sur une variante.
-        if (!p.has_variants) {
-          if ((p.stock_qty ?? 0) <= 0) return false;
-        }
+        if (!hasAnyStock(p)) return false;
       }
 
       return true;
@@ -88,7 +228,7 @@ export function CategoryProducts({ products, themePath = "vision" }: Props) {
 
       return 0;
     });
-  }, [products, search, priceMin, priceMax, inStockOnly, sort]);
+  }, [products, search, priceMin, priceMax, selectedVariantValues, inStockOnly, sort]);
 
   const total = filtered.length;
 
@@ -120,7 +260,7 @@ export function CategoryProducts({ products, themePath = "vision" }: Props) {
               <span className="text-neutral-500">Trier par</span>
               <select
                 value={sort}
-                onChange={(e) => setSort(e.target.value as 'featured' | 'price-asc' | 'price-desc' | 'newest')}
+                onChange={(e) => setSort(e.target.value as "featured" | "price-asc" | "price-desc" | "name-asc")}
                 className="rounded-lg border border-neutral-200 bg-white px-2 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-black/70"
               >
                 <option value="featured">Pertinence</option>
@@ -149,6 +289,9 @@ export function CategoryProducts({ products, themePath = "vision" }: Props) {
               bounds={priceBounds}
               inStockOnly={inStockOnly}
               setInStockOnly={setInStockOnly}
+              variantOptions={variantOptions}
+              selectedVariantValues={selectedVariantValues}
+              setSelectedVariantValues={setSelectedVariantValues}
             />
           </aside>
 
@@ -194,6 +337,9 @@ export function CategoryProducts({ products, themePath = "vision" }: Props) {
                 bounds={priceBounds}
                 inStockOnly={inStockOnly}
                 setInStockOnly={setInStockOnly}
+                variantOptions={variantOptions}
+                selectedVariantValues={selectedVariantValues}
+                setSelectedVariantValues={setSelectedVariantValues}
               />
 
               <Button
