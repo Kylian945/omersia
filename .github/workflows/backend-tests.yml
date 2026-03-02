@@ -340,7 +340,7 @@ jobs:
 
     steps:
       - name: Download PHPUnit coverage
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         continue-on-error: true
         with:
           name: phpunit-coverage-report
