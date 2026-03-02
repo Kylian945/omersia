@@ -15,6 +15,12 @@ class ShopControllerTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->withoutVite(); // Évite l'erreur de manifest Vite en CI
+    }
+
     private function createAdminUser(): User
     {
         $user = User::factory()->create();
