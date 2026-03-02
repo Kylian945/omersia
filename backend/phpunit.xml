@@ -73,18 +73,18 @@
     </logging>
 
     <php>
-        <env name="APP_ENV" value="testing"/>
-        <env name="APP_DEBUG" value="true"/>
-        <env name="APP_KEY" value="base64:VjuvYILi/Pq3nHGWRVoheVnOClQt4cvyrt9kX6hOxA0="/>
-        <env name="BCRYPT_ROUNDS" value="4"/>
-        <env name="CACHE_DRIVER" value="array"/>
-        <env name="DB_CONNECTION" value="sqlite"/>
-        <env name="DB_DATABASE" value=":memory:"/>
-        <env name="MAIL_MAILER" value="array"/>
-        <env name="QUEUE_CONNECTION" value="sync"/>
-        <env name="SESSION_DRIVER" value="array"/>
-        <env name="TELESCOPE_ENABLED" value="false"/>
-        <env name="SCOUT_DRIVER" value="null"/>
-        <env name="FRONT_API_KEY" value="test-api-key-for-testing"/>
+        <env name="APP_ENV" value="testing" force="true"/>
+        <env name="APP_DEBUG" value="true" force="true"/>
+        <env name="APP_KEY" value="base64:VjuvYILi/Pq3nHGWRVoheVnOClQt4cvyrt9kX6hOxA0=" force="true"/>
+        <env name="BCRYPT_ROUNDS" value="4" force="true"/>
+        <env name="CACHE_DRIVER" value="array" force="true"/>
+        <env name="DB_CONNECTION" value="sqlite" force="true"/>
+        <env name="DB_DATABASE" value=":memory:" force="true"/>
+        <env name="MAIL_MAILER" value="array" force="true"/>
+        <env name="QUEUE_CONNECTION" value="sync" force="true"/>
+        <env name="SESSION_DRIVER" value="array" force="true"/>
+        <env name="TELESCOPE_ENABLED" value="false" force="true"/>
+        <env name="SCOUT_DRIVER" value="null" force="true"/>
+        <env name="FRONT_API_KEY" value="test-api-key-for-testing" force="true"/>
     </php>
 </phpunit>
