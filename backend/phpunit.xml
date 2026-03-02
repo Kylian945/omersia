@@ -37,7 +37,7 @@
             <directory>packages/Api/tests</directory>
         </testsuite>
         <testsuite name="Cms">
-            <directory>packages/Cms/tests</directory>
+            <directory>packages/CMS/tests</directory>
         </testsuite>
     </testsuites>
     
