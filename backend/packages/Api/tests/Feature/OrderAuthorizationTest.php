@@ -7,6 +7,7 @@ namespace Omersia\Api\Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Catalog\Models\Order;
 use Omersia\Customer\Models\Customer;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Tests\WithApiKey;
 
@@ -26,6 +27,7 @@ class OrderAuthorizationTest extends TestCase
         $this->setUpApiKey();
     }
 
+    #[Test]
     public function unauthenticated_user_cannot_list_orders(): void
     {
         $response = $this->getJson('/api/v1/orders', $this->apiHeaders());
@@ -34,6 +36,7 @@ class OrderAuthorizationTest extends TestCase
         $response->assertJson(['message' => 'Unauthenticated.']);
     }
 
+    #[Test]
     public function user_can_list_only_their_confirmed_orders(): void
     {
         $userA = Customer::factory()->create();
@@ -65,6 +68,7 @@ class OrderAuthorizationTest extends TestCase
     /**
      * @group idor
      */
+    #[Test]
     public function user_cannot_view_other_user_order_details(): void
     {
         $userA = Customer::factory()->create();
@@ -81,6 +85,7 @@ class OrderAuthorizationTest extends TestCase
         $response->assertJson(['message' => 'Not found']);
     }
 
+    #[Test]
     public function user_can_view_their_own_order_details(): void
     {
         $user = Customer::factory()->create();
@@ -97,6 +102,7 @@ class OrderAuthorizationTest extends TestCase
         $response->assertJsonFragment(['number' => 'ORD-789012']);
     }
 
+    #[Test]
     public function unauthenticated_user_cannot_view_order_details(): void
     {
         $order = Order::factory()->confirmed()->create([
@@ -109,6 +115,7 @@ class OrderAuthorizationTest extends TestCase
         $response->assertJson(['message' => 'Unauthenticated.']);
     }
 
+    #[Test]
     public function user_cannot_view_nonexistent_order(): void
     {
         $user = Customer::factory()->create();
@@ -122,6 +129,7 @@ class OrderAuthorizationTest extends TestCase
     /**
      * @group idor
      */
+    #[Test]
     public function user_cannot_confirm_other_user_order(): void
     {
         $userA = Customer::factory()->create();
@@ -141,6 +149,7 @@ class OrderAuthorizationTest extends TestCase
         $this->assertEquals('draft', $orderB->fresh()->status);
     }
 
+    #[Test]
     public function user_can_confirm_their_own_draft_order(): void
     {
         $user = Customer::factory()->create();
@@ -148,6 +157,7 @@ class OrderAuthorizationTest extends TestCase
         $order = Order::factory()->draft()->create([
             'customer_id' => $user->id,
             'status' => 'draft',
+            'payment_status' => 'paid',
         ]);
 
         $response = $this->postJson('/api/v1/orders/'.$order->id.'/confirm', [], $this->authenticatedHeaders($user));
@@ -160,6 +170,7 @@ class OrderAuthorizationTest extends TestCase
         $this->assertNotNull($order->fresh()->placed_at);
     }
 
+    #[Test]
     public function unauthenticated_user_cannot_confirm_order(): void
     {
         $order = Order::factory()->draft()->create();
@@ -173,6 +184,7 @@ class OrderAuthorizationTest extends TestCase
     /**
      * @group idor
      */
+    #[Test]
     public function user_cannot_update_other_user_order(): void
     {
         $userA = Customer::factory()->create();
@@ -197,9 +209,10 @@ class OrderAuthorizationTest extends TestCase
 
         // DCA-002 fix: Explicit ownership check prevents IDOR
         $response->assertStatus(403);
-        $response->assertJson(['message' => 'Unauthorized']);
+        $response->assertJson(['message' => 'This action is unauthorized.']);
     }
 
+    #[Test]
     public function unauthenticated_user_cannot_download_invoice(): void
     {
         $order = Order::factory()->confirmed()->create([
@@ -215,6 +228,7 @@ class OrderAuthorizationTest extends TestCase
     /**
      * @group idor
      */
+    #[Test]
     public function user_cannot_download_other_user_invoice(): void
     {
         $userA = Customer::factory()->create();
@@ -231,6 +245,7 @@ class OrderAuthorizationTest extends TestCase
         $response->assertJson(['message' => 'Commande introuvable']);
     }
 
+    #[Test]
     public function guest_order_with_null_customer_id_cannot_be_accessed_without_auth(): void
     {
         // Create order with null customer_id (guest checkout)
@@ -249,6 +264,7 @@ class OrderAuthorizationTest extends TestCase
     /**
      * @group idor
      */
+    #[Test]
     public function authenticated_user_cannot_access_guest_order(): void
     {
         $user = Customer::factory()->create();
@@ -266,6 +282,7 @@ class OrderAuthorizationTest extends TestCase
         $response->assertJson(['message' => 'Not found']);
     }
 
+    #[Test]
     public function returns_404_for_invalid_order_number(): void
     {
         $user = Customer::factory()->create();
@@ -276,6 +293,7 @@ class OrderAuthorizationTest extends TestCase
         $response->assertJson(['message' => 'Not found']);
     }
 
+    #[Test]
     public function order_list_is_sorted_by_placed_at_desc(): void
     {
         $user = Customer::factory()->create();

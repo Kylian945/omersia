@@ -15,6 +15,7 @@ use Omersia\Catalog\Models\Product;
 use Omersia\Catalog\Services\ProductCreationService;
 use Omersia\Catalog\Services\ProductImageService;
 use Omersia\Catalog\Services\ProductVariantService;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ProductCreationServiceTest extends TestCase
@@ -34,6 +35,7 @@ class ProductCreationServiceTest extends TestCase
         );
     }
 
+    #[Test]
     public function it_can_create_a_simple_product(): void
     {
         // Arrange - Créer un produit minimal pour obtenir un shop_id valide
@@ -85,6 +87,7 @@ class ProductCreationServiceTest extends TestCase
         $this->assertTrue($product->categories->contains($category));
     }
 
+    #[Test]
     public function it_can_create_a_variant_product_with_options(): void
     {
         // Arrange
@@ -128,6 +131,7 @@ class ProductCreationServiceTest extends TestCase
         $this->assertEquals('TSHIRT-S', $product->variants->first()->sku);
     }
 
+    #[Test]
     public function it_can_create_product_with_images(): void
     {
         // Arrange
@@ -162,6 +166,7 @@ class ProductCreationServiceTest extends TestCase
         $this->assertEquals(1, $mainImage->position);
     }
 
+    #[Test]
     public function it_creates_product_within_transaction(): void
     {
         // Arrange
@@ -189,6 +194,7 @@ class ProductCreationServiceTest extends TestCase
         $this->assertDatabaseHas('product_translations', ['name' => 'Transaction Test']);
     }
 
+    #[Test]
     public function it_can_update_an_existing_product(): void
     {
         // Arrange
@@ -232,6 +238,7 @@ class ProductCreationServiceTest extends TestCase
         $this->assertEquals('updated-slug', $translation->slug);
     }
 
+    #[Test]
     public function it_can_add_images_during_update(): void
     {
         // Arrange
@@ -261,6 +268,7 @@ class ProductCreationServiceTest extends TestCase
         $this->assertTrue($updatedProduct->images->first()->is_main);
     }
 
+    #[Test]
     public function it_updates_product_within_transaction(): void
     {
         // Arrange

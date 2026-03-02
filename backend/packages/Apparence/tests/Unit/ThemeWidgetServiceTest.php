@@ -10,6 +10,7 @@ use Omersia\Apparence\Models\EcommercePageTranslation;
 use Omersia\Apparence\Models\Theme;
 use Omersia\Apparence\Services\ThemeWidgetService;
 use Omersia\Core\Models\Shop;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ThemeWidgetServiceTest extends TestCase
@@ -27,6 +28,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->shop = Shop::factory()->create();
     }
 
+    #[Test]
     public function it_detects_removed_widgets_between_themes(): void
     {
         $currentTheme = Theme::factory()->create([
@@ -53,6 +55,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertCount(1, $result['removed_widgets']);
     }
 
+    #[Test]
     public function it_detects_added_widgets_between_themes(): void
     {
         $currentTheme = Theme::factory()->create([
@@ -76,6 +79,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertContains('product-carousel', array_column($result['added_widgets'], 'type'));
     }
 
+    #[Test]
     public function it_returns_no_incompatibilities_when_all_widgets_are_compatible(): void
     {
         $currentTheme = Theme::factory()->create([
@@ -102,6 +106,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertCount(1, $result['added_widgets']);
     }
 
+    #[Test]
     public function it_finds_pages_using_removed_widgets(): void
     {
         $currentTheme = Theme::factory()->create([
@@ -152,6 +157,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertContains('old-widget', $result['affected_pages'][0]['incompatible_widgets']);
     }
 
+    #[Test]
     public function it_extracts_widget_types_from_nested_columns(): void
     {
         $currentTheme = Theme::factory()->create([
@@ -204,6 +210,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertContains('inner-widget', $result['affected_pages'][0]['incompatible_widgets']);
     }
 
+    #[Test]
     public function it_counts_total_widgets_to_remove(): void
     {
         $currentTheme = Theme::factory()->create([
@@ -266,6 +273,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertEquals(3, $result['total_widgets_to_remove']);
     }
 
+    #[Test]
     public function it_handles_multiple_translations_per_page(): void
     {
         $currentTheme = Theme::factory()->create([
@@ -312,6 +320,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertEquals('fr', $result['affected_pages'][1]['locale']);
     }
 
+    #[Test]
     public function it_cleans_incompatible_widgets_from_pages(): void
     {
         $page = EcommercePage::factory()->create(['shop_id' => $this->shop->id]);
@@ -349,6 +358,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertEquals('keep-widget', $widgets[0]['type']);
     }
 
+    #[Test]
     public function it_cleans_widgets_from_nested_columns(): void
     {
         $page = EcommercePage::factory()->create(['shop_id' => $this->shop->id]);
@@ -391,6 +401,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertEquals('child-widget', $nestedWidgets[0]['type']);
     }
 
+    #[Test]
     public function it_returns_zero_when_no_widgets_to_remove(): void
     {
         $page = EcommercePage::factory()->create(['shop_id' => $this->shop->id]);
@@ -421,6 +432,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertEquals(0, $removedCount);
     }
 
+    #[Test]
     public function it_handles_empty_widget_array(): void
     {
         $removedCount = $this->service->cleanIncompatibleWidgets(
@@ -431,6 +443,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertEquals(0, $removedCount);
     }
 
+    #[Test]
     public function it_handles_pages_with_no_sections(): void
     {
         $page = EcommercePage::factory()->create(['shop_id' => $this->shop->id]);
@@ -449,6 +462,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertEquals(0, $removedCount);
     }
 
+    #[Test]
     public function it_handles_columns_without_widgets_array(): void
     {
         $page = EcommercePage::factory()->create(['shop_id' => $this->shop->id]);
@@ -477,6 +491,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertEquals(0, $removedCount);
     }
 
+    #[Test]
     public function it_preserves_widget_array_indices_after_removal(): void
     {
         $page = EcommercePage::factory()->create(['shop_id' => $this->shop->id]);
@@ -515,6 +530,7 @@ class ThemeWidgetServiceTest extends TestCase
         $this->assertArrayNotHasKey(2, $widgets);
     }
 
+    #[Test]
     public function it_only_affects_pages_from_specified_shop(): void
     {
         $otherShop = Shop::factory()->create();

@@ -10,6 +10,7 @@ import '../../packages/Admin/src/resources/js/ai/content-assistant.js';
 import '../../packages/Admin/src/resources/js/ai/backoffice-assistant.js';
 import '../../packages/Admin/src/resources/js/builder/page-builder.js';
 import '../../packages/Admin/src/resources/js/builder/page-builder-native.js';
+import '../../packages/Admin/src/resources/js/core/toast.js';
 
 // Fonction d'initialisation conditionnelle des composants
 async function loadConditionalComponents() {

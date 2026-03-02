@@ -7,28 +7,31 @@ namespace Omersia\Payment\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Payment\Models\Payment;
 use Omersia\Payment\Models\PaymentProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class PaymentProviderTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_payment_provider(): void
     {
         $provider = PaymentProvider::create([
-            'name' => 'Stripe',
-            'code' => 'stripe',
+            'name' => 'Stripe Custom',
+            'code' => 'stripe_custom',
             'enabled' => true,
             'config' => ['api_key' => 'sk_test_123'],
         ]);
 
         $this->assertDatabaseHas('payment_providers', [
-            'name' => 'Stripe',
-            'code' => 'stripe',
+            'name' => 'Stripe Custom',
+            'code' => 'stripe_custom',
             'enabled' => true,
         ]);
     }
 
+    #[Test]
     public function it_has_many_payments(): void
     {
         $provider = PaymentProvider::factory()->create();
@@ -37,6 +40,7 @@ class PaymentProviderTest extends TestCase
         $this->assertCount(3, $provider->payments);
     }
 
+    #[Test]
     public function it_casts_enabled_to_boolean(): void
     {
         $provider = PaymentProvider::factory()->create(['enabled' => 1]);
@@ -45,6 +49,7 @@ class PaymentProviderTest extends TestCase
         $this->assertTrue($provider->enabled);
     }
 
+    #[Test]
     public function it_casts_config_to_array(): void
     {
         $provider = PaymentProvider::factory()->create([
@@ -55,6 +60,7 @@ class PaymentProviderTest extends TestCase
         $this->assertEquals('key123', $provider->config['api_key']);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $provider = new PaymentProvider;
@@ -66,6 +72,7 @@ class PaymentProviderTest extends TestCase
         $this->assertContains('config', $fillable);
     }
 
+    #[Test]
     public function it_stores_provider_code(): void
     {
         $provider = PaymentProvider::factory()->create(['code' => 'paypal']);
@@ -73,6 +80,7 @@ class PaymentProviderTest extends TestCase
         $this->assertEquals('paypal', $provider->code);
     }
 
+    #[Test]
     public function it_can_be_disabled(): void
     {
         $provider = PaymentProvider::factory()->create(['enabled' => false]);
@@ -80,6 +88,7 @@ class PaymentProviderTest extends TestCase
         $this->assertFalse($provider->enabled);
     }
 
+    #[Test]
     public function it_can_store_complex_config(): void
     {
         $config = [

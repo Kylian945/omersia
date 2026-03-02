@@ -8,12 +8,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Catalog\Models\Cart;
 use Omersia\Catalog\Models\CartItem;
 use Omersia\Customer\Models\Customer;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class CartTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_cart(): void
     {
         $cart = Cart::create([
@@ -31,6 +33,7 @@ class CartTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_has_items(): void
     {
         $cart = Cart::factory()->create();
@@ -39,6 +42,7 @@ class CartTest extends TestCase
         $this->assertCount(3, $cart->items);
     }
 
+    #[Test]
     public function it_belongs_to_customer(): void
     {
         $customer = Customer::factory()->create();
@@ -48,6 +52,7 @@ class CartTest extends TestCase
         $this->assertEquals($customer->id, $cart->customer->id);
     }
 
+    #[Test]
     public function it_casts_metadata_to_array(): void
     {
         $cart = Cart::factory()->create([
@@ -58,6 +63,7 @@ class CartTest extends TestCase
         $this->assertEquals('mobile', $cart->metadata['source']);
     }
 
+    #[Test]
     public function it_casts_last_activity_at_to_datetime(): void
     {
         $cart = Cart::factory()->create([
@@ -67,6 +73,7 @@ class CartTest extends TestCase
         $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $cart->last_activity_at);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $cart = new Cart;
@@ -83,6 +90,7 @@ class CartTest extends TestCase
         $this->assertContains('last_activity_at', $fillable);
     }
 
+    #[Test]
     public function it_can_store_email_for_guest_cart(): void
     {
         $cart = Cart::create([
@@ -96,6 +104,7 @@ class CartTest extends TestCase
         $this->assertNull($cart->customer_id);
     }
 
+    #[Test]
     public function it_tracks_total_quantity(): void
     {
         $cart = Cart::factory()->create(['total_qty' => 10]);
@@ -103,6 +112,7 @@ class CartTest extends TestCase
         $this->assertEquals(10, $cart->total_qty);
     }
 
+    #[Test]
     public function it_stores_subtotal(): void
     {
         $cart = Cart::factory()->create(['subtotal' => 250.50]);

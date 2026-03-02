@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "0619f763c331055a89edd23d574aca9d",
+    "content-hash": "0496553ef3bb0ca0f5f4b893604c0204",
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -3812,7 +3812,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/CMS",
-                "reference": "0de736b2641345097d7078b2aa03fbbd183dd494"
+                "reference": "a044b71711348b978073274da1c1e8934d8c091f"
             },
             "type": "library",
             "extra": {
@@ -3824,7 +3824,8 @@
             },
             "autoload": {
                 "psr-4": {
-                    "Omersia\\CMS\\": "src/"
+                    "Omersia\\CMS\\": "src/",
+                    "Omersia\\CMS\\Database\\Factories\\": "database/factories/"
                 }
             },
             "transport-options": {
@@ -12112,7 +12113,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-        "php": "^8.2"
+        "php": "^8.4"
     },
     "platform-dev": {},
     "plugin-api-version": "2.9.0"

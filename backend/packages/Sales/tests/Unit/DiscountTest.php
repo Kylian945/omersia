@@ -12,12 +12,14 @@ use Omersia\Customer\Models\Customer;
 use Omersia\Customer\Models\CustomerGroup;
 use Omersia\Sales\Models\Discount;
 use Omersia\Sales\Models\DiscountUsage;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class DiscountTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_discount(): void
     {
         $shop = Shop::factory()->create();
@@ -40,6 +42,7 @@ class DiscountTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_belongs_to_many_products(): void
     {
         $discount = Discount::factory()->create();
@@ -50,6 +53,7 @@ class DiscountTest extends TestCase
         $this->assertEquals($product->id, $discount->products->first()->id);
     }
 
+    #[Test]
     public function it_belongs_to_many_collections(): void
     {
         $discount = Discount::factory()->create();
@@ -59,6 +63,7 @@ class DiscountTest extends TestCase
         $this->assertCount(1, $discount->collections);
     }
 
+    #[Test]
     public function it_belongs_to_many_customer_groups(): void
     {
         $discount = Discount::factory()->create();
@@ -68,6 +73,7 @@ class DiscountTest extends TestCase
         $this->assertCount(1, $discount->customerGroups);
     }
 
+    #[Test]
     public function it_belongs_to_many_customers(): void
     {
         $discount = Discount::factory()->create();
@@ -77,6 +83,7 @@ class DiscountTest extends TestCase
         $this->assertCount(1, $discount->customers);
     }
 
+    #[Test]
     public function it_has_many_usages(): void
     {
         $discount = Discount::factory()->create();
@@ -85,6 +92,7 @@ class DiscountTest extends TestCase
         $this->assertCount(3, $discount->usages);
     }
 
+    #[Test]
     public function it_can_scope_active_discounts(): void
     {
         Discount::factory()->create([
@@ -101,6 +109,7 @@ class DiscountTest extends TestCase
         $this->assertCount(1, $active);
     }
 
+    #[Test]
     public function it_filters_discounts_by_start_date(): void
     {
         Discount::factory()->create([
@@ -117,6 +126,7 @@ class DiscountTest extends TestCase
         $this->assertCount(1, $active);
     }
 
+    #[Test]
     public function it_filters_discounts_by_end_date(): void
     {
         Discount::factory()->create([
@@ -133,6 +143,7 @@ class DiscountTest extends TestCase
         $this->assertCount(1, $active);
     }
 
+    #[Test]
     public function it_can_scope_for_shop(): void
     {
         $shop = Shop::factory()->create();
@@ -144,6 +155,7 @@ class DiscountTest extends TestCase
         $this->assertCount(2, $shopDiscounts);
     }
 
+    #[Test]
     public function it_casts_boolean_attributes(): void
     {
         $discount = Discount::factory()->create([
@@ -159,6 +171,7 @@ class DiscountTest extends TestCase
         $this->assertIsBool($discount->combines_with_product_discounts);
     }
 
+    #[Test]
     public function it_casts_datetime_attributes(): void
     {
         $discount = Discount::factory()->create([
@@ -170,6 +183,7 @@ class DiscountTest extends TestCase
         $this->assertInstanceOf(\Illuminate\Support\Carbon::class, $discount->ends_at);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $discount = new Discount;
@@ -183,6 +197,7 @@ class DiscountTest extends TestCase
         $this->assertContains('is_active', $fillable);
     }
 
+    #[Test]
     public function it_stores_discount_type(): void
     {
         $discount = Discount::factory()->create(['type' => 'product']);
@@ -190,6 +205,7 @@ class DiscountTest extends TestCase
         $this->assertEquals('product', $discount->type);
     }
 
+    #[Test]
     public function it_stores_value_type(): void
     {
         $discount = Discount::factory()->create(['value_type' => 'fixed_amount']);
@@ -197,6 +213,7 @@ class DiscountTest extends TestCase
         $this->assertEquals('fixed_amount', $discount->value_type);
     }
 
+    #[Test]
     public function it_stores_usage_limits(): void
     {
         $discount = Discount::factory()->create([
@@ -208,6 +225,7 @@ class DiscountTest extends TestCase
         $this->assertEquals(1, $discount->usage_limit_per_customer);
     }
 
+    #[Test]
     public function it_stores_minimum_requirements(): void
     {
         $discount = Discount::factory()->create([
@@ -219,6 +237,7 @@ class DiscountTest extends TestCase
         $this->assertEquals(3, $discount->min_quantity);
     }
 
+    #[Test]
     public function it_stores_buy_x_get_y_configuration(): void
     {
         $discount = Discount::factory()->create([
@@ -232,6 +251,7 @@ class DiscountTest extends TestCase
         $this->assertTrue($discount->get_is_free);
     }
 
+    #[Test]
     public function it_stores_combination_flags(): void
     {
         $discount = Discount::factory()->create([

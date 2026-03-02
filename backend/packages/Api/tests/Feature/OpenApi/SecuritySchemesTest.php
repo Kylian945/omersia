@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Packages\Api\Tests\Feature\OpenApi;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class SecuritySchemesTest extends TestCase
@@ -39,6 +40,7 @@ class SecuritySchemesTest extends TestCase
         }
     }
 
+    #[Test]
     public function it_generates_valid_openapi_spec(): void
     {
         // Assert OpenAPI version
@@ -64,6 +66,7 @@ class SecuritySchemesTest extends TestCase
         }
     }
 
+    #[Test]
     public function it_defines_both_security_schemes(): void
     {
         $this->assertArrayHasKey('components', $this->openApiSpec);
@@ -83,6 +86,7 @@ class SecuritySchemesTest extends TestCase
         $this->assertEquals('bearer', $securitySchemes['sanctum']['scheme'], 'sanctum should use bearer scheme');
     }
 
+    #[Test]
     public function it_applies_global_api_key_security(): void
     {
         $this->assertArrayHasKey('security', $this->openApiSpec, 'Global security should be defined');
@@ -103,6 +107,7 @@ class SecuritySchemesTest extends TestCase
         $this->assertTrue($hasApiKey, 'Global security should include api.key requirement');
     }
 
+    #[Test]
     public function all_endpoints_have_security_defined(): void
     {
         $paths = $this->openApiSpec['paths'];
@@ -128,6 +133,7 @@ class SecuritySchemesTest extends TestCase
         );
     }
 
+    #[Test]
     public function authenticated_endpoints_require_both_schemes(): void
     {
         // Define list of authenticated endpoints (path + method)
@@ -192,6 +198,7 @@ class SecuritySchemesTest extends TestCase
         );
     }
 
+    #[Test]
     public function public_endpoints_require_only_api_key(): void
     {
         // Define list of public endpoints (path + method)
@@ -254,6 +261,7 @@ class SecuritySchemesTest extends TestCase
         );
     }
 
+    #[Test]
     public function all_new_schemas_are_present(): void
     {
         $this->assertArrayHasKey('components', $this->openApiSpec);
@@ -305,6 +313,7 @@ class SecuritySchemesTest extends TestCase
         );
     }
 
+    #[Test]
     public function endpoints_include_standard_error_responses(): void
     {
         $paths = $this->openApiSpec['paths'];
@@ -367,6 +376,7 @@ class SecuritySchemesTest extends TestCase
         );
     }
 
+    #[Test]
     public function spec_file_has_reasonable_size(): void
     {
         $specPath = storage_path('api-docs/api-docs.json');
@@ -379,6 +389,7 @@ class SecuritySchemesTest extends TestCase
         $this->assertLessThan(5 * 1024 * 1024, $fileSize, 'Spec file should not be excessively large (<5MB)');
     }
 
+    #[Test]
     public function it_validates_endpoint_count(): void
     {
         $paths = $this->openApiSpec['paths'];
@@ -399,6 +410,7 @@ class SecuritySchemesTest extends TestCase
         $this->assertGreaterThanOrEqual(15, $endpointCount, 'Should have at least 15 documented endpoints');
     }
 
+    #[Test]
     public function it_validates_schema_count(): void
     {
         $schemas = $this->openApiSpec['components']['schemas'] ?? [];
@@ -416,6 +428,7 @@ class SecuritySchemesTest extends TestCase
         $this->assertGreaterThanOrEqual(13, $schemaCount, 'Should have at least 13 schemas defined');
     }
 
+    #[Test]
     public function error_schemas_have_correct_structure(): void
     {
         // Skip if schemas aren't parsed yet
@@ -448,6 +461,7 @@ class SecuritySchemesTest extends TestCase
         }
     }
 
+    #[Test]
     public function it_documents_known_issues_for_future_fixes(): void
     {
         $issues = [];
@@ -464,7 +478,7 @@ class SecuritySchemesTest extends TestCase
 
         // Document issues (this test always passes but logs issues for visibility)
         if (! empty($issues)) {
-            echo PHP_EOL.'⚠️  Known OpenAPI Issues:'.PHP_EOL;
+            echo PHP_EOL.'Known OpenAPI Issues:'.PHP_EOL;
             foreach ($issues as $issue) {
                 echo '   - '.$issue.PHP_EOL;
             }

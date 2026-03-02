@@ -16,6 +16,7 @@ use Omersia\Catalog\Models\ShippingMethod;
 use Omersia\Customer\Models\Customer;
 use Omersia\Sales\Models\Discount;
 use Omersia\Sales\Models\DiscountUsage;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
@@ -51,6 +52,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that order with correct prices succeeds.
      */
+    #[Test]
     public function it_accepts_order_with_correct_prices(): void
     {
         $customer = Customer::factory()->create();
@@ -104,6 +106,7 @@ class OrderPriceTamperingTest extends TestCase
      * This simulates a malicious client sending a lower price than
      * what's stored in the database.
      */
+    #[Test]
     public function it_rejects_order_with_reduced_item_price(): void
     {
         $customer = Customer::factory()->create();
@@ -149,6 +152,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that order with variant price is validated against database.
      */
+    #[Test]
     public function it_validates_variant_price_against_database(): void
     {
         $customer = Customer::factory()->create();
@@ -232,6 +236,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that order with multiple items validates all prices.
      */
+    #[Test]
     public function it_validates_all_item_prices_in_multi_item_order(): void
     {
         $customer = Customer::factory()->create();
@@ -296,6 +301,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that order with valid manual discount succeeds.
      */
+    #[Test]
     public function it_accepts_order_with_valid_manual_discount(): void
     {
         $customer = Customer::factory()->create();
@@ -351,6 +357,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that order with inflated discount total fails validation.
      */
+    #[Test]
     public function it_rejects_order_with_inflated_discount_total(): void
     {
         $customer = Customer::factory()->create();
@@ -400,6 +407,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that order with invalid discount code fails validation.
      */
+    #[Test]
     public function it_rejects_order_with_invalid_discount_code(): void
     {
         $customer = Customer::factory()->create();
@@ -440,6 +448,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that order with expired discount code fails validation.
      */
+    #[Test]
     public function it_rejects_order_with_expired_discount_code(): void
     {
         $customer = Customer::factory()->create();
@@ -491,6 +500,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that order with inactive discount code fails validation.
      */
+    #[Test]
     public function it_rejects_order_with_inactive_discount_code(): void
     {
         $customer = Customer::factory()->create();
@@ -546,6 +556,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that discount within usage limit succeeds.
      */
+    #[Test]
     public function it_accepts_discount_within_global_usage_limit(): void
     {
         $customer = Customer::factory()->create();
@@ -577,6 +588,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that discount exceeding global usage limit fails.
      */
+    #[Test]
     public function it_rejects_discount_exceeding_global_usage_limit(): void
     {
         $customer = Customer::factory()->create();
@@ -607,6 +619,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that discount exceeding per-customer limit fails.
      */
+    #[Test]
     public function it_rejects_discount_exceeding_per_customer_limit(): void
     {
         $customer = Customer::factory()->create();
@@ -639,6 +652,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that per-customer limit allows different customers.
      */
+    #[Test]
     public function it_allows_discount_for_different_customer_when_per_customer_limit_reached(): void
     {
         $customerA = Customer::factory()->create(['email' => 'a@test.com']);
@@ -676,6 +690,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that automatic discounts are applied server-side.
      */
+    #[Test]
     public function it_applies_automatic_discounts_server_side(): void
     {
         $customer = Customer::factory()->create();
@@ -727,6 +742,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that automatic discount respects usage limit.
      */
+    #[Test]
     public function it_respects_usage_limit_for_automatic_discounts(): void
     {
         $customer = Customer::factory()->create();
@@ -762,6 +778,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that order with zero discount when none applied succeeds.
      */
+    #[Test]
     public function it_accepts_order_with_zero_discount_when_no_discounts_exist(): void
     {
         $customer = Customer::factory()->create();
@@ -806,6 +823,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that combination of price and discount tampering is detected.
      */
+    #[Test]
     public function it_detects_combination_of_price_and_discount_tampering(): void
     {
         $customer = Customer::factory()->create();
@@ -854,6 +872,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that fixed amount discount is capped at subtotal.
      */
+    #[Test]
     public function it_caps_fixed_amount_discount_at_subtotal(): void
     {
         $customer = Customer::factory()->create();
@@ -879,6 +898,7 @@ class OrderPriceTamperingTest extends TestCase
     /**
      * Test that discount code is case-insensitive.
      */
+    #[Test]
     public function it_validates_discount_codes_case_insensitively(): void
     {
         $customer = Customer::factory()->create();

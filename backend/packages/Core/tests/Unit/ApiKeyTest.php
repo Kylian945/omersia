@@ -6,12 +6,14 @@ namespace Omersia\Core\Tests\Unit;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Core\Models\ApiKey;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ApiKeyTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_generate_api_key(): void
     {
         $apiKey = ApiKey::generate('Test API Key');
@@ -23,6 +25,7 @@ class ApiKeyTest extends TestCase
         $this->assertNotNull($apiKey->key);
     }
 
+    #[Test]
     public function it_hashes_key_on_creation(): void
     {
         $apiKey = ApiKey::generate('Test Key');
@@ -32,6 +35,7 @@ class ApiKeyTest extends TestCase
         $this->assertMatchesRegularExpression('/^[a-f0-9]{64}$/', $apiKey->key);
     }
 
+    #[Test]
     public function it_creates_active_key_by_default(): void
     {
         $apiKey = ApiKey::generate('Test Key');
@@ -39,6 +43,7 @@ class ApiKeyTest extends TestCase
         $this->assertTrue($apiKey->active);
     }
 
+    #[Test]
     public function it_can_create_inactive_key(): void
     {
         $apiKey = ApiKey::create([
@@ -50,6 +55,7 @@ class ApiKeyTest extends TestCase
         $this->assertFalse($apiKey->active);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $apiKey = new ApiKey;
@@ -60,6 +66,7 @@ class ApiKeyTest extends TestCase
         $this->assertContains('active', $fillable);
     }
 
+    #[Test]
     public function it_casts_active_to_boolean(): void
     {
         $apiKey = ApiKey::create([
@@ -72,6 +79,7 @@ class ApiKeyTest extends TestCase
         $this->assertTrue($apiKey->active);
     }
 
+    #[Test]
     public function it_can_regenerate_key(): void
     {
         $apiKey = ApiKey::generate('Test Key');
@@ -84,6 +92,7 @@ class ApiKeyTest extends TestCase
         $this->assertEquals(64, strlen($newKey));
     }
 
+    #[Test]
     public function it_validates_active_key(): void
     {
         $plainKey = str_repeat('a', 64);
@@ -96,6 +105,7 @@ class ApiKeyTest extends TestCase
         $this->assertTrue(ApiKey::isValid($plainKey));
     }
 
+    #[Test]
     public function it_rejects_inactive_key(): void
     {
         $plainKey = str_repeat('b', 64);
@@ -108,11 +118,13 @@ class ApiKeyTest extends TestCase
         $this->assertFalse(ApiKey::isValid($plainKey));
     }
 
+    #[Test]
     public function it_rejects_non_existent_key(): void
     {
         $this->assertFalse(ApiKey::isValid('non-existent-key'));
     }
 
+    #[Test]
     public function it_rejects_wrong_key(): void
     {
         $plainKey = str_repeat('c', 64);

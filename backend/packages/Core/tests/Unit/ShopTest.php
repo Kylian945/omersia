@@ -7,12 +7,14 @@ namespace Omersia\Core\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Core\Models\Shop;
 use Omersia\Core\Models\ShopDomain;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ShopTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_shop(): void
     {
         $shop = Shop::create([
@@ -28,6 +30,7 @@ class ShopTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_has_domains_relationship(): void
     {
         $shop = Shop::factory()->create();
@@ -37,6 +40,7 @@ class ShopTest extends TestCase
         $this->assertCount(1, $shop->domains);
     }
 
+    #[Test]
     public function it_can_have_multiple_domains(): void
     {
         $shop = Shop::factory()->create();
@@ -45,6 +49,7 @@ class ShopTest extends TestCase
         $this->assertCount(3, $shop->fresh()->domains);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $shop = new Shop;
@@ -58,6 +63,7 @@ class ShopTest extends TestCase
         $this->assertContains('display_name', $fillable);
     }
 
+    #[Test]
     public function it_can_set_display_name(): void
     {
         $shop = Shop::create([
@@ -70,6 +76,7 @@ class ShopTest extends TestCase
         $this->assertEquals('My Beautiful Shop', $shop->display_name);
     }
 
+    #[Test]
     public function it_can_set_logo_path(): void
     {
         $shop = Shop::create([

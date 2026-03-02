@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 use Omersia\Customer\Models\Address;
 use Omersia\Customer\Models\Customer;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 use Tests\WithApiKey;
 
@@ -28,6 +29,7 @@ class AddressAuthorizationTest extends TestCase
         $this->setUpApiKey();
     }
 
+    #[Test]
     public function unauthenticated_user_cannot_list_addresses(): void
     {
         $response = $this->getJson('/api/v1/addresses', $this->apiHeaders());
@@ -35,6 +37,7 @@ class AddressAuthorizationTest extends TestCase
         $response->assertStatus(401);
     }
 
+    #[Test]
     public function user_can_list_only_their_own_addresses(): void
     {
         $userA = Customer::factory()->create();
@@ -61,6 +64,7 @@ class AddressAuthorizationTest extends TestCase
     /**
      * @group idor
      */
+    #[Test]
     public function user_cannot_view_other_user_address(): void
     {
         $userA = Customer::factory()->create();
@@ -74,6 +78,7 @@ class AddressAuthorizationTest extends TestCase
         $response->assertJson(['message' => 'Not found']);
     }
 
+    #[Test]
     public function user_can_view_their_own_address(): void
     {
         $user = Customer::factory()->create();
@@ -85,6 +90,7 @@ class AddressAuthorizationTest extends TestCase
         $response->assertJsonFragment(['id' => $address->id]);
     }
 
+    #[Test]
     public function unauthenticated_user_cannot_view_address(): void
     {
         $address = Address::factory()->create();
@@ -100,6 +106,7 @@ class AddressAuthorizationTest extends TestCase
     /**
      * @group idor
      */
+    #[Test]
     public function user_cannot_update_other_user_address(): void
     {
         $userA = Customer::factory()->create();
@@ -124,6 +131,7 @@ class AddressAuthorizationTest extends TestCase
         $this->assertEquals('Original Street', $addressB->fresh()->line1);
     }
 
+    #[Test]
     public function user_can_update_their_own_address(): void
     {
         $user = Customer::factory()->create();
@@ -145,6 +153,7 @@ class AddressAuthorizationTest extends TestCase
         $this->assertEquals('New Street', $address->fresh()->line1);
     }
 
+    #[Test]
     public function unauthenticated_user_cannot_update_address(): void
     {
         $address = Address::factory()->create();
@@ -164,6 +173,7 @@ class AddressAuthorizationTest extends TestCase
     /**
      * @group idor
      */
+    #[Test]
     public function user_cannot_delete_other_user_address(): void
     {
         $userA = Customer::factory()->create();
@@ -180,6 +190,7 @@ class AddressAuthorizationTest extends TestCase
         $this->assertDatabaseHas('addresses', ['id' => $addressB->id]);
     }
 
+    #[Test]
     public function user_can_delete_their_own_address(): void
     {
         $user = Customer::factory()->create();
@@ -193,6 +204,7 @@ class AddressAuthorizationTest extends TestCase
         $this->assertDatabaseMissing('addresses', ['id' => $address->id]);
     }
 
+    #[Test]
     public function unauthenticated_user_cannot_delete_address(): void
     {
         $address = Address::factory()->create();
@@ -205,6 +217,7 @@ class AddressAuthorizationTest extends TestCase
         $response->assertJson(['message' => 'Unauthenticated.']);
     }
 
+    #[Test]
     public function user_can_create_address(): void
     {
         $user = Customer::factory()->create();
@@ -229,6 +242,7 @@ class AddressAuthorizationTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function unauthenticated_user_cannot_create_address(): void
     {
         $response = $this->postJson('/api/v1/addresses', [
@@ -246,6 +260,7 @@ class AddressAuthorizationTest extends TestCase
     /**
      * @group idor
      */
+    #[Test]
     public function user_cannot_set_default_shipping_for_other_user_address(): void
     {
         $userA = Customer::factory()->create();
@@ -262,6 +277,7 @@ class AddressAuthorizationTest extends TestCase
         $this->assertFalse($addressB->fresh()->is_default_shipping);
     }
 
+    #[Test]
     public function user_can_set_default_shipping_for_own_address(): void
     {
         $user = Customer::factory()->create();
@@ -278,6 +294,7 @@ class AddressAuthorizationTest extends TestCase
     /**
      * @group idor
      */
+    #[Test]
     public function user_cannot_set_default_billing_for_other_user_address(): void
     {
         $userA = Customer::factory()->create();
@@ -294,6 +311,7 @@ class AddressAuthorizationTest extends TestCase
         $this->assertFalse($addressB->fresh()->is_default_billing);
     }
 
+    #[Test]
     public function user_can_set_default_billing_for_own_address(): void
     {
         $user = Customer::factory()->create();
@@ -307,6 +325,7 @@ class AddressAuthorizationTest extends TestCase
         $this->assertTrue($address->fresh()->is_default_billing);
     }
 
+    #[Test]
     public function setting_default_shipping_removes_flag_from_other_addresses(): void
     {
         $user = Customer::factory()->create();
@@ -326,6 +345,7 @@ class AddressAuthorizationTest extends TestCase
         $this->assertTrue($address2->fresh()->is_default_shipping);
     }
 
+    #[Test]
     public function setting_default_billing_removes_flag_from_other_addresses(): void
     {
         $user = Customer::factory()->create();
@@ -345,6 +365,7 @@ class AddressAuthorizationTest extends TestCase
         $this->assertTrue($address2->fresh()->is_default_billing);
     }
 
+    #[Test]
     public function returns_404_for_invalid_address_id(): void
     {
         $user = Customer::factory()->create();
@@ -357,6 +378,7 @@ class AddressAuthorizationTest extends TestCase
         $response->assertJson(['message' => 'Not found']);
     }
 
+    #[Test]
     public function address_list_is_sorted_by_default_flags_and_label(): void
     {
         $user = Customer::factory()->create();
@@ -396,6 +418,7 @@ class AddressAuthorizationTest extends TestCase
         $this->assertEquals($address1->id, $ids[2]); // Regular address (Work)
     }
 
+    #[Test]
     public function address_creation_validates_required_fields(): void
     {
         $user = Customer::factory()->create();

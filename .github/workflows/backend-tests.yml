@@ -18,6 +18,9 @@ on:
 
 permissions:
   contents: read
+  issues: write
+  pull-requests: write
+  checks: write
 
 jobs:
   tests:
@@ -100,10 +103,48 @@ jobs:
           DB_USERNAME: root
           DB_PASSWORD: password
 
+      - name: Create fake Vite manifest for tests
+        run: |
+          mkdir -p backend/public/build
+          cat > backend/public/build/manifest.json << 'MANIFEST'
+          {
+            "resources/css/app.css": {"file": "assets/app.css", "src": "resources/css/app.css", "isEntry": true},
+            "resources/js/app.js": {"file": "assets/app.js", "src": "resources/js/app.js", "isEntry": true},
+            "packages/Admin/src/resources/js/core/toast.js": {"file": "assets/toast.js", "src": "packages/Admin/src/resources/js/core/toast.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/api-key.js": {"file": "assets/api-key.js", "src": "packages/Admin/src/resources/js/settings/api-key.js", "isEntry": true},
+            "packages/Admin/src/resources/js/dashboard/chart.js": {"file": "assets/chart.js", "src": "packages/Admin/src/resources/js/dashboard/chart.js", "isEntry": true},
+            "packages/Admin/src/resources/js/dashboard/realtime.js": {"file": "assets/dashboard-realtime.js", "src": "packages/Admin/src/resources/js/dashboard/realtime.js", "isEntry": true},
+            "packages/Admin/src/resources/js/orders/realtime.js": {"file": "assets/orders-realtime.js", "src": "packages/Admin/src/resources/js/orders/realtime.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/gdpr/realtime.js": {"file": "assets/gdpr-realtime.js", "src": "packages/Admin/src/resources/js/settings/gdpr/realtime.js", "isEntry": true},
+            "packages/Admin/src/resources/js/products/stock-realtime.js": {"file": "assets/stock-realtime.js", "src": "packages/Admin/src/resources/js/products/stock-realtime.js", "isEntry": true},
+            "packages/Admin/src/resources/js/orders/paid-sound-notification.js": {"file": "assets/paid-sound-notification.js", "src": "packages/Admin/src/resources/js/orders/paid-sound-notification.js", "isEntry": true},
+            "packages/Admin/src/resources/js/builder/page-builder.js": {"file": "assets/page-builder.js", "src": "packages/Admin/src/resources/js/builder/page-builder.js", "isEntry": true},
+            "packages/Admin/src/resources/js/builder/page-builder-native.js": {"file": "assets/page-builder-native.js", "src": "packages/Admin/src/resources/js/builder/page-builder-native.js", "isEntry": true},
+            "packages/Admin/src/resources/js/builder/preview-modal.js": {"file": "assets/preview-modal.js", "src": "packages/Admin/src/resources/js/builder/preview-modal.js", "isEntry": true},
+            "packages/Admin/src/resources/js/products/index.js": {"file": "assets/products-index.js", "src": "packages/Admin/src/resources/js/products/index.js", "isEntry": true},
+            "packages/Admin/src/resources/js/core/quill-editor.js": {"file": "assets/quill-editor.js", "src": "packages/Admin/src/resources/js/core/quill-editor.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/shipping-methods.js": {"file": "assets/shipping-methods.js", "src": "packages/Admin/src/resources/js/settings/shipping-methods.js", "isEntry": true},
+            "packages/Admin/src/resources/js/apparence/theme-activation.js": {"file": "assets/theme-activation.js", "src": "packages/Admin/src/resources/js/apparence/theme-activation.js", "isEntry": true},
+            "packages/Admin/src/resources/js/modules/upload-form.js": {"file": "assets/upload-form.js", "src": "packages/Admin/src/resources/js/modules/upload-form.js", "isEntry": true},
+            "packages/Admin/src/resources/js/modules/positions.js": {"file": "assets/positions.js", "src": "packages/Admin/src/resources/js/modules/positions.js", "isEntry": true},
+            "packages/Admin/src/resources/js/media/media-library.js": {"file": "assets/media-library.js", "src": "packages/Admin/src/resources/js/media/media-library.js", "isEntry": true},
+            "packages/Admin/src/resources/js/media/picker.js": {"file": "assets/picker.js", "src": "packages/Admin/src/resources/js/media/picker.js", "isEntry": true},
+            "packages/Admin/src/resources/js/apparence/ecommerce-pages-form.js": {"file": "assets/ecommerce-pages-form.js", "src": "packages/Admin/src/resources/js/apparence/ecommerce-pages-form.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/modal-manager.js": {"file": "assets/modal-manager.js", "src": "packages/Admin/src/resources/js/settings/modal-manager.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/roles.js": {"file": "assets/roles.js", "src": "packages/Admin/src/resources/js/settings/roles.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/permissions.js": {"file": "assets/permissions.js", "src": "packages/Admin/src/resources/js/settings/permissions.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/users.js": {"file": "assets/users.js", "src": "packages/Admin/src/resources/js/settings/users.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/stripe-config.js": {"file": "assets/stripe-config.js", "src": "packages/Admin/src/resources/js/settings/stripe-config.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/tax-rate-form.js": {"file": "assets/tax-rate-form.js", "src": "packages/Admin/src/resources/js/settings/tax-rate-form.js", "isEntry": true},
+            "packages/Admin/src/resources/css/apparence/theme-customize.css": {"file": "assets/theme-customize.css", "src": "packages/Admin/src/resources/css/apparence/theme-customize.css", "isEntry": true},
+            "packages/Admin/src/resources/css/settings/api-keys.css": {"file": "assets/api-keys.css", "src": "packages/Admin/src/resources/css/settings/api-keys.css", "isEntry": true}
+          }
+          MANIFEST
+
       - name: Run PHPUnit tests
         run: |
           cd backend
-          vendor/bin/phpunit --coverage-clover coverage.xml
+          vendor/bin/phpunit
         env:
           APP_ENV: testing
           DB_CONNECTION: mysql
@@ -112,6 +153,109 @@ jobs:
           DB_DATABASE: testing
           DB_USERNAME: root
           DB_PASSWORD: password
+
+      - name: Upload test results (JUnit)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phpunit-junit-report
+          path: backend/junit.xml
+          retention-days: 30
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phpunit-coverage-report
+          path: |
+            backend/coverage.xml
+            backend/coverage-report/
+          retention-days: 30
+
+      - name: Publish JUnit test report
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: '**/junit.xml'
+          check_name: 'PHPUnit Test Results'
+          fail_on_failure: true
+          require_tests: false
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const coveragePath = 'backend/coverage.xml';
+
+            if (!fs.existsSync(coveragePath)) {
+              console.log('Coverage report not found');
+              return;
+            }
+
+            const xml = fs.readFileSync(coveragePath, 'utf8');
+
+            // Extraire les métriques projet depuis le Clover XML
+            // Le premier <metrics> après <project> est le total du projet
+            const projectMatch = xml.match(/<project[^>]*>\s*<metrics\s([^>]+)\/>/);
+            if (!projectMatch) {
+              console.log('Impossible de parser les métriques de coverage.xml');
+              return;
+            }
+
+            const metricsStr = projectMatch[1];
+
+            function getAttr(str, name) {
+              const m = str.match(new RegExp(`\\b${name}="(\\d+)"`));
+              return m ? parseInt(m[1], 10) : 0;
+            }
+
+            function pct(covered, total) {
+              if (total === 0) return { val: 0, str: 'N/A' };
+              const p = (covered / total) * 100;
+              return { val: p, str: p.toFixed(2) + '%' };
+            }
+
+            const statements    = getAttr(metricsStr, 'statements');
+            const covStmts      = getAttr(metricsStr, 'coveredstatements');
+            const methods       = getAttr(metricsStr, 'methods');
+            const covMethods    = getAttr(metricsStr, 'coveredmethods');
+            const conditionals  = getAttr(metricsStr, 'conditionals');
+            const covConds      = getAttr(metricsStr, 'coveredconditionals');
+            const elements      = getAttr(metricsStr, 'elements');
+            const covElements   = getAttr(metricsStr, 'coveredelements');
+
+            const lines    = pct(covStmts, statements);
+            const funcs    = pct(covMethods, methods);
+            const branches = pct(covConds, conditionals);
+            const total    = pct(covElements, elements);
+
+            // Pas de seuil strict pour l'instant (coverage backend en progression)
+            const icon = (p) => p.val >= 50 ? '✅' : p.val >= 20 ? '⚠️' : '❌';
+
+            const comment = `## 📊 PHPUnit Coverage Report
+
+            | Métrique | Couverture |
+            |----------|------------|
+            | Lines / Statements | ${icon(lines)} ${lines.str} (${covStmts}/${statements}) |
+            | Functions / Methods | ${icon(funcs)} ${funcs.str} (${covMethods}/${methods}) |
+            | Branches | ${icon(branches)} ${branches.str} (${covConds}/${conditionals}) |
+            | **Total Elements** | ${icon(total)} **${total.str}** |
+
+            📦 [Télécharger le rapport HTML](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            try {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              core.warning(`Impossible de poster le commentaire coverage : ${error.message}`);
+            }
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
@@ -188,6 +332,98 @@ jobs:
           cd backend
           composer phpstan || echo "::warning::PHPStan found issues"
 
+  test-report:
+    name: Aggregate Test Results
+    runs-on: ubuntu-latest
+    needs: [tests, lint, static-analysis]
+    if: always()
+
+    steps:
+      - name: Download PHPUnit coverage
+        uses: actions/download-artifact@v7
+        continue-on-error: true
+        with:
+          name: phpunit-coverage-report
+          path: backend/
+
+      - name: Comment test summary on PR
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+
+            const testResult = '${{ needs.tests.result }}';
+            const lintResult = '${{ needs.lint.result }}';
+            const phpstanResult = '${{ needs.static-analysis.result }}';
+
+            function toStatus(result, warningLabel = '⚠️ Warnings') {
+              if (result === 'success') return '✅ Passed';
+              if (result === 'failure') return '❌ Failed';
+              if (result === 'cancelled') return '⚪ Cancelled';
+              return warningLabel;
+            }
+
+            let phpunitStatus = toStatus(testResult, '⚠️ No data');
+
+            if (testResult === 'success') {
+              const coveragePath = 'backend/coverage.xml';
+
+              if (fs.existsSync(coveragePath)) {
+                try {
+                  const xml = fs.readFileSync(coveragePath, 'utf8');
+                  const projectMatch = xml.match(/<project[^>]*>\s*<metrics\s([^>]+)\/>/);
+
+                  if (projectMatch) {
+                    const metricsStr = projectMatch[1];
+                    const attr = (name) => {
+                      const m = metricsStr.match(new RegExp(`\\b${name}="(\\d+)"`));
+                      return m ? parseInt(m[1], 10) : 0;
+                    };
+
+                    const elements = attr('elements');
+                    const coveredElements = attr('coveredelements');
+
+                    if (elements > 0) {
+                      const coveragePct = ((coveredElements / elements) * 100).toFixed(2);
+                      phpunitStatus = `✅ Passed (${coveragePct}% coverage)`;
+                    } else {
+                      phpunitStatus = '⚠️ Passed (no measurable coverage)';
+                    }
+                  } else {
+                    phpunitStatus = '⚠️ Passed (coverage unreadable)';
+                  }
+                } catch (error) {
+                  phpunitStatus = '⚠️ Passed (coverage parse error)';
+                  core.warning(`Unable to parse coverage.xml: ${error.message}`);
+                }
+              } else {
+                phpunitStatus = '⚠️ No coverage data';
+              }
+            }
+
+            const comment = `## 🧪 Backend Test Summary
+
+            | Test Suite | Status |
+            |------------|--------|
+            | PHPUnit Tests | ${phpunitStatus} |
+            | Code Style (Pint) | ${toStatus(lintResult)} |
+            | Static Analysis (PHPStan) | ${toStatus(phpstanResult)} |
+
+            📊 [View detailed coverage report](https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+            `;
+
+            try {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              core.warning(`Unable to post backend test summary comment: ${error.message}`);
+            }
+
   summary:
     name: Backend CI Summary
     runs-on: ubuntu-latest
@@ -197,8 +433,12 @@ jobs:
     steps:
       - name: CI Summary
         run: |
-          echo "## Backend CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 🧪 Backend CI Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Tests: ${{ needs.tests.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Code Style (Pint): ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Static Analysis (PHPStan): ${{ needs.static-analysis.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Statut |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| PHPUnit Tests | ${{ needs.tests.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Style (Pint) | ${{ needs.lint.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Static Analysis (PHPStan) | ${{ needs.static-analysis.result == 'success' && '✅ Passed' || '⚠️ Warnings' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 [Voir les artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY

@@ -9,6 +9,7 @@ use Omersia\Catalog\Models\TaxRate;
 use Omersia\Catalog\Models\TaxZone;
 use Omersia\Catalog\Services\TaxCalculator;
 use Omersia\Core\Models\Shop;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class TaxCalculatorTest extends TestCase
@@ -26,6 +27,7 @@ class TaxCalculatorTest extends TestCase
         $this->shop = Shop::factory()->create();
     }
 
+    #[Test]
     public function it_returns_zero_tax_when_shop_does_not_exist(): void
     {
         $result = $this->calculator->calculate(
@@ -41,6 +43,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertEmpty($result['breakdown']);
     }
 
+    #[Test]
     public function it_returns_zero_tax_when_no_tax_zone_matches(): void
     {
         $result = $this->calculator->calculate(
@@ -55,6 +58,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertNull($result['tax_zone']);
     }
 
+    #[Test]
     public function it_returns_zero_tax_when_tax_zone_has_no_active_rates(): void
     {
         $taxZone = TaxZone::factory()->create([
@@ -79,6 +83,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertEmpty($result['breakdown']);
     }
 
+    #[Test]
     public function it_calculates_simple_percentage_tax(): void
     {
         $taxZone = TaxZone::factory()->create([
@@ -115,6 +120,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertEquals(20.0, $result['breakdown'][0]['amount']);
     }
 
+    #[Test]
     public function it_calculates_tax_with_shipping(): void
     {
         $taxZone = TaxZone::factory()->create([
@@ -149,6 +155,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertEquals(2.0, $result['breakdown'][0]['shipping_tax']);
     }
 
+    #[Test]
     public function it_calculates_tax_without_taxable_shipping(): void
     {
         $taxZone = TaxZone::factory()->create([
@@ -182,6 +189,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertEquals(0.0, $result['breakdown'][0]['shipping_tax']);
     }
 
+    #[Test]
     public function it_calculates_compound_taxes(): void
     {
         $taxZone = TaxZone::factory()->create([
@@ -235,6 +243,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertEquals(10.47, $result['breakdown'][1]['amount']);
     }
 
+    #[Test]
     public function it_calculates_multiple_non_compound_taxes(): void
     {
         $taxZone = TaxZone::factory()->create([
@@ -282,6 +291,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertCount(2, $result['breakdown']);
     }
 
+    #[Test]
     public function it_respects_tax_zone_priority(): void
     {
         // Create low priority zone
@@ -330,6 +340,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertEquals($highPriorityZone->id, $result['tax_zone']->id);
     }
 
+    #[Test]
     public function it_calculates_included_tax(): void
     {
         $taxZone = TaxZone::factory()->create([
@@ -363,6 +374,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertEquals(100.0, $result['price_excluding_tax']);
     }
 
+    #[Test]
     public function it_returns_original_price_when_no_tax_for_included_tax(): void
     {
         $result = $this->calculator->calculateIncludedTax(
@@ -376,6 +388,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertEquals(120.0, $result['price_excluding_tax']);
     }
 
+    #[Test]
     public function it_uses_first_shop_when_shop_id_is_null(): void
     {
         $firstShop = Shop::first();
@@ -406,6 +419,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertEquals(10.0, $result['tax_total']);
     }
 
+    #[Test]
     public function it_rounds_tax_amounts_correctly(): void
     {
         $taxZone = TaxZone::factory()->create([
@@ -435,6 +449,7 @@ class TaxCalculatorTest extends TestCase
         $this->assertEquals(6.53, $result['tax_total']);
     }
 
+    #[Test]
     public function it_skips_inactive_tax_rates(): void
     {
         $taxZone = TaxZone::factory()->create([

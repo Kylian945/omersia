@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Core\Models\Shop;
 use Omersia\Core\Models\ShopDomain;
 use Omersia\Core\Repositories\ShopRepository;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ShopRepositoryTest extends TestCase
@@ -22,6 +23,7 @@ class ShopRepositoryTest extends TestCase
         $this->repository = new ShopRepository(new Shop);
     }
 
+    #[Test]
     public function it_can_find_shop_by_code(): void
     {
         $shop = Shop::factory()->create(['code' => 'test-shop']);
@@ -32,6 +34,7 @@ class ShopRepositoryTest extends TestCase
         $this->assertEquals('test-shop', $result->code);
     }
 
+    #[Test]
     public function it_returns_null_when_shop_code_not_found(): void
     {
         $result = $this->repository->findByCode('non-existent');
@@ -39,6 +42,7 @@ class ShopRepositoryTest extends TestCase
         $this->assertNull($result);
     }
 
+    #[Test]
     public function it_can_find_shop_by_domain(): void
     {
         $shop = Shop::factory()->create();
@@ -53,6 +57,7 @@ class ShopRepositoryTest extends TestCase
         $this->assertEquals($shop->id, $result->id);
     }
 
+    #[Test]
     public function it_returns_null_when_domain_not_found(): void
     {
         $result = $this->repository->findByDomain('non-existent.com');
@@ -60,6 +65,7 @@ class ShopRepositoryTest extends TestCase
         $this->assertNull($result);
     }
 
+    #[Test]
     public function it_finds_shop_with_multiple_domains(): void
     {
         $shop = Shop::factory()->create();
@@ -73,6 +79,7 @@ class ShopRepositoryTest extends TestCase
         $this->assertEquals($shop->id, $result2->id);
     }
 
+    #[Test]
     public function it_can_get_active_shops(): void
     {
         Shop::factory()->create(['is_active' => true]);
@@ -84,6 +91,7 @@ class ShopRepositoryTest extends TestCase
         $this->assertCount(2, $result);
     }
 
+    #[Test]
     public function it_returns_empty_collection_when_no_active_shops(): void
     {
         Shop::factory()->create(['is_active' => false]);
@@ -93,6 +101,7 @@ class ShopRepositoryTest extends TestCase
         $this->assertCount(0, $result);
     }
 
+    #[Test]
     public function it_can_get_default_shop(): void
     {
         Shop::factory()->create(['is_default' => false]);
@@ -104,6 +113,7 @@ class ShopRepositoryTest extends TestCase
         $this->assertEquals($defaultShop->id, $result->id);
     }
 
+    #[Test]
     public function it_returns_null_when_no_default_shop(): void
     {
         Shop::factory()->create(['is_default' => false]);
@@ -113,6 +123,7 @@ class ShopRepositoryTest extends TestCase
         $this->assertNull($result);
     }
 
+    #[Test]
     public function it_can_update_settings(): void
     {
         $shop = Shop::factory()->create([
@@ -130,6 +141,7 @@ class ShopRepositoryTest extends TestCase
         $this->assertEquals('New Display', $shop->fresh()->display_name);
     }
 
+    #[Test]
     public function it_only_updates_fillable_attributes(): void
     {
         $shop = Shop::factory()->create(['name' => 'Original']);
@@ -143,6 +155,7 @@ class ShopRepositoryTest extends TestCase
         $this->assertObjectNotHasProperty('non_fillable_field', $shop->fresh());
     }
 
+    #[Test]
     public function it_can_update_multiple_settings(): void
     {
         $shop = Shop::factory()->create();

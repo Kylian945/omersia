@@ -9,12 +9,14 @@ use Omersia\Catalog\Models\Order;
 use Omersia\Customer\Models\Customer;
 use Omersia\Sales\Models\Discount;
 use Omersia\Sales\Models\DiscountUsage;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class DiscountUsageTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_discount_usage(): void
     {
         $discount = Discount::factory()->create();
@@ -35,6 +37,7 @@ class DiscountUsageTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_belongs_to_discount(): void
     {
         $discount = Discount::factory()->create();
@@ -44,6 +47,7 @@ class DiscountUsageTest extends TestCase
         $this->assertEquals($discount->id, $usage->discount->id);
     }
 
+    #[Test]
     public function it_belongs_to_order(): void
     {
         $order = Order::factory()->create();
@@ -53,6 +57,7 @@ class DiscountUsageTest extends TestCase
         $this->assertEquals($order->id, $usage->order->id);
     }
 
+    #[Test]
     public function it_belongs_to_customer(): void
     {
         $customer = Customer::factory()->create();
@@ -62,6 +67,7 @@ class DiscountUsageTest extends TestCase
         $this->assertEquals($customer->id, $usage->customer->id);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $usage = new DiscountUsage;
@@ -73,6 +79,7 @@ class DiscountUsageTest extends TestCase
         $this->assertContains('usage_count', $fillable);
     }
 
+    #[Test]
     public function it_tracks_usage_count(): void
     {
         $usage = DiscountUsage::factory()->create(['usage_count' => 5]);

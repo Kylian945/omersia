@@ -7,9 +7,11 @@ namespace Omersia\Api\Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Api\DTO\OrderCreateDTO;
 use Omersia\Api\Services\OrderCreationService;
+use Omersia\Catalog\Models\Cart;
 use Omersia\Catalog\Models\Product;
 use Omersia\Catalog\Models\ShippingMethod;
 use Omersia\Customer\Models\Customer;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
@@ -37,6 +39,7 @@ class OrderCreationConcurrencyTest extends TestCase
      * Without proper sequence locking, concurrent order creation
      * could generate duplicate order numbers.
      */
+    #[Test]
     public function it_generates_unique_order_numbers_concurrently(): void
     {
         // Setup test data
@@ -48,7 +51,7 @@ class OrderCreationConcurrencyTest extends TestCase
 
         $product = Product::factory()->create([
             'price' => 10000, // 100.00 EUR in cents
-            'status' => 'active',
+            'stock_qty' => 9999,
         ]);
 
         $shippingMethod = ShippingMethod::factory()->create([
@@ -85,9 +88,10 @@ class OrderCreationConcurrencyTest extends TestCase
                     [
                         'product_id' => $product->id,
                         'variant_id' => null,
+                        'name' => 'Test Product',
                         'quantity' => 1,
-                        'price' => 100.00,
-                        'total_price' => 100.00,
+                        'unit_price' => 10000,
+                        'total_price' => 10000,
                     ],
                 ],
                 discountTotal: 0.0,
@@ -121,10 +125,11 @@ class OrderCreationConcurrencyTest extends TestCase
     /**
      * Test that orders created in parallel have sequential numbers.
      */
+    #[Test]
     public function it_creates_sequential_order_numbers(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
         $iterations = 10;
@@ -146,19 +151,21 @@ class OrderCreationConcurrencyTest extends TestCase
     /**
      * Test that updating existing draft doesn't change order number.
      */
+    #[Test]
     public function it_preserves_order_number_on_draft_update(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
+        $cart = Cart::factory()->withCustomer($customer->id)->create();
 
-        // Create initial draft order with cart_id
-        $dto1 = $this->createOrderDTO($customer, $product, $shippingMethod, 'cart-123');
+        // Create initial draft order
+        $dto1 = $this->createOrderDTO($customer, $product, $shippingMethod, $cart->id);
         $order1 = $this->orderService->createOrUpdateDraftOrder($dto1, $shippingMethod);
         $originalNumber = $order1->number;
 
-        // Update the draft (same cart_id)
-        $dto2 = $this->createOrderDTO($customer, $product, $shippingMethod, 'cart-123', 2);
+        // Update the draft (same customer, same cart, quantity 2)
+        $dto2 = $this->createOrderDTO($customer, $product, $shippingMethod, $cart->id, 2);
         $order2 = $this->orderService->createOrUpdateDraftOrder($dto2, $shippingMethod);
 
         $this->assertEquals($originalNumber, $order2->number);
@@ -168,18 +175,19 @@ class OrderCreationConcurrencyTest extends TestCase
     /**
      * Test that different carts get different order numbers.
      */
+    #[Test]
     public function it_assigns_different_numbers_to_different_carts(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
-        // Create order for cart 1
-        $dto1 = $this->createOrderDTO($customer, $product, $shippingMethod, 'cart-1');
+        // Create order 1
+        $dto1 = $this->createOrderDTO($customer, $product, $shippingMethod);
         $order1 = $this->orderService->createOrUpdateDraftOrder($dto1, $shippingMethod);
 
-        // Create order for cart 2
-        $dto2 = $this->createOrderDTO($customer, $product, $shippingMethod, 'cart-2');
+        // Create order 2
+        $dto2 = $this->createOrderDTO($customer, $product, $shippingMethod);
         $order2 = $this->orderService->createOrUpdateDraftOrder($dto2, $shippingMethod);
 
         $this->assertNotEquals($order1->number, $order2->number);
@@ -190,10 +198,11 @@ class OrderCreationConcurrencyTest extends TestCase
      * Test performance: creating 50 orders should be reasonably fast.
      * Target: < 3 seconds for 50 orders
      */
+    #[Test]
     public function it_creates_orders_efficiently(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
         $iterations = 50;
@@ -218,11 +227,12 @@ class OrderCreationConcurrencyTest extends TestCase
     /**
      * Test that order items are created correctly.
      */
+    #[Test]
     public function it_creates_order_items_correctly(): void
     {
         $customer = Customer::factory()->create();
-        $product1 = Product::factory()->create(['price' => 10000]);
-        $product2 = Product::factory()->create(['price' => 20000]);
+        $product1 = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
+        $product2 = Product::factory()->create(['price' => 20000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
         $dto = new OrderCreateDTO(
@@ -239,16 +249,18 @@ class OrderCreationConcurrencyTest extends TestCase
                 [
                     'product_id' => $product1->id,
                     'variant_id' => null,
+                    'name' => 'Test Product 1',
                     'quantity' => 2,
-                    'price' => 100.00,
-                    'total_price' => 200.00,
+                    'unit_price' => 10000,
+                    'total_price' => 20000,
                 ],
                 [
                     'product_id' => $product2->id,
                     'variant_id' => null,
+                    'name' => 'Test Product 2',
                     'quantity' => 1,
-                    'price' => 200.00,
-                    'total_price' => 200.00,
+                    'unit_price' => 20000,
+                    'total_price' => 20000,
                 ],
             ],
             discountTotal: 0.0,
@@ -259,17 +271,18 @@ class OrderCreationConcurrencyTest extends TestCase
         $order = $this->orderService->createOrUpdateDraftOrder($dto, $shippingMethod);
 
         $this->assertCount(2, $order->items);
-        $this->assertEquals(400.00, $order->subtotal);
-        $this->assertEquals(410.00, $order->total);
+        $this->assertEquals(40000, $order->subtotal);
+        $this->assertEquals(40010, $order->total);
     }
 
     /**
      * Test that concurrent creation doesn't cause database errors.
      */
+    #[Test]
     public function it_handles_concurrent_creation_without_errors(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
         $iterations = 20;
@@ -293,10 +306,11 @@ class OrderCreationConcurrencyTest extends TestCase
     /**
      * Test that order number format is consistent.
      */
+    #[Test]
     public function it_maintains_consistent_order_number_format(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
         $iterations = 15;
@@ -326,7 +340,7 @@ class OrderCreationConcurrencyTest extends TestCase
         Customer $customer,
         Product $product,
         ShippingMethod $shippingMethod,
-        ?string $cartId = null,
+        ?int $cartId = null,
         int $quantity = 1
     ): OrderCreateDTO {
         return new OrderCreateDTO(
@@ -353,9 +367,10 @@ class OrderCreationConcurrencyTest extends TestCase
                 [
                     'product_id' => $product->id,
                     'variant_id' => null,
+                    'name' => 'Test Product',
                     'quantity' => $quantity,
-                    'price' => 100.00,
-                    'total_price' => 100.00 * $quantity,
+                    'unit_price' => 10000,
+                    'total_price' => 10000 * $quantity,
                 ],
             ],
             discountTotal: 0.0,

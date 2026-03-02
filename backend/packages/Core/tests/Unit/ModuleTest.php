@@ -6,12 +6,14 @@ namespace Omersia\Core\Tests\Unit;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Core\Models\Module;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ModuleTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_module(): void
     {
         $module = Module::create([
@@ -30,6 +32,7 @@ class ModuleTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $module = new Module;
@@ -42,6 +45,7 @@ class ModuleTest extends TestCase
         $this->assertContains('manifest', $fillable);
     }
 
+    #[Test]
     public function it_casts_enabled_to_boolean(): void
     {
         $module = Module::create([
@@ -55,6 +59,7 @@ class ModuleTest extends TestCase
         $this->assertTrue($module->enabled);
     }
 
+    #[Test]
     public function it_casts_manifest_to_array(): void
     {
         $module = Module::create([
@@ -70,6 +75,7 @@ class ModuleTest extends TestCase
         $this->assertEquals('A test module', $module->manifest['description']);
     }
 
+    #[Test]
     public function it_can_store_complex_manifest(): void
     {
         $manifest = [
@@ -93,6 +99,7 @@ class ModuleTest extends TestCase
         $this->assertEquals($manifest, $module->fresh()->manifest);
     }
 
+    #[Test]
     public function it_can_be_disabled(): void
     {
         $module = Module::create([
@@ -105,6 +112,7 @@ class ModuleTest extends TestCase
         $this->assertFalse($module->enabled);
     }
 
+    #[Test]
     public function it_stores_version_string(): void
     {
         $module = Module::create([

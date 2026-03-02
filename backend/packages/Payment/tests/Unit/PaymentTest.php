@@ -8,12 +8,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Catalog\Models\Order;
 use Omersia\Payment\Models\Payment;
 use Omersia\Payment\Models\PaymentProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class PaymentTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_payment(): void
     {
         $order = Order::factory()->create();
@@ -36,6 +38,7 @@ class PaymentTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_belongs_to_order(): void
     {
         $order = Order::factory()->create();
@@ -45,6 +48,7 @@ class PaymentTest extends TestCase
         $this->assertEquals($order->id, $payment->order->id);
     }
 
+    #[Test]
     public function it_belongs_to_provider(): void
     {
         $provider = PaymentProvider::factory()->create();
@@ -54,6 +58,7 @@ class PaymentTest extends TestCase
         $this->assertEquals($provider->id, $payment->provider->id);
     }
 
+    #[Test]
     public function it_casts_meta_to_array(): void
     {
         $payment = Payment::factory()->create([
@@ -64,6 +69,7 @@ class PaymentTest extends TestCase
         $this->assertEquals('txn_123', $payment->meta['transaction_id']);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $payment = new Payment;
@@ -79,6 +85,7 @@ class PaymentTest extends TestCase
         $this->assertContains('meta', $fillable);
     }
 
+    #[Test]
     public function it_stores_provider_payment_id(): void
     {
         $payment = Payment::factory()->create([
@@ -88,6 +95,7 @@ class PaymentTest extends TestCase
         $this->assertEquals('ch_abc123xyz', $payment->provider_payment_id);
     }
 
+    #[Test]
     public function it_stores_payment_status(): void
     {
         $payment = Payment::factory()->create(['status' => 'completed']);
@@ -95,6 +103,7 @@ class PaymentTest extends TestCase
         $this->assertEquals('completed', $payment->status);
     }
 
+    #[Test]
     public function it_stores_currency(): void
     {
         $payment = Payment::factory()->create(['currency' => 'USD']);
@@ -102,6 +111,7 @@ class PaymentTest extends TestCase
         $this->assertEquals('USD', $payment->currency);
     }
 
+    #[Test]
     public function it_can_store_complex_meta(): void
     {
         $meta = [

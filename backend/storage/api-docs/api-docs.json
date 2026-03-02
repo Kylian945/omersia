@@ -1572,10 +1572,11 @@
                                                         "example": "Chemises"
                                                     },
                                                     "type": {
-                                                        "description": "Type de l'item: category = lié à une catégorie, link = URL libre, text = texte seul",
+                                                        "description": "Type de l'item: category = lié à une catégorie, cms_page = lié à une page CMS, link = URL libre, text = texte seul",
                                                         "type": "string",
                                                         "enum": [
                                                             "category",
+                                                            "cms_page",
                                                             "link",
                                                             "text"
                                                         ],
@@ -2439,7 +2440,7 @@
                 "tags": [
                     "Paiement"
                 ],
-                "summary": "Créer une intention de paiement (Stripe)",
+                "summary": "Créer une intention de paiement",
                 "operationId": "869f4046b94420f1ae42696cba896e29",
                 "requestBody": {
                     "required": true,

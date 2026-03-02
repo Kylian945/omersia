@@ -2,7 +2,8 @@
   "name": "omersia/cms",
   "autoload": {
     "psr-4": {
-      "Omersia\\CMS\\": "src/"
+      "Omersia\\CMS\\": "src/",
+      "Omersia\\CMS\\Database\\Factories\\": "database/factories/"
     }
   },
   "extra": {

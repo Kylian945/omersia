@@ -7,6 +7,7 @@ use Omersia\Api\DTO\DiscountApplicationDTO;
 use Omersia\Api\Services\DiscountEvaluationService;
 use Omersia\Customer\Models\Customer;
 use Omersia\Sales\Models\Discount;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 class DiscountEvaluationServiceTest extends TestCase
@@ -19,6 +20,7 @@ class DiscountEvaluationServiceTest extends TestCase
         $this->service = new DiscountEvaluationService;
     }
 
+    #[Test]
     public function it_evaluates_order_discount_with_percentage()
     {
         // Créer un mock de Discount
@@ -58,6 +60,7 @@ class DiscountEvaluationServiceTest extends TestCase
         $this->assertEquals(25.0, $result->totalDiscount);
     }
 
+    #[Test]
     public function it_fails_when_customer_not_provided_for_group_discount()
     {
         // Créer un mock de CustomerGroup collection
@@ -93,6 +96,7 @@ class DiscountEvaluationServiceTest extends TestCase
         $this->assertStringContainsString('réservé à certains clients', $result->message);
     }
 
+    #[Test]
     public function it_evaluates_product_discount_with_fixed_amount()
     {
         // Créer un mock de Discount
@@ -134,6 +138,7 @@ class DiscountEvaluationServiceTest extends TestCase
         $this->assertCount(2, $result->lineAdjustments);
     }
 
+    #[Test]
     public function it_fails_when_minimum_subtotal_not_reached()
     {
         // Créer un mock de Discount
@@ -166,6 +171,7 @@ class DiscountEvaluationServiceTest extends TestCase
         $this->assertStringContainsString('Montant minimum', $result->message);
     }
 
+    #[Test]
     public function it_evaluates_buy_x_get_y_discount()
     {
         // Créer un mock de Discount avec toutes les propriétés nécessaires
@@ -183,6 +189,7 @@ class DiscountEvaluationServiceTest extends TestCase
         $discount->code = 'BUY2GET1';
         $discount->min_subtotal = null;
         $discount->min_quantity = null;
+        $discount->setRelation('usages', collect([]));
 
         // Créer des items (6 items = 2 groupes complets)
         $items = [

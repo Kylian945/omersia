@@ -9,9 +9,14 @@ use Illuminate\Http\Request;
 use Omersia\Admin\Config\BuilderWidgets;
 use Omersia\CMS\Models\Page;
 use Omersia\CMS\Models\PageTranslation;
+use Omersia\CMS\Services\PageService;
 
 class PageBuilderController extends Controller
 {
+    public function __construct(
+        private readonly PageService $pageService,
+    ) {}
+
     public function edit(Page $page, Request $request)
     {
         $this->authorize('pages.update');
@@ -50,14 +55,10 @@ class PageBuilderController extends Controller
             'content_json' => ['required', 'string'],
         ]);
 
+        /** @var array<string, mixed> $decoded */
         $decoded = json_decode($request->input('content_json'), true);
 
-        $translation = $page->translations()->firstOrCreate(
-            ['locale' => $locale],
-            ['title' => $page->slug ?? 'Page', 'slug' => $page->slug ?? 'page-'.$page->id]
-        );
-
-        $translation->update(['content_json' => $decoded]);
+        $this->pageService->saveBuilderLayout($page, $decoded, $locale);
 
         return redirect()
             ->route('pages.builder', ['page' => $page->id, 'locale' => $locale])
