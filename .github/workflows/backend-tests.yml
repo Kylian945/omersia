@@ -18,6 +18,8 @@ on:
 
 permissions:
   contents: read
+  pull-requests: write
+  checks: write
 
 jobs:
   tests:
@@ -103,7 +105,7 @@ jobs:
       - name: Run PHPUnit tests
         run: |
           cd backend
-          vendor/bin/phpunit --coverage-clover coverage.xml
+          vendor/bin/phpunit
         env:
           APP_ENV: testing
           DB_CONNECTION: mysql
@@ -112,6 +114,109 @@ jobs:
           DB_DATABASE: testing
           DB_USERNAME: root
           DB_PASSWORD: password
+
+      - name: Upload test results (JUnit)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phpunit-junit-report
+          path: backend/junit.xml
+          retention-days: 30
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phpunit-coverage-report
+          path: |
+            backend/coverage.xml
+            backend/coverage-report/
+          retention-days: 30
+
+      - name: Publish JUnit test report
+        uses: mikepenz/action-junit-report@v4
+        if: always()
+        with:
+          report_paths: 'backend/junit.xml'
+          check_name: 'PHPUnit Test Results'
+          fail_on_failure: true
+          require_tests: true
+
+      - name: Comment coverage on PR
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false && github.actor != 'dependabot[bot]'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const coveragePath = 'backend/coverage.xml';
+
+            if (!fs.existsSync(coveragePath)) {
+              console.log('Coverage report not found');
+              return;
+            }
+
+            const xml = fs.readFileSync(coveragePath, 'utf8');
+
+            // Extraire les métriques projet depuis le Clover XML
+            // Le premier <metrics> après <project> est le total du projet
+            const projectMatch = xml.match(/<project[^>]*>\s*<metrics\s([^>]+)\/>/);
+            if (!projectMatch) {
+              console.log('Impossible de parser les métriques de coverage.xml');
+              return;
+            }
+
+            const metricsStr = projectMatch[1];
+
+            function getAttr(str, name) {
+              const m = str.match(new RegExp(`\\b${name}="(\\d+)"`));
+              return m ? parseInt(m[1], 10) : 0;
+            }
+
+            function pct(covered, total) {
+              if (total === 0) return { val: 0, str: 'N/A' };
+              const p = (covered / total) * 100;
+              return { val: p, str: p.toFixed(2) + '%' };
+            }
+
+            const statements    = getAttr(metricsStr, 'statements');
+            const covStmts      = getAttr(metricsStr, 'coveredstatements');
+            const methods       = getAttr(metricsStr, 'methods');
+            const covMethods    = getAttr(metricsStr, 'coveredmethods');
+            const conditionals  = getAttr(metricsStr, 'conditionals');
+            const covConds      = getAttr(metricsStr, 'coveredconditionals');
+            const elements      = getAttr(metricsStr, 'elements');
+            const covElements   = getAttr(metricsStr, 'coveredelements');
+
+            const lines    = pct(covStmts, statements);
+            const funcs    = pct(covMethods, methods);
+            const branches = pct(covConds, conditionals);
+            const total    = pct(covElements, elements);
+
+            // Pas de seuil strict pour l'instant (coverage backend en progression)
+            const icon = (p) => p.val >= 50 ? '✅' : p.val >= 20 ? '⚠️' : '❌';
+
+            const comment = `## 📊 PHPUnit Coverage Report
+
+            | Métrique | Couverture |
+            |----------|------------|
+            | Lines / Statements | ${icon(lines)} ${lines.str} (${covStmts}/${statements}) |
+            | Functions / Methods | ${icon(funcs)} ${funcs.str} (${covMethods}/${methods}) |
+            | Branches | ${icon(branches)} ${branches.str} (${covConds}/${conditionals}) |
+            | **Total Elements** | ${icon(total)} **${total.str}** |
+
+            📦 [Télécharger le rapport HTML](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            `;
+
+            try {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              core.warning(`Impossible de poster le commentaire coverage : ${error.message}`);
+            }
 
       - name: Upload coverage reports to Codecov
         uses: codecov/codecov-action@v4
@@ -197,8 +302,12 @@ jobs:
     steps:
       - name: CI Summary
         run: |
-          echo "## Backend CI Summary" >> $GITHUB_STEP_SUMMARY
+          echo "## 🧪 Backend CI Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Tests: ${{ needs.tests.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Code Style (Pint): ${{ needs.lint.result }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Static Analysis (PHPStan): ${{ needs.static-analysis.result }}" >> $GITHUB_STEP_SUMMARY
+          echo "| Job | Statut |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| PHPUnit Tests | ${{ needs.tests.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Code Style (Pint) | ${{ needs.lint.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Static Analysis (PHPStan) | ${{ needs.static-analysis.result == 'success' && '✅ Passed' || '⚠️ Warnings' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 [Voir les artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})" >> $GITHUB_STEP_SUMMARY

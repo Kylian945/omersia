@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omersia\CMS\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -22,6 +23,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class PageTranslation extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Omersia\CMS\Database\Factories\PageTranslationFactory
+    {
+        return \Omersia\CMS\Database\Factories\PageTranslationFactory::new();
+    }
+
     protected $table = 'cms_page_translations';
 
     protected $fillable = [

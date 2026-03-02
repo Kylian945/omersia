@@ -36,6 +36,9 @@
         <testsuite name="Api">
             <directory>packages/Api/tests</directory>
         </testsuite>
+        <testsuite name="Cms">
+            <directory>packages/Cms/tests</directory>
+        </testsuite>
     </testsuites>
     
     <source>
@@ -64,7 +67,11 @@
             <clover outputFile="coverage.xml"/>
         </report>
     </coverage>
-    
+
+    <logging>
+        <junit outputFile="junit.xml"/>
+    </logging>
+
     <php>
         <env name="APP_ENV" value="testing"/>
         <env name="APP_DEBUG" value="true"/>

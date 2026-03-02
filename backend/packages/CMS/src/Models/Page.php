@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Omersia\CMS\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -17,6 +18,13 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Page extends Model
 {
+    use HasFactory;
+
+    protected static function newFactory(): \Omersia\CMS\Database\Factories\PageFactory
+    {
+        return \Omersia\CMS\Database\Factories\PageFactory::new();
+    }
+
     protected $table = 'cms_pages';
 
     protected $fillable = [
