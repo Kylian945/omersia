@@ -7,12 +7,14 @@ namespace Omersia\Sales\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Catalog\Models\Order;
 use Omersia\Sales\Mail\OrderConfirmationMail;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class OrderConfirmationMailTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_builds_order_confirmation_mail(): void
     {
         $order = Order::factory()->create(['number' => 'ORD-123']);
@@ -22,6 +24,7 @@ class OrderConfirmationMailTest extends TestCase
         $this->assertEquals($order->id, $mailable->order->id);
     }
 
+    #[Test]
     public function it_has_correct_subject_with_order_number(): void
     {
         $order = Order::factory()->create(['number' => 'ORD-456']);
@@ -33,6 +36,7 @@ class OrderConfirmationMailTest extends TestCase
         $this->assertStringContainsString('ORD-456', $built->subject);
     }
 
+    #[Test]
     public function it_uses_order_confirmation_view(): void
     {
         $order = Order::factory()->create();
@@ -43,6 +47,7 @@ class OrderConfirmationMailTest extends TestCase
         $this->assertEquals('emails.order-confirmation', $built->view);
     }
 
+    #[Test]
     public function it_passes_order_data_to_view(): void
     {
         $order = Order::factory()->create([

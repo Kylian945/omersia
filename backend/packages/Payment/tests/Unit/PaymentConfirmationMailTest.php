@@ -8,12 +8,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Catalog\Models\Order;
 use Omersia\Payment\Mail\PaymentConfirmationMail;
 use Omersia\Payment\Models\Payment;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class PaymentConfirmationMailTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_builds_payment_confirmation_mail(): void
     {
         $order = Order::factory()->create(['number' => 'ORD-123']);
@@ -25,6 +27,7 @@ class PaymentConfirmationMailTest extends TestCase
         $this->assertEquals($payment->id, $mailable->payment->id);
     }
 
+    #[Test]
     public function it_has_correct_subject_with_order_number(): void
     {
         $order = Order::factory()->create(['number' => 'ORD-456']);
@@ -37,6 +40,7 @@ class PaymentConfirmationMailTest extends TestCase
         $this->assertStringContainsString('ORD-456', $built->subject);
     }
 
+    #[Test]
     public function it_uses_payment_confirmation_view(): void
     {
         $order = Order::factory()->create();
@@ -48,6 +52,7 @@ class PaymentConfirmationMailTest extends TestCase
         $this->assertEquals('emails.payment-confirmation', $built->view);
     }
 
+    #[Test]
     public function it_passes_order_and_payment_to_view(): void
     {
         $order = Order::factory()->create(['number' => 'ORD-789']);

@@ -8,6 +8,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Request;
 use Omersia\Catalog\Models\Product;
 use Omersia\Catalog\Services\ProductVariantService;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ProductVariantServiceTest extends TestCase
@@ -22,6 +23,7 @@ class ProductVariantServiceTest extends TestCase
         $this->service = new ProductVariantService;
     }
 
+    #[Test]
     public function it_can_sync_options_and_variants(): void
     {
         // Arrange
@@ -82,6 +84,7 @@ class ProductVariantServiceTest extends TestCase
         $this->assertEquals(10, $variant1->stock_qty);
     }
 
+    #[Test]
     public function it_deletes_existing_options_and_variants_before_sync(): void
     {
         // Arrange
@@ -126,6 +129,7 @@ class ProductVariantServiceTest extends TestCase
         $this->assertEquals('NEW-SKU', $product->variants->first()->sku);
     }
 
+    #[Test]
     public function it_skips_options_with_missing_name_or_values(): void
     {
         // Arrange
@@ -162,6 +166,7 @@ class ProductVariantServiceTest extends TestCase
         $this->assertEquals('ValidOption', $product->options->first()->name);
     }
 
+    #[Test]
     public function it_creates_variants_with_correct_attributes(): void
     {
         // Arrange
@@ -200,6 +205,7 @@ class ProductVariantServiceTest extends TestCase
         $this->assertTrue($variant->manage_stock);
     }
 
+    #[Test]
     public function it_updates_existing_variant_when_id_is_provided(): void
     {
         $product = Product::factory()->create(['type' => 'variant']);
@@ -263,6 +269,7 @@ class ProductVariantServiceTest extends TestCase
         $this->assertEquals('L', $updated->values->first()?->value);
     }
 
+    #[Test]
     public function it_assigns_variant_image_from_image_key_mapping(): void
     {
         $product = Product::factory()->create(['type' => 'variant']);

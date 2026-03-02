@@ -8,12 +8,14 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Core\Models\Shop;
 use Omersia\Customer\Models\Customer;
 use Omersia\Customer\Models\CustomerGroup;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class CustomerGroupTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_customer_group(): void
     {
         $shop = Shop::factory()->create();
@@ -32,6 +34,7 @@ class CustomerGroupTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_belongs_to_shop(): void
     {
         $shop = Shop::factory()->create();
@@ -41,6 +44,7 @@ class CustomerGroupTest extends TestCase
         $this->assertEquals($shop->id, $group->shop->id);
     }
 
+    #[Test]
     public function it_belongs_to_many_customers(): void
     {
         $group = CustomerGroup::factory()->create();
@@ -51,6 +55,7 @@ class CustomerGroupTest extends TestCase
         $this->assertEquals($customer->id, $group->customers->first()->id);
     }
 
+    #[Test]
     public function it_can_have_multiple_customers(): void
     {
         $group = CustomerGroup::factory()->create();
@@ -60,6 +65,7 @@ class CustomerGroupTest extends TestCase
         $this->assertCount(5, $group->customers);
     }
 
+    #[Test]
     public function it_casts_is_default_to_boolean(): void
     {
         $group = CustomerGroup::factory()->create(['is_default' => 1]);
@@ -68,6 +74,7 @@ class CustomerGroupTest extends TestCase
         $this->assertTrue($group->is_default);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $group = new CustomerGroup;
@@ -80,6 +87,7 @@ class CustomerGroupTest extends TestCase
         $this->assertContains('is_default', $fillable);
     }
 
+    #[Test]
     public function it_stores_description(): void
     {
         $group = CustomerGroup::factory()->create([
@@ -89,6 +97,7 @@ class CustomerGroupTest extends TestCase
         $this->assertEquals('Special discount group', $group->description);
     }
 
+    #[Test]
     public function it_stores_code(): void
     {
         $group = CustomerGroup::factory()->create([

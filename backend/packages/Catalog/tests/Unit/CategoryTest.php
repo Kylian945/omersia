@@ -9,12 +9,14 @@ use Omersia\Catalog\Models\Category;
 use Omersia\Catalog\Models\CategoryTranslation;
 use Omersia\Catalog\Models\Product;
 use Omersia\Core\Models\Shop;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class CategoryTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_category(): void
     {
         $shop = Shop::factory()->create();
@@ -32,6 +34,7 @@ class CategoryTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_can_have_parent_category(): void
     {
         $parent = Category::factory()->create();
@@ -41,6 +44,7 @@ class CategoryTest extends TestCase
         $this->assertEquals($parent->id, $child->parent->id);
     }
 
+    #[Test]
     public function it_can_have_children_categories(): void
     {
         $parent = Category::factory()->create();
@@ -49,6 +53,7 @@ class CategoryTest extends TestCase
         $this->assertCount(3, $parent->children);
     }
 
+    #[Test]
     public function it_has_translations(): void
     {
         $category = Category::factory()->create();
@@ -58,6 +63,7 @@ class CategoryTest extends TestCase
         $this->assertCount(1, $category->translations);
     }
 
+    #[Test]
     public function it_can_get_translation_by_locale(): void
     {
         $category = Category::factory()->create();
@@ -73,6 +79,7 @@ class CategoryTest extends TestCase
         $this->assertEquals('Catégorie Test', $translation->name);
     }
 
+    #[Test]
     public function it_belongs_to_many_products(): void
     {
         $category = Category::factory()->create();
@@ -83,6 +90,7 @@ class CategoryTest extends TestCase
         $this->assertEquals($product->id, $category->products->first()->id);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $category = new Category;
@@ -94,6 +102,7 @@ class CategoryTest extends TestCase
         $this->assertContains('position', $fillable);
     }
 
+    #[Test]
     public function it_can_create_nested_categories(): void
     {
         $grandParent = Category::factory()->create();
@@ -104,6 +113,7 @@ class CategoryTest extends TestCase
         $this->assertEquals($parent->id, $child->parent->id);
     }
 
+    #[Test]
     public function it_can_have_multiple_products(): void
     {
         $category = Category::factory()->create();

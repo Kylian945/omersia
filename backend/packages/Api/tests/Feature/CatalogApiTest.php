@@ -107,7 +107,7 @@ class CatalogApiTest extends TestCase
 
         $other = $this->createCategory($shop, 'autre');
 
-        $response = $this->getJson('/api/v1/categories?locale=fr&parent_only=true', $this->apiHeaders());
+        $response = $this->getJson('/api/v1/categories?locale=fr&parent_only=1', $this->apiHeaders());
 
         $response->assertStatus(200);
         $response->assertJsonCount(1, 'categories');

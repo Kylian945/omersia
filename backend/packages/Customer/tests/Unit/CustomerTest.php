@@ -10,12 +10,14 @@ use Omersia\Core\Models\Shop;
 use Omersia\Customer\Models\Address;
 use Omersia\Customer\Models\Customer;
 use Omersia\Customer\Models\CustomerGroup;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class CustomerTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_customer(): void
     {
         $shop = Shop::factory()->create();
@@ -36,6 +38,7 @@ class CustomerTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_belongs_to_shop(): void
     {
         $shop = Shop::factory()->create();
@@ -45,6 +48,7 @@ class CustomerTest extends TestCase
         $this->assertEquals($shop->id, $customer->shop->id);
     }
 
+    #[Test]
     public function it_belongs_to_many_groups(): void
     {
         $customer = Customer::factory()->create();
@@ -55,6 +59,7 @@ class CustomerTest extends TestCase
         $this->assertEquals($group->id, $customer->groups->first()->id);
     }
 
+    #[Test]
     public function it_has_fullname_attribute(): void
     {
         $customer = Customer::factory()->create([
@@ -65,6 +70,7 @@ class CustomerTest extends TestCase
         $this->assertEquals('Jane Smith', $customer->fullname);
     }
 
+    #[Test]
     public function it_returns_email_when_no_name(): void
     {
         $customer = Customer::factory()->create([
@@ -76,6 +82,7 @@ class CustomerTest extends TestCase
         $this->assertEquals('test@example.com', $customer->fullname);
     }
 
+    #[Test]
     public function it_has_orders(): void
     {
         $customer = Customer::factory()->create();
@@ -91,6 +98,7 @@ class CustomerTest extends TestCase
         $this->assertCount(2, $customer->orders);
     }
 
+    #[Test]
     public function it_calculates_orders_total(): void
     {
         $customer = Customer::factory()->create();
@@ -108,6 +116,7 @@ class CustomerTest extends TestCase
         $this->assertEquals(150.00, $customer->ordersTotal());
     }
 
+    #[Test]
     public function it_has_addresses(): void
     {
         $customer = Customer::factory()->create();
@@ -116,6 +125,7 @@ class CustomerTest extends TestCase
         $this->assertCount(3, $customer->addresses);
     }
 
+    #[Test]
     public function it_has_default_billing_address(): void
     {
         $customer = Customer::factory()->create();
@@ -128,6 +138,7 @@ class CustomerTest extends TestCase
         $this->assertEquals($billingAddress->id, $customer->defaultBillingAddress->id);
     }
 
+    #[Test]
     public function it_has_default_shipping_address(): void
     {
         $customer = Customer::factory()->create();
@@ -140,6 +151,7 @@ class CustomerTest extends TestCase
         $this->assertEquals($shippingAddress->id, $customer->defaultShippingAddress->id);
     }
 
+    #[Test]
     public function it_hides_password_attribute(): void
     {
         $customer = Customer::factory()->create(['password' => bcrypt('secret')]);
@@ -149,6 +161,7 @@ class CustomerTest extends TestCase
         $this->assertArrayNotHasKey('password', $array);
     }
 
+    #[Test]
     public function it_casts_is_active_to_boolean(): void
     {
         $customer = Customer::factory()->create(['is_active' => 1]);
@@ -157,6 +170,7 @@ class CustomerTest extends TestCase
         $this->assertTrue($customer->is_active);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $customer = new Customer;

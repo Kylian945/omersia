@@ -27,7 +27,13 @@ CLAUDE.md
 # Themes
 /theme-build
 /theme-zips
+
+# Scripts
 scripts/generate-theme-presets.mjs
+scripts/jira-import.py
+
+# Docs
+/docs
 
 # Results tests
 storefront/test-results

@@ -9,12 +9,14 @@ use Omersia\Catalog\Models\Category;
 use Omersia\Catalog\Models\Product;
 use Omersia\Catalog\Models\ProductTranslation;
 use Omersia\Core\Models\Shop;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ProductTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_product(): void
     {
         $shop = Shop::factory()->create();
@@ -34,6 +36,7 @@ class ProductTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_belongs_to_shop(): void
     {
         $shop = Shop::factory()->create();
@@ -43,6 +46,7 @@ class ProductTest extends TestCase
         $this->assertEquals($shop->id, $product->shop->id);
     }
 
+    #[Test]
     public function it_has_translations(): void
     {
         $product = Product::factory()->create();
@@ -52,6 +56,7 @@ class ProductTest extends TestCase
         $this->assertCount(1, $product->translations);
     }
 
+    #[Test]
     public function it_can_get_translation_by_locale(): void
     {
         $product = Product::factory()->create();
@@ -67,6 +72,7 @@ class ProductTest extends TestCase
         $this->assertEquals('Produit Test', $translation->name);
     }
 
+    #[Test]
     public function it_belongs_to_many_categories(): void
     {
         $product = Product::factory()->create();
@@ -77,6 +83,7 @@ class ProductTest extends TestCase
         $this->assertEquals($category->id, $product->categories->first()->id);
     }
 
+    #[Test]
     public function it_has_images(): void
     {
         $product = Product::factory()->create();
@@ -87,6 +94,7 @@ class ProductTest extends TestCase
         $this->assertCount(3, $product->fresh()->images);
     }
 
+    #[Test]
     public function it_has_main_image(): void
     {
         $product = Product::factory()->create();
@@ -100,6 +108,7 @@ class ProductTest extends TestCase
         $this->assertEquals($mainImage->id, $product->fresh()->mainImage->id);
     }
 
+    #[Test]
     public function it_gets_main_image_url_attribute(): void
     {
         $product = Product::factory()->create();
@@ -112,6 +121,7 @@ class ProductTest extends TestCase
         $this->assertStringContainsString('images/main.jpg', $product->fresh()->main_image_url);
     }
 
+    #[Test]
     public function it_returns_first_image_when_no_main_image(): void
     {
         $product = Product::factory()->create();
@@ -124,6 +134,7 @@ class ProductTest extends TestCase
         $this->assertStringContainsString('images/first.jpg', $product->fresh()->main_image_url);
     }
 
+    #[Test]
     public function it_has_related_products(): void
     {
         $product = Product::factory()->create();
@@ -133,6 +144,7 @@ class ProductTest extends TestCase
         $this->assertCount(1, $product->relatedProducts);
     }
 
+    #[Test]
     public function it_has_options(): void
     {
         $product = Product::factory()->create();
@@ -142,6 +154,7 @@ class ProductTest extends TestCase
         $this->assertCount(2, $product->fresh()->options);
     }
 
+    #[Test]
     public function it_has_variants(): void
     {
         $product = Product::factory()->create(['type' => 'variant']);
@@ -152,6 +165,7 @@ class ProductTest extends TestCase
         $this->assertCount(3, $product->fresh()->variants);
     }
 
+    #[Test]
     public function it_knows_if_has_variants(): void
     {
         $variantProduct = Product::factory()->create(['type' => 'variant']);
@@ -161,6 +175,7 @@ class ProductTest extends TestCase
         $this->assertFalse($simpleProduct->hasVariants());
     }
 
+    #[Test]
     public function it_casts_is_active_to_boolean(): void
     {
         $product = Product::factory()->create(['is_active' => 1]);
@@ -169,6 +184,7 @@ class ProductTest extends TestCase
         $this->assertTrue($product->is_active);
     }
 
+    #[Test]
     public function it_casts_manage_stock_to_boolean(): void
     {
         $product = Product::factory()->create(['manage_stock' => 1]);
@@ -177,6 +193,7 @@ class ProductTest extends TestCase
         $this->assertTrue($product->manage_stock);
     }
 
+    #[Test]
     public function it_casts_price_to_float(): void
     {
         $product = Product::factory()->create(['price' => '19.99']);
@@ -185,6 +202,7 @@ class ProductTest extends TestCase
         $this->assertEquals(19.99, $product->price);
     }
 
+    #[Test]
     public function it_casts_compare_at_price_to_float(): void
     {
         $product = Product::factory()->create(['compare_at_price' => '29.99']);
@@ -193,6 +211,7 @@ class ProductTest extends TestCase
         $this->assertEquals(29.99, $product->compare_at_price);
     }
 
+    #[Test]
     public function it_should_be_searchable_when_active(): void
     {
         $product = Product::factory()->create(['is_active' => true]);
@@ -200,6 +219,7 @@ class ProductTest extends TestCase
         $this->assertTrue($product->shouldBeSearchable());
     }
 
+    #[Test]
     public function it_should_not_be_searchable_when_inactive(): void
     {
         $product = Product::factory()->create(['is_active' => false]);

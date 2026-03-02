@@ -7,12 +7,14 @@ namespace Omersia\Customer\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Customer\Models\Address;
 use Omersia\Customer\Models\Customer;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class AddressTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_address(): void
     {
         $customer = Customer::factory()->create();
@@ -34,6 +36,7 @@ class AddressTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_belongs_to_customer(): void
     {
         $customer = Customer::factory()->create();
@@ -43,6 +46,7 @@ class AddressTest extends TestCase
         $this->assertEquals($customer->id, $address->customer->id);
     }
 
+    #[Test]
     public function it_casts_is_default_billing_to_boolean(): void
     {
         $address = Address::factory()->create(['is_default_billing' => 1]);
@@ -51,6 +55,7 @@ class AddressTest extends TestCase
         $this->assertTrue($address->is_default_billing);
     }
 
+    #[Test]
     public function it_casts_is_default_shipping_to_boolean(): void
     {
         $address = Address::factory()->create(['is_default_shipping' => 1]);
@@ -59,6 +64,7 @@ class AddressTest extends TestCase
         $this->assertTrue($address->is_default_shipping);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $address = new Address;
@@ -77,6 +83,7 @@ class AddressTest extends TestCase
         $this->assertContains('is_default_shipping', $fillable);
     }
 
+    #[Test]
     public function it_can_store_label(): void
     {
         $address = Address::factory()->create([
@@ -86,6 +93,7 @@ class AddressTest extends TestCase
         $this->assertEquals('Home', $address->label);
     }
 
+    #[Test]
     public function it_can_store_state(): void
     {
         $address = Address::factory()->create([
@@ -95,6 +103,7 @@ class AddressTest extends TestCase
         $this->assertEquals('Île-de-France', $address->state);
     }
 
+    #[Test]
     public function it_can_store_second_address_line(): void
     {
         $address = Address::factory()->create([

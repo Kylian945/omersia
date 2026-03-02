@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Omersia\Catalog\Models\Product;
 use Omersia\Catalog\Models\ProductImage;
 use Omersia\Catalog\Services\ProductImageService;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ProductImageServiceTest extends TestCase
@@ -25,6 +26,7 @@ class ProductImageServiceTest extends TestCase
         Storage::fake('public');
     }
 
+    #[Test]
     public function it_can_upload_images_for_a_product(): void
     {
         // Arrange
@@ -44,6 +46,7 @@ class ProductImageServiceTest extends TestCase
         $this->assertFalse($images[1]->is_main);
     }
 
+    #[Test]
     public function it_ensures_first_image_is_main_if_none_specified(): void
     {
         // Arrange
@@ -60,6 +63,7 @@ class ProductImageServiceTest extends TestCase
         $this->assertTrue($images[0]->fresh()->is_main);
     }
 
+    #[Test]
     public function it_can_upload_additional_images(): void
     {
         // Arrange
@@ -85,6 +89,7 @@ class ProductImageServiceTest extends TestCase
         $this->assertFalse($createdImages['new-0']->is_main);
     }
 
+    #[Test]
     public function it_can_set_main_image_from_existing_image(): void
     {
         // Arrange
@@ -110,6 +115,7 @@ class ProductImageServiceTest extends TestCase
         $this->assertTrue($image2->fresh()->is_main);
     }
 
+    #[Test]
     public function it_can_set_main_image_from_new_image(): void
     {
         // Arrange
@@ -138,6 +144,7 @@ class ProductImageServiceTest extends TestCase
         $this->assertTrue($newImage->fresh()->is_main);
     }
 
+    #[Test]
     public function it_can_change_main_image(): void
     {
         // Arrange
@@ -163,6 +170,7 @@ class ProductImageServiceTest extends TestCase
         $this->assertTrue($newMain->fresh()->is_main);
     }
 
+    #[Test]
     public function it_throws_exception_when_image_does_not_belong_to_product(): void
     {
         // Arrange

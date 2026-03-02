@@ -7,12 +7,14 @@ namespace Omersia\Core\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Core\Models\Shop;
 use Omersia\Core\Models\ShopDomain;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ShopDomainTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_shop_domain(): void
     {
         $shop = Shop::factory()->create();
@@ -30,6 +32,7 @@ class ShopDomainTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_belongs_to_shop(): void
     {
         $shop = Shop::factory()->create();
@@ -39,6 +42,7 @@ class ShopDomainTest extends TestCase
         $this->assertEquals($shop->id, $domain->shop->id);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $domain = new ShopDomain;
@@ -49,6 +53,7 @@ class ShopDomainTest extends TestCase
         $this->assertContains('is_primary', $fillable);
     }
 
+    #[Test]
     public function it_can_have_primary_domain(): void
     {
         $shop = Shop::factory()->create();
@@ -65,6 +70,7 @@ class ShopDomainTest extends TestCase
         $this->assertFalse($secondary->is_primary);
     }
 
+    #[Test]
     public function it_stores_domain_string(): void
     {
         $shop = Shop::factory()->create();

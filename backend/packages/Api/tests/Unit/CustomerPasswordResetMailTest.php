@@ -7,12 +7,14 @@ namespace Omersia\Api\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Api\Mail\CustomerPasswordResetMail;
 use Omersia\Customer\Models\Customer;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class CustomerPasswordResetMailTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_builds_password_reset_mail(): void
     {
         $customer = Customer::factory()->create([
@@ -27,6 +29,7 @@ class CustomerPasswordResetMailTest extends TestCase
         $this->assertEquals($resetUrl, $mailable->resetUrl);
     }
 
+    #[Test]
     public function it_has_correct_subject(): void
     {
         $customer = Customer::factory()->create();
@@ -38,6 +41,7 @@ class CustomerPasswordResetMailTest extends TestCase
         $this->assertEquals('Réinitialisation de votre mot de passe', $envelope->subject);
     }
 
+    #[Test]
     public function it_uses_password_reset_view(): void
     {
         $customer = Customer::factory()->create();
@@ -49,6 +53,7 @@ class CustomerPasswordResetMailTest extends TestCase
         $this->assertEquals('emails.password-reset', $content->view);
     }
 
+    #[Test]
     public function it_passes_customer_and_reset_url_to_view(): void
     {
         $customer = Customer::factory()->create([
@@ -64,6 +69,7 @@ class CustomerPasswordResetMailTest extends TestCase
         $this->assertEquals('https://example.com/reset/token456', $content->with['resetUrl']);
     }
 
+    #[Test]
     public function it_has_no_attachments(): void
     {
         $customer = Customer::factory()->create();

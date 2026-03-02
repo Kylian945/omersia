@@ -7,12 +7,14 @@ namespace Omersia\Customer\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Customer\Mail\WelcomeMail;
 use Omersia\Customer\Models\Customer;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class WelcomeMailTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_builds_welcome_mail_with_customer(): void
     {
         $customer = Customer::factory()->create([
@@ -26,6 +28,7 @@ class WelcomeMailTest extends TestCase
         $this->assertEquals($customer->id, $mailable->customer->id);
     }
 
+    #[Test]
     public function it_has_correct_subject(): void
     {
         $customer = Customer::factory()->create();
@@ -36,6 +39,7 @@ class WelcomeMailTest extends TestCase
         $this->assertStringContainsString('Bienvenue', $built->subject);
     }
 
+    #[Test]
     public function it_uses_welcome_view(): void
     {
         $customer = Customer::factory()->create();
@@ -46,6 +50,7 @@ class WelcomeMailTest extends TestCase
         $this->assertEquals('emails.welcome', $built->view);
     }
 
+    #[Test]
     public function it_passes_customer_to_view(): void
     {
         $customer = Customer::factory()->create([

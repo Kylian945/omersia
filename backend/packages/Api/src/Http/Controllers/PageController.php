@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace Omersia\Api\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Omersia\CMS\Models\Page;
+use Omersia\CMS\Services\PageService;
 use OpenApi\Annotations as OA;
 
 class PageController extends Controller
 {
+    public function __construct(
+        private readonly PageService $pageService,
+    ) {}
+
     /**
      * @OA\Get(
      *     path="/api/v1/pages",
@@ -44,16 +50,12 @@ class PageController extends Controller
      *     )
      * )
      */
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $locale = $request->get('locale', app()->getLocale());
 
-        $pages = Page::query()
-            ->where('is_active', true)
-            ->with(['translations' => function ($q) use ($locale) {
-                $q->where('locale', $locale);
-            }])
-            ->get()
+        $pages = $this->pageService
+            ->getPublicPages($locale)
             ->map(function (Page $page) {
                 $t = $page->translations->first();
 
@@ -109,15 +111,15 @@ class PageController extends Controller
      *     @OA\Response(response=404, description="Page non trouvée")
      * )
      */
-    public function show(string $slug, Request $request)
+    public function show(string $slug, Request $request): JsonResponse
     {
         $locale = $request->get('locale', app()->getLocale());
 
-        $page = Page::query()
-            ->where('is_active', true)
-            ->whereHas('translations', fn ($q) => $q->where('locale', $locale)->where('slug', $slug))
-            ->with(['translations' => fn ($q) => $q->where('locale', $locale)])
-            ->firstOrFail();
+        $page = $this->pageService->getPublicPage($slug, $locale);
+
+        if (! $page) {
+            abort(404);
+        }
 
         $t = $page->translations->first();
         $layout = ($t && is_array($t->content_json)) ? $t->content_json : ['sections' => []];
@@ -128,7 +130,6 @@ class PageController extends Controller
             'title' => $t?->title,
             'meta_title' => $t?->meta_title,
             'meta_description' => $t?->meta_description,
-            // 👇 le builder admin sauve la structure complète ici
             'layout' => $layout,
         ]);
     }

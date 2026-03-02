@@ -10,6 +10,7 @@ use Omersia\Catalog\Models\Product;
 use Omersia\Catalog\Models\ProductTranslation;
 use Omersia\Catalog\Repositories\ProductRepository;
 use Omersia\Core\Models\Shop;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class ProductRepositoryTest extends TestCase
@@ -24,6 +25,7 @@ class ProductRepositoryTest extends TestCase
         $this->repository = new ProductRepository(new Product);
     }
 
+    #[Test]
     public function it_can_find_product_by_sku(): void
     {
         $shop = Shop::factory()->create();
@@ -35,6 +37,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertEquals('TEST-123', $result->sku);
     }
 
+    #[Test]
     public function it_can_find_product_by_sku_and_shop(): void
     {
         $shop1 = Shop::factory()->create();
@@ -47,6 +50,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertEquals($shop1->id, $result->shop_id);
     }
 
+    #[Test]
     public function it_returns_null_when_sku_not_found(): void
     {
         $result = $this->repository->findBySku('NON-EXISTENT');
@@ -54,6 +58,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertNull($result);
     }
 
+    #[Test]
     public function it_can_get_products_by_shop_id(): void
     {
         $shop = Shop::factory()->create();
@@ -65,6 +70,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertCount(3, $result);
     }
 
+    #[Test]
     public function it_can_get_active_products(): void
     {
         Product::factory()->create(['is_active' => true]);
@@ -76,6 +82,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertCount(2, $result);
     }
 
+    #[Test]
     public function it_can_get_active_products_by_shop(): void
     {
         $shop = Shop::factory()->create();
@@ -87,6 +94,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertCount(2, $result);
     }
 
+    #[Test]
     public function it_can_get_products_by_category(): void
     {
         $category = Category::factory()->create();
@@ -102,6 +110,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertCount(2, $result);
     }
 
+    #[Test]
     public function it_can_search_products_by_sku(): void
     {
         Product::factory()->create(['sku' => 'ABC-123']);
@@ -113,6 +122,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertEquals(2, $result->total());
     }
 
+    #[Test]
     public function it_can_search_products_by_name(): void
     {
         $product = Product::factory()->create();
@@ -126,6 +136,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertEquals(1, $result->total());
     }
 
+    #[Test]
     public function it_can_update_stock(): void
     {
         $product = Product::factory()->create(['stock_qty' => 10]);
@@ -136,6 +147,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertEquals(20, $product->fresh()->stock_qty);
     }
 
+    #[Test]
     public function it_can_decrement_stock(): void
     {
         $product = Product::factory()->create(['stock_qty' => 10]);
@@ -146,6 +158,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertEquals(7, $product->fresh()->stock_qty);
     }
 
+    #[Test]
     public function it_fails_to_decrement_when_insufficient_stock(): void
     {
         $product = Product::factory()->create(['stock_qty' => 5]);
@@ -156,6 +169,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertEquals(5, $product->fresh()->stock_qty);
     }
 
+    #[Test]
     public function it_can_increment_stock(): void
     {
         $product = Product::factory()->create(['stock_qty' => 10]);
@@ -166,6 +180,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertEquals(15, $product->fresh()->stock_qty);
     }
 
+    #[Test]
     public function it_can_attach_categories(): void
     {
         $product = Product::factory()->create();
@@ -176,6 +191,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertCount(2, $product->fresh()->categories);
     }
 
+    #[Test]
     public function it_can_sync_categories(): void
     {
         $product = Product::factory()->create();
@@ -189,6 +205,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertEquals($category2->id, $product->fresh()->categories->first()->id);
     }
 
+    #[Test]
     public function it_can_attach_images(): void
     {
         $product = Product::factory()->create();
@@ -202,6 +219,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertCount(2, $product->fresh()->images);
     }
 
+    #[Test]
     public function it_can_get_related_products(): void
     {
         $product = Product::factory()->create();
@@ -213,6 +231,7 @@ class ProductRepositoryTest extends TestCase
         $this->assertCount(2, $result);
     }
 
+    #[Test]
     public function it_can_get_new_arrivals(): void
     {
         Product::factory()->create(['is_active' => true, 'created_at' => now()->subDays(1)]);

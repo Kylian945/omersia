@@ -7,12 +7,14 @@ namespace Omersia\Sales\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Catalog\Models\Order;
 use Omersia\Sales\Mail\OrderShippedMail;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class OrderShippedMailTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_builds_order_shipped_mail(): void
     {
         $order = Order::factory()->create(['number' => 'ORD-123']);
@@ -30,6 +32,7 @@ class OrderShippedMailTest extends TestCase
         $this->assertEquals('DHL', $mailable->carrier);
     }
 
+    #[Test]
     public function it_has_correct_subject_with_order_number(): void
     {
         $order = Order::factory()->create(['number' => 'ORD-456']);
@@ -41,6 +44,7 @@ class OrderShippedMailTest extends TestCase
         $this->assertStringContainsString('ORD-456', $built->subject);
     }
 
+    #[Test]
     public function it_uses_order_shipped_view(): void
     {
         $order = Order::factory()->create();
@@ -51,6 +55,7 @@ class OrderShippedMailTest extends TestCase
         $this->assertEquals('emails.order-shipped', $built->view);
     }
 
+    #[Test]
     public function it_passes_order_and_tracking_data_to_view(): void
     {
         $order = Order::factory()->create([
@@ -79,6 +84,7 @@ class OrderShippedMailTest extends TestCase
         $this->assertEquals('UPS', $viewData['carrier']);
     }
 
+    #[Test]
     public function it_handles_null_tracking_information(): void
     {
         $order = Order::factory()->create();

@@ -7,12 +7,14 @@ namespace Omersia\Payment\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Omersia\Payment\Models\PaymentProvider;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class PaymentProviderEncryptionTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_encrypts_config_in_database(): void
     {
         $sensitiveConfig = [
@@ -23,7 +25,7 @@ class PaymentProviderEncryptionTest extends TestCase
 
         $provider = PaymentProvider::create([
             'name' => 'Stripe',
-            'code' => 'stripe',
+            'code' => 'stripe_enc',
             'enabled' => true,
             'config' => $sensitiveConfig,
         ]);
@@ -45,6 +47,7 @@ class PaymentProviderEncryptionTest extends TestCase
         $this->assertStringStartsWith('eyJpdiI6', $rawConfig);
     }
 
+    #[Test]
     public function it_decrypts_config_transparently(): void
     {
         $config = [
@@ -55,7 +58,7 @@ class PaymentProviderEncryptionTest extends TestCase
 
         $provider = PaymentProvider::create([
             'name' => 'Stripe',
-            'code' => 'stripe',
+            'code' => 'stripe_dec',
             'enabled' => true,
             'config' => $config,
         ]);
@@ -69,6 +72,7 @@ class PaymentProviderEncryptionTest extends TestCase
         $this->assertEquals('test', $retrieved->config['mode']);
     }
 
+    #[Test]
     public function it_handles_empty_config(): void
     {
         $provider = PaymentProvider::create([
@@ -82,6 +86,7 @@ class PaymentProviderEncryptionTest extends TestCase
         $this->assertEmpty($provider->config);
     }
 
+    #[Test]
     public function it_handles_null_values_in_config(): void
     {
         $config = [
@@ -92,7 +97,7 @@ class PaymentProviderEncryptionTest extends TestCase
 
         $provider = PaymentProvider::create([
             'name' => 'Stripe',
-            'code' => 'stripe',
+            'code' => 'stripe_null',
             'enabled' => true,
             'config' => $config,
         ]);
@@ -103,11 +108,12 @@ class PaymentProviderEncryptionTest extends TestCase
         $this->assertEquals('pk_test_123', $retrieved->config['publishable_key']);
     }
 
+    #[Test]
     public function it_updates_encrypted_config(): void
     {
         $provider = PaymentProvider::create([
             'name' => 'Stripe',
-            'code' => 'stripe',
+            'code' => 'stripe_upd',
             'enabled' => true,
             'config' => ['secret_key' => 'old_key'],
         ]);

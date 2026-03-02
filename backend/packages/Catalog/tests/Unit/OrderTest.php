@@ -12,12 +12,14 @@ use Omersia\Catalog\Models\OrderItem;
 use Omersia\Catalog\Models\ShippingMethod;
 use Omersia\Customer\Models\Customer;
 use Omersia\Sales\Mail\OrderConfirmationMail;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class OrderTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_can_create_order(): void
     {
         $order = Order::create([
@@ -37,6 +39,7 @@ class OrderTest extends TestCase
         ]);
     }
 
+    #[Test]
     public function it_has_items(): void
     {
         $order = Order::factory()->create();
@@ -45,6 +48,7 @@ class OrderTest extends TestCase
         $this->assertCount(3, $order->items);
     }
 
+    #[Test]
     public function it_belongs_to_customer(): void
     {
         $customer = Customer::factory()->create();
@@ -54,6 +58,7 @@ class OrderTest extends TestCase
         $this->assertEquals($customer->id, $order->customer->id);
     }
 
+    #[Test]
     public function it_belongs_to_cart(): void
     {
         $cart = Cart::factory()->create();
@@ -63,6 +68,7 @@ class OrderTest extends TestCase
         $this->assertEquals($cart->id, $order->cart->id);
     }
 
+    #[Test]
     public function it_belongs_to_shipping_method(): void
     {
         $shippingMethod = ShippingMethod::factory()->create();
@@ -71,6 +77,7 @@ class OrderTest extends TestCase
         $this->assertInstanceOf(ShippingMethod::class, $order->shippingMethod);
     }
 
+    #[Test]
     public function it_casts_shipping_address_to_array(): void
     {
         $order = Order::factory()->create([
@@ -81,6 +88,7 @@ class OrderTest extends TestCase
         $this->assertEquals('123 Main St', $order->shipping_address['street']);
     }
 
+    #[Test]
     public function it_casts_billing_address_to_array(): void
     {
         $order = Order::factory()->create([
@@ -91,6 +99,7 @@ class OrderTest extends TestCase
         $this->assertEquals('456 Oak Ave', $order->billing_address['street']);
     }
 
+    #[Test]
     public function it_casts_meta_to_array(): void
     {
         $order = Order::factory()->create([
@@ -101,6 +110,7 @@ class OrderTest extends TestCase
         $this->assertEquals('web', $order->meta['source']);
     }
 
+    #[Test]
     public function it_has_status_label_attribute(): void
     {
         $order = Order::factory()->create(['status' => 'confirmed']);
@@ -108,6 +118,7 @@ class OrderTest extends TestCase
         $this->assertEquals('Confirmée', $order->status_label);
     }
 
+    #[Test]
     public function it_can_scope_confirmed_orders(): void
     {
         Order::factory()->create(['status' => 'confirmed']);
@@ -119,6 +130,7 @@ class OrderTest extends TestCase
         $this->assertCount(2, $confirmed);
     }
 
+    #[Test]
     public function it_can_scope_draft_orders(): void
     {
         Order::factory()->create(['status' => 'draft']);
@@ -130,6 +142,7 @@ class OrderTest extends TestCase
         $this->assertCount(2, $drafts);
     }
 
+    #[Test]
     public function it_can_check_if_is_draft(): void
     {
         $draft = Order::factory()->create(['status' => 'draft']);
@@ -139,6 +152,7 @@ class OrderTest extends TestCase
         $this->assertFalse($confirmed->isDraft());
     }
 
+    #[Test]
     public function it_can_confirm_draft_order(): void
     {
         Mail::fake();
@@ -155,6 +169,7 @@ class OrderTest extends TestCase
         $this->assertNotNull($order->fresh()->placed_at);
     }
 
+    #[Test]
     public function it_sends_confirmation_email_when_confirming(): void
     {
         Mail::fake();
@@ -166,11 +181,12 @@ class OrderTest extends TestCase
 
         $order->confirm();
 
-        Mail::assertSent(OrderConfirmationMail::class, function ($mail) use ($customer) {
+        Mail::assertQueued(OrderConfirmationMail::class, function ($mail) use ($customer) {
             return $mail->hasTo($customer->email);
         });
     }
 
+    #[Test]
     public function it_does_not_confirm_non_draft_order(): void
     {
         $order = Order::factory()->create(['status' => 'confirmed']);
@@ -182,6 +198,7 @@ class OrderTest extends TestCase
         $this->assertEquals($originalPlacedAt, $order->fresh()->placed_at);
     }
 
+    #[Test]
     public function it_has_fillable_attributes(): void
     {
         $order = new Order;

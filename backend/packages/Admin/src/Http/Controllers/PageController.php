@@ -5,20 +5,24 @@ declare(strict_types=1);
 namespace Omersia\Admin\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Omersia\Admin\Http\Requests\PageStoreRequest;
-use Omersia\Admin\Http\Requests\PageUpdateRequest;
+use Omersia\CMS\Http\Requests\PageStoreRequest;
+use Omersia\CMS\Http\Requests\PageUpdateRequest;
 use Omersia\CMS\Models\Page;
-use Omersia\CMS\Models\PageTranslation;
+use Omersia\CMS\Repositories\Contracts\PageRepositoryInterface;
+use Omersia\CMS\Services\PageService;
 
 class PageController extends Controller
 {
+    public function __construct(
+        private readonly PageRepositoryInterface $pageRepository,
+        private readonly PageService $pageService,
+    ) {}
+
     public function index()
     {
         $this->authorize('pages.view');
 
-        $pages = Page::with('translations')
-            ->orderBy('id', 'desc')
-            ->paginate(25);
+        $pages = $this->pageRepository->getByShopId(shopId: 1);
 
         return view('admin::pages.index', compact('pages'));
     }
@@ -32,29 +36,7 @@ class PageController extends Controller
 
     public function store(PageStoreRequest $request)
     {
-        $validated = $request->validated();
-
-        $page = Page::create([
-            'shop_id' => 1,
-            'type' => $validated['type'] ?? 'page',
-            'is_active' => $request->boolean('is_active', true),
-            'is_home' => $request->boolean('is_home', false),
-        ]);
-
-        $contentJson = $validated['content_json'] ?? null;
-        $content = $contentJson ? json_decode($contentJson, true) : null;
-
-        PageTranslation::create([
-            'page_id' => $page->id,
-            'locale' => 'fr',
-            'title' => $validated['title'],
-            'slug' => $validated['slug'],
-            'content' => null,
-            'content_json' => $content,
-            'meta_title' => $validated['meta_title'] ?? null,
-            'meta_description' => $validated['meta_description'] ?? null,
-            'noindex' => $request->boolean('noindex', false),
-        ]);
+        $this->pageService->create($request->validated(), shopId: 1);
 
         return redirect()->route('pages.index')->with('success', 'Page créée.');
     }
@@ -70,49 +52,17 @@ class PageController extends Controller
 
     public function update(PageUpdateRequest $request, Page $page)
     {
-        $validated = $request->validated();
+        $this->pageService->update($page, $request->validated());
 
-        $page->update([
-            'type' => $validated['type'] ?? 'page',
-            'is_active' => $request->boolean('is_active', true),
-            'is_home' => $request->boolean('is_home', false),
-        ]);
-
-        $translation = $page->translations()
-            ->where('locale', 'fr')
-            ->first();
-
-        if (! $translation) {
-            $translation = new PageTranslation([
-                'page_id' => $page->id,
-                'locale' => 'fr',
-            ]);
-        }
-
-        $contentJson = $validated['content_json'] ?? null;
-        $content = $contentJson ? json_decode($contentJson, true) : null;
-
-        $translation->fill([
-            'title' => $validated['title'],
-            'slug' => $validated['slug'],
-            'content' => null,
-            'content_json' => $content,
-            'meta_title' => $validated['meta_title'] ?? null,
-            'meta_description' => $validated['meta_description'] ?? null,
-            'noindex' => $request->boolean('noindex', false),
-        ])->save();
-
-        return redirect()->route('pages.index')
-            ->with('success', 'Page mise à jour.');
+        return redirect()->route('pages.index')->with('success', 'Page mise à jour.');
     }
 
     public function destroy(Page $page)
     {
         $this->authorize('pages.delete');
 
-        $page->delete();
+        $this->pageService->delete($page);
 
-        return redirect()->route('pages.index')
-            ->with('success', 'Page supprimée.');
+        return redirect()->route('pages.index')->with('success', 'Page supprimée.');
     }
 }

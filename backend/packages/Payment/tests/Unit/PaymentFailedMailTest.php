@@ -7,12 +7,14 @@ namespace Omersia\Payment\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Catalog\Models\Order;
 use Omersia\Payment\Mail\PaymentFailedMail;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class PaymentFailedMailTest extends TestCase
 {
     use RefreshDatabase;
 
+    #[Test]
     public function it_builds_payment_failed_mail(): void
     {
         $order = Order::factory()->create(['number' => 'ORD-123']);
@@ -24,6 +26,7 @@ class PaymentFailedMailTest extends TestCase
         $this->assertEquals('https://example.com/retry', $mailable->retryUrl);
     }
 
+    #[Test]
     public function it_has_correct_subject_with_order_number(): void
     {
         $order = Order::factory()->create(['number' => 'ORD-456']);
@@ -35,6 +38,7 @@ class PaymentFailedMailTest extends TestCase
         $this->assertStringContainsString('ORD-456', $built->subject);
     }
 
+    #[Test]
     public function it_uses_payment_failed_view(): void
     {
         $order = Order::factory()->create();
@@ -45,6 +49,7 @@ class PaymentFailedMailTest extends TestCase
         $this->assertEquals('emails.payment-failed', $built->view);
     }
 
+    #[Test]
     public function it_passes_order_and_reason_to_view(): void
     {
         $order = Order::factory()->create(['number' => 'ORD-789']);
@@ -65,6 +70,7 @@ class PaymentFailedMailTest extends TestCase
         $this->assertEquals('https://example.com/retry-payment', $viewData['retryUrl']);
     }
 
+    #[Test]
     public function it_handles_empty_reason_and_retry_url(): void
     {
         $order = Order::factory()->create();
