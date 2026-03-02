@@ -51,6 +51,7 @@ class OrderCreationConcurrencyTest extends TestCase
 
         $product = Product::factory()->create([
             'price' => 10000, // 100.00 EUR in cents
+            'stock_qty' => 9999,
         ]);
 
         $shippingMethod = ShippingMethod::factory()->create([
@@ -128,7 +129,7 @@ class OrderCreationConcurrencyTest extends TestCase
     public function it_creates_sequential_order_numbers(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
         $iterations = 10;
@@ -154,7 +155,7 @@ class OrderCreationConcurrencyTest extends TestCase
     public function it_preserves_order_number_on_draft_update(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
         $cart = Cart::factory()->withCustomer($customer->id)->create();
 
@@ -178,7 +179,7 @@ class OrderCreationConcurrencyTest extends TestCase
     public function it_assigns_different_numbers_to_different_carts(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
         // Create order 1
@@ -201,7 +202,7 @@ class OrderCreationConcurrencyTest extends TestCase
     public function it_creates_orders_efficiently(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
         $iterations = 50;
@@ -230,8 +231,8 @@ class OrderCreationConcurrencyTest extends TestCase
     public function it_creates_order_items_correctly(): void
     {
         $customer = Customer::factory()->create();
-        $product1 = Product::factory()->create(['price' => 10000]);
-        $product2 = Product::factory()->create(['price' => 20000]);
+        $product1 = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
+        $product2 = Product::factory()->create(['price' => 20000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
         $dto = new OrderCreateDTO(
@@ -281,7 +282,7 @@ class OrderCreationConcurrencyTest extends TestCase
     public function it_handles_concurrent_creation_without_errors(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
         $iterations = 20;
@@ -309,7 +310,7 @@ class OrderCreationConcurrencyTest extends TestCase
     public function it_maintains_consistent_order_number_format(): void
     {
         $customer = Customer::factory()->create();
-        $product = Product::factory()->create(['price' => 10000]);
+        $product = Product::factory()->create(['price' => 10000, 'stock_qty' => 9999]);
         $shippingMethod = ShippingMethod::factory()->create();
 
         $iterations = 15;

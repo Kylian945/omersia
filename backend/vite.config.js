@@ -7,7 +7,6 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/js/app.js',
-                'packages/Admin/src/resources/js/core/toast.js',
                 'packages/Admin/src/resources/js/settings/api-key.js',
                 'packages/Admin/src/resources/js/dashboard/chart.js',
                 'packages/Admin/src/resources/js/dashboard/realtime.js',

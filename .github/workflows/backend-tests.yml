@@ -102,6 +102,44 @@ jobs:
           DB_USERNAME: root
           DB_PASSWORD: password
 
+      - name: Create fake Vite manifest for tests
+        run: |
+          mkdir -p backend/public/build
+          cat > backend/public/build/manifest.json << 'MANIFEST'
+          {
+            "resources/css/app.css": {"file": "assets/app.css", "src": "resources/css/app.css", "isEntry": true},
+            "resources/js/app.js": {"file": "assets/app.js", "src": "resources/js/app.js", "isEntry": true},
+            "packages/Admin/src/resources/js/core/toast.js": {"file": "assets/toast.js", "src": "packages/Admin/src/resources/js/core/toast.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/api-key.js": {"file": "assets/api-key.js", "src": "packages/Admin/src/resources/js/settings/api-key.js", "isEntry": true},
+            "packages/Admin/src/resources/js/dashboard/chart.js": {"file": "assets/chart.js", "src": "packages/Admin/src/resources/js/dashboard/chart.js", "isEntry": true},
+            "packages/Admin/src/resources/js/dashboard/realtime.js": {"file": "assets/dashboard-realtime.js", "src": "packages/Admin/src/resources/js/dashboard/realtime.js", "isEntry": true},
+            "packages/Admin/src/resources/js/orders/realtime.js": {"file": "assets/orders-realtime.js", "src": "packages/Admin/src/resources/js/orders/realtime.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/gdpr/realtime.js": {"file": "assets/gdpr-realtime.js", "src": "packages/Admin/src/resources/js/settings/gdpr/realtime.js", "isEntry": true},
+            "packages/Admin/src/resources/js/products/stock-realtime.js": {"file": "assets/stock-realtime.js", "src": "packages/Admin/src/resources/js/products/stock-realtime.js", "isEntry": true},
+            "packages/Admin/src/resources/js/orders/paid-sound-notification.js": {"file": "assets/paid-sound-notification.js", "src": "packages/Admin/src/resources/js/orders/paid-sound-notification.js", "isEntry": true},
+            "packages/Admin/src/resources/js/builder/page-builder.js": {"file": "assets/page-builder.js", "src": "packages/Admin/src/resources/js/builder/page-builder.js", "isEntry": true},
+            "packages/Admin/src/resources/js/builder/page-builder-native.js": {"file": "assets/page-builder-native.js", "src": "packages/Admin/src/resources/js/builder/page-builder-native.js", "isEntry": true},
+            "packages/Admin/src/resources/js/builder/preview-modal.js": {"file": "assets/preview-modal.js", "src": "packages/Admin/src/resources/js/builder/preview-modal.js", "isEntry": true},
+            "packages/Admin/src/resources/js/products/index.js": {"file": "assets/products-index.js", "src": "packages/Admin/src/resources/js/products/index.js", "isEntry": true},
+            "packages/Admin/src/resources/js/core/quill-editor.js": {"file": "assets/quill-editor.js", "src": "packages/Admin/src/resources/js/core/quill-editor.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/shipping-methods.js": {"file": "assets/shipping-methods.js", "src": "packages/Admin/src/resources/js/settings/shipping-methods.js", "isEntry": true},
+            "packages/Admin/src/resources/js/apparence/theme-activation.js": {"file": "assets/theme-activation.js", "src": "packages/Admin/src/resources/js/apparence/theme-activation.js", "isEntry": true},
+            "packages/Admin/src/resources/js/modules/upload-form.js": {"file": "assets/upload-form.js", "src": "packages/Admin/src/resources/js/modules/upload-form.js", "isEntry": true},
+            "packages/Admin/src/resources/js/modules/positions.js": {"file": "assets/positions.js", "src": "packages/Admin/src/resources/js/modules/positions.js", "isEntry": true},
+            "packages/Admin/src/resources/js/media/media-library.js": {"file": "assets/media-library.js", "src": "packages/Admin/src/resources/js/media/media-library.js", "isEntry": true},
+            "packages/Admin/src/resources/js/media/picker.js": {"file": "assets/picker.js", "src": "packages/Admin/src/resources/js/media/picker.js", "isEntry": true},
+            "packages/Admin/src/resources/js/apparence/ecommerce-pages-form.js": {"file": "assets/ecommerce-pages-form.js", "src": "packages/Admin/src/resources/js/apparence/ecommerce-pages-form.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/modal-manager.js": {"file": "assets/modal-manager.js", "src": "packages/Admin/src/resources/js/settings/modal-manager.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/roles.js": {"file": "assets/roles.js", "src": "packages/Admin/src/resources/js/settings/roles.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/permissions.js": {"file": "assets/permissions.js", "src": "packages/Admin/src/resources/js/settings/permissions.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/users.js": {"file": "assets/users.js", "src": "packages/Admin/src/resources/js/settings/users.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/stripe-config.js": {"file": "assets/stripe-config.js", "src": "packages/Admin/src/resources/js/settings/stripe-config.js", "isEntry": true},
+            "packages/Admin/src/resources/js/settings/tax-rate-form.js": {"file": "assets/tax-rate-form.js", "src": "packages/Admin/src/resources/js/settings/tax-rate-form.js", "isEntry": true},
+            "packages/Admin/src/resources/css/apparence/theme-customize.css": {"file": "assets/theme-customize.css", "src": "packages/Admin/src/resources/css/apparence/theme-customize.css", "isEntry": true},
+            "packages/Admin/src/resources/css/settings/api-keys.css": {"file": "assets/api-keys.css", "src": "packages/Admin/src/resources/css/settings/api-keys.css", "isEntry": true}
+          }
+          MANIFEST
+
       - name: Run PHPUnit tests
         run: |
           cd backend

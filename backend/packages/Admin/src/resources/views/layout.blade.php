@@ -653,7 +653,6 @@
         };
     </script>
 
-    @vite(['packages/Admin/src/resources/js/core/toast.js'])
     @can('orders.view')
         <script>
             window.omersiaOrderSoundConfig = {
