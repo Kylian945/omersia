@@ -62,7 +62,7 @@ class DataDeletionService
                 ->whereNot('id', $dataRequest->id)
                 ->update(['data_deleted' => true]);
 
-            // 6. Anonymiser le compte customer (on ne supprime pas pour garder les relations)
+            // 6. Anonymiser le compte customer
             $this->anonymizeCustomer($customer);
             $anonymizedTables[] = 'customers';
             $totalAnonymized++;
@@ -91,6 +91,9 @@ class DataDeletionService
                     'total_anonymized' => $totalAnonymized,
                 ],
             ]);
+
+            // 9. Supprimer définitivement le customer une fois les traces d'audit enregistrées
+            $customer->delete();
 
             return $log;
         });
@@ -133,8 +136,6 @@ class DataDeletionService
             'date_of_birth' => null,
             'password' => bcrypt(str()->random(32)), // Mot de passe aléatoire
         ]);
-
-        $customer->delete();
     }
 
     /**

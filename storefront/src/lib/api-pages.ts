@@ -1,4 +1,4 @@
-import { apiJson } from "./api-http";
+import { apiJson } from "@/lib/api-http";
 import { Page, PageResponse } from "./types/page-types";
 
 export async function getPageBySlug(slug: string, locale = "fr"): Promise<Page | null> {
