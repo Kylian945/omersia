@@ -1,13 +1,18 @@
+/** @jest-environment node */
+
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 jest.mock('@/lib/api-http', () => ({
   apiJson: jest.fn(),
 }));
 
-import { getPageBySlug } from '@/lib/api-pages';
-import { apiJson } from '@/lib/api-http';
-
-const mockApiJson = apiJson as jest.MockedFunction<typeof apiJson>;
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { getPageBySlug } = require('@/lib/api-pages') as {
+  getPageBySlug: (slug: string, locale?: string) => Promise<unknown>;
+};
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { apiJson } = require('@/lib/api-http') as { apiJson: jest.Mock };
+const mockApiJson = apiJson;
 
 type MockPageResponse = {
   id: number;
@@ -38,7 +43,7 @@ const basePage: MockPageResponse = {
 
 describe('getPageBySlug', () => {
   beforeEach(() => {
-    mockApiJson.mockClear();
+    mockApiJson.mockReset();
   });
 
   describe('success cases', () => {

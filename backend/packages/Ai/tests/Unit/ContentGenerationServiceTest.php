@@ -365,7 +365,7 @@ class ContentGenerationServiceTest extends TestCase
         $method = $reflection->getMethod('normalizeTextBlock');
         $method->setAccessible(true);
 
-        $result = $method->invoke($this->service, "  Hello World  ", 5000);
+        $result = $method->invoke($this->service, '  Hello World  ', 5000);
 
         $this->assertEquals('Hello World', $result);
     }

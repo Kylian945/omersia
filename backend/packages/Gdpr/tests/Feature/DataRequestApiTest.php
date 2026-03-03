@@ -31,7 +31,7 @@ class DataRequestApiTest extends TestCase
         $token = $customer->createToken('test-token')->plainTextToken;
 
         return array_merge($this->apiHeaders(), [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ]);
     }
 
@@ -54,7 +54,7 @@ class DataRequestApiTest extends TestCase
         $token = $customer->createToken('test')->plainTextToken;
 
         $response = $this->getJson('/api/v1/gdpr/data-requests', [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ]);
 
         $response->assertUnauthorized();

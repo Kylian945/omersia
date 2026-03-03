@@ -185,7 +185,7 @@ class CookieConsentApiTest extends TestCase
         $token = $customer->createToken('test')->plainTextToken;
 
         $headers = array_merge($this->apiHeaders(), [
-            'Authorization' => 'Bearer ' . $token,
+            'Authorization' => 'Bearer '.$token,
         ]);
 
         $response = $this->postJson('/api/v1/gdpr/cookie-consent', [
