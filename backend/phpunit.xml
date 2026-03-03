@@ -39,6 +39,12 @@
         <testsuite name="Cms">
             <directory>packages/CMS/tests</directory>
         </testsuite>
+        <testsuite name="Gdpr">
+            <directory>packages/Gdpr/tests</directory>
+        </testsuite>
+        <testsuite name="Ai">
+            <directory>packages/Ai/tests</directory>
+        </testsuite>
     </testsuites>
     
     <source>
@@ -54,6 +60,8 @@
             <directory>packages/Api/src</directory>
             <directory>packages/CMS/src</directory>
             <directory>packages/Shared/src</directory>
+            <directory>packages/Gdpr/src</directory>
+            <directory>packages/Ai/src</directory>
         </include>
         <exclude>
             <directory>packages/*/src/database</directory>

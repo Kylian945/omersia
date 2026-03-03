@@ -89,6 +89,11 @@ class DataRequestService
         // Supprimer les données
         $this->dataDeletionService->deleteCustomerData($customer, $request, $userId);
 
+        // La suppression du customer peut cascader et supprimer la demande courante.
+        if ($request->fresh() === null) {
+            return;
+        }
+
         $request->markAsCompleted();
         $request->refresh();
         event(GdprRequestUpdated::fromModel($request));
