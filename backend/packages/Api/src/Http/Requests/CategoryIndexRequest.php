@@ -13,6 +13,13 @@ final class CategoryIndexRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('parent_only')) {
+            $this->merge(['parent_only' => filter_var($this->input('parent_only'), FILTER_VALIDATE_BOOLEAN)]);
+        }
+    }
+
     /**
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */

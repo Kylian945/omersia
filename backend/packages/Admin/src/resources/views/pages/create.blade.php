@@ -124,6 +124,15 @@
                     </select>
                 </div>
 
+                <div class="space-y-2">
+                    <label class="block text-xs font-medium text-gray-700">Statut éditorial</label>
+                    <select name="status" class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs">
+                        <option value="draft" selected>Brouillon</option>
+                        <option value="published">Publié</option>
+                        <option value="archived">Archivé</option>
+                    </select>
+                </div>
+
                 <div class="flex items-center gap-2">
                     <input type="checkbox" name="is_active" value="1" checked class="h-3 w-3 rounded border-gray-300">
                     <span class="text-xs text-gray-700">Page visible</span>

@@ -31,6 +31,9 @@ class PageModelTest extends TestCase
         $fillable = $page->getFillable();
         $this->assertContains('shop_id', $fillable);
         $this->assertContains('type', $fillable);
+        $this->assertContains('status', $fillable);
+        $this->assertContains('published_at', $fillable);
+        $this->assertContains('published_by', $fillable);
         $this->assertContains('is_active', $fillable);
         $this->assertContains('is_home', $fillable);
     }
@@ -153,6 +156,25 @@ class PageModelTest extends TestCase
         $page = Page::factory()->legal()->create();
         $this->assertEquals('legal', $page->type);
         $this->assertTrue($page->is_active);
+    }
+
+    #[Test]
+    public function factory_draft_state_sets_status_and_clears_publication_meta(): void
+    {
+        $page = Page::factory()->draft()->create();
+
+        $this->assertEquals(Page::STATUS_DRAFT, $page->status);
+        $this->assertNull($page->published_at);
+        $this->assertNull($page->published_by);
+    }
+
+    #[Test]
+    public function factory_published_state_sets_status_and_published_at(): void
+    {
+        $page = Page::factory()->published()->create();
+
+        $this->assertEquals(Page::STATUS_PUBLISHED, $page->status);
+        $this->assertNotNull($page->published_at);
     }
 
     #[Test]

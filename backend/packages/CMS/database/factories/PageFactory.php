@@ -17,6 +17,9 @@ class PageFactory extends Factory
         return [
             'shop_id' => Shop::factory(),
             'type' => 'page',
+            'status' => Page::STATUS_PUBLISHED,
+            'published_at' => now(),
+            'published_by' => null,
             'is_active' => true,
             'is_home' => false,
         ];
@@ -33,6 +36,30 @@ class PageFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_active' => false,
+        ]);
+    }
+
+    public function draft(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => Page::STATUS_DRAFT,
+            'published_at' => null,
+            'published_by' => null,
+        ]);
+    }
+
+    public function published(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => Page::STATUS_PUBLISHED,
+            'published_at' => now(),
+        ]);
+    }
+
+    public function archived(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => Page::STATUS_ARCHIVED,
         ]);
     }
 

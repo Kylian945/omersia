@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Omersia\CMS\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
+use Omersia\CMS\Models\Page;
 
 final class PageStoreRequest extends FormRequest
 {
@@ -22,6 +24,7 @@ final class PageStoreRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'slug' => ['required', 'string', 'max:255'],
             'type' => ['nullable', 'string'],
+            'status' => ['nullable', Rule::in(Page::STATUSES)],
             'is_active' => ['nullable', 'boolean'],
             'is_home' => ['nullable', 'boolean'],
             'content_json' => ['nullable', 'string'],
@@ -44,6 +47,7 @@ final class PageStoreRequest extends FormRequest
             'slug.string' => 'Le slug doit être une chaîne de caractères.',
             'slug.max' => 'Le slug ne peut pas dépasser 255 caractères.',
             'type.string' => 'Le type doit être une chaîne de caractères.',
+            'status.in' => 'Le statut doit être draft, published ou archived.',
             'is_active.boolean' => 'Le statut actif doit être vrai ou faux.',
             'is_home.boolean' => 'Le statut page d\'accueil doit être vrai ou faux.',
             'content_json.string' => 'Le contenu JSON doit être une chaîne de caractères.',

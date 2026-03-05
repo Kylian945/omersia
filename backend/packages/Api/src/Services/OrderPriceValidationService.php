@@ -15,8 +15,50 @@ use Omersia\Sales\Models\Discount;
 use Omersia\Sales\Models\DiscountUsage;
 
 /**
- * Service de validation des prix côté serveur
- * Prévient les manipulations de prix (DCA-012)
+ * Service de validation des prix côté serveur.
+ * Prévient les manipulations de prix (DCA-012).
+ *
+ * ## Flux de validation
+ *
+ * 1. Les prix unitaires soumis par le frontend sont comparés aux prix DB réels
+ *    (tolérance d'arrondi 0,01 €). Un écart lève PriceTamperingException.
+ *
+ * 2. Les discounts sont recalculés *entièrement côté serveur* :
+ *    - Discounts automatiques actifs → éligibilité réévaluée via DiscountEvaluationService
+ *    - Codes manuels soumis → validité, dates, limites d'usage revérifiées
+ *    Le montant total (`realDiscountTotal`) est la somme de tous les discounts applicables.
+ *
+ * 3. Si |realDiscountTotal - dto.discountTotal| > 0,01 € → PriceTamperingException (DCA-012).
+ *
+ * ## Comportement attendu sur un "mismatch"
+ *
+ * - **Inflation du discount (fraud)** : le frontend soumet discountTotal > valeur serveur.
+ *   → PriceTamperingException. La commande est refusée.
+ *
+ * - **Discount automatique manquant côté frontend** : un nouveau discount automatique a
+ *   été activé entre le chargement du panier et la confirmation. Le serveur calcule un
+ *   discount que le frontend n'a pas inclus → mismatch → exception.
+ *   Le frontend DOIT appeler POST /cart/apply-automatic-discounts avant de soumettre
+ *   la commande pour synchroniser les valeurs.
+ *
+ * - **Code expiré entre la saisie et la soumission** : le serveur rejette le code
+ *   (PriceTamperingException "not active" / "has expired"). Le frontend doit présenter
+ *   l'erreur à l'utilisateur et recalculer le panier.
+ *
+ * - **Usage limit dépassé (discount automatique)** : le discount est silencieusement
+ *   ignoré dans la somme serveur. Si le frontend a inclus ce montant, → mismatch
+ *   → exception. Le frontend doit appeler POST /cart/apply-automatic-discounts
+ *   juste avant la création de commande pour avoir les valeurs à jour.
+ *
+ * ## Risque résiduel connu
+ *
+ * `buildDiscountApplicationDTO` passe les prix du DTO soumis (non les `$validatedItems`)
+ * à DiscountEvaluationService. C'est sans danger car `validateItemPrices` a déjà confirmé
+ * que les prix soumis = prix DB, mais l'ordre d'appel est implicitement couplé.
+ * Ne pas réordonner les étapes dans `validateAndRecalculate()` sans revérifier.
+ *
+ * @see DiscountEvaluationService
+ * @see \Omersia\Api\Exceptions\PriceTamperingException
  */
 class OrderPriceValidationService
 {

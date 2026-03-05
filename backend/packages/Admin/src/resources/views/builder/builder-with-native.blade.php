@@ -19,7 +19,7 @@
         })'
         x-init="init()"
         class="h-[calc(100vh-6rem)] flex flex-col gap-3"
-        data-frontend-url="{{ config('app.url', 'http://localhost:8000') }}"
+        data-frontend-url="{{ config('storefront.frontend_url', 'http://localhost:3000') }}"
         data-page-slug="{{ $page->slug ?? $page->translations->first()->slug ?? 'default' }}"
         data-page-type="{{ $pageType ?? 'page' }}">
 

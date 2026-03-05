@@ -35,6 +35,7 @@ class PageStoreRequestTest extends TestCase
             'title' => 'Complete',
             'slug' => 'complete',
             'type' => 'legal',
+            'status' => 'published',
             'is_active' => true,
             'is_home' => false,
             'content_json' => json_encode(['sections' => []]),
@@ -43,6 +44,19 @@ class PageStoreRequestTest extends TestCase
             'noindex' => false,
         ]);
         $this->assertFalse($validator->fails());
+    }
+
+    #[Test]
+    public function it_fails_when_status_is_invalid(): void
+    {
+        $validator = $this->validate([
+            'title' => 'Page',
+            'slug' => 'page',
+            'status' => 'invalid-status',
+        ]);
+
+        $this->assertTrue($validator->fails());
+        $this->assertArrayHasKey('status', $validator->errors()->toArray());
     }
 
     #[Test]

@@ -19,8 +19,9 @@
             serverWidgets: @json($builderWidgets),
         })'
         x-init="init()"
+        @keydown.escape.window="closeHistoryDrawer(); closeRestoreModal()"
         class="h-[calc(100vh-6rem)] flex flex-col gap-3"
-        data-frontend-url="{{ config('app.url', 'http://localhost:8000') }}"
+        data-frontend-url="{{ config('storefront.frontend_url', 'http://localhost:3000') }}"
         data-page-slug="{{ $page->slug ?? $page->translations->first()->slug ?? 'default' }}">
         {{-- Barre supérieure type Shopify --}}
         <div class="flex items-center justify-between bg-white border border-black/5 rounded-2xl px-4 py-3">
@@ -50,6 +51,18 @@
                     <x-lucide-eye class="w-3.5 h-3.5" />
                     Aperçu
                 </button>
+                @if(! is_null($versionHistory ?? null))
+                    <button type="button" @click="openHistoryDrawer()"
+                        class="inline-flex items-center gap-1 rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50">
+                        <x-lucide-history class="w-3.5 h-3.5" />
+                        Historique
+                        @if(method_exists($versionHistory, 'total'))
+                            <span class="ml-1 inline-flex min-w-[18px] items-center justify-center rounded-full bg-neutral-900 px-1.5 py-0.5 text-xxs text-white">
+                                {{ $versionHistory->total() }}
+                            </span>
+                        @endif
+                    </button>
+                @endif
                 <button type="button" @click="save()"
                     class="inline-flex items-center gap-1 rounded-lg bg-black text-white px-4 py-1.5 text-xs font-medium hover:bg-neutral-900 disabled:opacity-60"
                     x-text="saving ? 'Enregistrement…' : 'Enregistrer'" :disabled="saving">
@@ -551,6 +564,172 @@
 
         {{-- Media Picker Modal --}}
         <x-admin::media-picker name="media-picker" />
+
+        @if(! is_null($versionHistory ?? null))
+            @php
+                $history = $versionHistory;
+                $diffs = $versionDiffsById ?? [];
+            @endphp
+
+            <div x-show="historyDrawerOpen" x-transition.opacity
+                class="fixed inset-0 z-50 bg-black/35"
+                @click="closeHistoryDrawer()"
+                style="display: none;"></div>
+
+            <aside x-show="historyDrawerOpen"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="translate-x-full"
+                x-transition:enter-end="translate-x-0"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="translate-x-0"
+                x-transition:leave-end="translate-x-full"
+                class="fixed right-0 top-0 z-[60] h-screen w-full max-w-2xl bg-white border-l border-neutral-200 shadow-2xl flex flex-col"
+                style="display: none;">
+                <div class="px-4 py-3 border-b border-neutral-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-neutral-900">Historique des versions</p>
+                        <p class="text-xxs text-neutral-500">Comparez et restaurez sans quitter le builder.</p>
+                    </div>
+                    <button type="button"
+                        @click="closeHistoryDrawer()"
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-neutral-200 text-neutral-600 hover:bg-neutral-50">
+                        <x-lucide-x class="w-4 h-4" />
+                    </button>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-4 space-y-3">
+                    @forelse($history as $version)
+                        @php
+                            $diff = $diffs[$version->id] ?? ['added' => [], 'removed' => [], 'changed' => [], 'has_changes' => false];
+                            $changeCount = count($diff['added']) + count($diff['removed']) + count($diff['changed']);
+                        @endphp
+                        <details class="rounded-xl border border-neutral-200 bg-white">
+                            <summary class="list-none cursor-pointer px-3 py-2.5 flex items-start justify-between gap-2">
+                                <div>
+                                    <p class="text-xs font-medium text-neutral-900">
+                                        {{ $version->label ?: 'Version sans label' }}
+                                    </p>
+                                    <p class="text-xxs text-neutral-500 mt-0.5">
+                                        {{ $version->created_at?->format('d/m/Y H:i') ?? '-' }}
+                                        · {{ $changeCount }} changement(s)
+                                    </p>
+                                </div>
+                                <span class="text-neutral-400 text-sm">›</span>
+                            </summary>
+
+                            <div class="px-3 pb-3 border-t border-neutral-100 space-y-2">
+                                @if (! $diff['has_changes'])
+                                    <p class="text-xxs text-neutral-500 pt-2">Aucune différence avec la version actuelle.</p>
+                                @else
+                                    @if(count($diff['changed']) > 0)
+                                        <div class="space-y-1 pt-2">
+                                            <p class="text-xxs font-semibold text-amber-700">Modifications</p>
+                                            @foreach($diff['changed'] as $item)
+                                                <div class="rounded-md border border-amber-100 bg-amber-50 px-2 py-1">
+                                                    <div class="font-mono text-xxs text-amber-800">{{ $item['path'] }}</div>
+                                                    <div class="text-xxs text-amber-700">Avant : {{ $item['old'] }}</div>
+                                                    <div class="text-xxs text-amber-700">Après : {{ $item['new'] }}</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    @if(count($diff['added']) > 0)
+                                        <div class="space-y-1">
+                                            <p class="text-xxs font-semibold text-emerald-700">Ajouts</p>
+                                            @foreach($diff['added'] as $item)
+                                                <div class="rounded-md border border-emerald-100 bg-emerald-50 px-2 py-1">
+                                                    <div class="font-mono text-xxs text-emerald-800">{{ $item['path'] }}</div>
+                                                    <div class="text-xxs text-emerald-700">{{ $item['value'] }}</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+
+                                    @if(count($diff['removed']) > 0)
+                                        <div class="space-y-1">
+                                            <p class="text-xxs font-semibold text-red-700">Suppressions</p>
+                                            @foreach($diff['removed'] as $item)
+                                                <div class="rounded-md border border-red-100 bg-red-50 px-2 py-1">
+                                                    <div class="font-mono text-xxs text-red-800">{{ $item['path'] }}</div>
+                                                    <div class="text-xxs text-red-700">{{ $item['value'] }}</div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                @endif
+
+                                <button type="button"
+                                    data-restore-url="{{ route('pages.versions.restore', ['page' => $page->id, 'version' => $version->id, 'locale' => $locale ?? 'fr']) }}"
+                                    data-version-label="{{ e($version->label ?: 'Version sans label') }}"
+                                    @click="openRestoreModal($event.currentTarget.dataset.restoreUrl, $event.currentTarget.dataset.versionLabel)"
+                                    class="w-full rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50">
+                                    Restaurer cette version
+                                </button>
+                            </div>
+                        </details>
+                    @empty
+                        <div class="rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-500">
+                            Aucune version disponible pour cette page.
+                        </div>
+                    @endforelse
+                </div>
+
+                @if(method_exists($history, 'hasPages') && $history->hasPages())
+                    <div class="px-4 py-3 border-t border-neutral-100 text-xs">
+                        {{ $history->appends(['locale' => $locale ?? 'fr'])->links() }}
+                    </div>
+                @endif
+            </aside>
+
+            <div x-show="restoreModalOpen" x-transition.opacity
+                class="fixed inset-0 z-[70] bg-black/40"
+                @click="closeRestoreModal()"
+                style="display: none;"></div>
+
+            <div x-show="restoreModalOpen"
+                x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 scale-95"
+                x-transition:enter-end="opacity-100 scale-100"
+                x-transition:leave="transition ease-in duration-150"
+                x-transition:leave-start="opacity-100 scale-100"
+                x-transition:leave-end="opacity-0 scale-95"
+                class="fixed inset-0 z-[80] flex items-center justify-center p-4"
+                style="display: none;">
+                <div class="w-full max-w-md rounded-2xl bg-white border border-neutral-200 shadow-2xl"
+                    @click.stop>
+                    <div class="px-4 py-3 border-b border-neutral-100">
+                        <p class="text-sm font-semibold text-neutral-900">Restaurer une version</p>
+                        <p class="text-xs text-neutral-500 mt-0.5">
+                            <span class="font-medium text-neutral-700" x-text="restoreVersionLabel"></span>
+                        </p>
+                    </div>
+
+                    <div class="px-4 py-3">
+                        <p class="text-xs text-neutral-600">
+                            Le contenu actuel sera sauvegardé automatiquement avant restauration.
+                        </p>
+                    </div>
+
+                    <div class="px-4 py-3 border-t border-neutral-100 flex items-center justify-end gap-2">
+                        <button type="button"
+                            @click="closeRestoreModal()"
+                            class="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-50">
+                            Annuler
+                        </button>
+                        <form method="POST" :action="restoreAction || '#'" @submit="if (!restoreAction) { $event.preventDefault(); }">
+                            @csrf
+                            <input type="hidden" name="return_to_builder" value="1">
+                            <button type="submit"
+                                :disabled="!restoreAction"
+                                class="rounded-lg bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-900 disabled:opacity-60 disabled:cursor-not-allowed">
+                                Confirmer la restauration
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 @endsection
 

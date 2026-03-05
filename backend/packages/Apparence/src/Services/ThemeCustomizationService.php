@@ -391,16 +391,20 @@ class ThemeCustomizationService
         $schemaIndex = $this->buildSettingsSchemaIndex($this->getThemeSettingsSchema($theme));
 
         foreach ($settings as $key => $value) {
+            $schemaMeta = $schemaIndex[$key] ?? null;
             $setting = $existingSettings->get($key);
 
             if ($setting) {
                 $setting->setEncodedValue($value);
+                if ($schemaMeta !== null) {
+                    $setting->group = $schemaMeta['group'];
+                    $setting->type = $schemaMeta['type'];
+                }
                 $setting->save();
 
                 continue;
             }
 
-            $schemaMeta = $schemaIndex[$key] ?? null;
             $newSetting = new ThemeSetting([
                 'theme_id' => $theme->id,
                 'key' => $key,
@@ -529,7 +533,13 @@ class ThemeCustomizationService
      */
     public function clearThemeCache(Theme $theme): void
     {
-        Cache::forget("theme_settings_{$theme->shop_id}");
+        $shopId = (int) $theme->shop_id;
+        $settingsKey = "theme_settings_{$shopId}";
+        $apiKey = "theme.settings.full.{$shopId}";
+
+        Cache::forget($settingsKey);
+        Cache::forget($apiKey);
+        Cache::tags(['shop', 'theme'])->forget($apiKey);
     }
 
     /**

@@ -7,6 +7,7 @@ namespace Omersia\CMS\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property int $id
@@ -20,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property mixed $meta_description
  * @property bool $noindex
  * @property-read Page|null $page
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, PageVersion> $versions
  */
 class PageTranslation extends Model
 {
@@ -52,5 +54,15 @@ class PageTranslation extends Model
     public function page(): BelongsTo
     {
         return $this->belongsTo(Page::class);
+    }
+
+    /**
+     * @return HasMany<PageVersion, $this>
+     */
+    public function versions(): HasMany
+    {
+        return $this->hasMany(PageVersion::class, 'page_translation_id')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id');
     }
 }

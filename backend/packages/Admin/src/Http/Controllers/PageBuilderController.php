@@ -10,11 +10,13 @@ use Omersia\Admin\Config\BuilderWidgets;
 use Omersia\CMS\Models\Page;
 use Omersia\CMS\Models\PageTranslation;
 use Omersia\CMS\Services\PageService;
+use Omersia\CMS\Services\PageVersioningService;
 
 class PageBuilderController extends Controller
 {
     public function __construct(
         private readonly PageService $pageService,
+        private readonly PageVersioningService $pageVersioningService,
     ) {}
 
     public function edit(Page $page, Request $request)
@@ -29,6 +31,18 @@ class PageBuilderController extends Controller
         $content = ($translation instanceof PageTranslation && is_array($translation->content_json))
             ? $translation->content_json
             : ['sections' => []];
+
+        $versionHistory = null;
+        $versionDiffsById = [];
+        if ($translation instanceof PageTranslation) {
+            $versionHistory = $this->pageVersioningService->getVersions($translation, 10);
+            foreach ($versionHistory as $version) {
+                $versionDiffsById[$version->id] = $this->pageVersioningService->buildVisualDiff(
+                    is_array($version->content_json) ? $version->content_json : [],
+                    $content
+                );
+            }
+        }
         $widgets = array_values(BuilderWidgets::all());
 
         return view('admin::builder.builder', [
@@ -42,6 +56,8 @@ class PageBuilderController extends Controller
             'widgets' => $widgets,
             'widgetCategories' => BuilderWidgets::grouped(),
             'categoryLabels' => BuilderWidgets::categoryLabels(),
+            'versionHistory' => $versionHistory,
+            'versionDiffsById' => $versionDiffsById,
         ]);
     }
 

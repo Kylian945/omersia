@@ -86,31 +86,23 @@ Route::middleware('api.key')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | PAGES
+    | PAGES / ECOMMERCE PAGES / MENUS (CMS public — throttle:cms-public)
     |--------------------------------------------------------------------------
     */
-    Route::get('/pages', [PageController::class, 'index'])
-        ->name('storefront.pages.index');
-    Route::get('/pages/{slug}', [PageController::class, 'show'])
-        ->name('storefront.pages.show');
+    Route::middleware('throttle:cms-public')->group(function () {
+        Route::get('/pages', [PageController::class, 'index'])
+            ->name('storefront.pages.index');
+        Route::get('/pages/{slug}', [PageController::class, 'show'])
+            ->name('storefront.pages.show');
 
-    /*
-    |--------------------------------------------------------------------------
-    | ECOMMERCE PAGES
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/ecommerce-pages/{slug}', [EcommercePageApiController::class, 'getBySlug'])
-        ->name('storefront.ecommerce-pages.show');
-    Route::get('/ecommerce-pages/{type}/{slug?}', [EcommercePageApiController::class, 'show'])
-        ->name('storefront.ecommerce-pages.show-by-type');
+        Route::get('/ecommerce-pages/{slug}', [EcommercePageApiController::class, 'getBySlug'])
+            ->name('storefront.ecommerce-pages.show');
+        Route::get('/ecommerce-pages/{type}/{slug?}', [EcommercePageApiController::class, 'show'])
+            ->name('storefront.ecommerce-pages.show-by-type');
 
-    /*
-    |--------------------------------------------------------------------------
-    | MENUS
-    |--------------------------------------------------------------------------
-    */
-    Route::get('/menus/{slug}', [MenuController::class, 'show'])
-        ->name('storefront.menus.show');
+        Route::get('/menus/{slug}', [MenuController::class, 'show'])
+            ->name('storefront.menus.show');
+    });
 
     /*
     |--------------------------------------------------------------------------

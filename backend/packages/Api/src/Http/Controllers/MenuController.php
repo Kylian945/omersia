@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Omersia\Api\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Omersia\Apparence\Models\Menu;
 use OpenApi\Annotations as OA;
 
@@ -183,112 +185,126 @@ class MenuController extends Controller
     {
         $locale = $request->get('locale', 'fr');
 
-        $menu = Menu::query()
-            ->where('slug', $slug)
-            ->where('is_active', true)
-            ->with([
-                'items' => function ($q) use ($locale) {
-                    $q->where('is_active', true)
-                        ->orderBy('position')
-                        ->orderBy('id')
-                        ->with([
-                            // Traduction de la catégorie liée
-                            'category.translations' => function ($t) use ($locale) {
-                                $t->where('locale', $locale);
-                            },
-                            // Niveau 2 : enfants directs
-                            'category.children.translations' => function ($t) use ($locale) {
-                                $t->where('locale', $locale);
-                            },
+        $cacheKey = "menu.{$slug}.{$locale}";
+        $result = Cache::tags(['menus'])->remember($cacheKey, 1800, function () use ($slug, $locale) {
+            $menu = Menu::query()
+                ->where('slug', $slug)
+                ->where('is_active', true)
+                ->with([
+                    'items' => function ($q) use ($locale) {
+                        $q->where('is_active', true)
+                            ->where(function (Builder $itemQuery): void {
+                                $itemQuery
+                                    ->where('type', '!=', 'cms_page')
+                                    ->orWhereHas('cmsPage', function (Builder $pageQuery): void {
+                                        $pageQuery
+                                            ->where('is_active', true)
+                                            ->published();
+                                    });
+                            })
+                            ->orderBy('position')
+                            ->orderBy('id')
+                            ->with([
+                                // Traduction de la catégorie liée
+                                'category.translations' => function ($t) use ($locale) {
+                                    $t->where('locale', $locale);
+                                },
+                                // Niveau 2 : enfants directs
+                                'category.children.translations' => function ($t) use ($locale) {
+                                    $t->where('locale', $locale);
+                                },
+                                // Niveau 3 : enfants des enfants
+                                'category.children.children.translations' => function ($t) use ($locale) {
+                                    $t->where('locale', $locale);
+                                },
+                                'cmsPage.translations' => function ($t) use ($locale) {
+                                    $t->where('locale', $locale);
+                                },
+                            ]);
+                    },
+                ])
+                ->firstOrFail();
+
+            $items = $menu->items->map(function ($item) {
+                $data = [
+                    'id' => $item->id,
+                    'label' => $item->label,
+                    'type' => $item->type,
+                    'url' => $item->url,
+                ];
+
+                if ($item->type === 'category' && $item->category) {
+                    $translation = $item->category->translations->first();
+                    $slug = $translation?->slug;
+
+                    $categoryData = [
+                        'id' => $item->category->id,
+                        'slug' => $slug,
+                        'name' => $translation?->name,
+                    ];
+
+                    // Niveau 2 : enfants directs
+                    if ($item->category->relationLoaded('children') && $item->category->children->isNotEmpty()) {
+                        $categoryData['children'] = $item->category->children->map(function ($child) {
+                            $childTranslation = $child->translations->first();
+
+                            $childData = [
+                                'id' => $child->id,
+                                'slug' => $childTranslation?->slug,
+                                'name' => $childTranslation?->name,
+                            ];
+
                             // Niveau 3 : enfants des enfants
-                            'category.children.children.translations' => function ($t) use ($locale) {
-                                $t->where('locale', $locale);
-                            },
-                            'cmsPage.translations' => function ($t) use ($locale) {
-                                $t->where('locale', $locale);
-                            },
-                        ]);
-                },
-            ])
-            ->firstOrFail();
+                            if ($child->relationLoaded('children') && $child->children->isNotEmpty()) {
+                                $childData['children'] = $child->children->map(function ($grandChild) {
+                                    $gcTranslation = $grandChild->translations->first();
 
-        $items = $menu->items->map(function ($item) {
-            $data = [
-                'id' => $item->id,
-                'label' => $item->label,
-                'type' => $item->type,
-                'url' => $item->url,
+                                    return [
+                                        'id' => $grandChild->id,
+                                        'slug' => $gcTranslation?->slug,
+                                        'name' => $gcTranslation?->name,
+                                    ];
+                                })->values()->all();
+                            }
+
+                            return $childData;
+                        })->values()->all();
+                    }
+
+                    $data['category'] = $categoryData;
+
+                    // URL sécurisée auto pour les catégories
+                    if (! $data['url'] && $slug) {
+                        $data['url'] = '/categories/'.$slug;
+                    }
+                }
+
+                if ($item->type === 'cms_page' && $item->cmsPage) {
+                    $translation = $item->cmsPage->translations->first();
+                    $slug = $translation?->slug;
+
+                    $data['cms_page'] = [
+                        'id' => $item->cmsPage->id,
+                        'slug' => $slug,
+                        'title' => $translation?->title,
+                    ];
+
+                    if (! $data['url'] && $slug) {
+                        $data['url'] = '/content/'.$slug;
+                    }
+                }
+
+                return $data;
+            })->values();
+
+            return [
+                'slug' => $menu->slug,
+                'name' => $menu->name,
+                'location' => $menu->location,
+                'items' => $items->all(),
             ];
+        });
 
-            if ($item->type === 'category' && $item->category) {
-                $translation = $item->category->translations->first();
-                $slug = $translation?->slug;
-
-                $categoryData = [
-                    'id' => $item->category->id,
-                    'slug' => $slug,
-                    'name' => $translation?->name,
-                ];
-
-                // Niveau 2 : enfants directs
-                if ($item->category->relationLoaded('children') && $item->category->children->isNotEmpty()) {
-                    $categoryData['children'] = $item->category->children->map(function ($child) {
-                        $childTranslation = $child->translations->first();
-
-                        $childData = [
-                            'id' => $child->id,
-                            'slug' => $childTranslation?->slug,
-                            'name' => $childTranslation?->name,
-                        ];
-
-                        // Niveau 3 : enfants des enfants
-                        if ($child->relationLoaded('children') && $child->children->isNotEmpty()) {
-                            $childData['children'] = $child->children->map(function ($grandChild) {
-                                $gcTranslation = $grandChild->translations->first();
-
-                                return [
-                                    'id' => $grandChild->id,
-                                    'slug' => $gcTranslation?->slug,
-                                    'name' => $gcTranslation?->name,
-                                ];
-                            })->values()->all();
-                        }
-
-                        return $childData;
-                    })->values()->all();
-                }
-
-                $data['category'] = $categoryData;
-
-                // URL sécurisée auto pour les catégories
-                if (! $data['url'] && $slug) {
-                    $data['url'] = '/categories/'.$slug;
-                }
-            }
-
-            if ($item->type === 'cms_page' && $item->cmsPage) {
-                $translation = $item->cmsPage->translations->first();
-                $slug = $translation?->slug;
-
-                $data['cms_page'] = [
-                    'id' => $item->cmsPage->id,
-                    'slug' => $slug,
-                    'title' => $translation?->title,
-                ];
-
-                if (! $data['url'] && $slug) {
-                    $data['url'] = '/content/'.$slug;
-                }
-            }
-
-            return $data;
-        })->values();
-
-        return response()->json([
-            'slug' => $menu->slug,
-            'name' => $menu->name,
-            'location' => $menu->location,
-            'items' => $items,
-        ]);
+        return response()->json($result);
     }
 }

@@ -36,6 +36,7 @@ class PageUpdateRequestTest extends TestCase
             'title' => 'Updated',
             'slug' => 'updated',
             'type' => 'page',
+            'status' => 'published',
             'is_active' => true,
             'is_home' => false,
             'content_json' => json_encode(['sections' => []]),
@@ -44,6 +45,19 @@ class PageUpdateRequestTest extends TestCase
             'noindex' => true,
         ]);
         $this->assertFalse($validator->fails());
+    }
+
+    #[Test]
+    public function it_fails_when_status_is_invalid(): void
+    {
+        $validator = $this->validate([
+            'title' => 'Updated',
+            'slug' => 'updated',
+            'status' => 'invalid-status',
+        ]);
+
+        $this->assertTrue($validator->fails());
+        $this->assertArrayHasKey('status', $validator->errors()->toArray());
     }
 
     #[Test]

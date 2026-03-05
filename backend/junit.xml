@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <testsuites>
-  <testsuite name="Omersia\Admin\Tests\Unit\AdminServiceProviderContractTest" file="/var/www/html/packages/Admin/tests/Unit/AdminServiceProviderContractTest.php" tests="1" assertions="2" errors="0" failures="0" skipped="0" time="0.092307">
-    <testcase name="it_exposes_a_valid_laravel_service_provider_class" file="/var/www/html/packages/Admin/tests/Unit/AdminServiceProviderContractTest.php" line="15" class="Omersia\Admin\Tests\Unit\AdminServiceProviderContractTest" classname="Omersia.Admin.Tests.Unit.AdminServiceProviderContractTest" assertions="2" time="0.092307"/>
+  <testsuite name="Omersia\CMS\Tests\Unit\PageVersioningServiceTest" file="/Users/kylian/Documents/dev/kp-pro/omersia/backend/packages/CMS/tests/Unit/PageVersioningServiceTest.php" tests="3" assertions="7" errors="0" failures="0" skipped="0" time="0.275239">
+    <testcase name="it_creates_snapshot_for_translation" file="/Users/kylian/Documents/dev/kp-pro/omersia/backend/packages/CMS/tests/Unit/PageVersioningServiceTest.php" line="32" class="Omersia\CMS\Tests\Unit\PageVersioningServiceTest" classname="Omersia.CMS.Tests.Unit.PageVersioningServiceTest" assertions="2" time="0.215789"/>
+    <testcase name="it_restores_a_version_and_saves_current_snapshot_before_restore" file="/Users/kylian/Documents/dev/kp-pro/omersia/backend/packages/CMS/tests/Unit/PageVersioningServiceTest.php" line="52" class="Omersia\CMS\Tests\Unit\PageVersioningServiceTest" classname="Omersia.CMS.Tests.Unit.PageVersioningServiceTest" assertions="2" time="0.030388"/>
+    <testcase name="build_visual_diff_returns_added_removed_and_changed_items" file="/Users/kylian/Documents/dev/kp-pro/omersia/backend/packages/CMS/tests/Unit/PageVersioningServiceTest.php" line="77" class="Omersia\CMS\Tests\Unit\PageVersioningServiceTest" classname="Omersia.CMS.Tests.Unit.PageVersioningServiceTest" assertions="3" time="0.029063"/>
   </testsuite>
 </testsuites>

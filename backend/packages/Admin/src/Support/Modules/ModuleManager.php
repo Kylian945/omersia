@@ -16,16 +16,26 @@ class ModuleManager
 
     public function all(): array
     {
-        return Cache::remember('modules.all', 60, function () {
-            $modules = [];
-            foreach (glob($this->path.'/*/*/module.json') as $manifest) {
-                $json = json_decode(file_get_contents($manifest), true) ?: [];
-                $json['base_path'] = dirname($manifest);
-                $modules[$json['slug']] = $json;
-            }
+        try {
+            return Cache::remember('modules.all', 60, function () {
+                return $this->scanModules();
+            });
+        } catch (\Exception $e) {
+            // Cache indisponible (ex: Redis non accessible sur le host lors de package:discover)
+            return $this->scanModules();
+        }
+    }
 
-            return $modules;
-        });
+    private function scanModules(): array
+    {
+        $modules = [];
+        foreach (glob($this->path.'/*/*/module.json') as $manifest) {
+            $json = json_decode(file_get_contents($manifest), true) ?: [];
+            $json['base_path'] = dirname($manifest);
+            $modules[$json['slug']] = $json;
+        }
+
+        return $modules;
     }
 
     public function enabled(): array

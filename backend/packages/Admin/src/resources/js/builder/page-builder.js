@@ -158,6 +158,10 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
 
         // View mode state (desktop/mobile)
         viewMode: 'desktop',
+        historyDrawerOpen: false,
+        restoreModalOpen: false,
+        restoreAction: '',
+        restoreVersionLabel: '',
 
         // Drag & Drop state
         dragOverColumn: null,
@@ -1692,6 +1696,26 @@ export function pageBuilder({ initial, saveUrl, csrf, categoriesUrl, productsUrl
 
         closePreview() {
             window.dispatchEvent(new CustomEvent('preview-close'));
+        },
+
+        openHistoryDrawer() {
+            this.historyDrawerOpen = true;
+        },
+
+        closeHistoryDrawer() {
+            this.historyDrawerOpen = false;
+        },
+
+        openRestoreModal(action, label = 'cette version') {
+            this.restoreAction = action;
+            this.restoreVersionLabel = label;
+            this.restoreModalOpen = true;
+        },
+
+        closeRestoreModal() {
+            this.restoreModalOpen = false;
+            this.restoreAction = '';
+            this.restoreVersionLabel = '';
         },
     };
 };

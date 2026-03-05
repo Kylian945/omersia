@@ -43,6 +43,16 @@ class SecurityHeaders
 
         $isProduction = app()->environment('production');
 
+        $frameSources = [
+            "'self'",
+            'https://js.stripe.com',
+            'https://hooks.stripe.com',
+        ];
+        $storefrontFrameSource = $this->normalizeFrameSource((string) config('storefront.frontend_url', ''));
+        if ($storefrontFrameSource !== null && ! in_array($storefrontFrameSource, $frameSources, true)) {
+            $frameSources[] = $storefrontFrameSource;
+        }
+
         $cspDirectives = [
             "default-src 'self'",
             "script-src 'self' 'nonce-{$nonce}' https://js.stripe.com https://maps.googleapis.com",
@@ -50,7 +60,7 @@ class SecurityHeaders
             "img-src 'self' data: https:",
             "font-src 'self' data: https://fonts.gstatic.com",
             "connect-src 'self' https://api.stripe.com https://*.meilisearch.com",
-            'frame-src https://js.stripe.com https://hooks.stripe.com',
+            'frame-src '.implode(' ', $frameSources),
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",
@@ -70,5 +80,33 @@ class SecurityHeaders
         }
 
         return $response;
+    }
+
+    private function normalizeFrameSource(string $url): ?string
+    {
+        $trimmed = trim($url);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        $parts = parse_url($trimmed);
+        if (! is_array($parts)) {
+            return null;
+        }
+
+        $scheme = isset($parts['scheme']) ? strtolower((string) $parts['scheme']) : '';
+        $host = isset($parts['host']) ? strtolower((string) $parts['host']) : '';
+        $port = isset($parts['port']) ? (int) $parts['port'] : null;
+
+        if ($scheme === '' || $host === '') {
+            return null;
+        }
+
+        $source = "{$scheme}://{$host}";
+        if ($port !== null) {
+            $source .= ":{$port}";
+        }
+
+        return $source;
     }
 }

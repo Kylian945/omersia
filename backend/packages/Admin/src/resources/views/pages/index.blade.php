@@ -29,6 +29,7 @@
                     <th class="py-2 px-3 text-left font-medium text-gray-400">Slug</th>
                     <th class="py-2 px-3 text-left font-medium text-gray-400">Type</th>
                     <th class="py-2 px-3 text-left font-medium text-gray-400">Visibilité</th>
+                    <th class="py-2 px-3 text-left font-medium text-gray-400">Statut</th>
                     <th class="py-2 px-3 text-left font-medium text-gray-400">Home</th>
                     <th class="py-2 px-3 text-right font-medium text-gray-400">Actions</th>
                 </tr>
@@ -62,6 +63,21 @@
                             @endif
                         </td>
                         <td class="py-2 px-3">
+                            @if ($page->status === 'published')
+                                <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xxxs text-blue-700">
+                                    Publié
+                                </span>
+                            @elseif($page->status === 'archived')
+                                <span class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xxxs text-amber-700">
+                                    Archivé
+                                </span>
+                            @else
+                                <span class="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-xxxs text-gray-500">
+                                    Brouillon
+                                </span>
+                            @endif
+                        </td>
+                        <td class="py-2 px-3">
                             @if ($page->is_home)
                                 <span class="text-xs">🏠</span>
                             @endif
@@ -82,7 +98,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td class="py-4 px-3 text-center text-xs text-gray-500" colspan="6">
+                        <td class="py-4 px-3 text-center text-xs text-gray-500" colspan="7">
                             Aucune page créée. Ajoutez vos pages de contenu pour compléter votre boutique.
                         </td>
                     </tr>

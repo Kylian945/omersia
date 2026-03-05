@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getPageBySlug } from "@/lib/api-pages";
 import { PageBuilderWithTheme } from "@/components/builder/PageBuilderWithTheme";
 import { Header } from "@/components/common/Header";
 import { Footer } from "@/components/common/Footer";
-import { Container } from "@/components/common/Container";
 
 type Props = {
     params: Promise<{ slug: string }>;
@@ -24,21 +24,7 @@ export default async function ContentPage({ params }: Props) {
     const page = await getPageBySlug(slug, "fr");
 
     if (!page) {
-        return (
-            <>
-                <Header />
-                <main className="px-6 py-10 flex-1">
-                    <Container>
-                        <h1 className="text-2xl font-semibold">Page introuvable</h1>
-                        <p className="mt-2 text-sm text-neutral-600">
-                            La page demandée n’existe pas ou n’est plus disponible.
-                        </p>
-                    </Container>
-                </main>
-                <Footer />
-            </>
-
-        );
+        notFound();
     }
 
     return (

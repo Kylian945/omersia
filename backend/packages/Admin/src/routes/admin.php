@@ -13,6 +13,7 @@ use Omersia\Admin\Http\Controllers\MediaLibraryController;
 use Omersia\Admin\Http\Controllers\MeilisearchController;
 use Omersia\Admin\Http\Controllers\PageBuilderController;
 use Omersia\Admin\Http\Controllers\PageController;
+use Omersia\Admin\Http\Controllers\PageVersionController;
 use Omersia\Admin\Http\Controllers\ProductAiController;
 use Omersia\Admin\Http\Controllers\SettingsController;
 // Customer Package Controllers
@@ -77,7 +78,7 @@ Route::post('products/ai/generate-image', [ProductAiController::class, 'generate
     ->name('products.ai.generate-image')
     ->middleware('throttle:10,1');
 Route::resource('categories', CategoryController::class);
-Route::resource('pages', PageController::class);
+Route::resource('pages', PageController::class)->middleware(['throttle:60,1']);
 Route::resource('discounts', DiscountController::class);
 Route::resource('customer-groups', CustomerGroupController::class)->except(['show']);
 
@@ -124,7 +125,13 @@ Route::post('/shops', [ShopController::class, 'store'])->name('admin.shops.store
 Route::get('/pages/{page}/builder', [PageBuilderController::class, 'edit'])
     ->name('pages.builder');
 Route::post('/pages/{page}/builder', [PageBuilderController::class, 'update'])
-    ->name('pages.builder.update');
+    ->name('pages.builder.update')
+    ->middleware('throttle:30,1');
+Route::get('/pages/{page}/versions', [PageVersionController::class, 'index'])
+    ->name('pages.versions.index');
+Route::post('/pages/{page}/versions/{version}/restore', [PageVersionController::class, 'restore'])
+    ->name('pages.versions.restore')
+    ->middleware('throttle:30,1');
 
 // Apparence
 Route::prefix('apparence')
@@ -149,11 +156,13 @@ Route::prefix('apparence')
         // E-commerce Pages
         Route::resource('ecommerce-pages', EcommercePageController::class)
             ->except(['show'])
-            ->parameters(['ecommerce-pages' => 'page']);
+            ->parameters(['ecommerce-pages' => 'page'])
+            ->middleware(['throttle:60,1']);
         Route::get('/ecommerce-pages/{page}/builder', [EcommercePageBuilderController::class, 'edit'])
             ->name('ecommerce-pages.builder');
         Route::post('/ecommerce-pages/{page}/builder', [EcommercePageBuilderController::class, 'update'])
-            ->name('ecommerce-pages.builder.update');
+            ->name('ecommerce-pages.builder.update')
+            ->middleware('throttle:30,1');
 
         // Media Library
         Route::get('/media', [MediaLibraryController::class, 'index'])->name('media.index');

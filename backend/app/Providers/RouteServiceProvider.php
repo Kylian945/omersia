@@ -64,6 +64,11 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perHour(50)->by($request->user()?->id ?: $request->ip());
         });
 
+        // Rate limit pour les pages CMS publiques (lecture seule, frontend storefront)
+        RateLimiter::for('cms-public', function (Request $request) {
+            return Limit::perMinute(300)->by($request->header('X-Api-Key') ?: $request->ip());
+        });
+
         $this->routes(function () {
             Route::middleware('api')
                 ->prefix('api')

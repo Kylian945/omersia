@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Omersia\Api\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Omersia\Core\Models\Shop;
 
 class ShopController
@@ -33,20 +34,24 @@ class ShopController
      */
     public function info(): JsonResponse
     {
-        $shop = Shop::first();
+        $data = Cache::tags(['shop'])->remember('shop.info', 86400, function () {
+            $shop = Shop::first();
 
-        if (! $shop) {
-            return response()->json([
-                'name' => config('app.name', 'Omersia'),
-                'display_name' => config('app.name', 'Omersia'),
-                'logo_url' => null,
-            ]);
-        }
+            if (! $shop) {
+                return [
+                    'name' => config('app.name', 'Omersia'),
+                    'display_name' => config('app.name', 'Omersia'),
+                    'logo_url' => null,
+                ];
+            }
 
-        return response()->json([
-            'name' => $shop->name,
-            'display_name' => $shop->display_name ?? $shop->name,
-            'logo_url' => $shop->logo_path ? url('storage/'.$shop->logo_path) : null,
-        ]);
+            return [
+                'name' => $shop->name,
+                'display_name' => $shop->display_name ?? $shop->name,
+                'logo_url' => $shop->logo_path ? url('storage/'.$shop->logo_path) : null,
+            ];
+        });
+
+        return response()->json($data);
     }
 }

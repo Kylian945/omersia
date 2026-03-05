@@ -60,10 +60,16 @@
                             </div>
                         </div>
 
-                        <a href="{{ route('pages.builder', ['page' => $page->id, 'locale' => 'fr']) }}"
-                            class="rounded-lg bg-gray-900 text-white px-4 py-1.5 font-semibold text-xs hover:bg-black flex items-center gap-1.5">
-                            <x-lucide-blocks class="w-4 h-4"/> Ouvrir le Builder
-                        </a>
+                        <div class="flex items-center gap-2">
+                            <a href="{{ route('pages.versions.index', ['page' => $page->id, 'locale' => 'fr']) }}"
+                                class="rounded-lg border border-gray-200 bg-white px-3 py-1.5 font-semibold text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-1.5">
+                                <x-lucide-history class="w-4 h-4"/> Historique
+                            </a>
+                            <a href="{{ route('pages.builder', ['page' => $page->id, 'locale' => 'fr']) }}"
+                                class="rounded-lg bg-gray-900 text-white px-4 py-1.5 font-semibold text-xs hover:bg-black flex items-center gap-1.5">
+                                <x-lucide-blocks class="w-4 h-4"/> Ouvrir le Builder
+                            </a>
+                        </div>
                     </div>
 
                     {{-- Champ caché pour rester compatible avec la logique existante --}}
@@ -131,16 +137,20 @@
                     </select>
                 </div>
 
+                <div class="space-y-2">
+                    <label class="block text-xs font-medium text-gray-700">Statut éditorial</label>
+                    <select name="status" class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs">
+                        @php $currentStatus = old('status', $page->status ?? 'draft'); @endphp
+                        <option value="draft" {{ $currentStatus === 'draft' ? 'selected' : '' }}>Brouillon</option>
+                        <option value="published" {{ $currentStatus === 'published' ? 'selected' : '' }}>Publié</option>
+                        <option value="archived" {{ $currentStatus === 'archived' ? 'selected' : '' }}>Archivé</option>
+                    </select>
+                </div>
+
                 <div class="flex items-center gap-2">
                     <input type="checkbox" name="is_active" value="1" {{ $page->is_active ? 'checked' : '' }}
                         class="h-3 w-3 rounded border-gray-300">
                     <span class="text-xs text-gray-700">Page visible</span>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" name="is_home" value="1" {{ $page->is_home ? 'checked' : '' }}
-                        class="h-3 w-3 rounded border-gray-300">
-                    <span class="text-xs text-gray-700">Utiliser comme page d’accueil</span>
                 </div>
             </div>
 

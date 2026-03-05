@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 namespace Omersia\Api\Tests\Feature;
 
+use App\Models\Permission;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use Omersia\CMS\Models\Page;
 use Omersia\CMS\Models\PageTranslation;
 use Omersia\Core\Models\Shop;
@@ -125,6 +129,73 @@ class PageApiTest extends TestCase
 
         // Assert: 404 car la page est inactive
         $response->assertNotFound();
+    }
+
+    #[Test]
+    public function it_does_not_expose_draft_pages_on_public_api(): void
+    {
+        $page = Page::factory()->draft()->create([
+            'shop_id' => $this->shop->id,
+            'is_active' => true,
+        ]);
+        PageTranslation::factory()->create([
+            'page_id' => $page->id,
+            'locale' => 'fr',
+            'title' => 'Draft',
+            'slug' => 'draft-page',
+        ]);
+
+        $listResponse = $this->getJson('/api/v1/pages?locale=fr', $this->apiHeaders());
+        $listResponse->assertOk();
+        $this->assertCount(0, $listResponse->json());
+
+        $showResponse = $this->getJson('/api/v1/pages/draft-page?locale=fr', $this->apiHeaders());
+        $showResponse->assertNotFound();
+    }
+
+    #[Test]
+    public function it_exposes_drafts_for_admin_context(): void
+    {
+        $page = Page::factory()->draft()->create([
+            'shop_id' => $this->shop->id,
+            'is_active' => true,
+        ]);
+        PageTranslation::factory()->create([
+            'page_id' => $page->id,
+            'locale' => 'fr',
+            'title' => 'Draft Admin',
+            'slug' => 'draft-admin-page',
+        ]);
+
+        $admin = User::factory()->create();
+        $permission = Permission::create([
+            'name' => 'pages.view',
+            'display_name' => 'Voir les pages',
+            'group' => 'pages',
+        ]);
+        $role = Role::create([
+            'name' => 'admin-pages',
+            'display_name' => 'Admin Pages',
+        ]);
+        $role->permissions()->attach($permission->id);
+        $admin->roles()->attach($role->id);
+
+        Sanctum::actingAs($admin);
+
+        $listResponse = $this->getJson('/api/v1/pages?locale=fr', $this->apiHeaders());
+        $listResponse->assertOk();
+        $this->assertCount(1, $listResponse->json());
+        $listResponse->assertJsonFragment([
+            'slug' => 'draft-admin-page',
+            'status' => 'draft',
+        ]);
+
+        $showResponse = $this->getJson('/api/v1/pages/draft-admin-page?locale=fr', $this->apiHeaders());
+        $showResponse->assertOk();
+        $showResponse->assertJsonFragment([
+            'slug' => 'draft-admin-page',
+            'status' => 'draft',
+        ]);
     }
 
     #[Test]

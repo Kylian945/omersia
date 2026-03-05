@@ -7,6 +7,8 @@ namespace Omersia\Api\Tests\Feature;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\Apparence\Models\Menu;
 use Omersia\Apparence\Models\MenuItem;
+use Omersia\CMS\Models\Page;
+use Omersia\CMS\Models\PageTranslation;
 use Omersia\Core\Models\Shop;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
@@ -184,5 +186,68 @@ class MenuApiTest extends TestCase
 
         // Assert: 404 car le menu est inactif (le contrôleur filtre is_active=true)
         $response->assertNotFound();
+    }
+
+    #[Test]
+    public function it_hides_unpublished_cms_pages_from_menu_items(): void
+    {
+        $menu = Menu::create([
+            'shop_id' => $this->shop->id,
+            'name' => 'Menu CMS',
+            'slug' => 'menu-cms',
+            'location' => 'header',
+            'is_active' => true,
+        ]);
+
+        $publishedPage = Page::factory()->published()->create([
+            'shop_id' => $this->shop->id,
+            'is_active' => true,
+        ]);
+        PageTranslation::factory()->create([
+            'page_id' => $publishedPage->id,
+            'locale' => 'fr',
+            'title' => 'Page publiee',
+            'slug' => 'page-publiee',
+        ]);
+
+        $draftPage = Page::factory()->draft()->create([
+            'shop_id' => $this->shop->id,
+            'is_active' => true,
+        ]);
+        PageTranslation::factory()->create([
+            'page_id' => $draftPage->id,
+            'locale' => 'fr',
+            'title' => 'Page brouillon',
+            'slug' => 'page-brouillon',
+        ]);
+
+        MenuItem::create([
+            'menu_id' => $menu->id,
+            'type' => 'cms_page',
+            'label' => 'Page publiee',
+            'cms_page_id' => $publishedPage->id,
+            'url' => null,
+            'is_active' => true,
+            'position' => 1,
+        ]);
+
+        MenuItem::create([
+            'menu_id' => $menu->id,
+            'type' => 'cms_page',
+            'label' => 'Page brouillon',
+            'cms_page_id' => $draftPage->id,
+            'url' => null,
+            'is_active' => true,
+            'position' => 2,
+        ]);
+
+        $response = $this->getJson('/api/v1/menus/menu-cms?locale=fr', $this->apiHeaders());
+
+        $response->assertOk();
+        $items = $response->json('items');
+        $this->assertCount(1, $items);
+        $this->assertSame('Page publiee', $items[0]['label']);
+        $this->assertSame('/content/page-publiee', $items[0]['url']);
+        $response->assertJsonMissing(['label' => 'Page brouillon']);
     }
 }

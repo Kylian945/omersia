@@ -70,6 +70,7 @@ class SecurityHeadersTest extends TestCase
         $csp = $response->headers->get('Content-Security-Policy-Report-Only')
             ?? $response->headers->get('Content-Security-Policy');
 
+        $this->assertStringContainsString("frame-src 'self'", $csp);
         $this->assertStringContainsString('https://js.stripe.com', $csp);
         $this->assertStringContainsString('https://hooks.stripe.com', $csp);
     }

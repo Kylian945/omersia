@@ -7,6 +7,7 @@ namespace Omersia\Api\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Payments\PaymentProviderManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use InvalidArgumentException;
 use Omersia\Catalog\Models\Order;
@@ -69,11 +70,13 @@ class PaymentController extends Controller
      */
     public function getAvailableMethods()
     {
-        PaymentProvider::ensureCoreProviders();
+        $methods = Cache::tags(['payment-methods'])->remember('payment.methods', 3600, function () {
+            PaymentProvider::ensureCoreProviders();
 
-        $methods = PaymentProvider::where('enabled', true)
-            ->select('id', 'name', 'code')
-            ->get();
+            return PaymentProvider::where('enabled', true)
+                ->select('id', 'name', 'code')
+                ->get();
+        });
 
         return response()->json([
             'ok' => true,

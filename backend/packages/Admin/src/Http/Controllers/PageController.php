@@ -36,7 +36,11 @@ class PageController extends Controller
 
     public function store(PageStoreRequest $request)
     {
-        $this->pageService->create($request->validated(), shopId: 1);
+        $this->pageService->create(
+            $request->validated(),
+            shopId: 1,
+            actorId: $request->user()?->id
+        );
 
         return redirect()->route('pages.index')->with('success', 'Page créée.');
     }
@@ -52,7 +56,11 @@ class PageController extends Controller
 
     public function update(PageUpdateRequest $request, Page $page)
     {
-        $this->pageService->update($page, $request->validated());
+        $this->pageService->update(
+            $page,
+            $request->validated(),
+            actorId: $request->user()?->id
+        );
 
         return redirect()->route('pages.index')->with('success', 'Page mise à jour.');
     }

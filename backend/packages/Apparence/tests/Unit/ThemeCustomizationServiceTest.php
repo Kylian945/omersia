@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Omersia\Apparence\Tests\Unit;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Omersia\Apparence\Models\Theme;
+use Omersia\Apparence\Models\ThemeSetting;
 use Omersia\Apparence\Services\ThemeCustomizationService;
+use Omersia\Core\Models\Shop;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -145,5 +149,60 @@ class ThemeCustomizationServiceTest extends TestCase
 
         $this->assertStringContainsString(':root', $css);
         $this->assertStringContainsString('}', $css);
+    }
+
+    #[Test]
+    public function clear_theme_cache_removes_api_and_settings_cache_entries(): void
+    {
+        $shop = Shop::factory()->create();
+        $theme = Theme::factory()->create([
+            'shop_id' => $shop->id,
+            'slug' => 'vision',
+            'is_active' => true,
+        ]);
+
+        $settingsKey = "theme_settings_{$shop->id}";
+        $apiKey = "theme.settings.full.{$shop->id}";
+
+        Cache::put($settingsKey, ['cached' => true], 3600);
+        Cache::put($apiKey, ['cached' => true], 3600);
+        Cache::tags(['shop', 'theme'])->put($apiKey, ['cached' => true], 3600);
+
+        $this->service->clearThemeCache($theme);
+
+        $this->assertNull(Cache::get($settingsKey));
+        $this->assertNull(Cache::get($apiKey));
+        $this->assertNull(Cache::tags(['shop', 'theme'])->get($apiKey));
+    }
+
+    #[Test]
+    public function update_settings_realigns_existing_setting_group_from_schema(): void
+    {
+        $shop = Shop::factory()->create();
+        $theme = Theme::factory()->create([
+            'shop_id' => $shop->id,
+            'slug' => 'vision',
+            'is_active' => true,
+        ]);
+
+        ThemeSetting::create([
+            'theme_id' => $theme->id,
+            'key' => 'product_image_ratio',
+            'value' => 'square',
+            'type' => 'text',
+            'group' => 'general',
+        ]);
+
+        $this->service->updateSettings($theme, [
+            'product_image_ratio' => 'portrait',
+        ]);
+
+        $setting = ThemeSetting::where('theme_id', $theme->id)
+            ->where('key', 'product_image_ratio')
+            ->firstOrFail();
+
+        $this->assertSame('portrait', $setting->getDecodedValue());
+        $this->assertSame('products', $setting->group);
+        $this->assertSame('select', $setting->type);
     }
 }

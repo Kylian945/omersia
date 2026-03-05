@@ -10,12 +10,14 @@ export async function Header() {
   // Désactiver complètement le cache pour ce composant
   noStore();
 
-  // Paralléliser les fetches pour réduire le temps de chargement
-  const [menu, shopInfo, themeSettings] = await Promise.all([
-    getMenu("main"),
+  const [primaryMenu, shopInfo, themeSettings] = await Promise.all([
+    getMenu("header"),
     getShopInfo(),
     getThemeSettings(),
   ]);
+
+  // Compat: certains environnements utilisent encore le slug "main" pour le header.
+  const menu = primaryMenu ?? await getMenu("main");
 
   return (
     <HeaderWrapper>

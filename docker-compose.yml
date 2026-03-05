@@ -56,6 +56,21 @@ services:
       retries: 10
       start_period: 20s
 
+  # Redis (Cache, Sessions, Queues)
+  redis:
+    image: redis:7-alpine
+    container_name: omersia-redis
+    volumes:
+      - redis_data:/data
+    networks:
+      - omersia_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   # Mailpit (Email testing)
   mailpit:
     image: axllent/mailpit:latest
@@ -66,6 +81,11 @@ services:
     networks:
       - omersia_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8025/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # Laravel Backend
   backend:
@@ -97,16 +117,29 @@ services:
       MEILISEARCH_KEY: ${MEILI_MASTER_KEY}
       MAIL_HOST: mailpit
       FRONT_API_KEY: ${FRONT_API_KEY}
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      CACHE_DRIVER: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
     depends_on:
       mysql:
         condition: service_healthy
       meilisearch:
         condition: service_healthy
+      redis:
+        condition: service_healthy
       mailpit:
-        condition: service_started
+        condition: service_healthy
     networks:
       - omersia_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8001/up"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
     extra_hosts:
       - "host.docker.internal:host-gateway"
     command: sh -c "sed -i 's/\r$//' /var/www/html/docker-entrypoint-dev.sh && sh /var/www/html/docker-entrypoint-dev.sh"
@@ -136,10 +169,16 @@ services:
       FRONT_API_KEY: ${FRONT_API_KEY}
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
     networks:
       - omersia_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:3000/"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
     # Allow container to reach localhost:8000 via host machine (for Next.js Image optimization)
     extra_hosts:
       - "host.docker.internal:host-gateway"
@@ -156,14 +195,19 @@ services:
     command: sh -c "sed 's/\r$//' /etc/nginx/nginx.conf.orig > /etc/nginx/nginx.conf && nginx -g 'daemon off;'"
     depends_on:
       backend:
-        condition: service_started
+        condition: service_healthy
       storefront:
-        condition: service_started
+        condition: service_healthy
       meilisearch:
         condition: service_healthy
     networks:
       - omersia_network
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:80/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   omersia_network:
@@ -172,3 +216,4 @@ networks:
 volumes:
   mysql_data:
   meilisearch_data:
+  redis_data:

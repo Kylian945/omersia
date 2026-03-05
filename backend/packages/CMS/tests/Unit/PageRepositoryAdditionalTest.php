@@ -79,6 +79,40 @@ class PageRepositoryAdditionalTest extends TestCase
     }
 
     #[Test]
+    public function get_active_by_locale_excludes_drafts_when_published_only_is_true(): void
+    {
+        $draft = Page::factory()->draft()->create(['shop_id' => $this->shop->id, 'is_active' => true]);
+        PageTranslation::factory()->create(['page_id' => $draft->id, 'locale' => 'fr', 'slug' => 'draft']);
+
+        $published = Page::factory()->published()->create(['shop_id' => $this->shop->id, 'is_active' => true]);
+        PageTranslation::factory()->create(['page_id' => $published->id, 'locale' => 'fr', 'slug' => 'published']);
+
+        $result = $this->repository->getActiveByLocale('fr');
+
+        $this->assertCount(1, $result);
+        $this->assertEquals($published->id, $result->first()->id);
+    }
+
+    #[Test]
+    public function find_by_slug_can_return_draft_when_published_filter_is_disabled(): void
+    {
+        $draft = Page::factory()->draft()->create(['shop_id' => $this->shop->id, 'is_active' => true]);
+        PageTranslation::factory()->create(['page_id' => $draft->id, 'locale' => 'fr', 'slug' => 'draft-visible-admin']);
+
+        $this->assertNull($this->repository->findBySlug('draft-visible-admin', 'fr'));
+
+        $found = $this->repository->findBySlug(
+            'draft-visible-admin',
+            'fr',
+            activeOnly: false,
+            publishedOnly: false
+        );
+
+        $this->assertNotNull($found);
+        $this->assertEquals($draft->id, $found->id);
+    }
+
+    #[Test]
     public function get_by_shop_id_orders_by_id_descending(): void
     {
         $first = Page::factory()->create(['shop_id' => $this->shop->id]);

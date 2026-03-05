@@ -6,6 +6,7 @@ namespace Omersia\Api\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Omersia\Api\Http\Requests\CategoryIndexRequest;
 use Omersia\Api\Http\Requests\CategoryShowRequest;
 use Omersia\Api\Http\Resources\CategoryDetailResource;
@@ -69,20 +70,23 @@ class CategoryController extends Controller
         $locale = $request->input('locale', 'fr');
         $parentOnly = $request->boolean('parent_only', false);
 
-        $accueil = $this->categoryService->findAccueil($locale);
+        $cacheKey = 'categories.list.'.$locale.'.'.($parentOnly ? '1' : '0');
+        $data = Cache::tags(['categories'])->remember($cacheKey, 1800, function () use ($locale, $parentOnly, $request) {
+            $accueil = $this->categoryService->findAccueil($locale);
 
-        if (! $accueil) {
-            return response()->json([
-                'categories' => [],
-                'error' => 'Catégorie accueil introuvable',
-            ]);
-        }
+            if (! $accueil) {
+                return [
+                    'categories' => [],
+                    'error' => 'Catégorie accueil introuvable',
+                ];
+            }
 
-        $categories = $this->categoryService->listCategories($accueil, $locale, $parentOnly);
+            $categories = $this->categoryService->listCategories($accueil, $locale, $parentOnly);
 
-        return response()->json([
-            'categories' => CategoryListResource::collection($categories)->toArray($request),
-        ]);
+            return ['categories' => CategoryListResource::collection($categories)->toArray($request)];
+        });
+
+        return response()->json($data);
     }
 
     /**

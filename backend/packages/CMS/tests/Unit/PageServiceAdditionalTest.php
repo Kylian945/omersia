@@ -7,6 +7,7 @@ namespace Omersia\CMS\Tests\Unit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Omersia\CMS\Models\Page;
 use Omersia\CMS\Models\PageTranslation;
+use Omersia\CMS\Models\PageVersion;
 use Omersia\CMS\Services\PageService;
 use Omersia\Core\Models\Shop;
 use PHPUnit\Framework\Attributes\Test;
@@ -126,6 +127,36 @@ class PageServiceAdditionalTest extends TestCase
     }
 
     #[Test]
+    public function get_public_pages_can_include_unpublished_for_admin_context(): void
+    {
+        $draft = Page::factory()->draft()->create(['shop_id' => $this->shop->id, 'is_active' => true]);
+        PageTranslation::factory()->create(['page_id' => $draft->id, 'locale' => 'fr', 'slug' => 'draft-fr']);
+
+        $published = Page::factory()->published()->create(['shop_id' => $this->shop->id, 'is_active' => true]);
+        PageTranslation::factory()->create(['page_id' => $published->id, 'locale' => 'fr', 'slug' => 'published-fr']);
+
+        $publicResult = $this->service->getPublicPages('fr');
+        $this->assertCount(1, $publicResult);
+        $this->assertEquals($published->id, $publicResult->first()->id);
+
+        $adminResult = $this->service->getPublicPages('fr', includeUnpublished: true);
+        $this->assertCount(2, $adminResult);
+    }
+
+    #[Test]
+    public function get_public_page_can_include_unpublished_for_admin_context(): void
+    {
+        $draft = Page::factory()->draft()->create(['shop_id' => $this->shop->id, 'is_active' => true]);
+        PageTranslation::factory()->create(['page_id' => $draft->id, 'locale' => 'fr', 'slug' => 'draft-admin']);
+
+        $this->assertNull($this->service->getPublicPage('draft-admin', 'fr'));
+
+        $adminResult = $this->service->getPublicPage('draft-admin', 'fr', includeUnpublished: true);
+        $this->assertNotNull($adminResult);
+        $this->assertEquals($draft->id, $adminResult->id);
+    }
+
+    #[Test]
     public function update_parses_content_json_string(): void
     {
         $page = Page::factory()->create(['shop_id' => $this->shop->id]);
@@ -141,5 +172,43 @@ class PageServiceAdditionalTest extends TestCase
         $translation = $updated->translations->where('locale', 'fr')->first();
         $this->assertIsArray($translation->content_json);
         $this->assertEquals($layout, $translation->content_json);
+    }
+
+    #[Test]
+    public function update_creates_snapshot_when_content_changes(): void
+    {
+        $page = Page::factory()->create(['shop_id' => $this->shop->id]);
+        PageTranslation::factory()->create([
+            'page_id' => $page->id,
+            'locale' => 'fr',
+            'slug' => 'old',
+            'content_json' => ['sections' => [['id' => 'before']]],
+        ]);
+
+        $this->service->update($page, [
+            'title' => 'Titre',
+            'slug' => 'new',
+            'content_json' => json_encode(['sections' => [['id' => 'after']]]),
+        ], 'fr');
+
+        $this->assertSame(1, PageVersion::query()->count());
+        $this->assertDatabaseHas('cms_page_versions', [
+            'page_translation_id' => $page->translations()->where('locale', 'fr')->firstOrFail()->id,
+        ]);
+    }
+
+    #[Test]
+    public function save_builder_layout_creates_snapshot_when_content_changes(): void
+    {
+        $page = Page::factory()->create(['shop_id' => $this->shop->id]);
+        PageTranslation::factory()->create([
+            'page_id' => $page->id,
+            'locale' => 'fr',
+            'content_json' => ['sections' => [['id' => 'before-builder']]],
+        ]);
+
+        $this->service->saveBuilderLayout($page, ['sections' => [['id' => 'after-builder']]], 'fr');
+
+        $this->assertSame(1, PageVersion::query()->count());
     }
 }

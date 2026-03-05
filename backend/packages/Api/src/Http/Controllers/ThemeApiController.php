@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Omersia\Api\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Omersia\Apparence\Models\Theme;
 use Omersia\Apparence\Services\ThemeCustomizationService;
@@ -73,24 +74,29 @@ class ThemeApiController
                 ], 404);
             }
 
-            /** @var Theme|null $activeTheme */
-            $activeTheme = $shop->themes()->where('is_active', true)->first();
+            $cacheKey = "theme.settings.full.{$shop->id}";
+            $data = Cache::tags(['shop', 'theme'])->remember($cacheKey, 3600, function () use ($shop) {
+                /** @var Theme|null $activeTheme */
+                $activeTheme = $shop->themes()->where('is_active', true)->first();
 
-            $settings = $this->customizationService->getActiveThemeSettings($shop->id);
+                $settings = $this->customizationService->getActiveThemeSettings($shop->id);
 
-            $cssVariables = $this->customizationService->generateCssVariables($settings);
+                $cssVariables = $this->customizationService->generateCssVariables($settings);
 
-            $settingsSchema = $activeTheme
-                ? $this->customizationService->getThemeSettingsSchema($activeTheme)
-                : $this->customizationService->getDefaultSettings();
+                $settingsSchema = $activeTheme
+                    ? $this->customizationService->getThemeSettingsSchema($activeTheme)
+                    : $this->customizationService->getDefaultSettings();
 
-            return response()->json([
-                'settings' => $settings,
-                'settings_schema' => $settingsSchema,
-                'css_variables' => $cssVariables,
-                'component_path' => $activeTheme ? $activeTheme->component_path : 'vision',
-                'theme_slug' => $activeTheme ? $activeTheme->slug : 'vision',
-            ]);
+                return [
+                    'settings' => $settings,
+                    'settings_schema' => $settingsSchema,
+                    'css_variables' => $cssVariables,
+                    'component_path' => $activeTheme ? $activeTheme->component_path : 'vision',
+                    'theme_slug' => $activeTheme ? $activeTheme->slug : 'vision',
+                ];
+            });
+
+            return response()->json($data);
         } catch (\Throwable $e) {
             Log::error('Error in ThemeApiController@settings', [
                 'message' => $e->getMessage(),
